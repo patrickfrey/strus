@@ -25,7 +25,7 @@
 
 using namespace strus;
 
-#define METHOD_NAME "matchvar"
+#define THIS_METHOD_NAME "matchvar"
 
 SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables(
 		const StorageClientInterface* storage_,
@@ -44,7 +44,7 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 
 void SummarizerFunctionContextMatchVariables::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
@@ -62,10 +62,10 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 
@@ -115,14 +115,14 @@ std::vector<SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
 std::string SummarizerFunctionContextMatchVariables::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 
 	std::vector<SummaryElement> res = getSummary( docno);
 	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
@@ -140,7 +140,7 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 	{
 		if (strus::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
@@ -148,25 +148,25 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -178,7 +178,7 @@ void SummarizerFunctionInstanceMatchVariables::defineResultName(
 	{
 		m_data->namemap[ resultname] = itemname;
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
@@ -194,7 +194,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::cr
 	{
 		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_data, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceMatchVariables::tostring() const
@@ -210,7 +210,7 @@ std::string SummarizerFunctionInstanceMatchVariables::tostring() const
 		}
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -221,7 +221,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createIns
 	{
 		return new SummarizerFunctionInstanceMatchVariables( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -236,6 +236,6 @@ FunctionDescription SummarizerFunctionMatchVariables::getDescription() const
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

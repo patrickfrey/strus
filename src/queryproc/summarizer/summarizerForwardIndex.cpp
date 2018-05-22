@@ -23,7 +23,7 @@
 #include <limits>
 
 using namespace strus;
-#define METHOD_NAME "forwardindex"
+#define THIS_METHOD_NAME "forwardindex"
 
 SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( const StorageClientInterface* storage_, const std::string& resultname_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_forwardindex(storage_->createForwardIterator(type_))
@@ -31,17 +31,17 @@ SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( co
 {
 	if (m_type.empty() || m_resultname.empty())
 	{
-		throw strus::runtime_error(_TXT("missing type and result definition of '%s'"), METHOD_NAME);
+		throw strus::runtime_error(_TXT("missing type and result definition of '%s'"), THIS_METHOD_NAME);
 	}
 	if (!m_forwardindex.get())
 	{
-		throw strus::runtime_error(_TXT("failed to create summarizer context for '%s': %s"), METHOD_NAME, m_errorhnd->fetchError());
+		throw strus::runtime_error(_TXT("failed to create summarizer context for '%s': %s"), THIS_METHOD_NAME, m_errorhnd->fetchError());
 	}
 }
 
 void SummarizerFunctionContextForwardIndex::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
@@ -51,7 +51,7 @@ void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
 		double /*weight*/,
 		const TermStatistics&)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no summarization feature defined for '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no summarization feature defined for '%s'"), THIS_METHOD_NAME);
 }
 
 std::vector<SummaryElement>
@@ -70,14 +70,14 @@ std::vector<SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
 std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 
 	std::vector<SummaryElement> res = getSummary( docno);
 	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
@@ -105,7 +105,7 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -113,11 +113,11 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 {
 	if (strus::caseInsensitiveEquals( name, "name"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "N"))
 	{
@@ -127,7 +127,7 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -146,7 +146,7 @@ void SummarizerFunctionInstanceForwardIndex::defineResultName(
 			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 
@@ -159,7 +159,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::crea
 	{
 		return new SummarizerFunctionContextForwardIndex( storage_, m_resultname, m_type, m_maxNofMatches, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceForwardIndex::tostring() const
@@ -179,7 +179,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionForwardIndex::createInsta
 	{
 		return new SummarizerFunctionInstanceForwardIndex( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -194,7 +194,7 @@ FunctionDescription SummarizerFunctionForwardIndex::getDescription() const
 		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
 

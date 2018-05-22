@@ -22,7 +22,7 @@
 #include <iostream>
 #include <iomanip>
 
-#define METHOD_NAME "scalar"
+#define THIS_METHOD_NAME "scalar"
 #define NOF_IMPLICIT_ARGUMENTS 1
 
 using namespace strus;
@@ -55,7 +55,7 @@ void WeightingFunctionContextScalar::addWeightingFeature(
 	{
 		throw std::runtime_error( _TXT( "no weighting function feature parameters allowed"));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionContextScalar::setVariableValue( const std::string& name, double value)
@@ -91,7 +91,7 @@ std::string WeightingFunctionContextScalar::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
 
 	if (!m_metadatahnd.empty())
 	{
@@ -142,7 +142,7 @@ void WeightingFunctionInstanceScalar::addStringParameter( const std::string& nam
 			throw strus::runtime_error(_TXT( "unknown string type parameter: %s"), name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceScalar::addNumericParameter( const std::string& name, const NumericVariant& value)
@@ -159,7 +159,7 @@ void WeightingFunctionInstanceScalar::addNumericParameter( const std::string& na
 			if (m_func.get()) m_func->setDefaultVariableValue( name, value);
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceScalar::initFunction() const
@@ -197,7 +197,7 @@ std::vector<std::string> WeightingFunctionInstanceScalar::getVariables() const
 	
 		return m_func->getVariables();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, std::vector<std::string>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<std::string>());
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceScalar::createFunctionContext(
@@ -223,7 +223,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceScalar::createFuncti
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextScalar( m_func.get(), metadata, metadatahnd, (double)nofdocs, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceScalar::tostring() const
@@ -249,7 +249,7 @@ std::string WeightingFunctionInstanceScalar::tostring() const
 		}
 		return msg.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 WeightingFunctionInstanceInterface* WeightingFunctionScalar::createInstance(
@@ -259,7 +259,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionScalar::createInstance(
 	{
 		return new WeightingFunctionInstanceScalar( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionScalar::getDescription() const
@@ -273,7 +273,7 @@ FunctionDescription WeightingFunctionScalar::getDescription() const
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
 

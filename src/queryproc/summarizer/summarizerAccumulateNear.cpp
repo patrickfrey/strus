@@ -31,7 +31,7 @@
 
 using namespace strus;
 
-#define METHOD_NAME "matchnear"
+#define THIS_METHOD_NAME "matchnear"
 
 SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear(
 		const StorageClientInterface* storage_,
@@ -58,7 +58,7 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 
 void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
@@ -90,10 +90,10 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
@@ -304,7 +304,7 @@ std::vector<SummaryElement>
 		// Get summary from map of weighted entities
 		return getSummariesFromEntityMap( entitymap);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
 
@@ -312,7 +312,7 @@ std::string SummarizerFunctionContextAccumulateNear::debugCall( const Index& doc
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 
 	// Initialization:
 	if (m_itrarsize == 0)
@@ -370,7 +370,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 	{
 		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
@@ -395,26 +395,26 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 			|| strus::caseInsensitiveEquals( name, "nofranks")
 			|| strus::caseInsensitiveEquals( name, "range"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "type")
 		|| strus::caseInsensitiveEquals( name, "result"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "cofactor"))
 	{
@@ -429,7 +429,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 		m_data->cprop = value.tofloat();
 		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), THIS_METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "range"))
@@ -447,7 +447,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -457,9 +457,9 @@ void SummarizerFunctionInstanceAccumulateNear::defineResultName(
 {
 	try
 	{
-		throw strus::runtime_error(_TXT("no result rename defined for '%s' summarizer"), METHOD_NAME);
+		throw strus::runtime_error(_TXT("no result rename defined for '%s' summarizer"), THIS_METHOD_NAME);
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::createFunctionContext(
@@ -476,7 +476,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::cr
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextAccumulateNear( storage, m_processor, m_data, nofCollectionDocuments, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceAccumulateNear::tostring() const
@@ -503,7 +503,7 @@ std::string SummarizerFunctionInstanceAccumulateNear::tostring() const
 		rt << ", cprop=" << m_data->cprop;
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createInstance(
@@ -513,7 +513,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createIns
 	{
 		return new SummarizerFunctionInstanceAccumulateNear( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -536,6 +536,6 @@ FunctionDescription SummarizerFunctionAccumulateNear::getDescription() const
 		rt( P::Numeric, "cprop", _TXT("constant part of idf proportional feature weight"), "0.0:1.0");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

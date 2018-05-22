@@ -19,7 +19,7 @@
 
 using namespace strus;
 
-#define METHOD_NAME "constant"
+#define THIS_METHOD_NAME "constant"
 
 WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 		MetaDataReaderInterface* metadata_,
@@ -39,7 +39,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 
 void WeightingFunctionContextMetadata::setVariableValue( const std::string& name, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionContextMetadata::addWeightingFeature(
@@ -48,7 +48,7 @@ void WeightingFunctionContextMetadata::addWeightingFeature(
 		double,
 		const TermStatistics&)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), THIS_METHOD_NAME);
 }
 
 double WeightingFunctionContextMetadata::call( const Index& docno)
@@ -61,7 +61,7 @@ std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
 
 	m_metadata->skipDoc( docno);
 	double val = (double)m_metadata->getValue( m_elementHandle);
@@ -92,7 +92,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 			addNumericParameter( name, parameterValue( name, value));
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const NumericVariant& value)
@@ -105,14 +105,14 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 		}
 		else if (strus::caseInsensitiveEquals( name, "name"))
 		{
-			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunctionContext(
@@ -124,11 +124,11 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunc
 	{
 		if (m_elementName.empty())
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("undefined '%s' weighting function parameter '%s'"), METHOD_NAME, "name");
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("undefined '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, "name");
 		}
 		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceMetadata::tostring() const
@@ -140,7 +140,7 @@ std::string WeightingFunctionInstanceMetadata::tostring() const
 			<< "name=" << m_elementName << ", weight=" << m_weight;
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -151,7 +151,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance(
 	{
 		return new WeightingFunctionInstanceMetadata( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -164,6 +164,6 @@ FunctionDescription WeightingFunctionMetadata::getDescription() const
 		rt( P::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
