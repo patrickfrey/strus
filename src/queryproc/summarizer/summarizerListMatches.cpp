@@ -22,7 +22,7 @@
 #include <sstream>
 
 using namespace strus;
-#define THIS_METHOD_NAME "matchpos"
+#define THIS_METHOD_NAME const_cast<char*>("matchpos")
 
 void SummarizerFunctionContextListMatches::setVariableValue( const std::string&, double)
 {

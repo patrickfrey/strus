@@ -23,7 +23,7 @@
 #include <limits>
 
 using namespace strus;
-#define THIS_METHOD_NAME "forwardindex"
+#define THIS_METHOD_NAME const_cast<char*>("forwardindex")
 
 SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( const StorageClientInterface* storage_, const std::string& resultname_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_forwardindex(storage_->createForwardIterator(type_))

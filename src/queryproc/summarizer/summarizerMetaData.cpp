@@ -21,7 +21,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "BM25"
+#define THIS_METHOD_NAME const_cast<char*>("BM25")
 
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& metaname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)

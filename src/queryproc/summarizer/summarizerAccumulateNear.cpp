@@ -31,7 +31,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "matchnear"
+#define THIS_METHOD_NAME const_cast<char*>("matchnear")
 
 SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear(
 		const StorageClientInterface* storage_,

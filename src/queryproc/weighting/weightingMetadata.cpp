@@ -19,7 +19,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "constant"
+#define THIS_METHOD_NAME const_cast<char*>("metadata")
 
 WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 		MetaDataReaderInterface* metadata_,

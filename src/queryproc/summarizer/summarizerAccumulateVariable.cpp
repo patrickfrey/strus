@@ -27,7 +27,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "accuvar"
+#define THIS_METHOD_NAME const_cast<char*>("accuvar")
 
 SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulateVariable(
 		const StorageClientInterface* storage_,

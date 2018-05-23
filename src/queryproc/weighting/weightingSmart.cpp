@@ -22,7 +22,7 @@
 #include <iostream>
 #include <iomanip>
 
-#define THIS_METHOD_NAME "SMART"
+#define THIS_METHOD_NAME const_cast<char*>("SMART")
 #define NOF_IMPLICIT_ARGUMENTS 4
 
 using namespace strus;

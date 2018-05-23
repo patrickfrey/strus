@@ -21,7 +21,7 @@
 #include <sstream>
 
 using namespace strus;
-#define THIS_METHOD_NAME "BM25pff"
+#define THIS_METHOD_NAME const_cast<char*>("BM25pff")
 #undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(

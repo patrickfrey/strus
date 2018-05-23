@@ -22,7 +22,7 @@
 #include <iostream>
 #include <iomanip>
 
-#define THIS_METHOD_NAME "scalar"
+#define THIS_METHOD_NAME const_cast<char*>("scalar")
 #define NOF_IMPLICIT_ARGUMENTS 1
 
 using namespace strus;

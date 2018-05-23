@@ -25,7 +25,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "matchvar"
+#define THIS_METHOD_NAME const_cast<char*>("matchvar")
 
 SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables(
 		const StorageClientInterface* storage_,

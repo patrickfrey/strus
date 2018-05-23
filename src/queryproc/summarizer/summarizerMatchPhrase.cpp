@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "matchphrase"
+#define THIS_METHOD_NAME const_cast<char*>("matchphrase")
 
 SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,

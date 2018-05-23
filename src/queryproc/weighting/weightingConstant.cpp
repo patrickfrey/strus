@@ -18,7 +18,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME "constant"
+#define THIS_METHOD_NAME const_cast<char*>("constant")
 
 void WeightingFunctionContextConstant::addWeightingFeature(
 		const std::string& name_,
