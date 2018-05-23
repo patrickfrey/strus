@@ -18,7 +18,7 @@
 #include <sstream>
 
 using namespace strus;
-#define THIS_METHOD_NAME "attribute"
+#define THIS_METHOD_NAME const_cast<const char*>("attribute")
 
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& attribname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
