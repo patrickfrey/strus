@@ -37,7 +37,7 @@ DatabaseCursorInterface* DatabaseTransaction::createCursor( const DatabaseOption
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
 		return new DatabaseCursor( m_conn, options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
@@ -76,7 +76,7 @@ void DatabaseTransaction::removeSubTree(
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
 
 		strus::local_ptr<leveldb::Iterator> itr( db->NewIterator( leveldb::ReadOptions()));
 		for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
@@ -96,7 +96,7 @@ bool DatabaseTransaction::commit()
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "commit");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "commit");
 
 		if (m_errorhnd->hasError())
 		{

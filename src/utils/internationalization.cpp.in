@@ -35,7 +35,7 @@ std::runtime_error strus::runtime_error( const char* format, ...)
 	return rt;
 }
 
-std::runtime_error strus::runtime_error( int apperrno, const char* format, ...)
+std::runtime_error strus::runtime_error_ec( int apperrno, const char* format, ...)
 {
 	char buffer[ MsgBufSize];
 	std::size_t buffersize = 0;
