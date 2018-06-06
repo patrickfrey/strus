@@ -26,13 +26,15 @@ class VectorStorageClientInterface;
 class VectorStorageBuilderInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class FileLocatorInterface;
 
 ///\brief Create a storage object builder with the builders from the standard strus core libraries (without module support)
-///\param[in] workdir working directory where persistent files are read from / written to, empty if all paths are absolute
+///\param[in] filelocator interface to get paths of resource files and the working directory
 ///\param[in] errorhnd error buffer interface
 StorageObjectBuilderInterface*
 	createStorageObjectBuilder_default(
-		const std::string& workdir,
+		const FileLocatorInterface* filelocator,
 		ErrorBufferInterface* errorhnd);
 
 ///\brief Create a alter metadata table interface with the object builder passed

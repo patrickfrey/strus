@@ -13,6 +13,7 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -43,12 +44,13 @@ class StorageObjectBuilder
 	:public StorageObjectBuilderInterface
 {
 public:
-	explicit StorageObjectBuilder( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
+	explicit StorageObjectBuilder( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
-		,m_storage(strus::createStorageType_std( workdir_, errorhnd_))
-		,m_db( strus::createDatabaseType_leveldb( workdir_, errorhnd_))
+		,m_storage(strus::createStorageType_std( filelocator_->getWorkDir(), errorhnd_))
+		,m_db( strus::createDatabaseType_leveldb( filelocator_->getWorkDir(), errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
+		,m_filelocator(filelocator_)
 	{
 		if (!m_queryProcessor.get()) throw std::runtime_error( _TXT("error creating query processor"));
 		if (!m_storage.get()) throw std::runtime_error( _TXT("error creating default storage"));
@@ -112,12 +114,13 @@ private:
 	Reference<DatabaseInterface> m_db;			///< database handle
 	Reference<StatisticsProcessorInterface> m_statsproc;	///< statistics processor handle
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
+	const FileLocatorInterface* m_filelocator;		///< file locator interface
 };
 
 
 DLL_PUBLIC StorageObjectBuilderInterface*
 	strus::createStorageObjectBuilder_default(
-		const std::string& workdir, 
+		const FileLocatorInterface* filelocator, 
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -127,7 +130,7 @@ DLL_PUBLIC StorageObjectBuilderInterface*
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return new StorageObjectBuilder( workdir, errorhnd);
+		return new StorageObjectBuilder( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating default storage object builder: %s"), *errorhnd, 0);
 }
