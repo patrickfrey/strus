@@ -33,7 +33,7 @@ struct QueryDescriptors
 {
 	std::set<std::string> fieldset;			///< set of defined query fields
 	std::set<std::string> typeset;			///< set of defined query fields
-	bool defaultFieldTypeDefined;			///< true if a field type name with name default has been specified
+	std::string defaultFieldType;			///< true if a field type name with name default has been specified
 	std::string selectionFeatureSet;		///< feature sets used for document selection
 	std::string weightingFeatureSet;		///< feature sets used for document weighting
 	float defaultSelectionTermPart;			///< default percentage of weighting terms required in selection
@@ -53,11 +53,15 @@ struct QueryDescriptors
 		{
 			typeset.insert( *ti);
 		}
+		if (fieldset.size() == 1)
+		{
+			defaultFieldType = *fieldset.begin();
+		}
 	}
 	QueryDescriptors( const QueryDescriptors& o)
 		:fieldset(o.fieldset)
 		,typeset(o.typeset)
-		,defaultFieldTypeDefined(o.defaultFieldTypeDefined)
+		,defaultFieldType(o.defaultFieldType)
 		,selectionFeatureSet(o.selectionFeatureSet)
 		,weightingFeatureSet(o.weightingFeatureSet)
 		,defaultSelectionTermPart(o.defaultSelectionTermPart)
@@ -78,6 +82,7 @@ enum Tokens {
 	TokCloseCurlyBracket,
 	TokOpenSquareBracket,
 	TokCloseSquareBracket,
+	TokOr,
 	TokAssign,
 	TokCompareNotEqual,
 	TokCompareEqual,
@@ -90,6 +95,7 @@ enum Tokens {
 	TokColon,
 	TokSemiColon,
 	TokTilde,
+	TokExp,
 	TokLeftArrow,
 	TokPath
 };
@@ -103,6 +109,7 @@ static const char* g_tokens[] = {
 	"\\}",
 	"\\[",
 	"\\]",
+	"\\|",
 	"\\=",
 	"\\!\\=",
 	"\\=\\=",
@@ -115,6 +122,7 @@ static const char* g_tokens[] = {
 	":",
 	";",
 	"~",
+	"^",
 	"<-",
 	"[/][^;,{} ]*",
 	NULL
@@ -633,27 +641,6 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 	}
 }
 
-static std::string parseQueryFieldType( Lexer& lexer)
-{
-	if (lexer.current().isToken(TokColon))
-	{
-		if (lexer.next().isToken(TokIdentifier))
-		{
-			std::string rt = lexer.current().value();
-			lexer.next();
-			return rt;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("query analyze phrase type (identifier) expected after colon ':' in query"));
-		}
-	}
-	else
-	{
-		return std::string();
-	}
-}
-
 static std::string parseVariableRef( Lexer& lexer)
 {
 	std::string rt;
@@ -819,20 +806,24 @@ static void parseQueryTermExpression(
 		Lexer& lexer)
 {
 	bool isSelection = true;
-	if (lexer.current())
-	if (isTilde( *src))
+	if (lexer.current().isToken( TokTilde))
 	{
-		(void)parse_OPERATOR( src);
+		lexer.next();
 		isSelection = false;
 	}
 	std::string field;
 	std::string fieldType;
-	if (isTextChar( *src) || isStringQuote( *src))
+	char const* tok = lexer.currentpos();
+	
+	if (lexer.current().isString() || lexer.current().isToken(TokIdentifier))
 	{
-		field = parseQueryTerm( src);
-		if (isColon( *src))
+		field = lexer.current().value();
+		if (lexer.next().isToken(TokColon()))
 		{
-			fieldType = parseQueryFieldType( src);
+			if (lexer.next().isToken(TokIdentifier))
+			{
+				fieldType = lexer.current().value();
+			}
 		}
 		else
 		{
@@ -843,9 +834,18 @@ static void parseQueryTermExpression(
 			fieldType = "default";
 		}
 	}
-	else if (isColon( *src))
+	else if (lexer.current().isToken(TokColon))
 	{
-		fieldType = parseQueryFieldType( src);
+		if (lexer.next().isToken(TokIdentifier))
+		{
+			fieldType = lexer.current().value();
+			lexer.next();
+			return rt;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("feature type (identifier) expected after colon ':' in query"));
+		}
 	}
 	else
 	{
@@ -871,67 +871,73 @@ static void parseQueryStructureExpression(
 		TermExpression& termExpression,
 		TermExpression& selectedTermExpression,
 		const QueryDescriptors& qdescr,
-		char const*& src)
+		ProgramLexer& lexer)
 {
-	std::string functionName = parse_IDENTIFIER(src);
-	if (!isOpenOvalBracket(*src)) throw std::runtime_error( _TXT("internal: bad lookahead in query parser"));
-
-	(void)parse_OPERATOR( src);
+	if (!lexer.current().isToken(TokIdentifier))
+	{
+		throw std::runtime_error( _TXT("identifier expected at start of query expression"));
+	}
+	std::string functionName = lexer.current().value();
+	lexer.next();
+	if (!lexer.current().isToken(TokOpenOvalBracket))
+	{
+		throw std::runtime_error( _TXT("internal: bad lookahead in query parser"));
+	}
+	lexer.next();
 	std::size_t argc = 0;
 
-	if (!isCloseOvalBracket( *src) && !isOr( *src) && !isExp( *src)) while (*src)
+	if (!lexer.current().isEof() && !lexer.current().isToken(TokCloseOvalBracket) && !lexer.current().isToken(TokOr) && !lexer.current().isToken(TokExp))
 	{
-		argc++;
-		if (isQueryStructureExpression( src))
+		do
 		{
-			parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, src);
-		}
-		else
-		{
-			parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, src);
-		}
-		if (isComma( *src))
-		{
-			(void)parse_OPERATOR( src);
-			continue;
-		}
-		else if (!isCloseOvalBracket( *src) && !isExp( *src) && !isOr(*src))
-		{
-			throw std::runtime_error( _TXT("expected a comma ',' (argument separator) or a close bracket ')' (end of argument list) or a '|' (range specififier), or a '^' (cardinality specifier)"));
-		}
-		break;
-	}
-	int range = 0;
-	unsigned int cardinality = 0;
-	while (isOr( *src) || isExp( *src))
-	{
-		if (isOr( *src))
-		{
-			if (range != 0) throw strus::runtime_error( "%s",  _TXT("range specified twice"));
-			(void)parse_OPERATOR( src);
-			if (isPlus(*src))
+			argc++;
+			if (isQueryStructureExpression(lexer))
 			{
-				parse_OPERATOR(src);
-				range = parse_UNSIGNED( src);
+				parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, src);
 			}
 			else
 			{
-				range = parse_INTEGER( src);
+				parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, src);
 			}
-			if (range == 0) throw strus::runtime_error( "%s",  _TXT("range should be a non null number"));
+		} while (lexer.fetchCurrent().isToken(TokComma));
+	}
+	int range = 0;
+	unsigned int cardinality = 0;
+	while (lexer.current().isToken(TokOr) || lexer.current().isToken(TokExp))
+	{
+		if (lexer.fetchCurrent().isToken(TokOr))
+		{
+			if (range != 0) throw strus::runtime_error( "%s",  _TXT("%s specified twice"), "range");
+			if (lexer.current().isToken(TokInteger))
+			{
+				range = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
+				lexer.next();
+			}
+			else
+			{
+				throw strus::runtime_error( "%s",  _TXT("%s should be an integer"), "range");
+			}
+			if (range == 0) throw strus::runtime_error( "%s",  _TXT("%s should be a non null number"), "range");
 		}
 		else
 		{
-			if (cardinality != 0) throw strus::runtime_error( "%s",  _TXT("cardinality specified twice"));
-			(void)parse_OPERATOR( src);
-			cardinality = parse_UNSIGNED1( src);
+			if (cardinality != 0) throw strus::runtime_error( "%s",  _TXT("%s specified twice"), "cardinality");
+			if (lexer.current().isToken(TokInteger))
+			{
+				cardinality = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
+				lexer.next();
+			}
+			else
+			{
+				throw strus::runtime_error( "%s",  _TXT("%s should be an integer"), "cardinality");
+			}
 		}
 	}
-	if (!isCloseOvalBracket( *src))
+	if (!lexer.current().isToken(TokCloseOvalBracket))
 	{
 		throw strus::runtime_error( "%s",  _TXT("close oval bracket ')' expected as end of a query structure expression expected"));
 	}
-	(void)parse_OPERATOR( src);
+	lexer.next();
 	std::string variableName = parseVariableRef( src);
 	termExpression.pushExpression( functionName, argc, range, cardinality);
 	if (!variableName.empty())
@@ -939,6 +945,7 @@ static void parseQueryStructureExpression(
 		termExpression.attachVariable( variableName);
 	}
 }
+!!!!!!
 
 DLL_PUBLIC bool strus::loadQuery(
 		QueryInterface& query,
