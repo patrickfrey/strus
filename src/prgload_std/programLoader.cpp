@@ -13,21 +13,36 @@
 #include "strus/queryEvalInterface.hpp"
 #include "strus/queryInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/storageDocumentUpdateInterface.hpp"
+#include "strus/storageTransactionInterface.hpp"
 #include "strus/vectorStorageClientInterface.hpp"
+#include "strus/vectorStorageTransactionInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "strus/scalarFunctionInterface.hpp"
 #include "strus/debugTraceInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/programLexer.hpp"
 #include "strus/base/numstring.hpp"
+#include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
+#include "strus/base/dll_tags.hpp"
+#include "strus/base/inputStream.hpp"
+#include "strus/base/hton.hpp"
+#include "private/internationalization.hpp"
 #include <string>
 #include <vector>
 #include <set>
 #include <map>
 #include <limits>
+#include <iostream>
+#include <sstream>
 
-/// \brief strus toplevel namespace
-namespace strus {
+using namespace strus;
 
 /// \brief Some default settings for parsing and building the query
 struct QueryDescriptors
@@ -41,7 +56,7 @@ struct QueryDescriptors
 	std::string defaultSelectionJoin;		///< default operator used to join terms for selection
 
 	QueryDescriptors( const std::vector<std::string>& fieldnames, const std::vector<std::string>& termtypes)
-		:fieldset(),typeset(),defaultFieldTypeDefined(false),selectionFeatureSet(),weightingFeatureSet()
+		:fieldset(),typeset(),defaultFieldType(),selectionFeatureSet(),weightingFeatureSet()
 		,defaultSelectionTermPart(1.0),defaultSelectionJoin("contains")
 	{
 		std::vector<std::string>::const_iterator fi = fieldnames.begin(), fe = fieldnames.end();
@@ -130,7 +145,7 @@ static const char* g_tokens[] = {
 	"[/][^;,{} ]*",
 	NULL
 };
-static const char* g_isQueryStructureExpressiontoken_names[] = {
+static const char* g_token_names[] = {
 	"identifier",
 	"flating point number",
 	"integer",
@@ -263,6 +278,7 @@ static void parseWeightingFormula(
 		const QueryProcessorInterface* queryproc,
 		ProgramLexer& lexer)
 {
+	std::string langName;
 	if (lexer.current().isToken(TokIdentifier))
 	{
 		langName = string_conv::tolower( lexer.current().value());
@@ -291,6 +307,7 @@ static void parseWeightingConfig(
 		const QueryProcessorInterface* queryproc,
 		ProgramLexer& lexer)
 {
+	std::string langName;
 	if (lexer.current().isToken(TokIdentifier))
 	{
 		langName = string_conv::tolower( lexer.current().value());
@@ -390,13 +407,13 @@ static void parseWeightingConfig(
 				function->addStringParameter( parameterName, parameterValue);
 			}
 		}
-		else
-		{
-			throw std::runtime_error( _TXT("parameter value (identifier,string,number) expected"));
-		}
 		else if (!lexer.current().isToken(TokComma))
 		{
 			break;
+		}
+		else
+		{
+			throw std::runtime_error( _TXT("parameter value (identifier,string,number) expected"));
 		}
 		lexer.next();
 	}
@@ -413,7 +430,7 @@ static void parseWeightingConfig(
 static void parseSummarizerConfig(
 		QueryEvalInterface& qeval,
 		const QueryProcessorInterface* queryproc,
-		char const*& src)
+		ProgramLexer& lexer)
 {
 	std::string functionName;
 	typedef QueryEvalInterface::FeatureParameter FeatureParameter;
@@ -465,7 +482,7 @@ static void parseSummarizerConfig(
 			{
 				throw std::runtime_error( _TXT("duplicate definition of 'debug' parameter"));
 			}
-			if (lexer.current().isToken( TokIdentifier) || isStringQuote( *src))
+			if (lexer.current().isToken( TokIdentifier) || lexer.current().isString())
 			{
 				debuginfoName = lexer.current().value();
 				lexer.next();
@@ -511,7 +528,7 @@ static void parseSummarizerConfig(
 		}
 		else
 		{
-			throw std::runtime_error( _TXT( "unexpected token (%s) in summarizer function parameter list"), tokenName( lexer.current()));
+			throw strus::runtime_error( _TXT( "unexpected token (%s) in summarizer function parameter list"), tokenName( lexer.current()));
 		}
 		if (!lexer.current().isToken(TokComma))
 		{
@@ -554,7 +571,7 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 			int kw = lexer.current().checkKeyword( 7, "FORMULA", "EVAL", "SELECT", "WEIGHT", "RESTRICT", "TERM", "SUMMARIZE");
 			if (kw < 0)
 			{
-				throw std::runtime_error( _TXT( "expected one of keywords %s"), "FORMULA, EVAL, SELECT, WEIGHT, RESTRICT, TERM, SUMMARIZE");
+				throw strus::runtime_error( _TXT( "expected one of keywords %s"), "FORMULA, EVAL, SELECT, WEIGHT, RESTRICT, TERM, SUMMARIZE");
 			}
 			lexer.next();
 
@@ -612,20 +629,20 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 					}
 					break;
 				case e_EVAL:
-					parseWeightingConfig( qeval, qdescr, queryproc, src);
+					parseWeightingConfig( qeval, qdescr, queryproc, lexer);
 					break;
 				case e_FORMULA:
-					parseWeightingFormula( qeval, queryproc, src);
+					parseWeightingFormula( qeval, queryproc, lexer);
 					break;
 				case e_SUMMARIZE:
-					parseSummarizerConfig( qeval, queryproc, src);
+					parseSummarizerConfig( qeval, queryproc, lexer);
 					break;
 			}
-			if (!lexer.current().isToken( TokSemicolon))
+			if (!lexer.current().isToken( TokSemiColon))
 			{
 				throw std::runtime_error( _TXT( "semicolon expected as delimiter of query eval program instructions"));
 			}
-			lexer.skip();
+			lexer.next();
 		}
 		if (qdescr.selectionFeatureSet.empty())
 		{
@@ -663,433 +680,6 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 	}
 }
 
-static std::string parseVariableRef( ProgramLexer& lexer)
-{
-	std::string rt;
-	if (lexer.current().isToken(TokAssign))
-	{
-		rt = lexer.next().value();
-		lexer.next();
-	}
-	return rt;
-}
-
-static bool isQueryStructureExpression( ProgramLexer& lexer)
-{
-	bool rt = false;
-	const char* curpos = lexer.currentpos();
-	if (lexer.current().isToken(TokIdentifier))
-	{
-		lexer.next();
-		rt = lexer.current().isToken(TokOpenOvalBracket);
-	}
-	lexer.skipto( curpos);
-	return rt;
-}
-
-static bool isCompareOperator( MetaDataRestrictionInterface::CompareOperator& opr, ProgramLexer& lexer)
-{
-	if (lexer.current().isToken(TokAssign))
-	{
-		opr = MetaDataRestrictionInterface::CompareEqual;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareNotEqual))
-	{
-		opr = MetaDataRestrictionInterface::CompareNotEqual;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareEqual))
-	{
-		opr = MetaDataRestrictionInterface::CompareEqual;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareGreaterEqual))
-	{
-		opr = MetaDataRestrictionInterface::CompareGreaterEqual;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareGreater))
-	{
-		opr = MetaDataRestrictionInterface::CompareGreater;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareLessEqual))
-	{
-		opr = MetaDataRestrictionInterface::CompareLessEqual;
-		return true;
-	}
-	else if (lexer.current().isToken(TokCompareLess))
-	{
-		opr = MetaDataRestrictionInterface::CompareLess;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-static bool isQueryMetaDataExpression( ProgramLexer& lexer)
-{
-	bool rt = false;
-	const char* curpos = lexer.currentpos();
-	if (lexer.current().isToken(TokIdentifier))
-	{
-		lexer.next();
-		MetaDataRestrictionInterface::CompareOperator opr;
-		rt = isCompareOperator( opr, lexer);
-	}
-	lexer.skipto( curpos);
-	return rt;
-}
-
-static MetaDataRestrictionInterface::CompareOperator invertCompareOperator( const MetaDataRestrictionInterface::CompareOperator& opr)
-{
-	switch (opr)
-	{
-		case MetaDataRestrictionInterface::CompareLess: return MetaDataRestrictionInterface::CompareGreaterEqual;
-		case MetaDataRestrictionInterface::CompareLessEqual: return MetaDataRestrictionInterface::CompareGreater;
-		case MetaDataRestrictionInterface::CompareEqual: return MetaDataRestrictionInterface::CompareNotEqual;
-		case MetaDataRestrictionInterface::CompareNotEqual: return MetaDataRestrictionInterface::CompareEqual;
-		case MetaDataRestrictionInterface::CompareGreater: return MetaDataRestrictionInterface::CompareLessEqual;
-		case MetaDataRestrictionInterface::CompareGreaterEqual: return MetaDataRestrictionInterface::CompareLess;
-	}
-	throw std::runtime_error( _TXT("unknown metadata compare operator"));
-}
-
-static void parseMetaDataExpression( 
-		MetaDataExpression& metadataExpression,
-		ProgramLexer& lexer)
-{
-	std::string fieldName;
-	std::vector<std::string> values;
-	MetaDataRestrictionInterface::CompareOperator opr;
-	if (lexer.current().isToken(TokIdentifier))
-	{
-		fieldName = lexer.current().value();
-		lexer.next();
-		if (!isCompareOperator( opr, lexer))
-		{
-			throw strus::runtime_error( _TXT("expected compare operator instead of %s"), tokenName( lexer.current()));
-		}
-		do
-		{
-			lexer.next();
-			if (!lexer.current().isToken(TokIdentifier) && !lexer.current().isToken(TokInteger) && !lexer.current().isToken(TokFloat) && !lexer.current().isString())
-			{
-				throw strus::runtime_error( _TXT("metadata value expected instead of %s"), tokenName( lexer.current()));
-			}
-			values.push_back( lexer.current().value());
-		} while (lexer.next().isToken(TokComma));
-	}
-	else if (lexer.current().isString() || lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
-	{
-		values.push_back( lexer.current().value());
-		lexer.next();
-
-		while (lexer.current().isToken(TokComma))
-		{
-			lexer.next();
-			if (!lexer.current().isToken(TokIdentifier) && !lexer.current().isToken(TokInteger) && !lexer.current().isToken(TokFloat) && !lexer.current().isString())
-			{
-				throw strus::runtime_error( _TXT("metadata value expected instead of %s"), tokenName( lexer.current()));
-			}
-			values.push_back( lexer.current().value());
-			lexer.next();
-		}
-		if (!isCompareOperator( opr, lexer))
-		{
-			throw strus::runtime_error( _TXT("expected compare operator instead of %s"), tokenName( lexer.current()));
-		}
-		if (lexer.next().isToken(TokIdentifier))
-		{
-			fieldName = lexer.current().value();
-			lexer.next();
-		}
-		opr = invertCompareOperator( opr);
-	}
-	std::vector<std::string>::const_iterator vi = values.begin(), ve = values.end();
-	for (; vi != ve; ++vi)
-	{
-		metadataExpression.pushCompare( opr, fieldName, *vi);
-	}
-	if (values.size() > 1)
-	{
-		metadataExpression.pushOperator( MetaDataExpression::OperatorOR, values.size());
-	}
-}
-
-static void parseQueryTermExpression(
-		TermExpression& termExpression,
-		TermExpression& selectedTermExpression,
-		const QueryDescriptors& qdescr,
-		ProgramLexer& lexer)
-{
-	bool isSelection = true;
-	if (lexer.current().isToken( TokTilde))
-	{
-		lexer.next();
-		isSelection = false;
-	}
-	std::string field;
-	std::string fieldType;
-	char const* tok = lexer.currentpos();
-	
-	if (lexer.current().isString() || lexer.current().isToken(TokIdentifier))
-	{
-		field = lexer.current().value();
-		if (lexer.next().isToken(TokColon()))
-		{
-			if (lexer.next().isToken(TokIdentifier))
-			{
-				fieldType = lexer.current().value();
-			}
-		}
-		else
-		{
-			if (!qdescr.defaultFieldTypeDefined)
-			{
-				throw std::runtime_error( _TXT("no query field with name 'default' defined in query analyzer configuration, cannot handle query fields without explicit naming"));
-			}
-			fieldType = "default";
-		}
-	}
-	else if (lexer.current().isToken(TokColon))
-	{
-		if (lexer.next().isToken(TokIdentifier))
-		{
-			fieldType = lexer.current().value();
-			lexer.next();
-			return rt;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("feature type (identifier) expected after colon ':' in query"));
-		}
-	}
-	else
-	{
-		throw strus::runtime_error( _TXT("syntax error in query, query expression or term expected"));
-	}
-	if (qdescr.fieldset.find( fieldType) == qdescr.fieldset.end())
-	{
-		throw strus::runtime_error( _TXT("query field type '%s' not defined in analyzer configuration"), fieldType.c_str());
-	}
-	if (isSelection)
-	{
-		selectedTermExpression.pushField( fieldType, field);
-	}
-	termExpression.pushField( fieldType, field);
-	std::string variableName = parseVariableRef( src);
-	if (!variableName.empty())
-	{
-		termExpression.attachVariable( variableName);
-	}
-}
-
-static void parseQueryStructureExpression(
-		TermExpression& termExpression,
-		TermExpression& selectedTermExpression,
-		const QueryDescriptors& qdescr,
-		ProgramLexer& lexer)
-{
-	if (!lexer.current().isToken(TokIdentifier))
-	{
-		throw std::runtime_error( _TXT("identifier expected at start of query expression"));
-	}
-	std::string functionName = lexer.current().value();
-	lexer.next();
-	if (!lexer.current().isToken(TokOpenOvalBracket))
-	{
-		throw std::runtime_error( _TXT("internal: bad lookahead in query parser"));
-	}
-	lexer.next();
-	std::size_t argc = 0;
-
-	if (!lexer.current().isEof() && !lexer.current().isToken(TokCloseOvalBracket) && !lexer.current().isToken(TokOr) && !lexer.current().isToken(TokExp))
-	{
-		do
-		{
-			argc++;
-			if (isQueryStructureExpression(lexer))
-			{
-				parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, src);
-			}
-			else
-			{
-				parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, src);
-			}
-		} while (lexer.fetchCurrent().isToken(TokComma));
-	}
-	int range = 0;
-	unsigned int cardinality = 0;
-	while (lexer.current().isToken(TokOr) || lexer.current().isToken(TokExp))
-	{
-		if (lexer.fetchCurrent().isToken(TokOr))
-		{
-			if (range != 0) throw strus::runtime_error( _TXT("%s specified twice"), "range");
-			if (lexer.current().isToken(TokInteger))
-			{
-				range = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
-				lexer.next();
-			}
-			else
-			{
-				throw strus::runtime_error( _TXT("%s should be an integer"), "range");
-			}
-			if (range == 0) throw strus::runtime_error( _TXT("%s should be a non null number"), "range");
-		}
-		else
-		{
-			if (cardinality != 0) throw strus::runtime_error( _TXT("%s specified twice"), "cardinality");
-			if (lexer.current().isToken(TokInteger))
-			{
-				cardinality = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
-				lexer.next();
-			}
-			else
-			{
-				throw strus::runtime_error( _TXT("%s should be an integer"), "cardinality");
-			}
-		}
-	}
-	if (!lexer.current().isToken(TokCloseOvalBracket))
-	{
-		throw strus::runtime_error( _TXT("close oval bracket ')' expected as end of a query structure expression expected"));
-	}
-	lexer.next();
-	std::string variableName = parseVariableRef( lexer);
-	termExpression.pushExpression( functionName, argc, range, cardinality);
-	if (!variableName.empty())
-	{
-		termExpression.attachVariable( variableName);
-	}
-}
-
-
-DLL_PUBLIC bool strus::loadQuery(
-		QueryInterface& query,
-		const QueryAnalyzerInstanceInterface* analyzer,
-		const QueryProcessorInterface* queryproc,
-		const std::string& source,
-		const QueryDescriptors& qdescr,
-		ErrorBufferInterface* errorhnd)
-{
-	ProgramLexer lexer( source.c_str(), g_eolncomment, g_tokens, g_errtokens, errorhnd);
-	try
-	{
-		QueryAnalyzerStruct queryAnalyzerStruct;
-		std::set<std::string>::const_iterator si = qdescr.fieldset.begin(), se = qdescr.fieldset.end();
-		for (; si != se; ++si)
-		{
-			// Group elements in one field implicitely as sequence:
-			queryAnalyzerStruct.autoGroupBy( *si, "sequence_imm", 0, 0, QueryAnalyzerContextInterface::GroupAll, false/*group single*/);
-		}
-		MetaDataExpression metaDataExpression( analyzer, errorhnd);
-		TermExpression termExpression( &queryAnalyzerStruct, analyzer, errorhnd);
-		TermExpression selectedTermExpression( &queryAnalyzerStruct, analyzer, errorhnd);
-
-		lexer.next();
-		while (!lexer.current().isEof())
-		{
-			// Parse query section:
-			if (isQueryMetaDataExpression( lexer))
-			{
-				parseMetaDataExpression( metaDataExpression, lexer);
-			}
-			else
-			{
-				if (isQueryStructureExpression( src))
-				{
-					parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, lexer);
-				}
-				else
-				{
-					parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, lexer);
-				}
-				double featureWeight = 1.0;
-				if (lexer.current().isToken( TokAsterisk))
-				{
-					lexer.next();
-					if (lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
-					{
-						featureWeight = numstring_conv::todouble( lexer.current().value());
-					}
-					else
-					{
-						throw std::runtime_error( _TXT("feature weight expected after term expression and following asterisk '*'"));
-					}
-				}
-				termExpression.assignFeature( qdescr.weightingFeatureSet, featureWeight);
-			}
-		}
-		{
-			// Define selection term expression
-			unsigned int argc = selectedTermExpression.nofExpressionsDefined();
-			unsigned int cardinality = std::min( argc, (unsigned int)(qdescr.defaultSelectionTermPart * argc + 1));
-			selectedTermExpression.pushExpression( qdescr.defaultSelectionJoin, argc, 0/*range*/, cardinality);
-			selectedTermExpression.assignFeature( qdescr.selectionFeatureSet, 1.0);
-		}
-		metaDataExpression.analyze();
-		metaDataExpression.translate( query);
-		termExpression.analyze();
-		termExpression.translate( query, queryproc);
-		selectedTermExpression.analyze();
-		selectedTermExpression.translate( query, queryproc);
-		return true;
-	}
-	catch (const std::bad_alloc&)
-	{
-		reportErrorWithLocation( errorhnd, lexer, _TXT("out or memory loading query"), 0);
-		return false;
-	}
-	catch (const std::runtime_error& e)
-	{
-		reportErrorWithLocation( errorhnd, lexer, _TXT("error loading query"), e.what());
-		return false;
-	}
-}
-
-
-DLL_PUBLIC bool strus::scanNextProgram(
-		std::string& segment,
-		std::string::const_iterator& si,
-		const std::string::const_iterator& se,
-		ErrorBufferInterface* errorhnd)
-{
-	try
-	{
-		for (; si != se && (unsigned char)*si <= 32; ++si){}
-		if (si == se) return false;
-	
-		std::string::const_iterator start = si;
-		while (si != se)
-		{
-			for (; si != se && *si != '\n'; ++si){}
-			if (si != se)
-			{
-				++si;
-				std::string::const_iterator end = si;
-	
-				if (si != se && *si == '.')
-				{
-					++si;
-					if (si != se && (*si == '\r' || *si == '\n'))
-					{
-						++si;
-						segment = std::string( start, end);
-						return true;
-					}
-				}
-			}
-		}
-		segment = std::string( start, si);
-		return true;
-	}
-	CATCH_ERROR_MAP_RETURN( "error scanning next program: %s", *errorhnd, false);
-}
-
 static bool skipSpaces( char const*& itr)
 {
 	for (; *itr && (unsigned char)*itr <= 32; ++itr){}
@@ -1119,10 +709,9 @@ static std::string parseNextItem( char const*& itr)
 	{
 		const char* start = itr;
 		for (++itr; *itr >= '0' && *itr <= '9'; ++itr){}
-		if (*itr && (unsigned char)*itr <= 32)
+		if (!*itr || (unsigned char)*itr <= 32)
 		{
 			rt = std::string( start, itr-start);
-			lexer.next();
 			return rt;
 		}
 		else
@@ -1133,7 +722,6 @@ static std::string parseNextItem( char const*& itr)
 	if (*itr == '"' || *itr == '\'')
 	{
 		char eb = *itr++;
-		const char* start = itr;
 		for (++itr; *itr && *itr != eb; ++itr)
 		{
 			if (*itr=='\\')
@@ -1147,7 +735,7 @@ static std::string parseNextItem( char const*& itr)
 	else
 	{
 		const char* start = itr;
-		for (; *itr && (unsignedchar)*itr > 32; ++itr){}
+		for (; *itr && (unsigned char)*itr > 32; ++itr){}
 		rt.append( start, itr-start);
 	}
 	return rt;
@@ -1163,7 +751,7 @@ static strus::Index parseDocno( StorageClientInterface& storage, char const*& it
 	}
 	if (docid[0] >= '0' && docid[0] <= '9')
 	{
-		rt = numstring_conv::toint( start, itr-start, std::numeric_limits<strus::Index>::max());
+		rt = numstring_conv::toint( docid, std::numeric_limits<strus::Index>::max());
 	}
 	else if (!docid.empty() && docid[0] == '_')
 	{
@@ -1180,12 +768,6 @@ static unsigned int parseUnsigned( char const*& itr)
 {
 	std::string item( parseNextItem( itr));
 	return numstring_conv::touint( item, std::numeric_limits<unsigned int>::max());
-}
-
-static double parseDouble( char const*& itr)
-{
-	std::string item( parseNextItem( itr));
-	return numstring_conv::todouble( item);
 }
 
 static void storeMetaDataValue( StorageTransactionInterface& transaction, const Index& docno, const std::string& name, const NumericVariant& val)
@@ -1423,7 +1005,7 @@ DLL_PUBLIC unsigned int strus::loadDocumentAttributeAssignments(
 {
 	try
 	{
-		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitsize, errprhnd);
+		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitsize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1461,20 +1043,6 @@ DLL_PUBLIC unsigned int strus::loadDocumentUserRightsAssignments(
 	}
 }
 
-static std::string seq_tostring( const void* sq, unsigned int sqlen)
-{
-	std::string rt;
-	static const char* HEX = "0123456789ABCDEF";
-	unsigned char const* si = (const unsigned char*) sq;
-	unsigned const char* se = (const unsigned char*) sq + sqlen;
-	for (; si != se; ++si)
-	{
-		unsigned char lo = *si % 16, hi = *si / 16;
-		rt.append( strus::string_format( " %c%c", HEX[hi], HEX[lo]));
-	}
-	return rt;
-}
-
 static void loadVectorStorageVectors_word2vecBin( 
 		VectorStorageClientInterface* client,
 		const std::string& vectorfile,
@@ -1486,11 +1054,11 @@ static void loadVectorStorageVectors_word2vecBin(
 	{
 		DebugTraceContextInterface* debugtrace;
 		strus::local_ptr<DebugTraceContextInterface> debugtraceref;
-		DebugTraceInterface* dgb = errorhnd->debugTrace();
+		DebugTraceInterface* dbg = errorhnd->debugTrace();
 		if (!dbg)
 		{
-			debugtraceref.reset( createTraceContext( "vector"));
-			debugtrace = get( debugtraceref);
+			debugtraceref.reset( dbg->createTraceContext( "vector"));
+			debugtrace = debugtraceref.get();
 		}
 		strus::local_ptr<VectorStorageTransactionInterface> transaction( client->createTransaction());
 		if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
@@ -1546,7 +1114,7 @@ static void loadVectorStorageVectors_word2vecBin(
 			{
 				throw strus::runtime_error( _TXT("wrong file format"));
 			}
-			std::ostringstream debugstr;
+			std::ostringstream vecstrbuf;
 			std::vector<double> vec;
 			vec.reserve( vecsize);
 			unsigned int ii = 0;
@@ -1556,9 +1124,8 @@ static void loadVectorStorageVectors_word2vecBin(
 				{
 					float_net_t val;
 					std::memcpy( (void*)&val, si, sizeof( val));
-					si += sizeof( float);
 					vec.push_back( ByteOrder<float>::ntoh( val));
-					if (debugtrace) debugstr << (ii?", ":"") << vec.back() << " [" << seq_tostring( si, sizeof( float)) << "]";
+					si += sizeof( float);
 				}
 			}
 			else
@@ -1566,18 +1133,10 @@ static void loadVectorStorageVectors_word2vecBin(
 				for (; ii < vecsize; ii++)
 				{
 					float val;
-					if (debugtrace) debugstr.append( seq_tostring( si, sizeof( float)));
 					std::memcpy( (void*)&val, si, sizeof( val));
 					si += sizeof( float);
 					vec.push_back( val);
-					if (debugtrace) debugstr << (ii?", ":"") << vec.back() << " [" << seq_tostring( si, sizeof( float)) << "]";
 				}
-			}
-			if (debugtrace)
-			{
-				std::string termstr( term, termsize);
-				std::string vecstr( debugstr.str());
-				debugtrace->event( "vecterm", "name '%s' vec %s", termstr.c_str(), vecstr.c_str());
 			}
 			double len = 0;
 			std::vector<double>::iterator vi = vec.begin(), ve = vec.end();
@@ -1588,17 +1147,25 @@ static void loadVectorStorageVectors_word2vecBin(
 			}
 			len = sqrt( len);
 			vi = vec.begin(), ve = vec.end();
-			for (; vi != ve; ++vi)
+			for (int vidx=0; vi != ve; ++vi,++vidx)
 			{
 				*vi /= len;
 				if (*vi >= -1.0 && *vi <= 1.0)
-				{/*OK*/}
+				{
+					if (debugtrace) vecstrbuf << (vidx?", ":"") << *vi;
+				}
 				else
 				{
 					throw strus::runtime_error( _TXT("illegal value in vector: %f %f"), *vi, len);
 				}
 			}
 			transaction->addFeature( std::string(term, termsize), vec);
+			if (debugtrace)
+			{
+				std::string termstr( term, termsize);
+				std::string vecstr( vecstrbuf.str());
+				debugtrace->event( "vecterm", "name '%s' vec %s", termstr.c_str(), vecstr.c_str());
+			}
 			if (errorhnd->hasError())
 			{
 				throw strus::runtime_error(_TXT("add vector failed: %s"), errorhnd->fetchError());
@@ -1641,6 +1208,14 @@ static void loadVectorStorageVectors_word2vecText(
 	unsigned int linecnt = 0;
 	try
 	{
+		DebugTraceContextInterface* debugtrace;
+		strus::local_ptr<DebugTraceContextInterface> debugtraceref;
+		DebugTraceInterface* dbg = errorhnd->debugTrace();
+		if (!dbg)
+		{
+			debugtraceref.reset( dbg->createTraceContext( "vector"));
+			debugtrace = debugtraceref.get();
+		}
 		strus::local_ptr<VectorStorageTransactionInterface> transaction( client->createTransaction());
 		if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
 		InputStream infile( vectorfile);
@@ -1666,10 +1241,9 @@ static void loadVectorStorageVectors_word2vecText(
 			const char* term;
 			std::size_t termsize;
 			std::vector<double> vec;
-			std::ostringstream debugstr;
+			std::ostringstream vecstrbuf;
 			if (!skipSpaces(si)) throw std::runtime_error( _TXT("unexpected end of line"));
 			term = si;
-		AGAIN:
 			skipNonSpaces( si);
 			if (si) throw std::runtime_error( _TXT("unexpected end of file"));
 			termsize = si - term;
@@ -1680,7 +1254,7 @@ static void loadVectorStorageVectors_word2vecText(
 				char const* sn = si;
 				skipNonSpaces(sn);
 				vec.push_back( numstring_conv::todouble( si, sn-si));
-				if (debugtrace) debugstr << (vec.empty()?"":", ") << vec.back();
+				if (debugtrace) vecstrbuf << (vec.empty()?"":", ") << vec.back();
 				si = sn;
 				skipSpaces(si);
 			}
@@ -1706,7 +1280,7 @@ static void loadVectorStorageVectors_word2vecText(
 			if (debugtrace)
 			{
 				std::string termstr( term, termsize);
-				std::string vecstr( debugstr.str());
+				std::string vecstr( vecstrbuf.str());
 				if (debugtrace) debugtrace->event( "vecterm", "name '%s' vec %s", termstr.c_str(), vecstr.c_str());
 			}
 			if (errorhnd->hasError())
