@@ -15,6 +15,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/vectorStorageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/debugTraceInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/programLexer.hpp"
@@ -96,6 +97,7 @@ enum Tokens {
 	TokSemiColon,
 	TokTilde,
 	TokExp,
+	TokAsterisk,
 	TokLeftArrow,
 	TokPath
 };
@@ -123,11 +125,12 @@ static const char* g_tokens[] = {
 	";",
 	"~",
 	"^",
+	"*"
 	"<-",
 	"[/][^;,{} ]*",
 	NULL
 };
-static const char* g_token_names[] = {
+static const char* g_isQueryStructureExpressiontoken_names[] = {
 	"identifier",
 	"flating point number",
 	"integer",
@@ -137,11 +140,21 @@ static const char* g_token_names[] = {
 	"close curly bracket '}'",
 	"open square bracket '['",
 	"close square bracket ']'",
+	"or operator '|'",
 	"assign '='",
+	"not equl (\\!\\=)",
+	"equality comparis operator \\=\\=",
+	"greater equal comparis operator \\>\\=",
+	"greater comparis operator \\>",
+	"lesser equal comparin operator \\<\\=",
+	"lesser equal comparison operator \\<",
 	"dot '.'",
 	"comma ','",
 	"colon ':'",
 	"semicolon ';'",
+	"tilde '^",
+	"exponent '^",
+	"asterisk';'",
 	"left arrow '<-'",
 	"path",
 	NULL
@@ -165,19 +178,29 @@ static const char* tokenName( const ProgramLexem& cur)
 	return "?";
 }
 
-static void reportErrorWithLocation( ErrorBufferInterface* errorhnd, ProgramLexer& lexer, const char* msg)
+static void reportErrorWithLocation( ErrorBufferInterface* errorhnd, ProgramLexer& lexer, const char* msg, const char* what)
 {
 	try
 	{
 		std::string errorlocation = lexer.currentLocationString( -30, 80, "<!>");
-		std::string errormsg = strus::string_format(
-			_TXT("error in source on line %d (at %s): %s"),
-			(int)lexer.lineno(), errorlocation.c_str(), msg);
+		std::string errormsg;
+		if (what)
+		{
+			errormsg = strus::string_format(
+				_TXT("error in source on line %d (at %s): %s: %s"),
+				(int)lexer.lineno(), errorlocation.c_str(), msg, what);
+		}
+		else
+		{
+			errormsg = strus::string_format(
+				_TXT("error in source on line %d (at %s): %s"),
+				(int)lexer.lineno(), errorlocation.c_str(), msg);
+		}
 		errorhnd->report( ErrorCodeSyntax, "%s", errormsg.c_str());
 	}
 	catch (const std::bad_alloc&)
 	{
-		errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory handling error"));
+		errorhnd->report( ErrorCodeOutOfMem, _TXT("%s: out of memory handling error"), msg);
 	}
 }
 
@@ -630,18 +653,17 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 	}
 	catch (const std::bad_alloc&)
 	{
-		ErrorPosition pos( source.c_str(), src);
-		errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory parsing query evaluation program %s"), pos.c_str());
+		reportErrorWithLocation( errorhnd, lexer, _TXT("out or memory loading query evaluation program"), 0);
 		return false;
 	}
 	catch (const std::runtime_error& e)
 	{
-		reportErrorWithLocation( errorhnd, lexer, e.what());
+		reportErrorWithLocation( errorhnd, lexer, _TXT("error loading query evaluation program"), e.what());
 		return false;
 	}
 }
 
-static std::string parseVariableRef( Lexer& lexer)
+static std::string parseVariableRef( ProgramLexer& lexer)
 {
 	std::string rt;
 	if (lexer.current().isToken(TokAssign))
@@ -652,7 +674,7 @@ static std::string parseVariableRef( Lexer& lexer)
 	return rt;
 }
 
-static bool isQueryStructureExpression( Lexer& lexer)
+static bool isQueryStructureExpression( ProgramLexer& lexer)
 {
 	bool rt = false;
 	const char* curpos = lexer.currentpos();
@@ -665,7 +687,7 @@ static bool isQueryStructureExpression( Lexer& lexer)
 	return rt;
 }
 
-static bool isCompareOperator( MetaDataRestrictionInterface::CompareOperator& opr, Lexer& lexer)
+static bool isCompareOperator( MetaDataRestrictionInterface::CompareOperator& opr, ProgramLexer& lexer)
 {
 	if (lexer.current().isToken(TokAssign))
 	{
@@ -708,7 +730,7 @@ static bool isCompareOperator( MetaDataRestrictionInterface::CompareOperator& op
 	}
 }
 
-static bool isQueryMetaDataExpression( Lexer& lexer)
+static bool isQueryMetaDataExpression( ProgramLexer& lexer)
 {
 	bool rt = false;
 	const char* curpos = lexer.currentpos();
@@ -738,7 +760,7 @@ static MetaDataRestrictionInterface::CompareOperator invertCompareOperator( cons
 
 static void parseMetaDataExpression( 
 		MetaDataExpression& metadataExpression,
-		Lexer& lexer)
+		ProgramLexer& lexer)
 {
 	std::string fieldName;
 	std::vector<std::string> values;
@@ -759,8 +781,7 @@ static void parseMetaDataExpression(
 				throw strus::runtime_error( _TXT("metadata value expected instead of %s"), tokenName( lexer.current()));
 			}
 			values.push_back( lexer.current().value());
-			lexer.next();
-		} while (lexer.current().isToken(TokComma));
+		} while (lexer.next().isToken(TokComma));
 	}
 	else if (lexer.current().isString() || lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
 	{
@@ -803,7 +824,7 @@ static void parseQueryTermExpression(
 		TermExpression& termExpression,
 		TermExpression& selectedTermExpression,
 		const QueryDescriptors& qdescr,
-		Lexer& lexer)
+		ProgramLexer& lexer)
 {
 	bool isSelection = true;
 	if (lexer.current().isToken( TokTilde))
@@ -849,7 +870,7 @@ static void parseQueryTermExpression(
 	}
 	else
 	{
-		throw strus::runtime_error( "%s",  _TXT("syntax error in query, query expression or term expected"));
+		throw strus::runtime_error( _TXT("syntax error in query, query expression or term expected"));
 	}
 	if (qdescr.fieldset.find( fieldType) == qdescr.fieldset.end())
 	{
@@ -907,7 +928,7 @@ static void parseQueryStructureExpression(
 	{
 		if (lexer.fetchCurrent().isToken(TokOr))
 		{
-			if (range != 0) throw strus::runtime_error( "%s",  _TXT("%s specified twice"), "range");
+			if (range != 0) throw strus::runtime_error( _TXT("%s specified twice"), "range");
 			if (lexer.current().isToken(TokInteger))
 			{
 				range = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
@@ -915,13 +936,13 @@ static void parseQueryStructureExpression(
 			}
 			else
 			{
-				throw strus::runtime_error( "%s",  _TXT("%s should be an integer"), "range");
+				throw strus::runtime_error( _TXT("%s should be an integer"), "range");
 			}
-			if (range == 0) throw strus::runtime_error( "%s",  _TXT("%s should be a non null number"), "range");
+			if (range == 0) throw strus::runtime_error( _TXT("%s should be a non null number"), "range");
 		}
 		else
 		{
-			if (cardinality != 0) throw strus::runtime_error( "%s",  _TXT("%s specified twice"), "cardinality");
+			if (cardinality != 0) throw strus::runtime_error( _TXT("%s specified twice"), "cardinality");
 			if (lexer.current().isToken(TokInteger))
 			{
 				cardinality = numstring_conv::toint( lexer.current().value(), std::numeric_limits<int>::max());
@@ -929,23 +950,23 @@ static void parseQueryStructureExpression(
 			}
 			else
 			{
-				throw strus::runtime_error( "%s",  _TXT("%s should be an integer"), "cardinality");
+				throw strus::runtime_error( _TXT("%s should be an integer"), "cardinality");
 			}
 		}
 	}
 	if (!lexer.current().isToken(TokCloseOvalBracket))
 	{
-		throw strus::runtime_error( "%s",  _TXT("close oval bracket ')' expected as end of a query structure expression expected"));
+		throw strus::runtime_error( _TXT("close oval bracket ')' expected as end of a query structure expression expected"));
 	}
 	lexer.next();
-	std::string variableName = parseVariableRef( src);
+	std::string variableName = parseVariableRef( lexer);
 	termExpression.pushExpression( functionName, argc, range, cardinality);
 	if (!variableName.empty())
 	{
 		termExpression.attachVariable( variableName);
 	}
 }
-!!!!!!
+
 
 DLL_PUBLIC bool strus::loadQuery(
 		QueryInterface& query,
@@ -955,7 +976,7 @@ DLL_PUBLIC bool strus::loadQuery(
 		const QueryDescriptors& qdescr,
 		ErrorBufferInterface* errorhnd)
 {
-	char const* src = source.c_str();
+	ProgramLexer lexer( source.c_str(), g_eolncomment, g_tokens, g_errtokens, errorhnd);
 	try
 	{
 		QueryAnalyzerStruct queryAnalyzerStruct;
@@ -969,31 +990,31 @@ DLL_PUBLIC bool strus::loadQuery(
 		TermExpression termExpression( &queryAnalyzerStruct, analyzer, errorhnd);
 		TermExpression selectedTermExpression( &queryAnalyzerStruct, analyzer, errorhnd);
 
-		skipSpaces(src);
-		while (*src)
+		lexer.next();
+		while (!lexer.current().isEof())
 		{
 			// Parse query section:
-			if (isQueryMetaDataExpression( src))
+			if (isQueryMetaDataExpression( lexer))
 			{
-				parseMetaDataExpression( metaDataExpression, src);
+				parseMetaDataExpression( metaDataExpression, lexer);
 			}
 			else
 			{
 				if (isQueryStructureExpression( src))
 				{
-					parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, src);
+					parseQueryStructureExpression( termExpression, selectedTermExpression, qdescr, lexer);
 				}
 				else
 				{
-					parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, src);
+					parseQueryTermExpression( termExpression, selectedTermExpression, qdescr, lexer);
 				}
 				double featureWeight = 1.0;
-				if (isAsterisk(*src))
+				if (lexer.current().isToken( TokAsterisk))
 				{
-					(void)parse_OPERATOR(src);
-					if (isDigit(*src))
+					lexer.next();
+					if (lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
 					{
-						featureWeight = parse_FLOAT( src);
+						featureWeight = numstring_conv::todouble( lexer.current().value());
 					}
 					else
 					{
@@ -1020,14 +1041,12 @@ DLL_PUBLIC bool strus::loadQuery(
 	}
 	catch (const std::bad_alloc&)
 	{
-		ErrorPosition pos( source.c_str(), src);
-		errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory parsing query source %s"), pos.c_str());
+		reportErrorWithLocation( errorhnd, lexer, _TXT("out or memory loading query"), 0);
 		return false;
 	}
 	catch (const std::runtime_error& e)
 	{
-		ErrorPosition pos( source.c_str(), src);
-		errorhnd->report( ErrorCodeRuntimeError, _TXT("error in query source %s: %s"), pos.c_str(), e.what());
+		reportErrorWithLocation( errorhnd, lexer, _TXT("error loading query"), e.what());
 		return false;
 	}
 }
@@ -1068,63 +1087,111 @@ DLL_PUBLIC bool strus::scanNextProgram(
 		segment = std::string( start, si);
 		return true;
 	}
-	catch (const std::bad_alloc&)
-	{
-		errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory scanning next program"));
-		return false;
-	}
-	catch (const std::runtime_error& e)
-	{
-		errorhnd->report( ErrorCodeRuntimeError, _TXT("error scanning next program: %s"), e.what());
-		return false;
-	}
+	CATCH_ERROR_MAP_RETURN( "error scanning next program: %s", *errorhnd, false);
 }
 
-static Index parseDocno( StorageClientInterface& storage, char const*& itr)
+static bool skipSpaces( char const*& itr)
 {
-	if (isDigit(*itr) && is_INTEGER(itr))
+	for (; *itr && (unsigned char)*itr <= 32; ++itr){}
+	return *itr;
+}
+
+static bool skipNonSpaces( char const*& itr)
+{
+	for (; *itr && (unsigned char)*itr > 32; ++itr){}
+	return *itr;
+}
+
+static bool skipToEoln( char const*& itr)
+{
+	for (; *itr && *itr != '\n'; ++itr){}
+	return *itr;
+}
+
+static std::string parseNextItem( char const*& itr)
+{
+	std::string rt;
+	if (!skipSpaces(itr))
 	{
-		return parse_UNSIGNED1( itr);
+		throw std::runtime_error(_TXT("unexpected end of item"));
 	}
-	else if (isStringQuote(*itr))
+	if (*itr >= '0' && *itr <= '9')
 	{
-		std::string docid = parse_STRING(itr);
-		return storage.documentNumber( docid);
+		const char* start = itr;
+		for (++itr; *itr >= '0' && *itr <= '9'; ++itr){}
+		if (*itr && (unsigned char)*itr <= 32)
+		{
+			rt = std::string( start, itr-start);
+			lexer.next();
+			return rt;
+		}
+		else
+		{
+			itr = start;
+		}
+	}
+	if (*itr == '"' || *itr == '\'')
+	{
+		char eb = *itr++;
+		const char* start = itr;
+		for (++itr; *itr && *itr != eb; ++itr)
+		{
+			if (*itr=='\\')
+			{
+				++itr;
+			}
+			rt.push_back( *itr);
+		}
+		if (!*itr) throw std::runtime_error(_TXT("string not terminated"));
 	}
 	else
 	{
-		std::string docid;
-		for (; !isSpace(*itr); ++itr)
-		{
-			docid.push_back( *itr);
-		}
-		skipSpaces( itr);
-		return storage.documentNumber( docid);
+		const char* start = itr;
+		for (; *itr && (unsignedchar)*itr > 32; ++itr){}
+		rt.append( start, itr-start);
 	}
+	return rt;
 }
 
-static std::string parseDocKey( char const*& itr)
+static strus::Index parseDocno( StorageClientInterface& storage, char const*& itr)
 {
-	if (isStringQuote(*itr))
+	strus::Index rt = 0;
+	std::string docid( parseNextItem( itr));
+	if (docid.empty())
 	{
-		return parse_STRING(itr);
+		throw std::runtime_error(_TXT("document id is empty"));
+	}
+	if (docid[0] >= '0' && docid[0] <= '9')
+	{
+		rt = numstring_conv::toint( start, itr-start, std::numeric_limits<strus::Index>::max());
+	}
+	else if (!docid.empty() && docid[0] == '_')
+	{
+		rt = numstring_conv::toint( docid.c_str()+1, docid.size()-1, std::numeric_limits<strus::Index>::max());
 	}
 	else
 	{
-		std::string id;
-		for (; !isSpace(*itr); ++itr)
-		{
-			id.push_back( *itr);
-		}
-		skipSpaces( itr);
-		return id;
+		rt = storage.documentNumber( docid);
 	}
+	return rt;
+}
+
+static unsigned int parseUnsigned( char const*& itr)
+{
+	std::string item( parseNextItem( itr));
+	return numstring_conv::touint( item, std::numeric_limits<unsigned int>::max());
+}
+
+static double parseDouble( char const*& itr)
+{
+	std::string item( parseNextItem( itr));
+	return numstring_conv::todouble( item);
 }
 
 static void storeMetaDataValue( StorageTransactionInterface& transaction, const Index& docno, const std::string& name, const NumericVariant& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
-	if (!update.get()) throw strus::runtime_error( "%s",  _TXT("failed to create document update structure"));
+	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
 
 	update->setMetaData( name, val);
 	update->done();
@@ -1133,7 +1200,7 @@ static void storeMetaDataValue( StorageTransactionInterface& transaction, const 
 static void storeAttributeValue( StorageTransactionInterface& transaction, const Index& docno, const std::string& name, const std::string& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
-	if (!update.get()) throw strus::runtime_error( "%s",  _TXT("failed to create document update structure"));
+	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
 	if (val.empty())
 	{
 		update->clearAttribute( name);
@@ -1148,29 +1215,38 @@ static void storeAttributeValue( StorageTransactionInterface& transaction, const
 static void storeUserRights( StorageTransactionInterface& transaction, const Index& docno, const std::string& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
-	if (!update.get()) throw strus::runtime_error( "%s",  _TXT("failed to create document update structure"));
+	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
 	char const* itr = val.c_str();
-	if (itr[0] == '+' && (itr[1] == ',' || !itr[1]))
-	{
-		itr += (itr[1])?2:1;
-	}
-	else
-	{
-		update->clearUserAccessRights();
-	}
-	while (*itr)
+
+	while (skipSpaces( itr))
 	{
 		bool positive = true;
-		if (*itr == '+')
+		if (*itr == '-')
 		{
-			(void)parse_OPERATOR( itr);
-		}
-		else if (*itr == '-')
-		{
+			++itr;
+			if (!skipSpaces(itr))
+			{
+				update->clearUserAccessRights();
+				break;
+			}
+			else if (*itr == ',')
+			{
+				update->clearUserAccessRights();
+				++itr;
+				continue;
+			}
 			positive = false;
-			(void)parse_OPERATOR( itr);
 		}
-		std::string username = parse_IDENTIFIER(itr);
+		else if (*itr == '+')
+		{
+			positive = true;
+			++itr;
+			if (!skipSpaces(itr))
+			{
+				throw strus::runtime_error( _TXT("username expected after '+'"));
+			}
+		}
+		std::string username = parseNextItem(itr);
 		if (positive)
 		{
 			update->setUserAccessRight( username);
@@ -1181,11 +1257,12 @@ static void storeUserRights( StorageTransactionInterface& transaction, const Ind
 		}
 		if (*itr == ',')
 		{
-			(void)parse_OPERATOR( itr);
+			++itr;
+			continue;
 		}
-		else if (*itr)
+		else if (skipSpaces(itr))
 		{
-			throw strus::runtime_error( "%s",  _TXT("unexpected token in user rigths specification"));
+			throw strus::runtime_error( _TXT("unexpected token in user rigths specification"));
 		}
 	}
 }
@@ -1203,47 +1280,26 @@ static bool updateStorageValue(
 		const Index& docno,
 		const std::string& elementName,
 		StorageValueType valueType,
-		const char* value)
+		const std::string& value)
 {
-	char const* itr = value;
 	switch (valueType)
 	{
 		case StorageValueMetaData:
 		{
-			NumericVariant val( parseNumericValue( itr));
+			NumericVariant val( value.c_str());
 			storeMetaDataValue( *transaction, docno, elementName, val);
 			return true;
 		}
 		case StorageValueAttribute:
 		{
-			std::string val;
-			if (isTextChar( *itr))
-			{
-				val = parse_TEXTWORD( itr);
-			}
-			else if (isStringQuote( *itr))
-			{
-				val = parse_STRING( itr);
-			}
-			else
-			{
-				val = std::string( itr);
-				itr = std::strchr( itr, '\0');
-			}
-			storeAttributeValue( *transaction, docno, elementName, val);
+			storeAttributeValue( *transaction, docno, elementName, value);
 			return true;
 		}
 		case StorageUserRights:
 		{
-			std::string val( itr);
-			itr = std::strchr( itr, '\0');
-			storeUserRights( *transaction, docno, val);
+			storeUserRights( *transaction, docno, value);
 			return true;
 		}
-	}
-	if (*itr)
-	{
-		throw strus::runtime_error( "%s",  _TXT("extra characters after value assignment"));
 	}
 	return false;
 }
@@ -1255,25 +1311,25 @@ static unsigned int loadStorageValues(
 		const KeyDocnoMap* attributemapref,
 		const std::string& file,
 		StorageValueType valueType,
-		unsigned int commitsize)
+		unsigned int commitsize,
+		ErrorBufferInterface* errorhnd)
 {
 	InputStream stream( file);
 	if (stream.error()) throw strus::runtime_error(_TXT("failed to open storage value file '%s': %s"), file.c_str(), ::strerror(stream.error()));
 	unsigned int rt = 0;
-	strus::local_ptr<StorageTransactionInterface>
-		transaction( storage.createTransaction());
-	if (!transaction.get()) throw strus::runtime_error( "%s",  _TXT("failed to create storage transaction"));
+	strus::local_ptr<StorageTransactionInterface> transaction( storage.createTransaction());
+	if (!transaction.get()) throw strus::runtime_error( _TXT("failed to create storage transaction"));
 	std::size_t linecnt = 1;
 	unsigned int commitcnt = 0;
 	try
 	{
-		char line[ 2048];
+		char line[ 4096];
 		for (; stream.readLine( line, sizeof(line)); ++linecnt)
 		{
 			char const* itr = line;
 			if (attributemapref)
 			{
-				std::string attr = parseDocKey( itr);
+				std::string attr = parseNextItem( itr);
 				std::pair<KeyDocnoMap::const_iterator,KeyDocnoMap::const_iterator>
 					range = attributemapref->equal_range( attr);
 				KeyDocnoMap::const_iterator ki = range.first, ke = range.second;
@@ -1288,7 +1344,11 @@ static unsigned int loadStorageValues(
 			else
 			{
 				Index docno = parseDocno( storage, itr);
-				if (!docno) continue;
+				if (!docno)
+				{
+					if (errorhnd->hasError()) throw std::runtime_error(errorhnd->fetchError());
+					continue;
+				}
 				if (updateStorageValue( transaction.get(), docno, elementName, valueType, itr))
 				{
 					rt += 1;
@@ -1302,7 +1362,7 @@ static unsigned int loadStorageValues(
 				}
 				commitcnt = 0;
 				transaction.reset( storage.createTransaction());
-				if (!transaction.get()) throw strus::runtime_error( "%s",  _TXT("failed to recreate storage transaction after commit"));
+				if (!transaction.get()) throw strus::runtime_error( _TXT("failed to recreate storage transaction after commit"));
 			}
 		}
 		if (stream.error())
@@ -1317,7 +1377,7 @@ static unsigned int loadStorageValues(
 			}
 			commitcnt = 0;
 			transaction.reset( storage.createTransaction());
-			if (!transaction.get()) throw strus::runtime_error( "%s",  _TXT("failed to recreate storage transaction after commit"));
+			if (!transaction.get()) throw strus::runtime_error( _TXT("failed to recreate storage transaction after commit"));
 		}
 		return rt;
 	}
@@ -1338,7 +1398,7 @@ DLL_PUBLIC unsigned int strus::loadDocumentMetaDataAssignments(
 {
 	try
 	{
-		return loadStorageValues( storage, metadataName, attributemapref, file, StorageValueMetaData, commitsize);
+		return loadStorageValues( storage, metadataName, attributemapref, file, StorageValueMetaData, commitsize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1363,7 +1423,7 @@ DLL_PUBLIC unsigned int strus::loadDocumentAttributeAssignments(
 {
 	try
 	{
-		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitsize);
+		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitsize, errprhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1387,7 +1447,7 @@ DLL_PUBLIC unsigned int strus::loadDocumentUserRightsAssignments(
 {
 	try
 	{
-		return loadStorageValues( storage, std::string(), attributemapref, file, StorageUserRights, commitsize);
+		return loadStorageValues( storage, std::string(), attributemapref, file, StorageUserRights, commitsize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1401,20 +1461,19 @@ DLL_PUBLIC unsigned int strus::loadDocumentUserRightsAssignments(
 	}
 }
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-static void print_value_seq( const void* sq, unsigned int sqlen)
+static std::string seq_tostring( const void* sq, unsigned int sqlen)
 {
+	std::string rt;
 	static const char* HEX = "0123456789ABCDEF";
 	unsigned char const* si = (const unsigned char*) sq;
 	unsigned const char* se = (const unsigned char*) sq + sqlen;
 	for (; si != se; ++si)
 	{
 		unsigned char lo = *si % 16, hi = *si / 16;
-		printf( " %c%c", HEX[hi], HEX[lo]);
+		rt.append( strus::string_format( " %c%c", HEX[hi], HEX[lo]));
 	}
-	printf(" |");
+	return rt;
 }
-#endif
 
 static void loadVectorStorageVectors_word2vecBin( 
 		VectorStorageClientInterface* client,
@@ -1425,7 +1484,15 @@ static void loadVectorStorageVectors_word2vecBin(
 	unsigned int linecnt = 0;
 	try
 	{
-		Reference<VectorStorageTransactionInterface> transaction( client->createTransaction());
+		DebugTraceContextInterface* debugtrace;
+		strus::local_ptr<DebugTraceContextInterface> debugtraceref;
+		DebugTraceInterface* dgb = errorhnd->debugTrace();
+		if (!dbg)
+		{
+			debugtraceref.reset( createTraceContext( "vector"));
+			debugtrace = get( debugtraceref);
+		}
+		strus::local_ptr<VectorStorageTransactionInterface> transaction( client->createTransaction());
 		if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
 
 		InputStream infile( vectorfile);
@@ -1433,8 +1500,8 @@ static void loadVectorStorageVectors_word2vecBin(
 		{
 			throw strus::runtime_error(_TXT("failed to open word2vec file '%s': %s"), vectorfile.c_str(), ::strerror(infile.error()));
 		}
-		unsigned int collsize;
-		unsigned int vecsize;
+		unsigned int collsize = 0;
+		unsigned int vecsize = 0;
 		std::size_t linesize;
 		{
 			// Read first text line, that contains two numbers, the collection size and the vector size:
@@ -1444,16 +1511,11 @@ static void loadVectorStorageVectors_word2vecBin(
 			char const* si = firstline;
 			const char* se = std::strchr( si, '\n');
 			if (!se) throw std::runtime_error( _TXT("failed to parse header line"));
-			skipSpaces( si);
-			if (!is_UNSIGNED(si)) throw std::runtime_error( _TXT("expected collection size as first element of the header line"));
-			collsize = parse_UNSIGNED1( si);
-			skipSpaces( si);
-			if (!is_UNSIGNED(si)) throw std::runtime_error( _TXT("expected vector size as second element of the header line"));
-			vecsize = parse_UNSIGNED1( si);
+			collsize = parseUnsigned( si);
+			vecsize = parseUnsigned( si);
 			if (*(si-1) != '\n')
 			{
-				skipToEoln( si);
-				++si;
+				if (skipToEoln( si)) ++si;
 			}
 			infile.read( firstline, si - firstline);
 		}
@@ -1468,7 +1530,7 @@ static void loadVectorStorageVectors_word2vecBin(
 		std::size_t linebufsize = MaxIdSize + vecsize * sizeof(float);
 		char* linebuf = (char*)std::malloc( linebufsize);
 		charp_scope linebuf_scope( linebuf);
-	
+
 		// Parse vector by vector and add them to the transaction till EOF:
 		linesize = infile.readAhead( linebuf, linebufsize);
 		while (linesize)
@@ -1482,11 +1544,9 @@ static void loadVectorStorageVectors_word2vecBin(
 			++si;
 			if (si+vecsize*sizeof(float) > se)
 			{
-				throw strus::runtime_error( "%s",  _TXT("wrong file format"));
+				throw strus::runtime_error( _TXT("wrong file format"));
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			for (std::size_t ti=0; ti<termsize; ++ti) printf("%c",term[ti]);
-#endif
+			std::ostringstream debugstr;
 			std::vector<double> vec;
 			vec.reserve( vecsize);
 			unsigned int ii = 0;
@@ -1495,12 +1555,10 @@ static void loadVectorStorageVectors_word2vecBin(
 				for (; ii < vecsize; ii++)
 				{
 					float_net_t val;
-#ifdef STRUS_LOWLEVEL_DEBUG
-					print_value_seq( si, sizeof( float));
-#endif
 					std::memcpy( (void*)&val, si, sizeof( val));
 					si += sizeof( float);
 					vec.push_back( ByteOrder<float>::ntoh( val));
+					if (debugtrace) debugstr << (ii?", ":"") << vec.back() << " [" << seq_tostring( si, sizeof( float)) << "]";
 				}
 			}
 			else
@@ -1508,17 +1566,19 @@ static void loadVectorStorageVectors_word2vecBin(
 				for (; ii < vecsize; ii++)
 				{
 					float val;
-#ifdef STRUS_LOWLEVEL_DEBUG
-					print_value_seq( si, sizeof( float));
-#endif
+					if (debugtrace) debugstr.append( seq_tostring( si, sizeof( float)));
 					std::memcpy( (void*)&val, si, sizeof( val));
 					si += sizeof( float);
 					vec.push_back( val);
+					if (debugtrace) debugstr << (ii?", ":"") << vec.back() << " [" << seq_tostring( si, sizeof( float)) << "]";
 				}
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			printf("\n");
-#endif
+			if (debugtrace)
+			{
+				std::string termstr( term, termsize);
+				std::string vecstr( debugstr.str());
+				debugtrace->event( "vecterm", "name '%s' vec %s", termstr.c_str(), vecstr.c_str());
+			}
 			double len = 0;
 			std::vector<double>::iterator vi = vec.begin(), ve = vec.end();
 			for (; vi != ve; ++vi)
@@ -1581,7 +1641,7 @@ static void loadVectorStorageVectors_word2vecText(
 	unsigned int linecnt = 0;
 	try
 	{
-		Reference<VectorStorageTransactionInterface> transaction( client->createTransaction());
+		strus::local_ptr<VectorStorageTransactionInterface> transaction( client->createTransaction());
 		if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
 		InputStream infile( vectorfile);
 		if (infile.error())
@@ -1601,35 +1661,28 @@ static void loadVectorStorageVectors_word2vecText(
 		for (; line; line = infile.readLine( linebuf, LineBufSize))
 		{
 			char const* si = line;
-			const char* se = si + std::strlen(si);
-			if (se - si == LineBufSize-1) throw std::runtime_error( _TXT("input line too long"));
+			if (std::strlen(si) >= LineBufSize-1) throw std::runtime_error( _TXT("input line too long"));
 			++linecnt;
 			const char* term;
 			std::size_t termsize;
 			std::vector<double> vec;
-			while (isSpace( *si)) ++si;
+			std::ostringstream debugstr;
+			if (!skipSpaces(si)) throw std::runtime_error( _TXT("unexpected end of line"));
 			term = si;
 		AGAIN:
-			for (; *si && *si != ' ' && *si != '\t'; ++si){}
-			if (!*si)
-			{
-				throw std::runtime_error( _TXT("unexpected end of file"));
-			}
+			skipNonSpaces( si);
+			if (si) throw std::runtime_error( _TXT("unexpected end of file"));
 			termsize = si - term;
 			++si;
-			if (!isMinus(*si) && !isDigit(*si))
+			if (!skipSpaces(si)) throw std::runtime_error( _TXT("unexpected end of line"));
+			while (*si)
 			{
-				goto AGAIN;
-			}
-			while (isSpace( *si)) ++si;
-			while (si < se && is_FLOAT(si))
-			{
-				vec.push_back( parse_FLOAT( si));
-				while (isSpace( *si)) ++si;
-			}
-			if (si < se)
-			{
-				throw std::runtime_error( _TXT("expected vector of double precision floating point numbers after term definition"));
+				char const* sn = si;
+				skipNonSpaces(sn);
+				vec.push_back( numstring_conv::todouble( si, sn-si));
+				if (debugtrace) debugstr << (vec.empty()?"":", ") << vec.back();
+				si = sn;
+				skipSpaces(si);
 			}
 			double len = 0;
 			std::vector<double>::iterator vi = vec.begin(), ve = vec.end();
@@ -1650,6 +1703,12 @@ static void loadVectorStorageVectors_word2vecText(
 				}
 			}
 			transaction->addFeature( std::string(term, termsize), vec);
+			if (debugtrace)
+			{
+				std::string termstr( term, termsize);
+				std::string vecstr( debugstr.str());
+				if (debugtrace) debugtrace->event( "vecterm", "name '%s' vec %s", termstr.c_str(), vecstr.c_str());
+			}
 			if (errorhnd->hasError())
 			{
 				throw strus::runtime_error(_TXT("add vector failed: %s"), errorhnd->fetchError());
@@ -1679,7 +1738,7 @@ DLL_PUBLIC bool strus::loadVectorStorageVectors(
 	char const* filetype = 0;
 	try
 	{
-		if (isTextFile( vectorfile))
+		if (strus::isTextFile( vectorfile))
 		{
 			filetype = "word2vec text file";
 			loadVectorStorageVectors_word2vecText( client, vectorfile, errorhnd);
