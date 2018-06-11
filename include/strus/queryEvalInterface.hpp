@@ -57,6 +57,10 @@ public:
 	/// \param[in] set_ name of the set of the exclusion feature
 	virtual void addExclusionFeature( const std::string& set_)=0;
 
+	/// \brief Define a set of features to be used for weighting
+	/// \return the list of all weighting feature set names declared
+	virtual std::vector<std::string> getWeightingFeatureSets() const=0;
+
 	/// \brief Define a set of features to be used as selection (declare what documents to weight)
 	/// \return the list of all selecting feature set names declared
 	virtual std::vector<std::string> getSelectionFeatureSets() const=0;

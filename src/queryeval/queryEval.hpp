@@ -54,6 +54,7 @@ public:
 	virtual void addRestrictionFeature( const std::string& set_);
 	virtual void addExclusionFeature( const std::string& set_);
 
+	virtual std::vector<std::string> getWeightingFeatureSets() const;
 	virtual std::vector<std::string> getSelectionFeatureSets() const;
 	virtual std::vector<std::string> getRestrictionFeatureSets() const;
 	virtual std::vector<std::string> getExclusionFeatureSets() const;
@@ -105,6 +106,7 @@ private:
 	void defineVariableAssignments( const std::vector<std::string>& variables, VariableAssignment::Target target, std::size_t index);
 
 private:
+	std::vector<std::string> m_weightingSets;			///< posting sets used for weighting the documents matched
 	std::vector<std::string> m_selectionSets;			///< posting sets selecting the documents to match
 	std::vector<std::string> m_restrictionSets;			///< posting sets restricting the documents to match
 	std::vector<std::string> m_exclusionSets;			///< posting sets excluding the documents to match

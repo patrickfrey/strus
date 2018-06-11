@@ -48,7 +48,7 @@ void QueryEval::addSelectionFeature( const std::string& set_)
 {
 	try
 	{
-		if (std::find( m_selectionSets.begin(), m_selectionSets.end(), set_) != m_selectionSets.end())
+		if (std::find( m_selectionSets.begin(), m_selectionSets.end(), set_) == m_selectionSets.end())
 		{
 			m_selectionSets.push_back( set_);
 		}
@@ -60,7 +60,7 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 {
 	try
 	{
-		if (std::find( m_restrictionSets.begin(), m_restrictionSets.end(), set_) != m_restrictionSets.end())
+		if (std::find( m_restrictionSets.begin(), m_restrictionSets.end(), set_) == m_restrictionSets.end())
 		{
 			m_restrictionSets.push_back( set_);
 		}
@@ -72,12 +72,21 @@ void QueryEval::addExclusionFeature( const std::string& set_)
 {
 	try
 	{
-		if (std::find( m_exclusionSets.begin(), m_exclusionSets.end(), set_) != m_exclusionSets.end())
+		if (std::find( m_exclusionSets.begin(), m_exclusionSets.end(), set_) == m_exclusionSets.end())
 		{
 			m_exclusionSets.push_back( set_);
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding exclusion feature: %s"), *m_errorhnd);
+}
+
+std::vector<std::string> QueryEval::getWeightingFeatureSets() const
+{
+	try
+	{
+		return m_weightingSets;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting the weighting feature sets: %s"), *m_errorhnd, std::vector<std::string>());
 }
 
 std::vector<std::string> QueryEval::getSelectionFeatureSets() const
@@ -86,7 +95,7 @@ std::vector<std::string> QueryEval::getSelectionFeatureSets() const
 	{
 		return m_selectionSets;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error getting selection feature sets: %s"), *m_errorhnd, std::vector<std::string>());
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting the selection feature sets: %s"), *m_errorhnd, std::vector<std::string>());
 }
 
 std::vector<std::string> QueryEval::getRestrictionFeatureSets() const
@@ -95,7 +104,7 @@ std::vector<std::string> QueryEval::getRestrictionFeatureSets() const
 	{
 		return m_restrictionSets;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error getting restriction feature sets: %s"), *m_errorhnd, std::vector<std::string>());
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting the restriction feature sets: %s"), *m_errorhnd, std::vector<std::string>());
 }
 
 std::vector<std::string> QueryEval::getExclusionFeatureSets() const
@@ -104,7 +113,7 @@ std::vector<std::string> QueryEval::getExclusionFeatureSets() const
 	{
 		return m_exclusionSets;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error getting exclusion feature sets: %s"), *m_errorhnd, std::vector<std::string>());
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting the exclusion feature sets: %s"), *m_errorhnd, std::vector<std::string>());
 }
 
 void QueryEval::addSummarizerFunction(
@@ -138,6 +147,14 @@ void QueryEval::addWeightingFunction(
 			functionref->getVariables(),
 			VariableAssignment::WeightingFunction,
 			m_weightingFunctions.size());
+		std::vector<FeatureParameter>::const_iterator fi = featureParameters.begin(), fe = featureParameters.end();
+		for (; fi != fe; ++fi)
+		{
+			if (std::find( m_weightingSets.begin(), m_weightingSets.end(), fi->featureSet()) == m_weightingSets.end())
+			{
+				m_weightingSets.push_back( fi->featureSet());
+			}
+		}
 		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
