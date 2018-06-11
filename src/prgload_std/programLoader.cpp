@@ -213,19 +213,21 @@ static void parseTermConfig(
 
 static NumericVariant parseNumericValue( ProgramLexer& lexer)
 {
+	NumericVariant rt;
 	if (lexer.current().isToken(TokInteger))
 	{
-		return NumericVariant( numstring_conv::toint( lexer.current().value(), std::numeric_limits<int64_t>::max()));
+		rt = NumericVariant( numstring_conv::toint( lexer.current().value(), std::numeric_limits<int64_t>::max()));
 	}
 	else if (lexer.current().isToken(TokFloat))
 	{
-		return NumericVariant( numstring_conv::todouble( lexer.current().value()));
+		rt = NumericVariant( numstring_conv::todouble( lexer.current().value()));
 	}
 	else
 	{
 		throw std::runtime_error( _TXT( "numeric value expected"));
 	}
 	lexer.next();
+	return rt;
 }
 
 static void parseWeightingFormula(
@@ -286,7 +288,6 @@ static void parseWeightingConfig(
 
 	if (!lexer.current().isToken(TokCloseOvalBracket)) for (;;)
 	{
-		lexer.next();
 		bool isFeatureParam = false;
 		if (lexer.current().isToken(TokDot))
 		{
@@ -355,13 +356,13 @@ static void parseWeightingConfig(
 				function->addStringParameter( parameterName, parameterValue);
 			}
 		}
-		else if (!lexer.current().isToken(TokComma))
-		{
-			break;
-		}
 		else
 		{
 			throw std::runtime_error( _TXT("parameter value (identifier,string,number) expected"));
+		}
+		if (!lexer.current().isToken(TokComma))
+		{
+			break;
 		}
 		lexer.next();
 	}
@@ -406,7 +407,6 @@ static void parseSummarizerConfig(
 
 	if (!lexer.current().isToken(TokCloseOvalBracket)) for (;;)
 	{
-		lexer.next();
 		bool isFeatureParam = false;
 		if (lexer.current().isToken(TokDot))
 		{

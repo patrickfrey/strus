@@ -54,6 +54,10 @@ public:
 	virtual void addRestrictionFeature( const std::string& set_);
 	virtual void addExclusionFeature( const std::string& set_);
 
+	virtual std::vector<std::string> getSelectionFeatureSets() const;
+	virtual std::vector<std::string> getRestrictionFeatureSets() const;
+	virtual std::vector<std::string> getExclusionFeatureSets() const;
+	
 	virtual void addSummarizerFunction(
 			const std::string& functionName,
 			SummarizerFunctionInstanceInterface* function,

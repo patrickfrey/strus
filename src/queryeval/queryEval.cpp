@@ -26,6 +26,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -47,7 +48,10 @@ void QueryEval::addSelectionFeature( const std::string& set_)
 {
 	try
 	{
-		m_selectionSets.push_back( set_);
+		if (std::find( m_selectionSets.begin(), m_selectionSets.end(), set_) != m_selectionSets.end())
+		{
+			m_selectionSets.push_back( set_);
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding selection feature: %s"), *m_errorhnd);
 }
@@ -56,7 +60,10 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 {
 	try
 	{
-		m_restrictionSets.push_back( set_);
+		if (std::find( m_restrictionSets.begin(), m_restrictionSets.end(), set_) != m_restrictionSets.end())
+		{
+			m_restrictionSets.push_back( set_);
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding restriction feature: %s"), *m_errorhnd);
 }
@@ -65,9 +72,39 @@ void QueryEval::addExclusionFeature( const std::string& set_)
 {
 	try
 	{
-		m_exclusionSets.push_back( set_);
+		if (std::find( m_exclusionSets.begin(), m_exclusionSets.end(), set_) != m_exclusionSets.end())
+		{
+			m_exclusionSets.push_back( set_);
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding exclusion feature: %s"), *m_errorhnd);
+}
+
+std::vector<std::string> QueryEval::getSelectionFeatureSets() const
+{
+	try
+	{
+		return m_selectionSets;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting selection feature sets: %s"), *m_errorhnd, std::vector<std::string>());
+}
+
+std::vector<std::string> QueryEval::getRestrictionFeatureSets() const
+{
+	try
+	{
+		return m_restrictionSets;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting restriction feature sets: %s"), *m_errorhnd, std::vector<std::string>());
+}
+
+std::vector<std::string> QueryEval::getExclusionFeatureSets() const
+{
+	try
+	{
+		return m_exclusionSets;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting exclusion feature sets: %s"), *m_errorhnd, std::vector<std::string>());
 }
 
 void QueryEval::addSummarizerFunction(
