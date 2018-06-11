@@ -9,6 +9,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -997,6 +998,9 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
+		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
+
 		const char* config = argv[1];
 		unsigned int nofDocuments = getUintValue( argv[2]);
 		unsigned int maxDocumentSize = getUintValue( argv[3]);
@@ -1092,7 +1096,7 @@ int main( int argc, const char* argv[])
 #endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			strus::local_ptr<strus::QueryProcessorInterface> 
-				queryproc( strus::createQueryProcessor( g_errorhnd));
+				queryproc( strus::createQueryProcessor( filelocator.get(), g_errorhnd));
 			if (!queryproc.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());

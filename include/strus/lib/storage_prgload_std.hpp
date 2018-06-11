@@ -6,9 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Various functions to instantiate strus storage and query evaluation components from configuration programs loaded from source
-/// \file programLoader.hpp
-#ifndef _STRUS_STORAGE_PROGRAM_LOADER_HPP_INCLUDED
-#define _STRUS_STORAGE_PROGRAM_LOADER_HPP_INCLUDED
+/// \file storage_prgload_std.hpp
+#ifndef _STRUS_STORAGE_PRGLOAD_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_PRGLOAD_LIB_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
 #include <vector>
@@ -40,7 +40,7 @@ class ErrorBufferInterface;
 /// \param[in] source source string (not a file name!) to parse
 /// \param[in,out] errorhnd buffer for reporting errors (exceptions)
 /// \return true on success, false on failure
-bool loadQueryEvalProgram(
+bool load_queryeval_program(
 		QueryEvalInterface& qeval,
 		const std::vector<std::string>& analyzerterms,
 		const QueryProcessorInterface* qproc,
@@ -55,7 +55,7 @@ bool loadQueryEvalProgram(
 /// \param[in] commitsize number of documents to update until an implicit commit is called (0 => no implicit commit)
 /// \param[in,out] errorhnd buffer for reporting errors (exceptions)
 /// \return the number of documents (non distinct) updated
-int loadDocumentMetaDataAssignments(
+int load_metadata_assignments(
 		StorageClientInterface& storage,
 		const std::string& metadataName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
@@ -71,7 +71,7 @@ int loadDocumentMetaDataAssignments(
 /// \param[in] commitsize number of documents to update until an implicit commit is called (0 => no implicit commit)
 /// \param[in,out] errorhnd buffer for reporting errors (exceptions)
 /// \return the number of documents (non distinct) updated
-int loadDocumentAttributeAssignments(
+int load_attribute_assignments(
 		StorageClientInterface& storage,
 		const std::string& attributeName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
@@ -86,7 +86,7 @@ int loadDocumentAttributeAssignments(
 /// \param[in] commitsize number of documents to update until an implicit commit is called (0 => no implicit commit)
 /// \param[in,out] errorhnd buffer for reporting errors (exceptions)
 /// \return the number of documents (non distinct) updated
-int loadDocumentUserRightsAssignments(
+int load_user_assignments(
 		StorageClientInterface& storage,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
@@ -99,7 +99,7 @@ int loadDocumentUserRightsAssignments(
 /// \param[in] networkOrder true, if the vector elements are stored in platform independent network order (hton).
 /// \param[in,out] errorhnd buffer for reporting errors (exceptions)
 /// \return true on success
-bool loadVectorStorageVectors( 
+bool load_vectors( 
 		VectorStorageClientInterface* vstorage,
 		const std::string& vectorfile,
 		bool networkOrder,

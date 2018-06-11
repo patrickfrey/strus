@@ -45,7 +45,7 @@ class StorageObjectBuilder
 {
 public:
 	explicit StorageObjectBuilder( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
-		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
+		:m_queryProcessor( strus::createQueryProcessor(filelocator_,errorhnd_))
 		,m_storage(strus::createStorageType_std( filelocator_->getWorkDir(), errorhnd_))
 		,m_db( strus::createDatabaseType_leveldb( filelocator_->getWorkDir(), errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))

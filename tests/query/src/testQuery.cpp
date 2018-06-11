@@ -7,6 +7,7 @@
  */
 #include "strus/reference.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -454,8 +455,10 @@ int main( int argc, const char* argv[])
 		}
 		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 		if (!g_errorhnd) return -1;
-	
-		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( g_errorhnd);
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
+		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
+
+		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( filelocator.get(), g_errorhnd);
 		if (!qpi.get())
 		{
 			throw strus::runtime_error("failed to create query processor instance");

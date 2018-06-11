@@ -20,6 +20,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class FileLocatorInterface;
 
 /// \brief Provides the objects needed for query processing
 class QueryProcessor
@@ -28,7 +30,7 @@ class QueryProcessor
 public:
 	/// \brief Constructor
 	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
-	explicit QueryProcessor( ErrorBufferInterface* errorhnd_);
+	QueryProcessor( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
 	virtual ~QueryProcessor();
@@ -73,6 +75,8 @@ public:
 		getScalarFunctionParser(
 			const std::string& name) const;
 
+	virtual std::string getResourceFilePath( const std::string& filename) const;
+
 private:
 	typedef std::map<std::string,Reference<SummarizerFunctionInterface> > SummarizerFunctionMap;
 	typedef std::map<std::string,Reference<WeightingFunctionInterface> > WeightingFunctionMap;
@@ -83,6 +87,7 @@ private:
 	PostingJoinOperatorMap m_joiners;
 	ScalarFunctionParserMap m_funcparsers;
 	ErrorBufferInterface* m_errorhnd;
+	const FileLocatorInterface* m_filelocator;
 };
 
 }//namespace

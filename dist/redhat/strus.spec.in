@@ -358,6 +358,8 @@ make test
 %{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
+%{_libdir}/%{name}/libstrus_storage_prgload_std.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
+%{_libdir}/%{name}/libstrus_storage_prgload_std.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 
 
 %files devel
@@ -371,6 +373,7 @@ make test
 %{_libdir}/%{name}/libstrus_statsproc.so
 %{_libdir}/%{name}/libstrus_scalarfunc.so
 %{_libdir}/%{name}/libstrus_storage_objbuild.so
+%{_libdir}/%{name}/libstrus_storage_prgload_std.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.hpp
 %dir %{_includedir}/%{name}/lib

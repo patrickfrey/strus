@@ -44,50 +44,6 @@
 
 using namespace strus;
 
-/// \brief Some default settings for parsing and building the query
-struct QueryDescriptors
-{
-	std::set<std::string> fieldset;			///< set of defined query fields
-	std::set<std::string> typeset;			///< set of defined query fields
-	std::string defaultFieldType;			///< true if a field type name with name default has been specified
-	std::string selectionFeatureSet;		///< feature sets used for document selection
-	std::string weightingFeatureSet;		///< feature sets used for document weighting
-	float defaultSelectionTermPart;			///< default percentage of weighting terms required in selection
-	std::string defaultSelectionJoin;		///< default operator used to join terms for selection
-
-	QueryDescriptors( const std::vector<std::string>& fieldnames, const std::vector<std::string>& termtypes)
-		:fieldset(),typeset(),defaultFieldType(),selectionFeatureSet(),weightingFeatureSet()
-		,defaultSelectionTermPart(1.0),defaultSelectionJoin("contains")
-	{
-		std::vector<std::string>::const_iterator fi = fieldnames.begin(), fe = fieldnames.end();
-		for (; fi != fe; ++fi)
-		{
-			fieldset.insert( *fi);
-		}
-		std::vector<std::string>::const_iterator ti = termtypes.begin(), te = termtypes.end();
-		for (; ti != te; ++ti)
-		{
-			typeset.insert( *ti);
-		}
-		if (fieldset.size() == 1)
-		{
-			defaultFieldType = *fieldset.begin();
-		}
-	}
-	QueryDescriptors( const QueryDescriptors& o)
-		:fieldset(o.fieldset)
-		,typeset(o.typeset)
-		,defaultFieldType(o.defaultFieldType)
-		,selectionFeatureSet(o.selectionFeatureSet)
-		,weightingFeatureSet(o.weightingFeatureSet)
-		,defaultSelectionTermPart(o.defaultSelectionTermPart)
-		,defaultSelectionJoin(o.defaultSelectionJoin)
-		{}
-};
-
-using namespace strus;
-
-
 enum Tokens {
 	TokIdentifier,
 	TokFloat,
@@ -134,13 +90,13 @@ static const char* g_tokens[] = {
 	"\\>",
 	"\\<\\=",
 	"\\<",
-	".",
-	",",
-	":",
+	"[.]",
+	"[,]",
+	"[:]",
 	";",
-	"~",
-	"^",
-	"*"
+	"\\~",
+	"\\^",
+	"\\*",
 	"<-",
 	"[/][^;,{} ]*",
 	NULL
@@ -221,7 +177,6 @@ static void reportErrorWithLocation( ErrorBufferInterface* errorhnd, ProgramLexe
 
 static void parseTermConfig(
 		QueryEvalInterface& qeval,
-		QueryDescriptors& qdescr,
 		ProgramLexer& lexer)
 {
 	if (lexer.current().isToken( TokIdentifier))
@@ -303,16 +258,9 @@ static void parseWeightingFormula(
 
 static void parseWeightingConfig(
 		QueryEvalInterface& qeval,
-		QueryDescriptors& qdescr,
 		const QueryProcessorInterface* queryproc,
 		ProgramLexer& lexer)
 {
-	std::string langName;
-	if (lexer.current().isToken(TokIdentifier))
-	{
-		langName = string_conv::tolower( lexer.current().value());
-		lexer.next();
-	}
 	if (!lexer.current().isToken(TokIdentifier))
 	{
 		throw std::runtime_error( _TXT( "weighting function identifier expected"));
@@ -558,7 +506,8 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 
 	try
 	{
-		QueryDescriptors qdescr( std::vector<std::string>()/*fieldnames*/, analyzerterms);
+		std::string selectionFeatureSet;
+		std::string weightingFeatureSet;
 
 		lexer.next();
 
@@ -578,11 +527,11 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 			switch ((StatementKeyword)kw)
 			{
 				case e_TERM:
-					parseTermConfig( qeval, qdescr, lexer);
+					parseTermConfig( qeval, lexer);
 					break;
 				case e_SELECT:
 				{
-					if (!qdescr.selectionFeatureSet.empty())
+					if (!selectionFeatureSet.empty())
 					{
 						throw std::runtime_error( _TXT("cannot handle more than one SELECT feature definition yet"));
 					}
@@ -590,14 +539,14 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 					{
 						throw std::runtime_error( _TXT( "expected identifier after SELECT"));
 					}
-					qdescr.selectionFeatureSet = string_conv::tolower( lexer.current().value());
+					selectionFeatureSet = string_conv::tolower( lexer.current().value());
 					lexer.next();
-					qeval.addSelectionFeature( qdescr.selectionFeatureSet);
+					qeval.addSelectionFeature( selectionFeatureSet);
 					break;
 				}
 				case e_WEIGHT:
 				{
-					if (!qdescr.weightingFeatureSet.empty())
+					if (!weightingFeatureSet.empty())
 					{
 						throw std::runtime_error( _TXT("cannot handle more than one WEIGHT feature definition yet"));
 					}
@@ -605,7 +554,7 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 					{
 						throw std::runtime_error( _TXT( "expected identifier after WEIGHT"));
 					}
-					qdescr.weightingFeatureSet = string_conv::tolower( lexer.current().value());
+					weightingFeatureSet = string_conv::tolower( lexer.current().value());
 					lexer.next();
 					break;
 				}
@@ -629,7 +578,7 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 					}
 					break;
 				case e_EVAL:
-					parseWeightingConfig( qeval, qdescr, queryproc, lexer);
+					parseWeightingConfig( qeval, queryproc, lexer);
 					break;
 				case e_FORMULA:
 					parseWeightingFormula( qeval, queryproc, lexer);
@@ -644,26 +593,26 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 			}
 			lexer.next();
 		}
-		if (qdescr.selectionFeatureSet.empty())
+		if (selectionFeatureSet.empty())
 		{
 			if (!analyzerterms.empty())
 			{
-				qdescr.selectionFeatureSet = analyzerterms[ 0];
+				selectionFeatureSet = analyzerterms[ 0];
 			}
 			else
 			{
 				throw std::runtime_error( _TXT("no selection feature set (SELECT) defined in query evaluation configuration"));
 			}
 		}
-		if (qdescr.weightingFeatureSet.empty())
+		if (weightingFeatureSet.empty())
 		{
 			if (!analyzerterms.empty())
 			{
-				qdescr.selectionFeatureSet = analyzerterms[ 0];
+				selectionFeatureSet = analyzerterms[ 0];
 			}
 			else
 			{
-				qdescr.weightingFeatureSet = qdescr.selectionFeatureSet;
+				weightingFeatureSet = selectionFeatureSet;
 			}
 		}
 		return true;
@@ -970,12 +919,12 @@ static unsigned int loadStorageValues(
 }
 
 
-DLL_PUBLIC unsigned int strus::loadDocumentMetaDataAssignments(
+DLL_PUBLIC int strus::loadDocumentMetaDataAssignments(
 		StorageClientInterface& storage,
 		const std::string& metadataName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		unsigned int commitsize,
+		int commitsize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -995,12 +944,12 @@ DLL_PUBLIC unsigned int strus::loadDocumentMetaDataAssignments(
 }
 
 
-DLL_PUBLIC unsigned int strus::loadDocumentAttributeAssignments(
+DLL_PUBLIC int strus::loadDocumentAttributeAssignments(
 		StorageClientInterface& storage,
 		const std::string& attributeName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		unsigned int commitsize,
+		int commitsize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -1020,11 +969,11 @@ DLL_PUBLIC unsigned int strus::loadDocumentAttributeAssignments(
 }
 
 
-DLL_PUBLIC unsigned int strus::loadDocumentUserRightsAssignments(
+DLL_PUBLIC int strus::loadDocumentUserRightsAssignments(
 		StorageClientInterface& storage,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		unsigned int commitsize,
+		int commitsize,
 		ErrorBufferInterface* errorhnd)
 {
 	try

@@ -13,6 +13,7 @@
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/base/string_conv.hpp"
@@ -28,8 +29,8 @@ using namespace strus;
 
 #define DEFAULT_SCALAR_FUNCTION_PARSER "default"
 
-QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_)
+QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_),m_filelocator(filelocator_)
 {
 	PostingJoinOperatorInterface* op;
 	if (0==(op=createPostingJoinInRange( m_errorhnd))) throw std::runtime_error( _TXT("error creating posting join operator"));
@@ -296,4 +297,19 @@ const ScalarFunctionParserInterface*
 		return 0;
 	}
 }
+
+std::string QueryProcessor::getResourceFilePath( const std::string& filename) const
+{
+	try
+	{
+		return m_filelocator->getResourceFilePath( filename);
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
+		return 0;
+	}
+}
+
+
 
