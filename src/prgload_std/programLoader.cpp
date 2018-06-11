@@ -260,6 +260,7 @@ static void parseWeightingFormula(
 
 static void parseWeightingConfig(
 		QueryEvalInterface& qeval,
+		const std::string& weightingFeatureSet,
 		const QueryProcessorInterface* queryproc,
 		ProgramLexer& lexer)
 {
@@ -336,7 +337,14 @@ static void parseWeightingConfig(
 			lexer.next();
 			if (isFeatureParam)
 			{
-				featureParameters.push_back( FeatureParameter( parameterName, parameterValue));
+				if (strus::caseInsensitiveEquals( weightingFeatureSet, parameterValue))
+				{
+					featureParameters.insert( featureParameters.begin(), FeatureParameter( parameterName, parameterValue));
+				}
+				else
+				{
+					featureParameters.push_back( FeatureParameter( parameterName, parameterValue));
+				}
 			}
 			else
 			{
@@ -578,7 +586,11 @@ DLL_PUBLIC bool strus::loadQueryEvalProgram(
 					}
 					break;
 				case e_EVAL:
-					parseWeightingConfig( qeval, queryproc, lexer);
+					if (weightingFeatureSet.empty())
+					{
+						throw std::runtime_error( _TXT( "WEIGHT (weighting feature not defined before EVAL)"));
+					}
+					parseWeightingConfig( qeval, weightingFeatureSet, queryproc, lexer);
 					break;
 				case e_FORMULA:
 					parseWeightingFormula( qeval, queryproc, lexer);
