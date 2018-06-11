@@ -357,7 +357,14 @@ static void parseWeightingConfig(
 			lexer.next();
 			if (isFeatureParam)
 			{
-				featureParameters.push_back( FeatureParameter( parameterName, parameterValue));
+				if (strus::caseInsensitiveEquals( weightingFeatureSet, parameterValue))
+				{
+					featureParameters.insert( featureParameters.begin(), FeatureParameter( parameterName, parameterValue));
+				}
+				else
+				{
+					featureParameters.push_back( FeatureParameter( parameterName, parameterValue));
+				}
 			}
 			else
 			{
