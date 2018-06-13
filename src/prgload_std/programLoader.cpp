@@ -1020,7 +1020,7 @@ static void loadVectorStorageVectors_word2vecBin(
 	unsigned int linecnt = 0;
 	try
 	{
-		DebugTraceContextInterface* debugtrace;
+		DebugTraceContextInterface* debugtrace = 0;
 		strus::local_ptr<DebugTraceContextInterface> debugtraceref;
 		DebugTraceInterface* dbg = errorhnd->debugTrace();
 		if (!dbg)
@@ -1176,7 +1176,7 @@ static void loadVectorStorageVectors_word2vecText(
 	unsigned int linecnt = 0;
 	try
 	{
-		DebugTraceContextInterface* debugtrace;
+		DebugTraceContextInterface* debugtrace = 0;
 		strus::local_ptr<DebugTraceContextInterface> debugtraceref;
 		DebugTraceInterface* dbg = errorhnd->debugTrace();
 		if (!dbg)
