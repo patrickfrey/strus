@@ -101,8 +101,8 @@ struct WithinMatch
 	WithinMatch(){}
 	WithinMatch( const Index& pos_, std::size_t argidx_)
 		:pos(pos_),argidx(argidx_){}
-	WithinMatch( const WithinMatch& o)
-		:pos(o.pos),argidx(o.argidx){}
+	void assign( const WithinMatch& o)
+		{pos=o.pos;argidx=o.argidx;}
 };
 
 struct WithinMatchArray
