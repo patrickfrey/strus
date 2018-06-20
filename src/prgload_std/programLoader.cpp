@@ -1083,7 +1083,7 @@ static void loadVectorStorageVectors_word2vecBin(
 				throw strus::runtime_error( _TXT("wrong file format"));
 			}
 			std::ostringstream vecstrbuf;
-			std::vector<double> vec;
+			std::vector<float> vec;
 			vec.reserve( vecsize);
 			unsigned int ii = 0;
 			if (networkOrder)
@@ -1107,7 +1107,7 @@ static void loadVectorStorageVectors_word2vecBin(
 				}
 			}
 			double len = 0;
-			std::vector<double>::iterator vi = vec.begin(), ve = vec.end();
+			std::vector<float>::iterator vi = vec.begin(), ve = vec.end();
 			for (; vi != ve; ++vi)
 			{
 				double vv = *vi;
@@ -1208,7 +1208,7 @@ static void loadVectorStorageVectors_word2vecText(
 			++linecnt;
 			const char* term;
 			std::size_t termsize;
-			std::vector<double> vec;
+			std::vector<float> vec;
 			std::ostringstream vecstrbuf;
 			if (!skipSpaces(si)) throw std::runtime_error( _TXT("unexpected end of line"));
 			term = si;
@@ -1227,7 +1227,7 @@ static void loadVectorStorageVectors_word2vecText(
 				skipSpaces(si);
 			}
 			double len = 0;
-			std::vector<double>::iterator vi = vec.begin(), ve = vec.end();
+			std::vector<float>::iterator vi = vec.begin(), ve = vec.end();
 			for (; vi != ve; ++vi)
 			{
 				double vv = *vi;

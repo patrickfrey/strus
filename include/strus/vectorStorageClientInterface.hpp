@@ -44,7 +44,7 @@ public:
 	/// \brief Get the list of indices of features represented by a learnt concept feature specified as argument
 	/// \param[in] conceptClass name identifying a class of concepts learnt. Concept classes are defined by configuration of the vector storage and instantiated by the storage builder.
 	/// \param[in] conceptid index (indices of learnt concepts starting from 1) 
-	/// \return the resulting vector indices (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
+	/// \return the resulting vector indices (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<float>& vec) starting from 0)
 	virtual std::vector<Index> conceptFeatures( const std::string& conceptClass, const Index& conceptid) const=0;
 
 	/// \brief Get the number of concept features learned for a class
@@ -59,25 +59,25 @@ public:
 	virtual std::vector<Index> featureConcepts( const std::string& conceptClass, const Index& index) const=0;
 
 	/// \brief Get the vector assigned to a feature 
-	/// \param[in] index index of the feature in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>& vec) starting from 0
-	/// \return the vector assinged to this feature index with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
-	virtual std::vector<double> featureVector( const Index& index) const=0;
+	/// \param[in] index index of the feature in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<float>& vec) starting from 0
+	/// \return the vector assinged to this feature index with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<float>&)
+	virtual std::vector<float> featureVector( const Index& index) const=0;
 
 	/// \brief Get the name of a feature by its index starting from 0
-	/// \param[in] index index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
-	/// \return the name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
+	/// \param[in] index index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<float>& vec) starting from 0)
+	/// \return the name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<float>&)
 	virtual std::string featureName( const Index& index) const=0;
 
 	/// \brief Get the index starting from 0 of a feature by its name
-	/// \param[in] name name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
-	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
+	/// \param[in] name name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<float>&)
+	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<float>& vec) starting from 0)
 	virtual Index featureIndex( const std::string& name) const=0;
 
 	/// \brief Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage
 	/// \param[in] v1 first input vector
 	/// \param[in] v2 second input vector
 	/// \return the similarity measure
-	virtual double vectorSimilarity( const std::vector<double>& v1, const std::vector<double>& v2) const=0;
+	virtual double vectorSimilarity( const std::vector<float>& v1, const std::vector<float>& v2) const=0;
 
 	/// \brief Get the number of feature vectors defined
 	/// \return the number of features
