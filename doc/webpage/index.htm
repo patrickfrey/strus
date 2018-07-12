@@ -42,7 +42,14 @@
 			<li><b>Status</b><br />Development status is <i>Alpha</i>.</li>
 			<li><b>License</b><br /><a href="https://www.mozilla.org/en-US/MPL/2.0/">MPL (Mozilla Public License) 2.0</a></li>
 			<li><b>Contact</b><br />Contact us by mail: <img src="email_contact.jpg" alt="contact at project dash strus dot net"/> or follow us on twitter <a href="https://twitter.com/ProjectStrus">@ProjectStrus</a> or subscribe to the <a href="https://groups.google.com/forum/#!forum/project-strus">mailing list</a>.</li>
-			<li><b>Roadmap</b><br />(1) Rebuild the Wikipedia search</li>
+			<li><b>Roadmap</b><br /><br />
+				<ol>
+				<li>Reimplementation of the <a href="wikipediaToXML.html">Wikimedia to XML conversion</a></li>
+				<li>POS tagging of Wikipedia (with <i>SyntaxNet</i>/<i>TensorFlow</i>).</li>
+				<li>Rebuild Wikipedia demo search based on <i>strusWebService</i>.</li>
+				<li>Implement new core features: (a) Structure relations as operator, (b) Entropy value replacing ff</li>
+				</ol>
+			</li>
 		</ul>
 	</div>
 
@@ -118,14 +125,14 @@
 		<table>
 
 		<tr>
-		<td><p class="timestamp">July 11th, 2018</p></td>
+		<td><p class="timestamp">July 12th, 2018</p></td>
 		<td><p class="newstext">The Wikimedia to XML conversion  has been rewritten and a better XML schema has been defined.
-		A documentation will follow soon. Currently, we refer to the usage of the program strusWikimediaToXml in the project
-		<a href="https://github.com/patrickfrey/strusWikipediaSearch">strusWikipediaSearch</a>. 
+		A documentation can be found <a href="wikipediaToXML.html">here</a>.
 		The program takes the Wikipedia XML dump and creates one XML file for every document.
 		The XML schema used tries to map the Wikipedia content in a way appropriate for information retrieval.
 		It is intended to be usable for other projects outside the strus context too.
-		Currently, The project <i>strusWikipediaSearch</i> is in an intermediate state and needs cleanup.
+		Currently, The project <i>strusWikipediaSearch</i> is in an intermediate state and needs cleanup, but it should be
+		possible to build it.
 		</p></td>
 		</tr>
 
