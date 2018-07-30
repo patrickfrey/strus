@@ -18,7 +18,7 @@ namespace strus {
 class DataBlock
 {
 public:
-	explicit DataBlock()
+	DataBlock()
 		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{}
 
@@ -58,6 +58,7 @@ public:
 	const void* ptr() const		{return m_ptr;}
 	const char* charptr() const	{return (const char*)m_ptr;}
 	const char* charend() const	{return (const char*)m_ptr + m_size;}
+	const void* data_at( int idx)	{return (const void*)((const char*)m_ptr + idx);}
 
 	void init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
 	void init( const Index& id_, std::size_t allocsize_);

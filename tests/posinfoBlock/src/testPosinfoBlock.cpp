@@ -124,7 +124,7 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 		std::vector<strus::PosinfoBlock>::iterator
 			bi = blockar.begin(),
 			be = blockar.end();
-		strus::PosinfoBlock::Cursor bidx;
+		strus::DocIndexNodeCursor bidx;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 		strus::Index dx = bi->firstDoc( bidx);
@@ -205,7 +205,7 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 			{
 				if (bi->id() >= dn)
 				{
-					strus::PosinfoBlock::Cursor cursor;
+					strus::DocIndexNodeCursor cursor;
 					if (dn != bi->skipDoc( find_dn, cursor))
 					{
 						throw std::runtime_error( "posinfo block skip doc query failed");

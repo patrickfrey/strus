@@ -36,6 +36,7 @@ set( source_files
 	browsePostingIterator.cpp
 	statisticsInitIterator.cpp
 	statisticsUpdateIterator.cpp
+	docIndexNode.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp
 	postingIterator.cpp

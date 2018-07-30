@@ -537,7 +537,7 @@ void InvertedIndexMap::mergePosBlock(
 		PosinfoBlockBuilder& newblk)
 {
 	newblk.setId( oldblk.id());
-	PosinfoBlock::Cursor blkcursor;
+	DocIndexNodeCursor blkcursor;
 
 	Index old_docno = oldblk.firstDoc( blkcursor);
 	while (ei != ee && old_docno)

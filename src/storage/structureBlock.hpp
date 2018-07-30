@@ -1,41 +1,72 @@
 /*
- * Copyright (c) 2014 Patrick P. Frey
+ * Copyright (c) 2018 Patrick P. Frey
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_POSINFO_BLOCK_HPP_INCLUDED
-#define _STRUS_POSINFO_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_STRUCTURE_BLOCK_HPP_INCLUDED
+#define _STRUS_STRUCTURE_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "docIndexNode.hpp"
+#include "flatArray.hpp"
 #include <vector>
 
 namespace strus {
 
-/// \class PosinfoBlock
-/// \brief Block of term occurrence positions
-class PosinfoBlock
+/// \class StructureBlock
+/// \brief Block of structures defined as unidirectional relation between position ranges in a document with the relation source ranges not overlapping.
+class StructureBlock
 	:public DataBlock
 {
 public:
 	enum {
 		MaxBlockSize=1024
 	};
+	typedef Index DocnoType;
 	typedef unsigned short PositionType;
+	typedef unsigned short MemberIdxType;
+
+	struct StructureMember
+	{
+		PositionType start;
+		PositionType end;
+	};
+	struct StructureDef
+	{
+		PositionType header_end;
+		PositionType header_start;
+		MemberIdxType membersSize;
+		MemberIdxType membersIdx;
+	};
+	struct StructureMemberSearchCompare
+	{
+		StructureMemberSearchCompare(){}
+		bool operator()( const StructureMember& aa, const PositionType& bb) const
+		{
+			return aa.end < bb;
+		}
+	};
+	struct StructureDefSearchCompare
+	{
+		StructureDefSearchCompare(){}
+		bool operator()( const StructureDef& aa, const PositionType& bb) const
+		{
+			return aa.header_end < bb;
+		}
+	};
 
 public:
-	explicit PosinfoBlock()
-		:DataBlock(),m_docIndexNodeArray(),m_posinfoptr(0)
+	explicit StructureBlock()
+		:DataBlock(),m_docindexptr(0),m_posinfoptr(0)
 	{}
-	PosinfoBlock( const PosinfoBlock& o)
+	StructureBlock( const StructureBlock& o)
 		:DataBlock(o)
 		{initFrame();}
-	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	StructureBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
 		{initFrame();}
 
-	PosinfoBlock& operator=( const PosinfoBlock& o)
+	StructureBlock& operator=( const StructureBlock& o)
 	{
 		DataBlock::operator =(o);
 		initFrame();
@@ -47,43 +78,46 @@ public:
 		initFrame();
 	}
 
-
-	/// \brief Get the document number of the current DocIndexNodeCursor
-	Index docno_at( const DocIndexNodeCursor& cursor) const
+	struct Cursor
 	{
-		return m_docIndexNodeArray.docno_at( cursor);
-	}
-	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
-	const PositionType* posinfo_at( const DocIndexNodeCursor& cursor) const;
-	/// \brief Get the postions of the current Cursor
-	std::vector<Index> positions_at( const DocIndexNodeCursor& cursor) const;
-	/// \brief Get the feature frequency of the current DocIndexNodeCursor
-	unsigned int frequency_at( const DocIndexNodeCursor& cursor) const;
+		unsigned short nodeidx;
+		unsigned short docidx;
+
+		Cursor()
+			:nodeidx(0),docidx(0){}
+		Cursor( const Cursor& o)
+			:nodeidx(o.nodeidx),docidx(o.docidx){}
+		void reset()
+		{
+			nodeidx = 0;
+			docidx = 0;
+		}
+	};
+
+	/// \brief Get the document number of the current StructureBlock::Cursor
+	Index docno_at( const Cursor& cursor) const;
+	/// \brief Get the internal representation of the postions of the current StructureBlock::Cursor
+	const StructureDef* structure_at( const Cursor& cursor) const;
+	/// \brief Get the postions of the current cursor
+	const StructureMember* members_at( const Cursor& cursor) const;
+	/// \brief Get the feature frequency of the current StructureBlock::Cursor
+	unsigned int frequency_at( const Cursor& cursor) const;
 
 	/// \brief Get the next document with the current cursor
-	Index nextDoc( DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.nextDoc( cursor);
-	}
+	Index nextDoc( Cursor& cursor) const;
 	/// \brief Get the first document with the current cursor
-	Index firstDoc( DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.firstDoc( cursor);
-	}
+	Index firstDoc( Cursor& cursor) const;
 	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( const Index& docno_, DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.skipDoc( docno_, cursor);
-	}
+	Index skipDoc( const Index& docno_, Cursor& cursor) const;
 
 	bool isThisBlockAddress( const Index& docno_) const
 	{
-		return (docno_ <= id() && m_docIndexNodeArray.size && docno_ > m_docIndexNodeArray.ar[ 0].base);
+		return (docno_ <= id() && m_nofDocIndexNodes && docno_ > m_docindexptr[ 0].base);
 	}
 	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
 	bool isFollowBlockAddress( const Index& docno_) const
 	{
-		Index diff = id() - (m_docIndexNodeArray.size?m_docIndexNodeArray.ar[ 0].base:1);
+		Index diff = id() - (m_nofDocIndexNodes?m_docindexptr[ 0].base:1);
 		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
 	}
 
@@ -126,7 +160,7 @@ public:
 		unsigned short m_itr;
 	};
 
-	PositionScanner positionScanner_at( const DocIndexNodeCursor& cursor) const
+	PositionScanner positionScanner_at( const Cursor& cursor) const
 	{
 		return PositionScanner( posinfo_at( cursor));
 	}
@@ -135,8 +169,15 @@ private:
 	void initFrame();
 
 private:
-	DocIndexNodeArray m_docIndexNodeArray;
-	const PositionType* m_posinfoptr;
+	struct BlockHeader
+	{
+		int docindexidx;
+		int headeridx;
+		int memberidx;
+	};
+	const DocIndexNode* m_docindexptr;
+	const StructureDef* m_headerptr;
+	const StructureMember* m_memberptr;
 };
 
 class PosinfoBlockBuilder

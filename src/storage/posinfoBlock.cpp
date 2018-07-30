@@ -17,26 +17,13 @@ using namespace strus;
 
 enum {EndPosinfoMarker=(char)0xFE};
 
-Index PosinfoBlock::docno_at( const Cursor& cursor) const
+const PosinfoBlock::PositionType* PosinfoBlock::posinfo_at( const DocIndexNodeCursor& cursor) const
 {
-	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
-	if (cursor.docidx)
-	{
-		return nd.base + nd.ofs[ cursor.docidx-1];
-	}
-	else
-	{
-		return nd.base;
-	}
-}
-
-const PosinfoBlock::PositionType* PosinfoBlock::posinfo_at( const Cursor& cursor) const
-{
-	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
+	const DocIndexNode& nd = m_docIndexNodeArray[ cursor];
 	return m_posinfoptr + nd.posrefIdx[ cursor.docidx];
 }
 
-std::vector<Index> PosinfoBlock::positions_at( const Cursor& cursor) const
+std::vector<Index> PosinfoBlock::positions_at( const DocIndexNodeCursor& cursor) const
 {
 	const PositionType* pi = posinfo_at( cursor);
 	const PositionType* pe = pi + *pi + 1;
@@ -48,99 +35,10 @@ std::vector<Index> PosinfoBlock::positions_at( const Cursor& cursor) const
 	return rt;
 }
 
-unsigned int PosinfoBlock::frequency_at( const Cursor& cursor) const
+unsigned int PosinfoBlock::frequency_at( const DocIndexNodeCursor& cursor) const
 {
-	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
+	const DocIndexNode& nd = m_docIndexNodeArray[ cursor];
 	return m_posinfoptr[ nd.posrefIdx[ cursor.docidx]];
-}
-
-Index PosinfoBlock::firstDoc( Cursor& cursor) const
-{
-	cursor.reset();
-	return m_nofDocIndexNodes?m_docindexptr[ 0].base:0;
-}
-
-Index PosinfoBlock::nextDoc( Cursor& cursor) const
-{
-	if (++cursor.docidx >= DocIndexNode::Size)
-	{
-		cursor.docidx = 0;
-		++cursor.nodeidx;
-	}
-	for (;;)
-	{
-		if (cursor.nodeidx >= m_nofDocIndexNodes)
-		{
-			cursor.reset();
-			return 0;
-		}
-		if (cursor.docidx == 0)
-		{
-			return m_docindexptr[ cursor.nodeidx].base;
-		}
-		if (m_docindexptr[ cursor.nodeidx].ofs[ cursor.docidx-1])
-		{
-			return m_docindexptr[ cursor.nodeidx].base
-				+ m_docindexptr[ cursor.nodeidx].ofs[ cursor.docidx-1];
-		}
-		else
-		{
-			cursor.docidx = 0;
-			++cursor.nodeidx;
-		}
-	}
-}
-
-Index PosinfoBlock::skipDoc( const Index& docno_, Cursor& cursor) const
-{
-	std::size_t di = cursor.nodeidx;
-	if (m_docindexptr[ di].base >= docno_)
-	{
-		if (m_docindexptr[ di].base == docno_)
-		{
-			cursor.docidx = 0;
-			return docno_;
-		}
-		if (!di)
-		{
-			return m_docindexptr[ 0].base;
-		}
-		di = 0;
-	}
-	for (;di < m_nofDocIndexNodes && m_docindexptr[ di].base <= docno_; ++di){}
-	if (!di)
-	{
-		if (m_nofDocIndexNodes)
-		{
-			cursor.reset();
-			return m_docindexptr[ 0].base;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	unsigned short cursor_docidx;
-	Index rt = m_docindexptr[ di-1].skipDoc( docno_, cursor_docidx);
-	if (rt)
-	{
-		cursor.nodeidx = (unsigned short)(di-1);
-		cursor.docidx = cursor_docidx;
-		return rt;
-	}
-	else
-	{
-		if (di < m_nofDocIndexNodes)
-		{
-			cursor.nodeidx = (unsigned short)di;
-			cursor.docidx = 0;
-			return m_docindexptr[ di].base;
-		}
-		else
-		{
-			return 0;
-		}
-	}
 }
 
 Index PosinfoBlock::PositionScanner::skip( const Index& pos)
@@ -170,95 +68,19 @@ Index PosinfoBlock::PositionScanner::skip( const Index& pos)
 	return ii < nn ? m_ar[ m_itr = (unsigned short)ii]:0;
 }
 
-void PosinfoBlock::initDocIndexNodeFrame()
+void PosinfoBlock::initFrame()
 {
 	if (size() < sizeof(unsigned int))
 	{
-		m_nofDocIndexNodes = 0;
-		m_docindexptr = 0;
+		m_docIndexNodeArray.init( 0, 0);
 		m_posinfoptr = 0;
 	}
 	else
 	{
-		m_nofDocIndexNodes = *(const unsigned int*)ptr();
-		m_docindexptr = (const DocIndexNode*)( (const unsigned int*)ptr()+1);
-		m_posinfoptr = (const PositionType*)(const void*)(m_docindexptr + m_nofDocIndexNodes);
-	}
-}
-
-PosinfoBlock::DocIndexNode::DocIndexNode()
-{
-	std::memset( this, 0, sizeof(*this));
-}
-
-PosinfoBlock::DocIndexNode::DocIndexNode( const DocIndexNode& o)
-{
-	std::memcpy( this, &o, sizeof(*this));
-}
-
-std::size_t PosinfoBlock::DocIndexNode::nofElements() const
-{
-	if (!base)
-	{
-		return 0;
-	}
-	else
-	{
-		std::size_t ii = 0;
-		for (; ii<(Size-1) && ofs[ii]; ++ii){}
-		return ii+1;
-	}
-}
-
-bool PosinfoBlock::DocIndexNode::addDocument( const Index& docno_, unsigned short posrefIdx_)
-{
-	if (!base)
-	{
-		base = docno_;
-		posrefIdx[ 0] = posrefIdx_;
-	}
-	else
-	{
-		if (base >= docno_)
-		{
-			throw strus::runtime_error( "%s",  _TXT( "documents not added in ascending order into posinfo block"));
-		}
-		if (base + std::numeric_limits<unsigned short>::max() <= docno_)
-		{
-			return false;
-		}
-		std::size_t ii = 0;
-		for (; ii<(Size-1) && ofs[ii]; ++ii){}
-		if (ii == (Size-1)) return false;
-		ofs[ ii] = docno_ - base;
-		posrefIdx[ ii+1] = posrefIdx_;
-	}
-	return true;
-}
-
-Index PosinfoBlock::DocIndexNode::skipDoc( const Index& docno_, unsigned short& cursor_docidx) const
-{
-	if (docno_ <= base)
-	{
-		if (docno_ == base)
-		{
-			cursor_docidx = 0;
-			return base;
-		}
-		return 0;
-	}
-	if (docno_ - base > std::numeric_limits<unsigned short>::max()) return false;
-	unsigned short ofs_ = (unsigned short)(docno_ - base);
-	std::size_t ii = 0;
-	for (; ii<(Size-1) && ofs_ > ofs[ii]; ++ii){}
-	if (ii == (Size-1))
-	{
-		return 0;
-	}
-	else
-	{
-		cursor_docidx = ii+1;
-		return base + ofs[ ii];
+		int nofDocIndexNodes = *(const unsigned int*)ptr();
+		const DocIndexNode* docIndexNodes = (const DocIndexNode*)( (const unsigned int*)ptr()+1);
+		m_docIndexNodeArray.init( docIndexNodes, nofDocIndexNodes);
+		m_posinfoptr = (const PositionType*)(const void*)(docIndexNodes + nofDocIndexNodes);
 	}
 }
 
@@ -266,7 +88,7 @@ Index PosinfoBlock::DocIndexNode::skipDoc( const Index& docno_, unsigned short& 
 PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 	:m_id(o.id())
 {
-	PosinfoBlock::Cursor idx;
+	DocIndexNodeCursor idx;
 	Index docno;
 	if (!(docno=o.firstDoc( idx))) return;
 	do
@@ -313,7 +135,7 @@ PosinfoBlock PosinfoBlockBuilder::createBlock() const
 
 	MemBlock blkmem( blksize);
 	unsigned int nofDocIndexNodes = *(unsigned int*)blkmem.ptr() = docIndexNodeArray().size();
-	PosinfoBlock::DocIndexNode* docindexptr = (PosinfoBlock::DocIndexNode*)( (const unsigned int*)blkmem.ptr()+1);
+	DocIndexNode* docindexptr = (DocIndexNode*)( (const unsigned int*)blkmem.ptr()+1);
 	PositionType* posinfoptr = (PositionType*)(const void*)(docindexptr + nofDocIndexNodes);
 	
 	std::vector<DocIndexNode>::const_iterator

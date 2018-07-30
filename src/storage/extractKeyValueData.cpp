@@ -470,7 +470,7 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
 	}
 	PosinfoBlock blk( docno, vi, ve-vi);
-	PosinfoBlock::Cursor cursor;
+	DocIndexNodeCursor cursor;
 	Index dn = blk.firstDoc( cursor);
 
 	while (dn)
