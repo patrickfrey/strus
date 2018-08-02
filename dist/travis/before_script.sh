@@ -18,7 +18,7 @@ case $OS in
 	Darwin)
 		brew update
 		brew upgrade cmake
-		brew upgrade boost
+		# -- brew upgrade boost
 		brew install gettext snappy leveldb || true
 		# make sure cmake finds the brew version of gettext
 		brew link --force gettext || true
