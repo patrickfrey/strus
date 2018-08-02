@@ -36,12 +36,12 @@ std::size_t DocIndexNode::nofElements() const
 	}
 }
 
-bool DocIndexNode::addDocument( const Index& docno, unsigned short posrefIdx_)
+bool DocIndexNode::addDocument( const Index& docno, unsigned short ref_)
 {
 	if (!base)
 	{
 		base = docno;
-		posrefIdx[ 0] = posrefIdx_;
+		ref[ 0] = ref_;
 	}
 	else
 	{
@@ -57,7 +57,7 @@ bool DocIndexNode::addDocument( const Index& docno, unsigned short posrefIdx_)
 		for (; ii<(Size-1) && ofs[ii]; ++ii){}
 		if (ii == (Size-1)) return false;
 		ofs[ ii] = docno - base;
-		posrefIdx[ ii+1] = posrefIdx_;
+		ref[ ii+1] = ref_;
 	}
 	return true;
 }

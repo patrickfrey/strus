@@ -17,12 +17,6 @@ using namespace strus;
 
 enum {EndPosinfoMarker=(char)0xFE};
 
-const PosinfoBlock::PositionType* PosinfoBlock::posinfo_at( const DocIndexNodeCursor& cursor) const
-{
-	const DocIndexNode& nd = m_docIndexNodeArray[ cursor];
-	return m_posinfoptr + nd.posrefIdx[ cursor.docidx];
-}
-
 std::vector<Index> PosinfoBlock::positions_at( const DocIndexNodeCursor& cursor) const
 {
 	const PositionType* pi = posinfo_at( cursor);
@@ -38,7 +32,7 @@ std::vector<Index> PosinfoBlock::positions_at( const DocIndexNodeCursor& cursor)
 unsigned int PosinfoBlock::frequency_at( const DocIndexNodeCursor& cursor) const
 {
 	const DocIndexNode& nd = m_docIndexNodeArray[ cursor];
-	return m_posinfoptr[ nd.posrefIdx[ cursor.docidx]];
+	return m_posinfoptr[ nd.ref[ cursor.docidx]];
 }
 
 Index PosinfoBlock::PositionScanner::skip( const Index& pos)

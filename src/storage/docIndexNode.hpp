@@ -18,13 +18,13 @@ struct DocIndexNode
 	DocIndexNode();
 	DocIndexNode( const DocIndexNode& o);
 
-	bool addDocument( const Index& docno_, unsigned short posrefIdx_);
+	bool addDocument( const Index& docno_, unsigned short ref_);
 	Index skipDoc( const Index& docno_, unsigned short& cursor_docidx) const;
 	std::size_t nofElements() const;
 
 	Index base;
 	unsigned short ofs[ Size-1];
-	unsigned short posrefIdx[ Size];
+	unsigned short ref[ Size];
 };
 
 struct DocIndexNodeCursor

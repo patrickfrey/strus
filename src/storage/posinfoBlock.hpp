@@ -54,9 +54,13 @@ public:
 		return m_docIndexNodeArray.docno_at( cursor);
 	}
 	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
-	const PositionType* posinfo_at( const DocIndexNodeCursor& cursor) const;
-	/// \brief Get the postions of the current Cursor
+	const PositionType* posinfo_at( const DocIndexNodeCursor& cursor) const
+	{
+		return m_posinfoptr + m_docIndexNodeArray[ cursor].ref[ cursor.docidx];
+	}
+	/// \brief Get the list of the postions of the current DocIndexNodeCursor
 	std::vector<Index> positions_at( const DocIndexNodeCursor& cursor) const;
+
 	/// \brief Get the feature frequency of the current DocIndexNodeCursor
 	unsigned int frequency_at( const DocIndexNodeCursor& cursor) const;
 
