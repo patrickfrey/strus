@@ -16,6 +16,7 @@
 #include "databaseKey.hpp"
 #include "dataBlock.hpp"
 #include "posinfoBlock.hpp"
+#include "structBlock.hpp"
 #include "booleanBlock.hpp"
 #include "invTermBlock.hpp"
 #include "forwardIndexBlock.hpp"
@@ -32,10 +33,6 @@ class DatabaseTransactionInterface;
 class MetaDataBlock;
 /// \brief Forward declaration
 class MetaDataDescription;
-/// \brief Forward declaration
-class PosinfoBlock;
-/// \brief Forward declaration
-class BooleanBlock;
 /// \brief Forward declaration
 class InvTermBlock;
 /// \brief Forward declaration
@@ -230,6 +227,10 @@ struct DatabaseAdapter_TermType
 
 struct DatabaseAdapter_TermValue
 	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermValuePrefix>
+{};
+
+struct DatabaseAdapter_StructType
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::StructTypePrefix>
 {};
 
 struct DatabaseAdapter_DocId
@@ -460,6 +461,48 @@ struct DatabaseAdapter_PosinfoBlock
 				const Index& typeno_, const Index& termno_)
 			:Cursor(database_,typeno_,termno_)
 			,Writer(database_,typeno_,termno_){}
+	};
+};
+
+struct DatabaseAdapter_StructBlock
+{
+	typedef DatabaseAdapter_TypedDataBlock<
+			DatabaseKey::StructBlockPrefix, StructBlock, true> Parent;
+
+	class Reader
+		:public Parent::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_,
+			const Index& structno_)
+			:Parent::Reader( database_, BlockKey(structno_)){}
+	};
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_,
+			const Index& structno_)
+			:Parent::Writer( database_, BlockKey(structno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_,
+			const Index& structno_)
+			:Parent::Cursor( database_, BlockKey(structno_)){}
+	};
+
+	class WriteCursor
+		:public Cursor
+		,public Writer
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, 
+				const Index& structno_)
+			:Cursor(database_,structno_)
+			,Writer(database_,structno_){}
 	};
 };
 
@@ -706,6 +749,10 @@ class DatabaseAdapter_TermTypeInv
 
 class DatabaseAdapter_TermValueInv
 	:public DatabaseAdapter_TypedIndexString<DatabaseKey::TermValueInvPrefix>
+{};
+
+class DatabaseAdapter_StructTypeInv
+	:public DatabaseAdapter_TypedIndexString<DatabaseKey::StructTypeInvPrefix>
 {};
 
 

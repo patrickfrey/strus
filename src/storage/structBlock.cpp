@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "structureBlock.hpp"
+#include "structBlock.hpp"
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
 #include "private/internationalization.hpp"
@@ -15,7 +15,7 @@
 
 using namespace strus;
 
-void StructureBlock::initFrame()
+void StructBlock::initFrame()
 {
 	if (size() < sizeof(BlockHeader))
 	{
@@ -42,7 +42,7 @@ void StructureBlock::initFrame()
 	}
 }
 
-void StructureBlockBuilder::addNewDocument( const Index& docno)
+void StructBlockBuilder::addNewDocument( const Index& docno)
 {
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
@@ -59,7 +59,7 @@ void StructureBlockBuilder::addNewDocument( const Index& docno)
 	m_structurelistar.push_back( lst);
 }
 
-void StructureBlockBuilder::addLastStructureMember( const IndexRange& sink)
+void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 {
 	StructureMember member;
 	if (m_structurear.back().membersSize)
@@ -75,7 +75,7 @@ void StructureBlockBuilder::addLastStructureMember( const IndexRange& sink)
 	++m_structurear.back().membersSize;
 }
 
-void StructureBlockBuilder::addLastDocStructure( const IndexRange& src)
+void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 {
 	StructureDef st;
 	st.header_start = src.start();
@@ -86,7 +86,7 @@ void StructureBlockBuilder::addLastDocStructure( const IndexRange& src)
 	++m_structurelistar.back().size;
 }
 
-void StructureBlockBuilder::push( const Index& docno, const IndexRange& src, const IndexRange& sink)
+void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const IndexRange& sink)
 {
 	if (!docno) throw std::runtime_error(_TXT("cannot add docno 0"));
 	if (m_lastDoc > docno) throw std::runtime_error(_TXT("documents not added in ascending order"));
@@ -129,18 +129,18 @@ void StructureBlockBuilder::push( const Index& docno, const IndexRange& src, con
 	}
 }
 
-bool StructureBlockBuilder::fitsInto( std::size_t nofstructures) const
+bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
 	return m_memberar.size() + nofstructures <= std::numeric_limits<short>::max();
 }
 
-StructureBlock StructureBlockBuilder::createBlock() const
+StructBlock StructBlockBuilder::createBlock() const
 {
 	if (empty()) throw strus::runtime_error( "%s",  _TXT( "tried to create empty structure block"));
 
-	StructureBlock::BlockHeader hdr;
+	StructBlock::BlockHeader hdr;
 
-	int docindexofs = sizeof( StructureBlock::BlockHeader);
+	int docindexofs = sizeof( StructBlock::BlockHeader);
 	int structlistofs = docindexofs + m_docIndexNodeArray.size() * sizeof( m_docIndexNodeArray[0]);
 	int structofs = structlistofs + m_structurelistar.size() * sizeof( m_structurelistar[0]);
 	int memberofs = structofs + m_structurear.size() * sizeof( m_structurear[0]);
@@ -160,16 +160,16 @@ StructureBlock StructureBlockBuilder::createBlock() const
 	std::memcpy( dt+structofs, m_structurear.data(), m_structurear.size() * sizeof( m_structurear[0]));
 	std::memcpy( dt+memberofs, m_memberar.data(), m_memberar.size() * sizeof( m_memberar[0]));
 
-	return StructureBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
+	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
 }
 
-void StructureBlockBuilder::setId( const Index& id_)
+void StructBlockBuilder::setId( const Index& id_)
 {
 	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( "%s",  _TXT( "assigning illegal id to block"));
 	m_id = id_;
 }
 
-void StructureBlockBuilder::clear()
+void StructBlockBuilder::clear()
 {
 	m_docIndexNodeArray.clear();
 	m_structurelistar.clear();

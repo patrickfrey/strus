@@ -162,6 +162,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	ByteOrderMark storage_byteOrderMark;
 	Index next_termno_;
 	Index next_typeno_;
+	Index next_structno_;
 	Index next_docno_;
 	Index next_attribno_;
 	Index nof_documents_;
@@ -176,6 +177,10 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	||  !varstor.load( "NofDocs", nof_documents_))
 	{
 		throw strus::runtime_error( "%s",  _TXT( "corrupt storage, not all mandatory variables defined"));
+	}
+	if (!varstor.load( "StructNo", next_structno_))
+	{
+		next_structno_	= 0;
 	}
 	if (!varstor.load( "Version", version_))
 	{
@@ -198,6 +203,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	}
 	m_next_termno.set( next_termno_);
 	m_next_typeno.set( next_typeno_);
+	m_next_structno.set( next_structno_);
 	m_next_docno.set( next_docno_);
 	m_next_attribno.set( next_attribno_);
 	m_nof_documents.set( nof_documents_);
@@ -219,6 +225,7 @@ void StorageClient::getVariablesWriteBatch(
 	DatabaseAdapter_Variable::Writer varstor( m_database.get());
 	varstor.store( transaction, "TermNo", m_next_termno.value());
 	varstor.store( transaction, "TypeNo", m_next_typeno.value());
+	varstor.store( transaction, "StructNo", m_next_structno.value());
 	varstor.store( transaction, "DocNo", m_next_docno.value());
 	varstor.store( transaction, "AttribNo", m_next_attribno.value());
 	varstor.store( transaction, "NofDocs", m_nof_documents.value() + nof_documents_incr);
@@ -596,6 +603,19 @@ Index StorageClient::allocTypenoImm( const std::string& name)
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 
 	strus::scoped_lock lock( m_immalloc_typeno_mutex);
+	if (!stor.load( name, rt))
+	{
+		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
+	}
+	return rt;
+}
+
+Index StorageClient::allocStructnoImm( const std::string& name)
+{
+	Index rt;
+	DatabaseAdapter_StructType::ReadWriter stor(m_database.get());
+
+	strus::scoped_lock lock( m_immalloc_structno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());

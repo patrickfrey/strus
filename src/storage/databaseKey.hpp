@@ -21,15 +21,18 @@ public:
 	{
 		TermTypePrefix='T',	///< [type string]             ->  [typeno]
 		TermValuePrefix='I',	///< [term string]             ->  [valueno]
+		StructTypePrefix='S',	///< [struct type string]      ->  [structno]
 		DocIdPrefix='D',	///< [docid string]            ->  [docno]
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
 		TermTypeInvPrefix='K',	///< [typeno]                  ->  [type string]
 		TermValueInvPrefix='N',	///< [valueno]                 ->  [term string]
+		StructTypeInvPrefix='X',///< [structno]                ->  [struct type string]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+		StructBlockPrefix='s',	///< [structno,docno]          ->  [struct]*
 		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff,firstpos]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
@@ -48,15 +51,18 @@ public:
 		{
 			case TermTypePrefix: return "term type";
 			case TermValuePrefix: return "term value";
+			case StructTypePrefix: return "struct type";
 			case DocIdPrefix: return "docid";
 			case VariablePrefix: return "global variable";
 			case AttributeKeyPrefix: return "document attribute name";
 			case UserNamePrefix: return "user id";
 			case TermTypeInvPrefix: return "term type inv";
 			case TermValueInvPrefix: return "term value inv";
+			case StructTypeInvPrefix: return "struct type inv";
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";
+			case StructBlockPrefix: return "structure block";
 			case InverseTermPrefix: return "inverse terminfo block";
 			case UserAclBlockPrefix: return "user ACL block";
 			case AclBlockPrefix: return "inverted ACL block";

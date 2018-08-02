@@ -15,9 +15,9 @@
 
 namespace strus {
 
-/// \class StructureBlock
+/// \class StructBlock
 /// \brief Block of structures defined as unidirectional relation between position ranges in a document with the relation source ranges not overlapping.
-class StructureBlock
+class StructBlock
 	:public DataBlock
 {
 public:
@@ -70,17 +70,17 @@ public:
 	};
 
 public:
-	explicit StructureBlock()
+	explicit StructBlock()
 		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_structar(0),m_memberar(0)
 	{}
-	StructureBlock( const StructureBlock& o)
+	StructBlock( const StructBlock& o)
 		:DataBlock(o)
 		{initFrame();}
-	StructureBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	StructBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
 		{initFrame();}
 
-	StructureBlock& operator=( const StructureBlock& o)
+	StructBlock& operator=( const StructBlock& o)
 	{
 		DataBlock::operator =(o);
 		initFrame();
@@ -266,18 +266,18 @@ private:
 };
 
 
-class StructureBlockBuilder
+class StructBlockBuilder
 {
 public:
-	typedef StructureBlock::StructureMember StructureMember;
-	typedef StructureBlock::StructureDef StructureDef;
-	typedef StructureBlock::StructureDefList StructureDefList;
+	typedef StructBlock::StructureMember StructureMember;
+	typedef StructBlock::StructureDef StructureDef;
+	typedef StructBlock::StructureDefList StructureDefList;
 
 public:
-	StructureBlockBuilder( const StructureBlock& o);
-	StructureBlockBuilder()
+	StructBlockBuilder( const StructBlock& o);
+	StructBlockBuilder()
 		:m_memberar(),m_structurelistar(),m_structurear(),m_lastDoc(0),m_id(0){}
-	StructureBlockBuilder( const StructureBlockBuilder& o)
+	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_memberar(o.m_memberar)
 		,m_structurelistar(o.m_structurelistar)
 		,m_structurear(o.m_structurear)
@@ -304,7 +304,7 @@ public:
 		int mm = m_memberar.size() * sizeof(StructureMember);
 		int ll = m_structurelistar.size() * sizeof(StructureDefList);
 		int ss = m_structurear.size() * sizeof(StructureDef);
-		return dd + mm + ll + ss >= StructureBlock::MaxBlockSize;
+		return dd + mm + ll + ss >= StructBlock::MaxBlockSize;
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
@@ -312,7 +312,7 @@ public:
 	const std::vector<StructureDefList>& structureListArray() const		{return m_structurelistar;}
 	const std::vector<StructureDef>& structureArray() const			{return m_structurear;}
 
-	StructureBlock createBlock() const;
+	StructBlock createBlock() const;
 	void clear();
 
 private:

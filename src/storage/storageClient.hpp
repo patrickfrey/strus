@@ -182,6 +182,7 @@ public:/*StorageTransaction*/
 	Index allocDocno();
 
 	Index allocTypenoImm( const std::string& name);		///< immediate allocation of a term type
+	Index allocStructnoImm( const std::string& name);	///< immediate allocation of a struct type
 	Index allocUsernoImm( const std::string& name);		///< immediate allocation of a user number
 	Index allocAttribnoImm( const std::string& name);	///< immediate allocation of a attribute number
 
@@ -236,15 +237,17 @@ private:
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
 	strus::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
 	strus::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
+	strus::AtomicCounter<Index> m_next_structno;		///< next index to assign to a new structure type
 	strus::AtomicCounter<Index> m_next_docno;		///< next index to assign to a new document id
 	strus::AtomicCounter<Index> m_next_userno;		///< next index to assign to a new user id
 	strus::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
 	strus::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
 
 	strus::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
-	strus::mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno s
-	strus::mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno s
-	strus::mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno s
+	strus::mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno
+	strus::mutex m_immalloc_structno_mutex;			///< mutual exclusion in the critical part of immediate allocation of structno
+	strus::mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno
+	strus::mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
