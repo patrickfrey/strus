@@ -44,6 +44,8 @@ struct DatabaseAdapter_StringIndex
 	{
 	public:
 		Cursor( char prefix_, const DatabaseClientInterface* database_);
+		Cursor( const Cursor& o)
+			:m_cursor(o.m_cursor),m_prefix(o.m_prefix){}
 
 		bool skip( const std::string& key, std::string& keyfound, Index& value);
 		bool skipPrefix( const std::string& key, std::string& keyfound, Index& value);
@@ -64,7 +66,9 @@ struct DatabaseAdapter_StringIndex
 	public:
 		Reader( char prefix_, const DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
-	
+		Reader( const Reader& o)
+			:m_prefix(o.m_prefix),m_database(o.m_database){}
+
 		Index get( const std::string& key) const;
 		bool load( const std::string& key, Index& value) const;
 	
@@ -78,7 +82,9 @@ struct DatabaseAdapter_StringIndex
 	public:
 		Writer( char prefix_, DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
-	
+		Writer( const Writer& o)
+			:m_prefix(o.m_prefix),m_database(o.m_database){}
+
 		void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
 		void remove( DatabaseTransactionInterface* transaction, const std::string& key);
 		void storeImm( const std::string& key, const Index& value);
@@ -96,6 +102,8 @@ struct DatabaseAdapter_StringIndex
 		WriteCursor( char prefix_, DatabaseClientInterface* database_)
 			:Writer(prefix_,database_)
 			,Cursor(prefix_,database_){}
+		WriteCursor( const WriteCursor& o)
+			:Writer(o),Cursor(o){}
 	};
 
 	class ReadWriter
@@ -106,6 +114,8 @@ struct DatabaseAdapter_StringIndex
 		ReadWriter( char prefix_, DatabaseClientInterface* database_)
 			:Reader(prefix_,database_)
 			,Writer(prefix_,database_){}
+		ReadWriter( const ReadWriter& o)
+			:Reader(o),Writer(o){}
 	};
 };
 
@@ -117,7 +127,9 @@ public:
 	public:
 		Reader( char prefix_, const DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
-	
+		Reader( const Reader& o)
+			:m_prefix(o.m_prefix),m_database(o.m_database){}
+
 		bool defined()		{return m_prefix != 0;}
 
 		bool load( const Index& key, std::string& value) const;
@@ -132,6 +144,8 @@ public:
 	public:
 		Writer( char prefix_, DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
+		Writer( const Writer& o)
+			:m_prefix(o.m_prefix),m_database(o.m_database){}
 
 		bool defined()		{return m_prefix != 0;}
 
@@ -152,6 +166,8 @@ public:
 		ReadWriter( char prefix_, DatabaseClientInterface* database_)
 			:Reader(prefix_,database_)
 			,Writer(prefix_,database_){}
+		ReadWriter( const ReadWriter& o)
+			:Reader(o),Writer(o){}
 
 		bool defined()		{return Reader::defined();}
 	};
@@ -168,6 +184,8 @@ public:
 	public:
 		Cursor( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( KeyPrefix, database_){}
+		Cursor( const Cursor& o)
+			:Cursor(o){}
 	};
 	class Reader
 		:public DatabaseAdapter_StringIndex::Reader
@@ -175,6 +193,8 @@ public:
 	public:
 		Reader( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
+		Reader( const Reader& o)
+			:Reader(o){}
 	};
 	class Writer
 		:public DatabaseAdapter_StringIndex::Writer
@@ -182,6 +202,8 @@ public:
 	public:
 		Writer( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+		Writer( const Writer& o)
+			:Writer(o){}
 	};
 	class ReadWriter
 		:public Reader
@@ -190,6 +212,8 @@ public:
 	public:
 		ReadWriter( DatabaseClientInterface* database_)
 			:Reader( database_),Writer( database_){}
+		ReadWriter( const Writer& o)
+			:Reader(o),Writer(o){}
 	};
 };
 
@@ -203,6 +227,8 @@ public:
 	public:
 		Reader( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_IndexString::Reader( KeyPrefix, database_){}
+		Reader( const Reader& o)
+			:DatabaseAdapter_IndexString::Reader(o){}
 	};
 	class Writer
 		:public DatabaseAdapter_IndexString::Writer
@@ -210,6 +236,8 @@ public:
 	public:
 		Writer( DatabaseClientInterface* database_)
 			:DatabaseAdapter_IndexString::Writer( KeyPrefix, database_){}
+		Writer( const Writer& o)
+			:DatabaseAdapter_IndexString::Writer(o){}
 	};
 	class ReadWriter
 		:public Reader
@@ -218,6 +246,8 @@ public:
 	public:
 		ReadWriter( DatabaseClientInterface* database_)
 			:Reader( database_),Writer( database_){}
+		ReadWriter( const ReadWriter& o)
+			:Reader(o),Writer(o){}
 	};
 };
 
@@ -260,6 +290,8 @@ struct DatabaseAdapter_DataBlock
 		{
 			m_domainKeySize = m_dbkey.size();
 		}
+		Base( const Base& o)
+			:m_dbkey(o.m_dbkey),m_domainKeySize(o.m_domainKeySize){}
 
 	protected:
 		DatabaseKey m_dbkey;
@@ -272,6 +304,8 @@ struct DatabaseAdapter_DataBlock
 	public:
 		Reader( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
 			:Base(prefix_,domainKey_),m_database(database_),m_useCache(useCache_){}
+		Reader( const Reader& o)
+			:Base(o),m_database(o.m_database),m_useCache(o.m_useCache){}
 
 		bool load( const Index& docno, DataBlock& blk);
 
@@ -286,6 +320,8 @@ struct DatabaseAdapter_DataBlock
 	public:
 		Writer( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
 			:Base(prefix_,domainKey_),m_database(database_){}
+		Writer( const Writer& o)
+			:Base(o),m_database(o.m_database){}
 
 		void store( DatabaseTransactionInterface* transaction, const DataBlock& blk);
 		void remove( DatabaseTransactionInterface* transaction, const Index& elemno);
@@ -300,6 +336,8 @@ struct DatabaseAdapter_DataBlock
 	{
 	public:
 		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_);
+		Cursor( const Cursor& o)
+			:Base(o),m_cursor(o.m_cursor){}
 
 		bool loadUpperBound( const Index& elemno, DataBlock& blk);
 		bool loadFirst( DataBlock& blk);
@@ -324,6 +362,8 @@ struct DatabaseAdapter_TypedDataBlock
 	public:
 		Reader( const DatabaseClientInterface* database_, const BlockKey& domainKey_,bool useCache_=UseCache)
 			:DatabaseAdapter_DataBlock::Reader(KeyPrefix,database_,domainKey_,useCache_){}
+		Reader( const Reader& o)
+			:DatabaseAdapter_DataBlock::Reader(o){}
 
 		bool load( const Index& elemno, DataBlockType& blk)
 		{
@@ -340,6 +380,8 @@ struct DatabaseAdapter_TypedDataBlock
 	public:
 		Writer( DatabaseClientInterface* database_, const BlockKey& domainKey_)
 			:DatabaseAdapter_DataBlock::Writer(KeyPrefix,database_,domainKey_){}
+		Writer( const Writer& o)
+			:DatabaseAdapter_DataBlock::Writer(o){}
 
 		void store( DatabaseTransactionInterface* transaction, const DataBlockType& blk)
 		{
@@ -353,6 +395,8 @@ struct DatabaseAdapter_TypedDataBlock
 	public:
 		Cursor( const DatabaseClientInterface* database_, const BlockKey& domainKey_,bool useCache_=UseCache)
 			:DatabaseAdapter_DataBlock::Cursor(KeyPrefix,database_,domainKey_,useCache_){}
+		Cursor( const Cursor& o)
+			:DatabaseAdapter_DataBlock::Cursor(o){}
 
 		bool loadUpperBound( const Index& elemno, DataBlockType& blk)
 		{
@@ -400,6 +444,8 @@ struct DatabaseAdapter_ForwardIndex
 		Reader( const DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& docno_)
 			:Parent::Reader( database_, BlockKey(typeno_,docno_)){}
+		Reader( const Reader& o)
+			:Parent::Reader(o){}
 	};
 	class Writer
 		:public Parent::Writer
@@ -408,6 +454,8 @@ struct DatabaseAdapter_ForwardIndex
 		Writer( DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& docno_)
 			:Parent::Writer( database_, BlockKey(typeno_,docno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -416,6 +464,8 @@ struct DatabaseAdapter_ForwardIndex
 		Cursor( const DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& docno_)
 			:Parent::Cursor( database_, BlockKey(typeno_,docno_)){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	static bool exists( const DatabaseClientInterface* database_, const Index& typeno_);
@@ -434,6 +484,8 @@ struct DatabaseAdapter_PosinfoBlock
 		Reader( const DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& termno_)
 			:Parent::Reader( database_, BlockKey(typeno_,termno_)){}
+		Reader( const Reader& o)
+			:Parent::Reader(o){}
 	};
 	class Writer
 		:public Parent::Writer
@@ -442,6 +494,8 @@ struct DatabaseAdapter_PosinfoBlock
 		Writer( DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& termno_)
 			:Parent::Writer( database_, BlockKey(typeno_,termno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -450,6 +504,8 @@ struct DatabaseAdapter_PosinfoBlock
 		Cursor( const DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& termno_)
 			:Parent::Cursor( database_, BlockKey(typeno_,termno_)){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	class WriteCursor
@@ -461,6 +517,8 @@ struct DatabaseAdapter_PosinfoBlock
 				const Index& typeno_, const Index& termno_)
 			:Cursor(database_,typeno_,termno_)
 			,Writer(database_,typeno_,termno_){}
+		WriteCursor( const WriteCursor& o)
+			:Cursor(o),Writer(o){}
 	};
 };
 
@@ -476,6 +534,8 @@ struct DatabaseAdapter_StructBlock
 		Reader( const DatabaseClientInterface* database_,
 			const Index& structno_)
 			:Parent::Reader( database_, BlockKey(structno_)){}
+		Reader( const Reader& o)
+			:Parent::Reader(o){}
 	};
 	class Writer
 		:public Parent::Writer
@@ -484,6 +544,8 @@ struct DatabaseAdapter_StructBlock
 		Writer( DatabaseClientInterface* database_,
 			const Index& structno_)
 			:Parent::Writer( database_, BlockKey(structno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -492,6 +554,8 @@ struct DatabaseAdapter_StructBlock
 		Cursor( const DatabaseClientInterface* database_,
 			const Index& structno_)
 			:Parent::Cursor( database_, BlockKey(structno_)){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	class WriteCursor
@@ -503,6 +567,8 @@ struct DatabaseAdapter_StructBlock
 				const Index& structno_)
 			:Cursor(database_,structno_)
 			,Writer(database_,structno_){}
+		WriteCursor( const WriteCursor& o)
+			:Cursor(o),Writer(o){}
 	};
 };
 
@@ -518,6 +584,8 @@ struct DatabaseAdapter_InverseTerm
 	public:
 		Reader( const DatabaseClientInterface* database_)
 			:Parent::Reader( database_, BlockKey()){}
+		Reader( const Reader& o)
+			:Parent::Reader(o){}
 	};
 	class Writer
 		:public Parent::Writer
@@ -525,6 +593,8 @@ struct DatabaseAdapter_InverseTerm
 	public:
 		Writer( DatabaseClientInterface* database_)
 			:Parent::Writer( database_, BlockKey()){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 
 	class ReadWriter
@@ -535,6 +605,8 @@ struct DatabaseAdapter_InverseTerm
 		ReadWriter( DatabaseClientInterface* database_)
 			:Reader(database_)
 			,Writer(database_){}
+		ReadWriter( const ReadWriter& o)
+			:Reader(o),Writer(o){}
 	};
 
 	class Cursor
@@ -543,6 +615,8 @@ struct DatabaseAdapter_InverseTerm
 	public:
 		Cursor( const DatabaseClientInterface* database_)
 			:Parent::Cursor( database_, BlockKey()){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 };
 
@@ -555,6 +629,8 @@ struct DatabaseAdapter_BooleanBlock
 	public:
 		Writer( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
 			:DatabaseAdapter_DataBlock::Writer(prefix_,database_,domainKey_){}
+		Writer( const Writer& o)
+			:DatabaseAdapter_DataBlock::Writer(o){}
 
 		void store( DatabaseTransactionInterface* transaction, const BooleanBlock& blk)
 		{
@@ -568,6 +644,8 @@ struct DatabaseAdapter_BooleanBlock
 	public:
 		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
 			:DatabaseAdapter_DataBlock::Cursor(prefix_,database_,domainKey_,useCache_){}
+		Cursor( const Cursor& o)
+			:DatabaseAdapter_DataBlock::Cursor(o){}
 
 		bool loadUpperBound( const Index& elemno, BooleanBlock& blk)
 		{
@@ -610,6 +688,8 @@ struct DatabaseAdapter_BooleanBlock
 		WriteCursor( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
 			:Cursor(prefix_,database_,domainKey_,false)
 			,Writer(prefix_,database_,domainKey_){}
+		WriteCursor( const WriteCursor& o)
+			:Cursor(o),Writer(o){}
 	};
 };
 
@@ -625,6 +705,8 @@ struct DatabaseAdapter_UserAclBlock
 	public:
 		Writer( DatabaseClientInterface* database_, const Index& userno_)
 			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(userno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -632,6 +714,8 @@ struct DatabaseAdapter_UserAclBlock
 	public:
 		Cursor( const DatabaseClientInterface* database_, const Index& userno_, bool useCache_)
 			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(userno_), useCache_){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	class WriteCursor
@@ -640,6 +724,8 @@ struct DatabaseAdapter_UserAclBlock
 	public:
 		WriteCursor( DatabaseClientInterface* database_, const Index& userno_)
 			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(userno_)){}
+		WriteCursor( const WriteCursor& o)
+			:Parent::WriteCursor(o){}
 	};
 };
 
@@ -655,6 +741,8 @@ struct DatabaseAdapter_AclBlock
 	public:
 		Writer( DatabaseClientInterface* database_, const Index& docno_)
 			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(docno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -662,6 +750,8 @@ struct DatabaseAdapter_AclBlock
 	public:
 		Cursor( const DatabaseClientInterface* database_, const Index& docno_, bool useCache_)
 			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(docno_), useCache_){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	class WriteCursor
@@ -670,6 +760,8 @@ struct DatabaseAdapter_AclBlock
 	public:
 		WriteCursor( DatabaseClientInterface* database_, const Index& docno_)
 			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(docno_)){}
+		WriteCursor( const WriteCursor& o)
+			:Parent::WriteCursor(o){}
 	};
 };
 
@@ -686,6 +778,8 @@ struct DatabaseAdapter_DocListBlock
 		Writer( DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& termno_)
 			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(typeno_,termno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
 	};
 	class Cursor
 		:public Parent::Cursor
@@ -694,6 +788,8 @@ struct DatabaseAdapter_DocListBlock
 		Cursor( const DatabaseClientInterface* database_,
 			const Index& typeno_, const Index& termno_, bool useCache_)
 			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(typeno_,termno_), useCache_){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
 	};
 
 	class WriteCursor
@@ -702,6 +798,8 @@ struct DatabaseAdapter_DocListBlock
 	public:
 		WriteCursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
 			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(typeno_,termno_)){}
+		WriteCursor( const WriteCursor& o)
+			:Parent::WriteCursor(o){}
 	};
 };
 

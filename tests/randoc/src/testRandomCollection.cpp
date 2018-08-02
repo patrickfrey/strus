@@ -1189,6 +1189,7 @@ int main( int argc, const char* argv[])
 				rsum += rcnt;
 				std::cerr << std::endl;
 				std::cerr << "verified " << rsum << " query results" << std::endl;
+				std::cerr << (nofQueriesFailed ? "ERR":"OK") << std::endl;
 				return (nofQueriesFailed?2:0);
 			}
 		}

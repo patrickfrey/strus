@@ -76,6 +76,7 @@ StorageClient::StorageClient(
 	:m_database(database_->createClient( databaseConfig))
 	,m_next_typeno(0)
 	,m_next_termno(0)
+	,m_next_structno(0)
 	,m_next_docno(0)
 	,m_next_userno(0)
 	,m_next_attribno(0)
@@ -618,7 +619,7 @@ Index StorageClient::allocStructnoImm( const std::string& name)
 	strus::scoped_lock lock( m_immalloc_structno_mutex);
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
+		stor.storeImm( name, rt = m_next_structno.allocIncrement());
 	}
 	return rt;
 }
@@ -652,6 +653,11 @@ Index StorageClient::allocAttribnoImm( const std::string& name)
 Index StorageClient::maxTermTypeNo() const
 {
 	return m_next_typeno.value() -1;
+}
+
+Index StorageClient::maxStructTypeNo() const
+{
+	return m_next_structno.value() -1;
 }
 
 IndexSetIterator StorageClient::getAclIterator( const Index& docno) const

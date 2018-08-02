@@ -41,6 +41,7 @@ set( source_files
 	posinfoIterator.cpp
 	postingIterator.cpp
 	structBlock.cpp
+	structIterator.cpp
 	storageAlterMetaDataTable.cpp
 	storage.cpp
 	storageClient.cpp

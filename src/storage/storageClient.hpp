@@ -221,6 +221,7 @@ public:/*StatisticsIterator*/
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
+	Index maxStructTypeNo() const;
 	DatabaseClientInterface* databaseClient()
 	{
 		return m_database.get();
