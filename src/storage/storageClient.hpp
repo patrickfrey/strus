@@ -232,6 +232,8 @@ private:
 	void loadTermnoMap( const char* termnomap_source);
 	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();
+	// \brief Filling document frequency cache
+	// \note Neither this method nor the document frequency cache is ever used -- dead code
 	void fillDocumentFrequencyCache();
 
 private:

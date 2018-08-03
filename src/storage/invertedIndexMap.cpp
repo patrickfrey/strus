@@ -177,86 +177,137 @@ void InvertedIndexMap::renameNewNumbers(
 		const std::map<Index,Index>& docnoUnknownMap,
 		const std::map<Index,Index>& termUnknownMap)
 {
-	// Rename terms:
-	Map::iterator mi = m_map.begin(), me = m_map.end();
-	while (mi != me)
 	{
-		Index termno = BlockKey(mi->first.termkey).elem(2);
-		Index docno = mi->first.docno;
-		if (KeyMap::isUnknown( termno) || KeyMap::isUnknown( docno))
+		// Rename terms:
+		Map::iterator mi = m_map.begin(), me = m_map.end();
+		while (mi != me)
 		{
-			Index typeno = BlockKey( mi->first.termkey).elem(1);
-			Index new_termno;
-			if (KeyMap::isUnknown( termno))
+			Index termno = BlockKey(mi->first.termkey).elem(2);
+			Index docno = mi->first.docno;
+			if (KeyMap::isUnknown( termno) || KeyMap::isUnknown( docno))
 			{
-				std::map<Index,Index>::const_iterator ri = termUnknownMap.find( termno);
-				if (ri == termUnknownMap.end())
+				Index typeno = BlockKey( mi->first.termkey).elem(1);
+				Index new_termno;
+				if (KeyMap::isUnknown( termno))
 				{
-					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "posinfo map");
+					std::map<Index,Index>::const_iterator ri = termUnknownMap.find( termno);
+					if (ri == termUnknownMap.end())
+					{
+						throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "posinfo map");
+					}
+					new_termno = ri->second;
 				}
-				new_termno = ri->second;
+				else
+				{
+					new_termno = termno;
+				}
+				Index new_docno;
+				if (KeyMap::isUnknown( docno))
+				{
+					std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( docno);
+					if (ri == docnoUnknownMap.end())
+					{
+						throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
+					}
+					new_docno = ri->second;
+				}
+				else
+				{
+					new_docno = docno;
+				}
+				MapKey newkey( typeno, new_termno, new_docno);
+				m_map[ newkey] = mi->second;
+				m_map.erase( mi++);
 			}
 			else
 			{
-				new_termno = termno;
+				++mi;
 			}
-			Index new_docno;
-			if (KeyMap::isUnknown( docno))
+		}
+	}{
+		// Rename inv:
+		InvTermList::iterator li = m_invterms.begin(), le = m_invterms.end();
+		for (; li != le; ++li)
+		{
+			if (KeyMap::isUnknown( li->termno))
 			{
-				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( docno);
+				std::map<Index,Index>::const_iterator ri = termUnknownMap.find( li->termno);
+				if (ri == termUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "inv posinfo map");
+				}
+				li->termno = ri->second;
+			}
+		}
+	}{
+		InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
+		while (di != de)
+		{
+			if (KeyMap::isUnknown( di->first))
+			{
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( di->first);
+				if (ri == docnoUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inv posinfo map");
+				}
+				m_invtermmap[ ri->second] = di->second;
+				m_invtermmap.erase( di++);
+			}
+			else
+			{
+				++di;
+			}
+		}
+	}{
+		// Rename deletes:
+		std::vector<Index> eraselist;
+	
+		std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
+		for (; ui != ue; ++ui)
+		{
+			if (KeyMap::isUnknown( ui->first))
+			{
+				eraselist.push_back( ui->first);
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( ui->first);
+				if (ri == docnoUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inverted index map");
+				}
+				m_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ri->second, ui->second));
+			}
+			
+		}
+		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
+		for (; ei != ee; ++ei)
+		{
+			m_docno_typeno_deletes.erase( *ei);
+		}
+	}{
+		std::vector<Index> eraselist;
+		std::set<Index>::const_iterator ti = m_docno_deletes.begin(), te = m_docno_deletes.end();
+		for (; ti != te; ++ti)
+		{
+			if (KeyMap::isUnknown( *ti))
+			{
+				eraselist.push_back( *ti);
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( *ti);
 				if (ri == docnoUnknownMap.end())
 				{
 					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
 				}
-				new_docno = ri->second;
+				m_docno_deletes.insert( ri->second);
 			}
-			else
-			{
-				new_docno = docno;
-			}
-			MapKey newkey( typeno, new_termno, new_docno);
-			m_map[ newkey] = mi->second;
-			m_map.erase( mi++);
+			
 		}
-		else
+		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
+		for (; ei != ee; ++ei)
 		{
-			++mi;
+			m_docno_deletes.erase( *ei);
 		}
+	}{
+		// Rename df:
+		m_dfmap.renameNewTermNumbers( termUnknownMap);
 	}
-	// Rename inv:
-	InvTermList::iterator li = m_invterms.begin(), le = m_invterms.end();
-	for (; li != le; ++li)
-	{
-		if (KeyMap::isUnknown( li->termno))
-		{
-			std::map<Index,Index>::const_iterator ri = termUnknownMap.find( li->termno);
-			if (ri == termUnknownMap.end())
-			{
-				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "inv posinfo map");
-			}
-			li->termno = ri->second;
-		}
-	}
-	InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
-	while (di != de)
-	{
-		if (KeyMap::isUnknown( di->first))
-		{
-			std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( di->first);
-			if (ri == docnoUnknownMap.end())
-			{
-				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inv posinfo map");
-			}
-			m_invtermmap[ ri->second] = di->second;
-			m_invtermmap.erase( di++);
-		}
-		else
-		{
-			++di;
-		}
-	}
-	// Rename df:
-	m_dfmap.renameNewTermNumbers( termUnknownMap);
 }
 
 void InvertedIndexMap::getWriteBatch(

@@ -80,8 +80,7 @@ void ForwardIndexMap::renameNewDocNumbers( const std::map<Index,Index>& renamema
 				++mi;
 			}
 		}
-	}
-	{
+	}{
 		// Rename document numbers in list of forward index block deletes:
 		std::set<Index>::iterator
 			di = m_docno_deletes.upper_bound( KeyMap::unknownUpperBoundKey()),
@@ -107,8 +106,7 @@ void ForwardIndexMap::renameNewDocNumbers( const std::map<Index,Index>& renamema
 				++di;
 			}
 		}
-	}
-	{
+	}{
 		// Rename document numbers in list of partial forward index block deletes:
 		std::map<Index, std::set<Index> >::iterator
 			di = m_docno_typeno_deletes.upper_bound( KeyMap::unknownUpperBoundKey()),

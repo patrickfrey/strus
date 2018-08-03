@@ -57,6 +57,26 @@ void UserAclMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 				++ai;
 			}
 		}
+	}{
+		std::vector<Index> newdeletes;
+		std::vector<Index>::const_iterator di = m_doc_deletes.begin(), de = m_doc_deletes.end();
+		for (; di != de; ++di)
+		{
+			if (KeyMap::isUnknown( *di))
+			{
+				std::map<Index,Index>::const_iterator ri = renamemap.find( *di);
+				if (ri == renamemap.end())
+				{
+					throw strus::runtime_error( _TXT( "docno undefined (%s)"), "doc user map");
+				}
+				newdeletes.push_back( ri->second);
+			}
+			else
+			{
+				newdeletes.push_back( *di);
+			}
+		}
+		m_doc_deletes = newdeletes;
 	}
 }
 
