@@ -73,7 +73,7 @@ private:
 	typedef std::less<StructDef> StructDefCompare;
 	typedef std::set<StructDef,StructDefCompare,StructDefAllocator> StructDefSet;
 
-	typedef LocalStructAllocator<std::pair<Index,int> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const Index,int> > MapAllocator;
 	typedef std::less<Index> MapCompare;
 	typedef std::map<Index,int,MapCompare,MapAllocator> Map;
 
