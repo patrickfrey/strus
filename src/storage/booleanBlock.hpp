@@ -35,20 +35,20 @@ public:
 	BooleanBlock( const Index& id_, const void* ptr_, std::size_t size_)
 		:DataBlock( id_, ptr_, size_)
 	{
-		initFrameData();
+		initFrame();
 	}
 
 	BooleanBlock& operator=( const BooleanBlock& o)
 	{
 		DataBlock::operator =(o);
-		initFrameData();
+		initFrame();
 		return *this;
 	}
 
 	void swap( DataBlock& o)
 	{
 		DataBlock::swap( o);
-		initFrameData();
+		initFrame();
 	}
 
 	struct NodeCursor
@@ -115,7 +115,7 @@ public:
 
 private:
 	static bool joinRange( Index& from_, Index& to_, const Index& addfrom_, const Index& addto_);
-	void initFrameData();
+	void initFrame();
 
 private:
 	struct Node

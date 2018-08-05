@@ -216,7 +216,7 @@ void BooleanBlock::Node::getLastRange( Index& from_, Index& to_) const
 	}
 }
 
-void BooleanBlock::initFrameData()
+void BooleanBlock::initFrame()
 {
 	if (!empty())
 	{
@@ -491,7 +491,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 		Node newnod;
 		newnod.init( elemno, elemno + rangesize);
 		append( &newnod, sizeof(newnod));
-		initFrameData();
+		initFrame();
 	}
 }
 

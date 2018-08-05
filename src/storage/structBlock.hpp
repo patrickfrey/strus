@@ -75,10 +75,14 @@ public:
 	{}
 	StructBlock( const StructBlock& o)
 		:DataBlock(o)
-		{initFrame();}
+	{
+		initFrame();
+	}
 	StructBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
-		{initFrame();}
+	{
+		initFrame();
+	}
 
 	StructBlock& operator=( const StructBlock& o)
 	{
@@ -120,6 +124,10 @@ public:
 	Index firstDoc( DocIndexNodeCursor& cursor) const
 	{
 		return m_docIndexNodeArray.firstDoc( cursor);
+	}
+	Index lastDoc() const
+	{
+		return m_docIndexNodeArray.lastDoc();
 	}
 	/// \brief Upper bound search for a docnument number in the block
 	Index skipDoc( const Index& docno_, DocIndexNodeCursor& cursor) const
@@ -163,6 +171,15 @@ public:
 		const StructureMember* current() const
 		{
 			return m_itr < m_ar.size() ? m_ar.at(m_itr) : 0;
+		}
+		bool next()
+		{
+			if (m_itr < m_ar.size())
+			{
+				++m_itr;
+				return true;
+			}
+			return false;
 		}
 
 		IndexRange skip( const Index& pos)
@@ -210,6 +227,15 @@ public:
 		const StructureDef* current() const
 		{
 			return m_itr < m_ar.size() ? m_ar.at(m_itr) : 0;
+		}
+		bool next()
+		{
+			if (m_itr < m_ar.size())
+			{
+				++m_itr;
+				return true;
+			}
+			return false;
 		}
 
 		IndexRange skip( const Index& pos)
@@ -300,11 +326,7 @@ public:
 	bool fitsInto( std::size_t nofstructures) const;
 	bool full() const
 	{
-		int dd = m_docIndexNodeArray.size() * sizeof(DocIndexNode);
-		int mm = m_memberar.size() * sizeof(StructureMember);
-		int ll = m_structurelistar.size() * sizeof(StructureDefList);
-		int ss = m_structurear.size() * sizeof(StructureDef);
-		return dd + mm + ll + ss >= StructBlock::MaxBlockSize;
+		return size() >= StructBlock::MaxBlockSize;
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
@@ -314,6 +336,14 @@ public:
 
 	StructBlock createBlock() const;
 	void clear();
+	int size() const
+	{
+		int dd = m_docIndexNodeArray.size() * sizeof(DocIndexNode);
+		int mm = m_memberar.size() * sizeof(StructureMember);
+		int ll = m_structurelistar.size() * sizeof(StructureDefList);
+		int ss = m_structurear.size() * sizeof(StructureDef);
+		return dd + mm + ll + ss;
+	}
 
 private:
 	void addNewDocument( const Index& docno);

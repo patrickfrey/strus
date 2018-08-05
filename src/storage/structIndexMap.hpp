@@ -27,7 +27,7 @@ class DatabaseTransactionInterface;
 class StructIndexMap
 {
 public:
-	explicit StructIndexMap( DatabaseClientInterface* database_);
+	StructIndexMap( DatabaseClientInterface* database_, Index maxstructno_);
 
 	void defineStructure(
 		const Index& structno,
@@ -47,101 +47,52 @@ public:
 	void clear();
 
 private:
-	/// \brief Key of the structure map
-	/// \note The key includes source and sink to have the correct order and because they must not overlap
-	struct MapKey
+	struct StructDef
 	{
-		Index structno;
-		Index docno;
-		Index source_end;
-		Index sink_end;
+		IndexRange source;
+		IndexRange sink;
 
-		MapKey( const MapKey& o)
-			:structno(o.structno),docno(o.docno),source_end(o.source_end),sink_end(o.sink_end){}
-		MapKey( const Index& structno_, const Index& docno_, Index source_end_, Index sink_end_)
-			:structno(structno_),docno(docno_),source_end(source_end_),sink_end(sink_end_){}
+		StructDef( const IndexRange& source_, const IndexRange& sink_)
+			:source(source_),sink(sink_){}
+		StructDef( const StructDef& o)
+			:source(o.source),sink(o.sink){}
 
-		bool operator < (const MapKey& o) const
+		bool operator < (const StructDef& o) const
 		{
-			if (structno < o.structno) return true;
-			if (structno > o.structno) return false;
-			if (docno < o.docno) return true;
-			if (docno > o.docno) return false;
-			if (source_end < o.source_end) return true;
-			if (source_end > o.source_end) return false;
-			return (sink_end < o.sink_end);
+			if (source.end() < o.source.end()) return true;
+			if (source.end() > o.source.end()) return false;
+			if (sink.end() < o.sink.end()) return true;
+			if (sink.end() > o.sink.end()) return false;
+			if (source.start() < o.source.start()) return true;
+			if (source.start() > o.source.start()) return false;
+			return (sink.start() < o.sink.start());
 		}
 	};
 
-	struct MapValue
-	{
-		Index source_start;
-		Index sink_start;
+	typedef LocalStructAllocator<StructDef> StructDefAllocator;
+	typedef std::less<StructDef> StructDefCompare;
+	typedef std::set<StructDef,StructDefCompare,StructDefAllocator> StructDefSet;
 
-		MapValue()
-			:source_start(0),sink_start(0){}
-		MapValue( Index source_start_, Index sink_start_)
-			:source_start(source_start_),sink_start(sink_start_){}
-		MapValue( const MapValue& o)
-			:source_start(o.source_start),sink_start(o.sink_start){}
-	};
-
-	struct StructDocRel
-	{
-		Index structno;
-		Index docno;
-
-		StructDocRel()
-			:structno(0),docno(0){}
-		StructDocRel( Index docno_, Index structno_)
-			:structno(structno_),docno(docno_){}
-		StructDocRel( const StructDocRel& o)
-			:structno(o.structno),docno(o.docno){}
-
-		bool operator < (const StructDocRel& o) const
-		{
-			if (structno < o.structno) return true;
-			if (structno > o.structno) return false;
-			return (docno < o.docno);
-		}
-	};
-
-	typedef LocalStructAllocator<std::pair<const MapKey,std::size_t> > MapAllocator;
-	typedef std::less<MapKey> MapCompare;
-	typedef std::map<MapKey,MapValue,MapCompare,MapAllocator> Map;
+	typedef LocalStructAllocator<std::pair<Index,int> > MapAllocator;
+	typedef std::less<Index> MapCompare;
+	typedef std::map<Index,int,MapCompare,MapAllocator> Map;
 
 private:
-	void insertNewElements(
-			DatabaseAdapter_StructBlock::WriteCursor& dbadapter_struct,
+	void deleteInsertedStructs( const Index& docno, const Index& structno);
+	void loadStoredElementsFromBlock( const Index& structno, const StructBlock& blk);
+	void writeNewBlocks(
+			DatabaseAdapter_StructBlock::WriteCursor& dbadapter,
 			DatabaseTransactionInterface* transaction,
-			Map::const_iterator& ei,
-			const Map::const_iterator& ee,
-			StructBlockBuilder& newblk,
-			std::vector<BooleanBlock::MergeRange>& docrangear);
-
-	void mergeNewElements(
-			DatabaseAdapter_StructBlock::WriteCursor& dbadapter_struct,
-			DatabaseTransactionInterface* transaction,
-			Map::const_iterator& ei,
-			const Map::const_iterator& ee,
-			StructBlockBuilder& newblk,
-			std::vector<BooleanBlock::MergeRange>& docrangear);
-
-	void mergeBlock(
-			DatabaseAdapter_StructBlock::WriteCursor& dbadapter_struct, 
-			DatabaseTransactionInterface* transaction,
-			Map::const_iterator ei,
-			const Map::const_iterator& ee,
-			const StructBlock& oldblk,
-			StructBlockBuilder& newblk);
+			Map::const_iterator mi,
+			const Map::const_iterator& me,
+			StructBlockBuilder& blk);
+	bool fitsNofStructuresLeft( Map::const_iterator mi, const Map::const_iterator& me, int maxLimit) const;
 
 private:
-	DatabaseClientInterface* m_database;
-	Map m_map;
-	Index m_docno;
-	std::set<Index> m_structnoset;
-	std::set<Index> m_docno_deletes;
-	std::set<StructDocRel> m_structno_docno_deletes;
+	DatabaseClientInterface* m_database;		///< database client interface
+	std::vector<StructDefSet> m_defar;		///< vector doc index index -> structures
+	std::vector<Map> m_mapar;			///< map docno -> doc index or -1 (deleted)
+	Index m_docno;					///< current document number
 };
 
 }

@@ -57,6 +57,6 @@ private:
 	Index m_structno;
 };
 
-}
+}//namespace
 #endif
 

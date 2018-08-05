@@ -21,6 +21,8 @@ struct DocIndexNode
 	bool addDocument( const Index& docno_, unsigned short ref_);
 	Index skipDoc( const Index& docno_, unsigned short& cursor_docidx) const;
 	std::size_t nofElements() const;
+	Index firstDoc() const		{return base;}
+	Index lastDoc() const		{int ii=0; for (;ofs[ii];++ii){} return ii?(base+ofs[ii]):base;}
 
 	Index base;
 	unsigned short ofs[ Size-1];
@@ -65,6 +67,7 @@ struct DocIndexNodeArray
 	Index firstDoc( DocIndexNodeCursor& cursor) const;
 	Index nextDoc( DocIndexNodeCursor& cursor) const;
 	Index skipDoc( const Index& docno, DocIndexNodeCursor& cursor) const;
+	Index lastDoc() const;
 };
 
 } //namespace

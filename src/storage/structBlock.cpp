@@ -57,6 +57,7 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 	lst.idx = m_structurear.size();
 	lst.size = 0;
 	m_structurelistar.push_back( lst);
+	m_lastDoc = docno;
 }
 
 void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)

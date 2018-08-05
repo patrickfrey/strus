@@ -107,6 +107,11 @@ Index DocIndexNodeArray::firstDoc( DocIndexNodeCursor& cursor) const
 	return size?ar[ 0].base:0;
 }
 
+Index DocIndexNodeArray::lastDoc() const
+{
+	return size ? ar[ size-1].lastDoc() : 0;
+}
+	
 Index DocIndexNodeArray::nextDoc( DocIndexNodeCursor& cursor) const
 {
 	if (++cursor.docidx >= DocIndexNode::Size)

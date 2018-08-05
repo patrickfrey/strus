@@ -369,7 +369,7 @@ struct DatabaseAdapter_TypedDataBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Reader::load( elemno, blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 	};
@@ -402,7 +402,7 @@ struct DatabaseAdapter_TypedDataBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadUpperBound( elemno, blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -410,7 +410,7 @@ struct DatabaseAdapter_TypedDataBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadFirst( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -418,7 +418,7 @@ struct DatabaseAdapter_TypedDataBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadNext( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -426,7 +426,7 @@ struct DatabaseAdapter_TypedDataBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadLast( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 	};
@@ -651,7 +651,7 @@ struct DatabaseAdapter_BooleanBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadUpperBound( elemno, blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -659,7 +659,7 @@ struct DatabaseAdapter_BooleanBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadFirst( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -667,7 +667,7 @@ struct DatabaseAdapter_BooleanBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadNext( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 
@@ -675,7 +675,7 @@ struct DatabaseAdapter_BooleanBlock
 		{
 			DataBlock blk_;
 			if (!DatabaseAdapter_DataBlock::Cursor::loadLast( blk_)) return false;
-			blk.swap( blk_);
+			blk.swap( blk_);//... swap calls the final initialization of the block (including frame)
 			return true;
 		}
 	};

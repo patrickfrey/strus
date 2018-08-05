@@ -357,7 +357,7 @@ void InvertedIndexMap::getWriteBatch(
 				for (;ei != ee; ei = invblk.next( ei))
 				{
 					InvTerm it = invblk.element_at( ei);
-	
+
 					if (ui->second.find( it.typeno) != ui->second.end())
 					{
 						// ensure old search index elements are deleted:

@@ -131,7 +131,7 @@ PosinfoBlock PosinfoBlockBuilder::createBlock() const
 	unsigned int nofDocIndexNodes = *(unsigned int*)blkmem.ptr() = docIndexNodeArray().size();
 	DocIndexNode* docindexptr = (DocIndexNode*)( (const unsigned int*)blkmem.ptr()+1);
 	PositionType* posinfoptr = (PositionType*)(const void*)(docindexptr + nofDocIndexNodes);
-	
+
 	std::vector<DocIndexNode>::const_iterator
 		di = m_docIndexNodeArray.begin(),
 		de = m_docIndexNodeArray.end();
