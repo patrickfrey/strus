@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STORAGE_SKIP_SCAN_ARRAY_ARRAY_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_SKIP_SCAN_ARRAY_HPP_INCLUDED
 #define _STRUS_STORAGE_SKIP_SCAN_ARRAY_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/internationalization.hpp"
