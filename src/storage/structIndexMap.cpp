@@ -140,7 +140,10 @@ void StructIndexMap::writeNewBlocks(
 		if (blk.empty() || blk.fitsInto( nofDocStructs))
 		{
 			StructDefSet::const_iterator si = st.begin(), se = st.end();
-			blk.push( docno, si->source, si->sink);
+			for (; si != se; ++si)
+			{
+				blk.push( docno, si->source, si->sink);
+			}
 		}
 		else
 		{
