@@ -59,6 +59,27 @@ void StorageDocumentUpdate::addSearchIndexTerm(
 	CATCH_ERROR_MAP( _TXT("error adding search index term to document: %s"), *m_errorhnd);
 }
 
+void StorageDocumentUpdate::addSearchIndexStructure(
+		const std::string& struct_,
+		const IndexRange& source_,
+		const IndexRange& sink_)
+{
+	try
+	{
+		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
+		}
+		else
+		{
+			Index structno = m_transaction->getOrCreateStructType( struct_);
+			m_structures.push_back( DocStructure( structno, source_, sink_));
+			m_delete_search_structnolist.insert( structno);
+		}
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure '%s' to document: %s"), struct_.c_str(), *m_errorhnd);
+}
+
 void StorageDocumentUpdate::addForwardIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
@@ -89,6 +110,17 @@ void StorageDocumentUpdate::clearSearchIndexTerm(
 		m_delete_search_typenolist.insert( typeno);
 	}
 	CATCH_ERROR_MAP( _TXT("error removing occurrencies of search index term type from document: %s"), *m_errorhnd);
+}
+
+void StorageDocumentUpdate::clearSearchIndexStructure(
+		const std::string& struct_)
+{
+	try
+	{
+		Index structno = m_transaction->getOrCreateStructType( struct_);
+		m_delete_search_structnolist.insert( structno);
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error removing structure '%s' from search index: %s"), struct_.c_str(), *m_errorhnd);
 }
 
 void StorageDocumentUpdate::clearForwardIndexTerm(
@@ -196,74 +228,87 @@ void StorageDocumentUpdate::done()
 	try
 	{
 		//[1] Delete old index elements (forward index and inverted index):
-		std::set<Index>::const_iterator si = m_delete_search_typenolist.begin(), se = m_delete_search_typenolist.end();
-		for (; si != se; ++si)
 		{
-			m_transaction->deleteDocSearchIndexType( m_docno, *si);
-		}
-		std::set<Index>::const_iterator fi = m_delete_forward_typenolist.begin(), fe = m_delete_forward_typenolist.end();
-		for (; fi != fe; ++fi)
-		{
-			m_transaction->deleteDocForwardIndexType( m_docno, *fi);
-		}
-
-		//[2.1] Update metadata:
-		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
-		for (; wi != we; ++wi)
-		{
-			m_transaction->defineMetaData( m_docno, wi->name, wi->value);
-		}
-	
-		//[2.2] Update attributes:
-		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
-		for (; ai != ae; ++ai)
-		{
-			if (ai->value.empty())
+			std::set<Index>::const_iterator si = m_delete_search_typenolist.begin(), se = m_delete_search_typenolist.end();
+			for (; si != se; ++si)
 			{
-				m_transaction->deleteAttribute( m_docno, ai->name);
+				m_transaction->deleteDocSearchIndexType( m_docno, *si);
 			}
-			else
+		}{
+			std::set<Index>::const_iterator fi = m_delete_forward_typenolist.begin(), fe = m_delete_forward_typenolist.end();
+			for (; fi != fe; ++fi)
 			{
-				m_transaction->defineAttribute( m_docno, ai->name, ai->value);
+				m_transaction->deleteDocForwardIndexType( m_docno, *fi);
+			}
+		}{
+			std::set<Index>::const_iterator si = m_delete_search_structnolist.begin(), se = m_delete_search_structnolist.end();
+			for (; si != se; ++si)
+			{
+				m_transaction->deleteDocSearchIndexStructure( m_docno, *si);
+			}
+		}{
+			//[2.1] Update metadata:
+			std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+			for (; wi != we; ++wi)
+			{
+				m_transaction->defineMetaData( m_docno, wi->name, wi->value);
+			}
+		}{
+			//[2.2] Update attributes:
+			std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
+			for (; ai != ae; ++ai)
+			{
+				if (ai->value.empty())
+				{
+					m_transaction->deleteAttribute( m_docno, ai->name);
+				}
+				else
+				{
+					m_transaction->defineAttribute( m_docno, ai->name, ai->value);
+				}
+			}
+		}{
+			//[2.3] Insert new index elements (forward index and inverted index):
+			TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
+			for (; ti != te; ++ti)
+			{
+				//[2.3.1] Insert inverted index
+				std::vector<Index> pos( ti->second.pos.begin(), ti->second.pos.end());
+				m_transaction->definePosinfoPosting(
+						ti->first.first, ti->first.second, m_docno, pos);
+			}
+			m_transaction->openForwardIndexDocument( m_docno);
+			InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
+			for (; ri != re; ++ri)
+			{
+				//[2.3.2] Insert forward index
+				m_transaction->defineForwardIndexTerm(
+					ri->first.typeno, ri->first.pos, ri->second);
+			}
+			m_transaction->closeForwardIndexDocument();
+
+			std::vector<DocStructure>::const_iterator si = m_structures.begin(), se = m_structures.end();
+			for (; si != se; ++si)
+			{
+				m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
+			}
+		}{
+			//[2.4] Update document access rights:
+			if (m_doClearUserlist)
+			{
+				m_transaction->deleteAcl( m_docno);
+			}
+			std::vector<Index>::const_iterator ui = m_add_userlist.begin(), ue = m_add_userlist.end();
+			for (; ui != ue; ++ui)
+			{
+				m_transaction->defineAcl( *ui, m_docno);
+			}
+			ui = m_del_userlist.begin(), ue = m_del_userlist.end();
+			for (; ui != ue; ++ui)
+			{
+				m_transaction->deleteAcl( *ui, m_docno);
 			}
 		}
-
-		//[2.3] Insert new index elements (forward index and inverted index):
-		TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
-		for (; ti != te; ++ti)
-		{
-			//[2.3.1] Insert inverted index
-			std::vector<Index> pos;
-			pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
-			m_transaction->definePosinfoPosting(
-					ti->first.first, ti->first.second, m_docno, pos);
-		}
-		m_transaction->openForwardIndexDocument( m_docno);
-		InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
-		for (; ri != re; ++ri)
-		{
-			//[2.3.2] Insert forward index
-			m_transaction->defineForwardIndexTerm(
-				ri->first.typeno, ri->first.pos, ri->second);
-		}
-		m_transaction->closeForwardIndexDocument();
-
-		//[2.4] Update document access rights:
-		if (m_doClearUserlist)
-		{
-			m_transaction->deleteAcl( m_docno);
-		}
-		std::vector<Index>::const_iterator ui = m_add_userlist.begin(), ue = m_add_userlist.end();
-		for (; ui != ue; ++ui)
-		{
-			m_transaction->defineAcl( *ui, m_docno);
-		}
-		ui = m_del_userlist.begin(), ue = m_del_userlist.end();
-		for (; ui != ue; ++ui)
-		{
-			m_transaction->deleteAcl( *ui, m_docno);
-		}
-	
 		//[3] Clear data:
 		m_terms.clear();
 		m_invs.clear();

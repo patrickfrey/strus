@@ -21,6 +21,8 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
+class StructIteratorInterface;
+/// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class DocumentTermIteratorInterface;
@@ -69,6 +71,13 @@ public:
 			const std::string& type,
 			const std::string& value,
 			const Index& length) const=0;
+
+	/// \brief Create an iterator on the structures (relations of ordinal position ranges) of a defined type
+	/// \param[in] structstr name of the structure to get the iterator on
+	/// \return the created iterator reference (with ownership)
+	virtual StructIteratorInterface*
+		createStructIterator(
+			const std::string& structstr) const=0;
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.
@@ -154,6 +163,10 @@ public:
 	/// \brief Create an iterator on the term types inserted
 	/// \return the iterator
 	virtual ValueIteratorInterface* createTermTypeIterator() const=0;
+
+	/// \brief Create an iterator on the structure types inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createStructTypeIterator() const=0;
 
 	/// \brief Create an iterator on the term value inserted
 	/// \return the iterator

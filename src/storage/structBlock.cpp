@@ -90,6 +90,7 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const IndexRange& sink)
 {
 	if (!docno) throw std::runtime_error(_TXT("cannot add docno 0"));
+	if (src.start() >= src.end() || sink.start() >= sink.end()) throw std::runtime_error(_TXT("adding empty structures not allowed"));
 	if (m_lastDoc > docno) throw std::runtime_error(_TXT("documents not added in ascending order"));
 	if (m_lastDoc != docno)
 	{

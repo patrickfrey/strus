@@ -28,6 +28,8 @@ class DocumentTermIteratorInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
+class StructIteratorInterface;
+/// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
@@ -75,6 +77,10 @@ public:
 			const std::string& termid,
 			const Index& length) const;
 
+	virtual StructIteratorInterface*
+		createStructIterator(
+			const std::string& structstr) const;
+	
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(
 			const MetaDataRestrictionInterface* restriction,
@@ -135,6 +141,8 @@ public:
 
 	virtual ValueIteratorInterface* createTermTypeIterator() const;
 
+	virtual ValueIteratorInterface* createStructTypeIterator() const;
+
 	virtual ValueIteratorInterface* createTermValueIterator() const;
 
 	virtual ValueIteratorInterface* createDocIdIterator() const;
@@ -154,6 +162,7 @@ public:
 public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
+	Index getStructType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
 	Index getUserno( const std::string& name) const;
 	Index getAttributeno( const std::string& name) const;
@@ -171,6 +180,7 @@ public:/*StorageTransaction*/
 	Index nofAttributeTypes();
 
 	KeyAllocatorInterface* createTypenoAllocator();
+	KeyAllocatorInterface* createStructnoAllocator();
 	KeyAllocatorInterface* createDocnoAllocator();
 	KeyAllocatorInterface* createUsernoAllocator();
 	KeyAllocatorInterface* createAttribnoAllocator();
@@ -219,7 +229,7 @@ public:/*StatisticsIterator*/
 	///\brief Fetch a message from a storage update transaction
 	bool fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize);
 
-public:/*strusResizeBlocks*/
+public:/*strusResizeBlocks,StorageDocumentChecker*/
 	Index maxTermTypeNo() const;
 	Index maxStructTypeNo() const;
 	DatabaseClientInterface* databaseClient()

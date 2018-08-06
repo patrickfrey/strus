@@ -187,12 +187,12 @@ public:
 			if (initialized()) return IndexRange();
 			if ((Index)m_ar[ m_itr].start > pos)
 			{
-				int idx = m_ar.upperbound( pos, 0, m_itr, StructureMemberSearchCompare());
+				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureMemberSearchCompare());
 				if (idx > 0) m_itr = idx; else return IndexRange();
 			}
 			else if ((Index)m_ar[ m_itr].end <= pos)
 			{
-				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureMemberSearchCompare());
+				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureMemberSearchCompare());
 				if (idx > 0) m_itr = idx; else return IndexRange();
 			}
 			return IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
@@ -243,12 +243,12 @@ public:
 			if (initialized()) return IndexRange();
 			if ((Index)m_ar[ m_itr].header_start > pos)
 			{
-				int idx = m_ar.upperbound( pos, 0, m_itr, StructureDefSearchCompare());
+				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureDefSearchCompare());
 				if (idx > 0) m_itr = idx; else return IndexRange();
 			}
 			else if ((Index)m_ar[ m_itr].header_end <= pos)
 			{
-				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureDefSearchCompare());
+				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureDefSearchCompare());
 				if (idx > 0) m_itr = idx; else return IndexRange();
 			}
 			return IndexRange( m_ar[ m_itr].header_start, m_ar[ m_itr].header_end);

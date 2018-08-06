@@ -44,6 +44,12 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
+	/// \brief Implementation of StorageDocumentInterface::addSearchIndexStructure( const std::string&, const IndexRange&, const IndexRange&);
+	virtual void addSearchIndexStructure(
+			const std::string& struct_,
+			const IndexRange& source_,
+			const IndexRange& sink_);
+
 	/// \brief Implementation of StorageDocumentInterface::addForwardIndexTerm( const std::string&, const std::string&, const Index&);
 	virtual void addForwardIndexTerm(
 			const std::string& type_,
@@ -89,6 +95,7 @@ private:
 	Index m_docno;						///< document number
 	TermMap m_terms;					///< map of all search index terms added
 	InvMap m_invs;						///< map of all forward index terms added
+	std::vector<DocStructure> m_structures;			///< structures to add
 	std::vector<DocAttribute> m_attributes;			///< attributes to add
 	std::vector<DocMetaData> m_metadata;			///< metadata to add
 	std::vector<Index> m_userlist;				///< users granted access to this document

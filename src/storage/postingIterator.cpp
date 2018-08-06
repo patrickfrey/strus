@@ -19,6 +19,8 @@
 
 using namespace strus;
 
+#define INTERFACE_NAME "posting iterator"
+
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_READABLE_FEATUREID
 
@@ -74,7 +76,7 @@ Index PostingIterator::skipDoc( const Index& docno_)
 		}
 		return m_docno;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip document: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip document: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
 Index PostingIterator::skipDocCandidate( const Index& docno_)
@@ -93,7 +95,7 @@ Index PostingIterator::skipDocCandidate( const Index& docno_)
 		}
 		return m_docno;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip document candidate: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip document candidate: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
 Index PostingIterator::skipPos( const Index& firstpos_)
@@ -116,7 +118,7 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		return m_posinfoIterator.skipPos( firstpos_);
 #endif
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip position: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip skip position: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
 unsigned int PostingIterator::frequency()
@@ -130,7 +132,7 @@ unsigned int PostingIterator::frequency()
 		m_posinfoIterator.skipDoc( m_docno);
 		return m_posinfoIterator.frequency();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator get frequency: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
 Index PostingIterator::documentFrequency() const
@@ -139,6 +141,6 @@ Index PostingIterator::documentFrequency() const
 	{
 		return m_posinfoIterator.documentFrequency();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator get document frequency: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get document frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 

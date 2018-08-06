@@ -33,6 +33,7 @@ StorageTransaction::StorageTransaction(
 		DatabaseClientInterface* database_,
 		const MetaDataDescription* metadescr_,
 		const Index& maxtypeno_,
+		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
@@ -40,9 +41,11 @@ StorageTransaction::StorageTransaction(
 	,m_attributeMap(database_)
 	,m_metaDataMap(database_,metadescr_)
 	,m_invertedIndexMap(database_)
+	,m_structIndexMap(database_,maxstructno_)
 	,m_forwardIndexMap(database_,maxtypeno_)
 	,m_userAclMap(database_)
 	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())
+	,m_structTypeMap(database_,DatabaseKey::StructTypePrefix,DatabaseKey::StructTypeInvPrefix,storage_->createStructnoAllocator())
 	,m_termValueMap(database_,DatabaseKey::TermValuePrefix,DatabaseKey::TermValueInvPrefix,storage_->createTermnoAllocator())
 	,m_docIdMap(database_,DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
 	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
@@ -81,6 +84,11 @@ Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
 	return m_termTypeMap.getOrCreate( string_conv::tolower( name));
+}
+
+Index StorageTransaction::getOrCreateStructType( const std::string& name)
+{
+	return m_structTypeMap.getOrCreate( string_conv::tolower( name));
 }
 
 Index StorageTransaction::getOrCreateDocno( const std::string& name)
@@ -153,6 +161,13 @@ void StorageTransaction::definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
+void StorageTransaction::defineStructure(
+	const Index& structno,
+	const Index& docno, const IndexRange& source, const IndexRange& sink)
+{
+	m_structIndexMap.defineStructure( structno, docno, source, sink);
+}
+
 void StorageTransaction::openForwardIndexDocument( const Index& docno)
 {
 	m_forwardIndexMap.openForwardIndexDocument( docno);
@@ -174,12 +189,18 @@ void StorageTransaction::closeForwardIndexDocument()
 void StorageTransaction::deleteIndex( const Index& docno)
 {
 	m_invertedIndexMap.deleteIndex( docno);
+	m_structIndexMap.deleteIndex( docno);
 	m_forwardIndexMap.deleteIndex( docno);
 }
 
 void StorageTransaction::deleteDocSearchIndexType( const Index& docno, const Index& typeno)
 {
 	m_invertedIndexMap.deleteIndex( docno, typeno);
+}
+
+void StorageTransaction::deleteDocSearchIndexStructure( const Index& docno, const Index& structno)
+{
+	m_structIndexMap.deleteIndex( docno, structno);
 }
 
 void StorageTransaction::deleteDocForwardIndexType( const Index& docno, const Index& typeno)
@@ -340,6 +361,7 @@ bool StorageTransaction::commit()
 		m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
 
 		m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
+		m_structIndexMap.renameNewNumbers( docnoUnknownMap);
 
 		StatisticsBuilderScope statisticsBuilderScope( statisticsBuilder);
 		DocumentFrequencyCache::Batch dfbatch;
@@ -348,6 +370,8 @@ bool StorageTransaction::commit()
 				transaction.get(),
 				statisticsBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
+		m_structIndexMap.getWriteBatch( transaction.get());
+
 		if (statisticsBuilder)
 		{
 			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents_incr);
@@ -414,6 +438,7 @@ void StorageTransaction::clearMaps()
 	m_userAclMap.clear();
 
 	m_termTypeMap.clear();
+	m_structTypeMap.clear();
 	m_termValueMap.clear();
 	m_docIdMap.clear();
 	m_userIdMap.clear();

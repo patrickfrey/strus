@@ -8,10 +8,13 @@
 #include "structIterator.hpp"
 #include "storageClient.hpp"
 #include "private/internationalization.hpp"
+#include "strus/errorBufferInterface.hpp"
+
+#define INTERFACE_NAME "struct iterator"
 
 using namespace strus;
 
-IndexRange StructIterator::skipPosSource( const Index& firstpos_)
+IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 {
 	if (!docno()) return IndexRange(0,0);
 	if (m_structureScanner.initialized())
@@ -31,7 +34,7 @@ IndexRange StructIterator::skipPosSource( const Index& firstpos_)
 	return m_structureScanner.skip( firstpos_);
 }
 
-IndexRange StructIterator::skipPosSink( const Index& firstpos_)
+IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 {
 	if (!docno()) return IndexRange(0,0);
 	if (m_memberScanner.initialized())
@@ -49,6 +52,48 @@ IndexRange StructIterator::skipPosSink( const Index& firstpos_)
 		if (!m_memberScanner.initialized()) return IndexRange(0,0);
 	}
 	return m_memberScanner.skip( firstpos_);
+}
+
+
+Index StructIterator::skipDoc( const Index& docno)
+{
+	try
+	{
+		return m_impl.skipDoc( docno);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, 0);
+}
+IndexRange StructIterator::skipPosSource( const Index& firstpos)
+{
+	try
+	{
+		return m_impl.skipPosSource( firstpos);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+}
+IndexRange StructIterator::skipPosSink( const Index& firstpos)
+{
+	try
+	{
+		return m_impl.skipPosSink( firstpos);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip sink position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+}
+IndexRange StructIterator::source() const
+{
+	try
+	{
+		return m_impl.source();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current source: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+}
+IndexRange StructIterator::sink() const
+{
+	try
+	{
+		return m_impl.sink();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current sink: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
 }
 
 

@@ -36,6 +36,7 @@
 #include "metaDataRestriction.hpp"
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
+#include "structIterator.hpp"
 #include "browsePostingIterator.hpp"
 #include "metaDataRangePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
@@ -256,6 +257,11 @@ Index StorageClient::getTermType( const std::string& name) const
 	return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
+Index StorageClient::getStructType( const std::string& name) const
+{
+	return DatabaseAdapter_StructType::Reader( m_database.get()).get( string_conv::tolower( name));
+}
+
 Index StorageClient::getDocno( const std::string& name) const
 {
 	return DatabaseAdapter_DocId::Reader( m_database.get()).get( name);
@@ -302,6 +308,20 @@ PostingIteratorInterface*
 		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+StructIteratorInterface*
+	StorageClient::createStructIterator(
+		const std::string& structstr) const
+{
+	try
+	{
+		Index structno = getStructType( structstr);
+		if (!structno) return new NullStructIterator();
+
+		return new StructIterator( this, m_database.get(), structno, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating structure iterator: %s"), *m_errorhnd, 0);
 }
 
 PostingIteratorInterface*
@@ -434,7 +454,7 @@ StorageTransactionInterface*
 				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
-		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
@@ -465,7 +485,7 @@ class TypenoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	TypenoAllocator( StorageClient* storage_)
+	explicit TypenoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -480,11 +500,30 @@ private:
 	StorageClient* m_storage;
 };
 
+class StructnoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	explicit StructnoAllocator( StorageClient* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name)
+	{
+		return m_storage->allocStructnoImm( name);
+	}
+	virtual Index alloc()
+	{
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "structno");
+	}
+
+private:
+	StorageClient* m_storage;
+};
+
 class DocnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	DocnoAllocator( StorageClient* storage_)
+	explicit DocnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -502,7 +541,7 @@ class UsernoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	UsernoAllocator( StorageClient* storage_)
+	explicit UsernoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -524,7 +563,7 @@ class AttribnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	AttribnoAllocator( StorageClient* storage_)
+	explicit AttribnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -542,7 +581,7 @@ class TermnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	TermnoAllocator( StorageClient* storage_)
+	explicit TermnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 
 	virtual Index getOrCreate( const std::string& name)
@@ -561,6 +600,11 @@ private:
 KeyAllocatorInterface* StorageClient::createTypenoAllocator()
 {
 	return new TypenoAllocator( this);
+}
+
+KeyAllocatorInterface* StorageClient::createStructnoAllocator()
+{
+	return new StructnoAllocator( this);
 }
 
 KeyAllocatorInterface* StorageClient::createDocnoAllocator()
@@ -731,7 +775,16 @@ ValueIteratorInterface* StorageClient::createTermTypeIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_TermType>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating term type iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "term type", *m_errorhnd, 0);
+}
+
+ValueIteratorInterface* StorageClient::createStructTypeIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_StructType>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "struct type", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createTermValueIterator() const
@@ -740,7 +793,7 @@ ValueIteratorInterface* StorageClient::createTermValueIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_TermValue>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating term value iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "term value", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createDocIdIterator() const
@@ -749,7 +802,7 @@ ValueIteratorInterface* StorageClient::createDocIdIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_DocId>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating document id iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "document id", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createUserNameIterator() const
@@ -758,7 +811,7 @@ ValueIteratorInterface* StorageClient::createUserNameIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_UserName>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating user name iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "user name", *m_errorhnd, 0);
 }
 
 Index StorageClient::documentStatistics(
