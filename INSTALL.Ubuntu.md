@@ -17,7 +17,7 @@ Install packages with 'apt-get'/aptitude.
 # Configure build and install strus prerequisite packages with GNU C/C++
 	git clone https://github.com/patrickfrey/strusBase strusBase
 	cd strusBase
-	cmake -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=/usr/local/lib .
+	cmake -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib .
 	make
 	make install
 	cd ..
