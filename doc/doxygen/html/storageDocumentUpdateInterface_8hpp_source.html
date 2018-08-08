@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -86,45 +85,55 @@
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                        <span class="keyword">const</span> std::string&amp; value_,</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                        <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; position_)=0;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d">addForwardIndexTerm</a>(</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                        <span class="keyword">const</span> std::string&amp; value_,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                        <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; position_)=0;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a7eb64ad6ce3328239a867506951a8875">addSearchIndexStructure</a>(</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                        <span class="keyword">const</span> std::string&amp; struct_,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1IndexRange.html">IndexRange</a>&amp; source_,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1IndexRange.html">IndexRange</a>&amp; sink_)=0;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6">clearSearchIndexTerm</a>(</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_)=0;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6">clearForwardIndexTerm</a>(</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_)=0;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a41f6a247f0e95b10494c8dd6885dfe22">setMetaData</a>(</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; value_)=0;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ab83449ac5544b12971270576df54a080">setAttribute</a>(</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_,</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                        <span class="keyword">const</span> std::string&amp; value_)=0;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d">addForwardIndexTerm</a>(</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                        <span class="keyword">const</span> std::string&amp; value_,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                        <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; position_)=0;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6">clearSearchIndexTerm</a>(</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_)=0;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a662a2fd7f80ac6ef9dbbadea5ad0fbff">clearSearchIndexStructure</a>(</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                        <span class="keyword">const</span> std::string&amp; struct_)=0;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6">clearForwardIndexTerm</a>(</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                        <span class="keyword">const</span> std::string&amp; type_)=0;</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a">clearAttribute</a>(</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_)=0;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#aaf3d13f27a6a8990676ab53a28236e13">setUserAccessRight</a>(</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                        <span class="keyword">const</span> std::string&amp; username_)=0;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a85cbf69f25d72c0c94d255fdb4faa660">clearUserAccessRight</a>(</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                        <span class="keyword">const</span> std::string&amp; username_)=0;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">clearUserAccessRights</a>()=0;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a41f6a247f0e95b10494c8dd6885dfe22">setMetaData</a>(</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; value_)=0;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ab83449ac5544b12971270576df54a080">setAttribute</a>(</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                        <span class="keyword">const</span> std::string&amp; value_)=0;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a">clearAttribute</a>(</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                        <span class="keyword">const</span> std::string&amp; name_)=0;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a3b9eece0dadc361cf40f66de68cea022">done</a>()=0;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;};</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#aaf3d13f27a6a8990676ab53a28236e13">setUserAccessRight</a>(</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                        <span class="keyword">const</span> std::string&amp; username_)=0;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a85cbf69f25d72c0c94d255fdb4faa660">clearUserAccessRight</a>(</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                        <span class="keyword">const</span> std::string&amp; username_)=0;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">clearUserAccessRights</a>()=0;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageDocumentUpdateInterface.html#a3b9eece0dadc361cf40f66de68cea022">done</a>()=0;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;};</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html"><div class="ttname"><a href="classstrus_1_1IndexRange.html">strus::IndexRange</a></div><div class="ttdef"><b>Definition:</b> index.hpp:38</div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_ac64145d441e65ecca96176b6822b303e"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">strus::StorageDocumentUpdateInterface::clearUserAccessRights</a></div><div class="ttdeci">virtual void clearUserAccessRights()=0</div><div class="ttdoc">Clear the user rights for all users. </div></div>
+<div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_a7eb64ad6ce3328239a867506951a8875"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#a7eb64ad6ce3328239a867506951a8875">strus::StorageDocumentUpdateInterface::addSearchIndexStructure</a></div><div class="ttdeci">virtual void addSearchIndexStructure(const std::string &amp;struct_, const IndexRange &amp;source_, const IndexRange &amp;sink_)=0</div><div class="ttdoc">Add a structure (relation of ordinal position ranges) in the the document for retrieval. </div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_aaf3d13f27a6a8990676ab53a28236e13"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#aaf3d13f27a6a8990676ab53a28236e13">strus::StorageDocumentUpdateInterface::setUserAccessRight</a></div><div class="ttdeci">virtual void setUserAccessRight(const std::string &amp;username_)=0</div><div class="ttdoc">Allow a user to access the document. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_ae7dbf8aa19d59ca13fc76f29ddb4917c"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c">strus::StorageDocumentUpdateInterface::addSearchIndexTerm</a></div><div class="ttdeci">virtual void addSearchIndexTerm(const std::string &amp;type_, const std::string &amp;value_, const Index &amp;position_)=0</div><div class="ttdoc">Add one occurrence of a term to the search index excluding all features of this type previously added...</div></div>
@@ -138,11 +147,12 @@
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_a41f6a247f0e95b10494c8dd6885dfe22"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#a41f6a247f0e95b10494c8dd6885dfe22">strus::StorageDocumentUpdateInterface::setMetaData</a></div><div class="ttdeci">virtual void setMetaData(const std::string &amp;name_, const NumericVariant &amp;value_)=0</div><div class="ttdoc">Define a meta data element of the document by name. </div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_af6d06cf62b2bb4fdacfc9a415ecbad9a"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a">strus::StorageDocumentUpdateInterface::clearAttribute</a></div><div class="ttdeci">virtual void clearAttribute(const std::string &amp;name_)=0</div><div class="ttdoc">Delete an attribute (string) of the document. </div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></div><div class="ttdoc">Object to declare the items for an update of a document in the storage. </div><div class="ttdef"><b>Definition:</b> storageDocumentUpdateInterface.hpp:21</div></div>
+<div class="ttc" id="classstrus_1_1StorageDocumentUpdateInterface_html_a662a2fd7f80ac6ef9dbbadea5ad0fbff"><div class="ttname"><a href="classstrus_1_1StorageDocumentUpdateInterface.html#a662a2fd7f80ac6ef9dbbadea5ad0fbff">strus::StorageDocumentUpdateInterface::clearSearchIndexStructure</a></div><div class="ttdeci">virtual void clearSearchIndexStructure(const std::string &amp;struct_)=0</div><div class="ttdoc">Clear all previous occurrencies of a structure in a document in the search index. ...</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

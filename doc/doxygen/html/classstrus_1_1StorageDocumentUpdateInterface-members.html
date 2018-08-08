@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -66,9 +66,11 @@
 <p>This is the complete list of members for <a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a>, including all inherited members.</p>
 <table class="directory">
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d">addForwardIndexTerm</a>(const std::string &amp;type_, const std::string &amp;value_, const Index &amp;position_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c">addSearchIndexTerm</a>(const std::string &amp;type_, const std::string &amp;value_, const Index &amp;position_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a">clearAttribute</a>(const std::string &amp;name_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6">clearForwardIndexTerm</a>(const std::string &amp;type_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a7eb64ad6ce3328239a867506951a8875">addSearchIndexStructure</a>(const std::string &amp;struct_, const IndexRange &amp;source_, const IndexRange &amp;sink_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c">addSearchIndexTerm</a>(const std::string &amp;type_, const std::string &amp;value_, const Index &amp;position_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a">clearAttribute</a>(const std::string &amp;name_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6">clearForwardIndexTerm</a>(const std::string &amp;type_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a662a2fd7f80ac6ef9dbbadea5ad0fbff">clearSearchIndexStructure</a>(const std::string &amp;struct_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6">clearSearchIndexTerm</a>(const std::string &amp;type_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a85cbf69f25d72c0c94d255fdb4faa660">clearUserAccessRight</a>(const std::string &amp;username_)=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">clearUserAccessRights</a>()=0</td><td class="entry"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">strus::StorageDocumentUpdateInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
@@ -81,7 +83,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

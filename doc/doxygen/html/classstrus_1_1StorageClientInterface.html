@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -91,6 +91,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a23a6f18e77bd05ac87ddf2791adededd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a23a6f18e77bd05ac87ddf2791adededd">createTermPostingIterator</a> (const std::string &amp;type, const std::string &amp;value, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;length) const =0</td></tr>
 <tr class="memdesc:a23a6f18e77bd05ac87ddf2791adededd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the occurrencies of a term in the storage.  <a href="#a23a6f18e77bd05ac87ddf2791adededd">More...</a><br/></td></tr>
 <tr class="separator:a23a6f18e77bd05ac87ddf2791adededd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51ad71bc452b253c9d0bb4879a740584"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StructIteratorInterface.html">StructIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a51ad71bc452b253c9d0bb4879a740584">createStructIterator</a> (const std::string &amp;structstr) const =0</td></tr>
+<tr class="memdesc:a51ad71bc452b253c9d0bb4879a740584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the structures (relations of ordinal position ranges) of a defined type.  <a href="#a51ad71bc452b253c9d0bb4879a740584">More...</a><br/></td></tr>
+<tr class="separator:a51ad71bc452b253c9d0bb4879a740584"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af707ea61df2896e4cf84f03df0b85193"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#af707ea61df2896e4cf84f03df0b85193">createBrowsePostingIterator</a> (const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a> *restriction, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;maxpos) const =0</td></tr>
 <tr class="memdesc:af707ea61df2896e4cf84f03df0b85193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on all enumerable postings of document selected by a metadata restriction.  <a href="#af707ea61df2896e4cf84f03df0b85193">More...</a><br/></td></tr>
 <tr class="separator:af707ea61df2896e4cf84f03df0b85193"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,6 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aca36b644019e4ba1b620d62ee9d1bb90"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aca36b644019e4ba1b620d62ee9d1bb90">createTermTypeIterator</a> () const =0</td></tr>
 <tr class="memdesc:aca36b644019e4ba1b620d62ee9d1bb90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the term types inserted.  <a href="#aca36b644019e4ba1b620d62ee9d1bb90">More...</a><br/></td></tr>
 <tr class="separator:aca36b644019e4ba1b620d62ee9d1bb90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c8daa6cfa24cfbe38b2d4620826294e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a0c8daa6cfa24cfbe38b2d4620826294e">createStructTypeIterator</a> () const =0</td></tr>
+<tr class="memdesc:a0c8daa6cfa24cfbe38b2d4620826294e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the structure types inserted.  <a href="#a0c8daa6cfa24cfbe38b2d4620826294e">More...</a><br/></td></tr>
+<tr class="separator:a0c8daa6cfa24cfbe38b2d4620826294e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af29e4b20fe150f02a18c4af1f19a8a03"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#af29e4b20fe150f02a18c4af1f19a8a03">createTermValueIterator</a> () const =0</td></tr>
 <tr class="memdesc:af29e4b20fe150f02a18c4af1f19a8a03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the term value inserted.  <a href="#af29e4b20fe150f02a18c4af1f19a8a03">More...</a><br/></td></tr>
 <tr class="separator:af29e4b20fe150f02a18c4af1f19a8a03"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -747,6 +753,65 @@ Fields give you the possibility to treat elements in the document differently wh
 
 </div>
 </div>
+<a class="anchor" id="a51ad71bc452b253c9d0bb4879a740584"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StructIteratorInterface.html">StructIteratorInterface</a>* strus::StorageClientInterface::createStructIterator </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>structstr</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an iterator on the structures (relations of ordinal position ranges) of a defined type. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">structstr</td><td>name of the structure to get the iterator on </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a0c8daa6cfa24cfbe38b2d4620826294e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a>* strus::StorageClientInterface::createStructTypeIterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an iterator on the structure types inserted. </p>
+<dl class="section return"><dt>Returns</dt><dd>the iterator </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a23a6f18e77bd05ac87ddf2791adededd"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1182,7 +1247,7 @@ Fields give you the possibility to treat elements in the document differently wh
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

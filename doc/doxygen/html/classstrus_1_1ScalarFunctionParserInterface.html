@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -79,6 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6d88e762eaf132a965730949c4561580"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html#a6d88e762eaf132a965730949c4561580">createFunction</a> (const std::string &amp;src, const std::vector&lt; std::string &gt; &amp;argumentNames) const =0</td></tr>
 <tr class="memdesc:a6d88e762eaf132a965730949c4561580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a function from source and instantiates a function object.  <a href="#a6d88e762eaf132a965730949c4561580">More...</a><br/></td></tr>
 <tr class="separator:a6d88e762eaf132a965730949c4561580"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f01896a0cfb83d21883e671771ac3d8"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html#a9f01896a0cfb83d21883e671771ac3d8">getDescription</a> () const =0</td></tr>
+<tr class="memdesc:a9f01896a0cfb83d21883e671771ac3d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a description of the parser syntax.  <a href="#a9f01896a0cfb83d21883e671771ac3d8">More...</a><br/></td></tr>
+<tr class="separator:a9f01896a0cfb83d21883e671771ac3d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for parsing scalar function definitions. </p>
@@ -153,6 +156,32 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a9f01896a0cfb83d21883e671771ac3d8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const char* strus::ScalarFunctionParserInterface::getDescription </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a description of the parser syntax. </p>
+<dl class="section return"><dt>Returns</dt><dd>the description </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="scalarFunctionParserInterface_8hpp_source.html">scalarFunctionParserInterface.hpp</a></li>
 </ul>
@@ -160,7 +189,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

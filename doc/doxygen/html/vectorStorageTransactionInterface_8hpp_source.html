@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -79,7 +78,7 @@
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classstrus_1_1VectorStorageTransactionInterface.html#a9e53772043fe1a059812b3f38be8e805">   22</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#a9e53772043fe1a059812b3f38be8e805">~VectorStorageTransactionInterface</a>(){}</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd">addFeature</a>( <span class="keyword">const</span> std::string&amp; name, <span class="keyword">const</span> std::vector&lt;double&gt;&amp; vec)=0;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#aded5f36d34e2a7633747d08f2dd5ddc0">addFeature</a>( <span class="keyword">const</span> std::string&amp; name, <span class="keyword">const</span> std::vector&lt;float&gt;&amp; vec)=0;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">defineFeatureConceptRelation</a>( <span class="keyword">const</span> std::string&amp; conceptClass, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; featidx, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; conidx)=0;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
@@ -95,16 +94,16 @@
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_acbc7b83a624dd7c0af34b0db488c7d26"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">strus::VectorStorageTransactionInterface::defineFeatureConceptRelation</a></div><div class="ttdeci">virtual void defineFeatureConceptRelation(const std::string &amp;conceptClass, const Index &amp;featidx, const Index &amp;conidx)=0</div><div class="ttdoc">Define a relation element. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html">strus::VectorStorageTransactionInterface</a></div><div class="ttdoc">Interface for building a repository of vectors with classifiers to map them to discrete features...</div><div class="ttdef"><b>Definition:</b> vectorStorageTransactionInterface.hpp:18</div></div>
+<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_aded5f36d34e2a7633747d08f2dd5ddc0"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#aded5f36d34e2a7633747d08f2dd5ddc0">strus::VectorStorageTransactionInterface::addFeature</a></div><div class="ttdeci">virtual void addFeature(const std::string &amp;name, const std::vector&lt; float &gt; &amp;vec)=0</div><div class="ttdoc">Add a feature to the repository for later retrieval. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_ae7daf345f9ab7eb8903e46f2a1dd9f77"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#ae7daf345f9ab7eb8903e46f2a1dd9f77">strus::VectorStorageTransactionInterface::rollback</a></div><div class="ttdeci">virtual void rollback()=0</div><div class="ttdoc">Rollback of the transaction, no changes made. </div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_a95fcd5f12a6206bab7ffe31cd70c7fbd"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd">strus::VectorStorageTransactionInterface::addFeature</a></div><div class="ttdeci">virtual void addFeature(const std::string &amp;name, const std::vector&lt; double &gt; &amp;vec)=0</div><div class="ttdoc">Add a feature to the repository for later retrieval. </div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_ad4a4d51ffe2f01398bcce4d3ce9461ce"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">strus::VectorStorageTransactionInterface::commit</a></div><div class="ttdeci">virtual bool commit()=0</div><div class="ttdoc">Ensure the persistent storage of the features added with addFeature(const std::string&amp;,const std::vector&lt;double&gt;&amp;) till now. </div></div>
+<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_ad4a4d51ffe2f01398bcce4d3ce9461ce"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">strus::VectorStorageTransactionInterface::commit</a></div><div class="ttdeci">virtual bool commit()=0</div><div class="ttdoc">Ensure the persistent storage of the features added with addFeature(const std::string&amp;,const std::vector&lt;float&gt;&amp;) till now. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_a9e53772043fe1a059812b3f38be8e805"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#a9e53772043fe1a059812b3f38be8e805">strus::VectorStorageTransactionInterface::~VectorStorageTransactionInterface</a></div><div class="ttdeci">virtual ~VectorStorageTransactionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> vectorStorageTransactionInterface.hpp:22</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

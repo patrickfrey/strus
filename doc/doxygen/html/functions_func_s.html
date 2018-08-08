@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -104,10 +104,10 @@
 : <a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a9152f94f38b4bf3aa5a21a81c6da82f8">strus::DatabaseCursorInterface</a>
 </li>
 <li>seekUpperBound()
-: <a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a6f51b6dc91934e7be7e6b5b95c4432cf">strus::DatabaseCursorInterface</a>
+: <a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a0f384106df00d46dee361b694a29163c">strus::DatabaseCursorInterface</a>
 </li>
 <li>seekUpperBoundRestricted()
-: <a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a4356b5ebdb72c2ee9648973761d6076c">strus::DatabaseCursorInterface</a>
+: <a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a8e3a928910d3891ea25abfcb2b5ebb1f">strus::DatabaseCursorInterface</a>
 </li>
 <li>setAttribute()
 : <a class="el" href="classstrus_1_1StorageDocumentInterface.html#ac714eb72c49f7e95fb9828513ee644c9">strus::StorageDocumentInterface</a>
@@ -148,10 +148,13 @@
 , <a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#aea415bb346cb95677dd97079a08f2210">strus::WeightingFunctionContextInterface</a>
 </li>
 <li>setWeight()
-: <a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html#af16ff52bca50c4dfb0ebf4946800c1c8">strus::VectorStorageSearchInterface::Result</a>
+: <a class="el" href="classstrus_1_1VectorQueryResult.html#aae9b99c71c616bac92f061c2c9a98d02">strus::VectorQueryResult</a>
 </li>
 <li>setWeightingVariableValue()
 : <a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0">strus::QueryInterface</a>
+</li>
+<li>sink()
+: <a class="el" href="classstrus_1_1StructIteratorInterface.html#a8b6ee23a36faefabd7ffc2d61dd8e077">strus::StructIteratorInterface</a>
 </li>
 <li>size()
 : <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html#a1db62d28dd60ca57b70da86a70ff054b">strus::DatabaseCursorInterface::Slice</a>
@@ -167,6 +170,7 @@
 , <a class="el" href="classstrus_1_1InvAclIteratorInterface.html#ad6acdb32b185c7c221a377eaf67b71ea">strus::InvAclIteratorInterface</a>
 , <a class="el" href="classstrus_1_1MetaDataReaderInterface.html#ab69eff92cdb645603e16f7f974271b7d">strus::MetaDataReaderInterface</a>
 , <a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627">strus::PostingIteratorInterface</a>
+, <a class="el" href="classstrus_1_1StructIteratorInterface.html#a7ce06cf891858536061a093417b2a4a5">strus::StructIteratorInterface</a>
 </li>
 <li>skipDocCandidate()
 : <a class="el" href="classstrus_1_1PostingIteratorInterface.html#a06ed13e7e8a62c7eac3f1f9c0bcbbc40">strus::PostingIteratorInterface</a>
@@ -175,8 +179,20 @@
 : <a class="el" href="classstrus_1_1ForwardIteratorInterface.html#abbd71f579b6fbd808c21bec66d08abdd">strus::ForwardIteratorInterface</a>
 , <a class="el" href="classstrus_1_1PostingIteratorInterface.html#a7c0010412b848df94b629fa50148b966">strus::PostingIteratorInterface</a>
 </li>
+<li>skipPosSink()
+: <a class="el" href="classstrus_1_1StructIteratorInterface.html#af6f90a00ab6bcaaaf19e0ba170d88837">strus::StructIteratorInterface</a>
+</li>
+<li>skipPosSource()
+: <a class="el" href="classstrus_1_1StructIteratorInterface.html#a243f21478a6e91d437dfe2877a060b52">strus::StructIteratorInterface</a>
+</li>
+<li>skipPrefix()
+: <a class="el" href="classstrus_1_1ValueIteratorInterface.html#a83b569424d250be00cab9e5c50798a7d">strus::ValueIteratorInterface</a>
+</li>
 <li>Slice()
 : <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html#a99b264a619d715570accb6f2c5d1e328">strus::DatabaseCursorInterface::Slice</a>
+</li>
+<li>source()
+: <a class="el" href="classstrus_1_1StructIteratorInterface.html#a4a0e315923522700c9aa07eac141a60f">strus::StructIteratorInterface</a>
 </li>
 <li>standard_pattern_matcher()
 : <a class="el" href="structstrus_1_1Constants.html#ac7d3de6b18384cbb797bc89a0c172377">strus::Constants</a>
@@ -191,13 +207,14 @@
 : <a class="el" href="structstrus_1_1Constants.html#a45e6c514c2281ecaef59e1dd209aaa05">strus::Constants</a>
 </li>
 <li>start()
-: <a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a9fbc3e068ce77cc19e26138da34d5274">strus::StatisticsBuilderInterface</a>
+: <a class="el" href="classstrus_1_1IndexRange.html#a88b4757a2a12a9000f4a910fde91cb0b">strus::IndexRange</a>
+, <a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a9fbc3e068ce77cc19e26138da34d5274">strus::StatisticsBuilderInterface</a>
 </li>
 <li>storage_max_position_info()
 : <a class="el" href="structstrus_1_1Constants.html#ad25b1fa8b954cfc473ec94b9d24a3544">strus::Constants</a>
 </li>
 <li>SummarizationVariable()
-: <a class="el" href="classstrus_1_1SummarizationVariable.html#aec43215dddf869b20feb4504b95706fa">strus::SummarizationVariable</a>
+: <a class="el" href="classstrus_1_1SummarizationVariable.html#a2d0852aadf2598d76025dc1d15171fd8">strus::SummarizationVariable</a>
 </li>
 <li>SummaryElement()
 : <a class="el" href="classstrus_1_1SummaryElement.html#a88eb499a0c63e0b2028b4380641b89ea">strus::SummaryElement</a>
@@ -210,7 +227,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

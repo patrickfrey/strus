@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -59,7 +59,6 @@
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classstrus_1_1StatisticsViewerInterface-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -72,12 +71,6 @@
 
 <p><code>#include &lt;<a class="el" href="statisticsViewerInterface_8hpp_source.html">statisticsViewerInterface.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html">DocumentFrequencyChange</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure describing the document frequency change of one term in the collection.  <a href="classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html#details">More...</a><br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7e4fb4b7875367cad8d6cd3e90baa8f3"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsViewerInterface.html#a7e4fb4b7875367cad8d6cd3e90baa8f3">~StatisticsViewerInterface</a> ()</td></tr>
@@ -86,9 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af13e6581fed53a5070eb1390618a6ca1"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsViewerInterface.html#af13e6581fed53a5070eb1390618a6ca1">nofDocumentsInsertedChange</a> ()=0</td></tr>
 <tr class="memdesc:af13e6581fed53a5070eb1390618a6ca1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the change of the number of document inserted.  <a href="#af13e6581fed53a5070eb1390618a6ca1">More...</a><br/></td></tr>
 <tr class="separator:af13e6581fed53a5070eb1390618a6ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9abc2ff2f5d75c370fec11ddcb1ef6df"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsViewerInterface.html#a9abc2ff2f5d75c370fec11ddcb1ef6df">nextDfChange</a> (<a class="el" href="classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html">DocumentFrequencyChange</a> &amp;rec)=0</td></tr>
-<tr class="memdesc:a9abc2ff2f5d75c370fec11ddcb1ef6df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the next message propagating a change in the df (document frequency)  <a href="#a9abc2ff2f5d75c370fec11ddcb1ef6df">More...</a><br/></td></tr>
-<tr class="separator:a9abc2ff2f5d75c370fec11ddcb1ef6df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff987de1f463625bf95145466d86f7b6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsViewerInterface.html#aff987de1f463625bf95145466d86f7b6">nextDfChange</a> (<a class="el" href="classstrus_1_1TermStatisticsChange.html">TermStatisticsChange</a> &amp;rec)=0</td></tr>
+<tr class="memdesc:aff987de1f463625bf95145466d86f7b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the next message propagating a change in the df (document frequency)  <a href="#aff987de1f463625bf95145466d86f7b6">More...</a><br/></td></tr>
+<tr class="separator:aff987de1f463625bf95145466d86f7b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for a viewer of a statistics message (distributed index) </p>
@@ -119,7 +112,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a9abc2ff2f5d75c370fec11ddcb1ef6df"></a>
+<a class="anchor" id="aff987de1f463625bf95145466d86f7b6"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -129,7 +122,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual bool strus::StatisticsViewerInterface::nextDfChange </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html">DocumentFrequencyChange</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classstrus_1_1TermStatisticsChange.html">TermStatisticsChange</a> &amp;&#160;</td>
           <td class="paramname"><em>rec</em></td><td>)</td>
           <td></td>
         </tr>
@@ -185,7 +178,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

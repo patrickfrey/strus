@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -61,6 +61,7 @@
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classstrus_1_1MetaDataRestrictionInterface-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">strus::MetaDataRestrictionInterface Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
@@ -106,6 +107,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad37d7dffb1c90ed15390eeac1b6c613d"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ad37d7dffb1c90ed15390eeac1b6c613d">tostring</a> () const =0</td></tr>
 <tr class="memdesc:ad37d7dffb1c90ed15390eeac1b6c613d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a readable string representation of the expression.  <a href="#ad37d7dffb1c90ed15390eeac1b6c613d">More...</a><br/></td></tr>
 <tr class="separator:ad37d7dffb1c90ed15390eeac1b6c613d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:aaa45349ab1f084254ed5d9eebe0aab9c"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#aaa45349ab1f084254ed5d9eebe0aab9c">compareOperatorStr</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> op)</td></tr>
+<tr class="memdesc:aaa45349ab1f084254ed5d9eebe0aab9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the operator as string.  <a href="#aaa45349ab1f084254ed5d9eebe0aab9c">More...</a><br/></td></tr>
+<tr class="separator:aaa45349ab1f084254ed5d9eebe0aab9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12bc549460617ba2e69ac238ff6ebdd6"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#a12bc549460617ba2e69ac238ff6ebdd6">compareOperatorName</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> op)</td></tr>
+<tr class="memdesc:a12bc549460617ba2e69ac238ff6ebdd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the operator name as string.  <a href="#a12bc549460617ba2e69ac238ff6ebdd6">More...</a><br/></td></tr>
+<tr class="separator:a12bc549460617ba2e69ac238ff6ebdd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for building up a metadata restriction. </p>
@@ -246,6 +256,58 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a12bc549460617ba2e69ac238ff6ebdd6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static const char* strus::MetaDataRestrictionInterface::compareOperatorName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a>&#160;</td>
+          <td class="paramname"><em>op</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the operator name as string. </p>
+
+</div>
+</div>
+<a class="anchor" id="aaa45349ab1f084254ed5d9eebe0aab9c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static const char* strus::MetaDataRestrictionInterface::compareOperatorStr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a>&#160;</td>
+          <td class="paramname"><em>op</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the operator as string. </p>
+
+</div>
+</div>
 <a class="anchor" id="a8579cb2fed01193d09a26c9be0778cf6"></a>
 <div class="memitem">
 <div class="memproto">
@@ -305,7 +367,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

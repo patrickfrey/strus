@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -95,6 +95,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae95b9416827422ca9fa58c029406a283"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#ae95b9416827422ca9fa58c029406a283">addExclusionFeature</a> (const std::string &amp;set_)=0</td></tr>
 <tr class="memdesc:ae95b9416827422ca9fa58c029406a283"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of features to be used as exclusion (exclude documents that contain a feature of the set declared)  <a href="#ae95b9416827422ca9fa58c029406a283">More...</a><br/></td></tr>
 <tr class="separator:ae95b9416827422ca9fa58c029406a283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfa71b886aa2b4c91882928d1a601244"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#acfa71b886aa2b4c91882928d1a601244">getWeightingFeatureSets</a> () const =0</td></tr>
+<tr class="memdesc:acfa71b886aa2b4c91882928d1a601244"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of features to be used for weighting.  <a href="#acfa71b886aa2b4c91882928d1a601244">More...</a><br/></td></tr>
+<tr class="separator:acfa71b886aa2b4c91882928d1a601244"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af64e724434d89683cf2fb4189afc07fb"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#af64e724434d89683cf2fb4189afc07fb">getSelectionFeatureSets</a> () const =0</td></tr>
+<tr class="memdesc:af64e724434d89683cf2fb4189afc07fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of features to be used as selection (declare what documents to weight)  <a href="#af64e724434d89683cf2fb4189afc07fb">More...</a><br/></td></tr>
+<tr class="separator:af64e724434d89683cf2fb4189afc07fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31dbed6f0ff159dc2ed79bbd040e766a"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a31dbed6f0ff159dc2ed79bbd040e766a">getRestrictionFeatureSets</a> () const =0</td></tr>
+<tr class="memdesc:a31dbed6f0ff159dc2ed79bbd040e766a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the set names of features to be used as restriction (exclude documents that do not contain a feature of the set declared)  <a href="#a31dbed6f0ff159dc2ed79bbd040e766a">More...</a><br/></td></tr>
+<tr class="separator:a31dbed6f0ff159dc2ed79bbd040e766a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0900ac23ab3df40d39c35190b4c137a0"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a0900ac23ab3df40d39c35190b4c137a0">getExclusionFeatureSets</a> () const =0</td></tr>
+<tr class="memdesc:a0900ac23ab3df40d39c35190b4c137a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the set names of features to be used as exclusion (exclude documents that contain a feature of the set declared)  <a href="#a0900ac23ab3df40d39c35190b4c137a0">More...</a><br/></td></tr>
+<tr class="separator:a0900ac23ab3df40d39c35190b4c137a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48fca77972ca11a9c47ef0082a4e0ed2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a48fca77972ca11a9c47ef0082a4e0ed2">addSummarizerFunction</a> (const std::string &amp;functionName, <a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a> *function, const std::vector&lt; <a class="el" href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html">FeatureParameter</a> &gt; &amp;featureParameters, const std::string &amp;debugAttributeName=std::string())=0</td></tr>
 <tr class="memdesc:a48fca77972ca11a9c47ef0082a4e0ed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare a summarizer function to use for this query evaluation scheme.  <a href="#a48fca77972ca11a9c47ef0082a4e0ed2">More...</a><br/></td></tr>
 <tr class="separator:a48fca77972ca11a9c47ef0082a4e0ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -465,6 +477,110 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0900ac23ab3df40d39c35190b4c137a0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::QueryEvalInterface::getExclusionFeatureSets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the set names of features to be used as exclusion (exclude documents that contain a feature of the set declared) </p>
+<dl class="section return"><dt>Returns</dt><dd>the list of all exclusion feature set names declared </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a31dbed6f0ff159dc2ed79bbd040e766a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::QueryEvalInterface::getRestrictionFeatureSets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the set names of features to be used as restriction (exclude documents that do not contain a feature of the set declared) </p>
+<dl class="section return"><dt>Returns</dt><dd>the list of all restriction feature set names declared </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="af64e724434d89683cf2fb4189afc07fb"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::QueryEvalInterface::getSelectionFeatureSets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a set of features to be used as selection (declare what documents to weight) </p>
+<dl class="section return"><dt>Returns</dt><dd>the list of all selecting feature set names declared </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="acfa71b886aa2b4c91882928d1a601244"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::QueryEvalInterface::getWeightingFeatureSets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a set of features to be used for weighting. </p>
+<dl class="section return"><dt>Returns</dt><dd>the list of all weighting feature set names declared </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="queryEvalInterface_8hpp_source.html">queryEvalInterface.hpp</a></li>
 </ul>
@@ -472,7 +588,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

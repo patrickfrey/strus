@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -83,23 +82,26 @@
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ValueIteratorInterface.html#a3e9918c32e9f7400738f808317978173">skip</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* value, std::size_t size)=0;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keyword">virtual</span> std::vector&lt;std::string&gt; <a class="code" href="classstrus_1_1ValueIteratorInterface.html#a971fcf3590b9cdda75dec9d105fd8c2e">fetchValues</a>( std::size_t maxNofElements)=0;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;};</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ValueIteratorInterface.html#a83b569424d250be00cab9e5c50798a7d">skipPrefix</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* value, std::size_t size)=0;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keyword">virtual</span> std::vector&lt;std::string&gt; <a class="code" href="classstrus_1_1ValueIteratorInterface.html#a971fcf3590b9cdda75dec9d105fd8c2e">fetchValues</a>( std::size_t maxNofElements)=0;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;};</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
 <div class="ttc" id="classstrus_1_1ValueIteratorInterface_html_a3e9918c32e9f7400738f808317978173"><div class="ttname"><a href="classstrus_1_1ValueIteratorInterface.html#a3e9918c32e9f7400738f808317978173">strus::ValueIteratorInterface::skip</a></div><div class="ttdeci">virtual void skip(const char *value, std::size_t size)=0</div><div class="ttdoc">Set the next key to find. </div></div>
 <div class="ttc" id="classstrus_1_1ValueIteratorInterface_html"><div class="ttname"><a href="classstrus_1_1ValueIteratorInterface.html">strus::ValueIteratorInterface</a></div><div class="ttdoc">Structure that represents a set of strings as iterator. </div><div class="ttdef"><b>Definition:</b> valueIteratorInterface.hpp:21</div></div>
+<div class="ttc" id="classstrus_1_1ValueIteratorInterface_html_a83b569424d250be00cab9e5c50798a7d"><div class="ttname"><a href="classstrus_1_1ValueIteratorInterface.html#a83b569424d250be00cab9e5c50798a7d">strus::ValueIteratorInterface::skipPrefix</a></div><div class="ttdeci">virtual void skipPrefix(const char *value, std::size_t size)=0</div><div class="ttdoc">Set the next key to find with the condition that all elements fetched contain the key specified as pr...</div></div>
 <div class="ttc" id="classstrus_1_1ValueIteratorInterface_html_a91851751edf9d667a34f0d00cab41a0b"><div class="ttname"><a href="classstrus_1_1ValueIteratorInterface.html#a91851751edf9d667a34f0d00cab41a0b">strus::ValueIteratorInterface::~ValueIteratorInterface</a></div><div class="ttdeci">virtual ~ValueIteratorInterface()</div><div class="ttdef"><b>Definition:</b> valueIteratorInterface.hpp:24</div></div>
 <div class="ttc" id="classstrus_1_1ValueIteratorInterface_html_a971fcf3590b9cdda75dec9d105fd8c2e"><div class="ttname"><a href="classstrus_1_1ValueIteratorInterface.html#a971fcf3590b9cdda75dec9d105fd8c2e">strus::ValueIteratorInterface::fetchValues</a></div><div class="ttdeci">virtual std::vector&lt; std::string &gt; fetchValues(std::size_t maxNofElements)=0</div><div class="ttdoc">Fetch the next N elements. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

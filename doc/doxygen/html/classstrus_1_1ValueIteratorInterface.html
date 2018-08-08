@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -78,6 +78,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3e9918c32e9f7400738f808317978173"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ValueIteratorInterface.html#a3e9918c32e9f7400738f808317978173">skip</a> (const char *value, std::size_t size)=0</td></tr>
 <tr class="memdesc:a3e9918c32e9f7400738f808317978173"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the next key to find.  <a href="#a3e9918c32e9f7400738f808317978173">More...</a><br/></td></tr>
 <tr class="separator:a3e9918c32e9f7400738f808317978173"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83b569424d250be00cab9e5c50798a7d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ValueIteratorInterface.html#a83b569424d250be00cab9e5c50798a7d">skipPrefix</a> (const char *value, std::size_t size)=0</td></tr>
+<tr class="memdesc:a83b569424d250be00cab9e5c50798a7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the next key to find with the condition that all elements fetched contain the key specified as prefix.  <a href="#a83b569424d250be00cab9e5c50798a7d">More...</a><br/></td></tr>
+<tr class="separator:a83b569424d250be00cab9e5c50798a7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a971fcf3590b9cdda75dec9d105fd8c2e"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ValueIteratorInterface.html#a971fcf3590b9cdda75dec9d105fd8c2e">fetchValues</a> (std::size_t maxNofElements)=0</td></tr>
 <tr class="memdesc:a971fcf3590b9cdda75dec9d105fd8c2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the next N elements.  <a href="#a971fcf3590b9cdda75dec9d105fd8c2e">More...</a><br/></td></tr>
 <tr class="separator:a971fcf3590b9cdda75dec9d105fd8c2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,6 +189,49 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a83b569424d250be00cab9e5c50798a7d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::ValueIteratorInterface::skipPrefix </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the next key to find with the condition that all elements fetched contain the key specified as prefix. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>pointer key string to seek </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>sizeof of value in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="valueIteratorInterface_8hpp_source.html">valueIteratorInterface.hpp</a></li>
 </ul>
@@ -193,7 +239,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

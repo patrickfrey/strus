@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -75,18 +74,19 @@
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">class </span>QueryProcessorInterface;</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">class </span>StorageClientInterface;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">class </span>ErrorBufferInterface;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;QueryProcessorInterface* <a class="code" href="namespacestrus.html#acc92d6c60a2528e84bc60dd144850dd2">createQueryProcessor</a>( ErrorBufferInterface* errorhnd);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="namespacestrus_html_acc92d6c60a2528e84bc60dd144850dd2"><div class="ttname"><a href="namespacestrus.html#acc92d6c60a2528e84bc60dd144850dd2">strus::createQueryProcessor</a></div><div class="ttdeci">QueryProcessorInterface * createQueryProcessor(ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Create a query processor with the functions and operators needed for query evaluation. </div></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">class </span>FileLocatorInterface;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;QueryProcessorInterface* <a class="code" href="namespacestrus.html#a98c57a85ed775c234bba1e99e1bcfd25">createQueryProcessor</a>( <span class="keyword">const</span> FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="namespacestrus_html_a98c57a85ed775c234bba1e99e1bcfd25"><div class="ttname"><a href="namespacestrus.html#a98c57a85ed775c234bba1e99e1bcfd25">strus::createQueryProcessor</a></div><div class="ttdeci">QueryProcessorInterface * createQueryProcessor(const FileLocatorInterface *filelocator, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Create a query processor with the functions and operators needed for query evaluation. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

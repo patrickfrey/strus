@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -96,18 +96,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a60add1a17dd9f0d4ec2d021b67d762c4"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a60add1a17dd9f0d4ec2d021b67d762c4">featureConcepts</a> (const std::string &amp;conceptClass, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;index) const =0</td></tr>
 <tr class="memdesc:a60add1a17dd9f0d4ec2d021b67d762c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the set of learnt concepts for a feature defined.  <a href="#a60add1a17dd9f0d4ec2d021b67d762c4">More...</a><br/></td></tr>
 <tr class="separator:a60add1a17dd9f0d4ec2d021b67d762c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a70207499642f21b10d844d19fd85d9"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a7a70207499642f21b10d844d19fd85d9">featureVector</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;index) const =0</td></tr>
-<tr class="memdesc:a7a70207499642f21b10d844d19fd85d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the vector assigned to a feature.  <a href="#a7a70207499642f21b10d844d19fd85d9">More...</a><br/></td></tr>
-<tr class="separator:a7a70207499642f21b10d844d19fd85d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a844369de56d05ead1a7f412f6d44a72f"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a844369de56d05ead1a7f412f6d44a72f">featureVector</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;index) const =0</td></tr>
+<tr class="memdesc:a844369de56d05ead1a7f412f6d44a72f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the vector assigned to a feature.  <a href="#a844369de56d05ead1a7f412f6d44a72f">More...</a><br/></td></tr>
+<tr class="separator:a844369de56d05ead1a7f412f6d44a72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a556199a56b93735263765a16ff2e7abf"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a556199a56b93735263765a16ff2e7abf">featureName</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;index) const =0</td></tr>
 <tr class="memdesc:a556199a56b93735263765a16ff2e7abf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of a feature by its index starting from 0.  <a href="#a556199a56b93735263765a16ff2e7abf">More...</a><br/></td></tr>
 <tr class="separator:a556199a56b93735263765a16ff2e7abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13b478bdae75de10cc9cff69c62b9617"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a13b478bdae75de10cc9cff69c62b9617">featureIndex</a> (const std::string &amp;name) const =0</td></tr>
 <tr class="memdesc:a13b478bdae75de10cc9cff69c62b9617"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the index starting from 0 of a feature by its name.  <a href="#a13b478bdae75de10cc9cff69c62b9617">More...</a><br/></td></tr>
 <tr class="separator:a13b478bdae75de10cc9cff69c62b9617"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab9102863dfbc26a6ad2c59ce573a678"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#aab9102863dfbc26a6ad2c59ce573a678">vectorSimilarity</a> (const std::vector&lt; double &gt; &amp;v1, const std::vector&lt; double &gt; &amp;v2) const =0</td></tr>
-<tr class="memdesc:aab9102863dfbc26a6ad2c59ce573a678"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage.  <a href="#aab9102863dfbc26a6ad2c59ce573a678">More...</a><br/></td></tr>
-<tr class="separator:aab9102863dfbc26a6ad2c59ce573a678"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59ea9b13ba4df97a0750b8a55e3455b5"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a59ea9b13ba4df97a0750b8a55e3455b5">vectorSimilarity</a> (const std::vector&lt; float &gt; &amp;v1, const std::vector&lt; float &gt; &amp;v2) const =0</td></tr>
+<tr class="memdesc:a59ea9b13ba4df97a0750b8a55e3455b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage.  <a href="#a59ea9b13ba4df97a0750b8a55e3455b5">More...</a><br/></td></tr>
+<tr class="separator:a59ea9b13ba4df97a0750b8a55e3455b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a259345ad0ffd52dcd219c78341bdf485"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a259345ad0ffd52dcd219c78341bdf485">nofFeatures</a> () const =0</td></tr>
 <tr class="memdesc:a259345ad0ffd52dcd219c78341bdf485"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of feature vectors defined.  <a href="#a259345ad0ffd52dcd219c78341bdf485">More...</a><br/></td></tr>
 <tr class="separator:a259345ad0ffd52dcd219c78341bdf485"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -240,7 +240,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the resulting vector indices (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;double&gt;&amp; vec) starting from 0) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the resulting vector indices (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;float&gt;&amp; vec) starting from 0) </dd></dl>
 
 </div>
 </div>
@@ -410,11 +410,11 @@ Public Member Functions</h2></td></tr>
 <p>Get the index starting from 0 of a feature by its name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;double&gt;&amp;) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;float&gt;&amp;) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;double&gt;&amp; vec) starting from 0) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;float&gt;&amp; vec) starting from 0) </dd></dl>
 
 </div>
 </div>
@@ -443,15 +443,15 @@ Public Member Functions</h2></td></tr>
 <p>Get the name of a feature by its index starting from 0. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;double&gt;&amp; vec) starting from 0) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name, const std::vector&lt;float&gt;&amp; vec) starting from 0) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;double&gt;&amp;) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;float&gt;&amp;) </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a7a70207499642f21b10d844d19fd85d9"></a>
+<a class="anchor" id="a844369de56d05ead1a7f412f6d44a72f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -459,7 +459,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::vector&lt;double&gt; strus::VectorStorageClientInterface::featureVector </td>
+          <td class="memname">virtual std::vector&lt;float&gt; strus::VectorStorageClientInterface::featureVector </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -476,11 +476,11 @@ Public Member Functions</h2></td></tr>
 <p>Get the vector assigned to a feature. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of the feature in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;double&gt;&amp; vec) starting from 0 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of the feature in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;float&gt;&amp; vec) starting from 0 </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the vector assinged to this feature index with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;double&gt;&amp;) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the vector assinged to this feature index with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;float&gt;&amp;) </dd></dl>
 
 </div>
 </div>
@@ -543,7 +543,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aab9102863dfbc26a6ad2c59ce573a678"></a>
+<a class="anchor" id="a59ea9b13ba4df97a0750b8a55e3455b5"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -553,13 +553,13 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual double strus::VectorStorageClientInterface::vectorSimilarity </td>
           <td>(</td>
-          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>v1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>v2</em>&#160;</td>
         </tr>
         <tr>
@@ -594,7 +594,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

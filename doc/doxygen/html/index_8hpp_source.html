@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -84,15 +83,59 @@
 <div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">   32</a></span>&#160;        <span class="keyword">typedef</span> int64_t <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}<span class="comment">//namespace</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">namespace </span>strus {</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html">   38</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1IndexRange.html">IndexRange</a></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#a88b4757a2a12a9000f4a910fde91cb0b">   41</a></span>&#160;        <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> <a class="code" href="classstrus_1_1IndexRange.html#a88b4757a2a12a9000f4a910fde91cb0b">start</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">        </span>{</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                <span class="keywordflow">return</span> m_start;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        }</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#a37787b6bbbeaa687b381cea9c4efab71">   45</a></span>&#160;        <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> <a class="code" href="classstrus_1_1IndexRange.html#a37787b6bbbeaa687b381cea9c4efab71">end</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">        </span>{</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                <span class="keywordflow">return</span> m_end;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        }</div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#a5bdeab56d15d08ad34b779be64c84717">   49</a></span>&#160;        <span class="keywordtype">int</span> <a class="code" href="classstrus_1_1IndexRange.html#a5bdeab56d15d08ad34b779be64c84717">len</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keyword">        </span>{</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keywordflow">return</span> m_end - m_start;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        }</div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#a37dde9fc46a041d168e235f99ee06dd4">   53</a></span>&#160;        <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1IndexRange.html#a37dde9fc46a041d168e235f99ee06dd4">defined</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keyword">        </span>{</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                <span class="keywordflow">return</span> m_start &lt; m_end;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#af05b3e404904004c37f61f972dd65b3e">   58</a></span>&#160;        <a class="code" href="classstrus_1_1IndexRange.html#af05b3e404904004c37f61f972dd65b3e">IndexRange</a>()</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                :m_start(0),m_end(0){}</div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#abe7f3b925c8a913cb601a29ea8b95fe6">   60</a></span>&#160;        <a class="code" href="classstrus_1_1IndexRange.html#abe7f3b925c8a913cb601a29ea8b95fe6">IndexRange</a>( <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> start_, <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> end_)</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                :m_start(start_),m_end(end_){}</div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classstrus_1_1IndexRange.html#ab6298b5c69064beb9fb6e1989ff1ecdd">   62</a></span>&#160;        <a class="code" href="classstrus_1_1IndexRange.html#ab6298b5c69064beb9fb6e1989ff1ecdd">IndexRange</a>( <span class="keyword">const</span> <a class="code" href="classstrus_1_1IndexRange.html">IndexRange</a>&amp; o)</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                :m_start(o.m_start),m_end(o.m_end){}</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> m_start;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> m_end;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;};</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_abe7f3b925c8a913cb601a29ea8b95fe6"><div class="ttname"><a href="classstrus_1_1IndexRange.html#abe7f3b925c8a913cb601a29ea8b95fe6">strus::IndexRange::IndexRange</a></div><div class="ttdeci">IndexRange(Index start_, Index end_)</div><div class="ttdef"><b>Definition:</b> index.hpp:60</div></div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html"><div class="ttname"><a href="classstrus_1_1IndexRange.html">strus::IndexRange</a></div><div class="ttdef"><b>Definition:</b> index.hpp:38</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_a5bdeab56d15d08ad34b779be64c84717"><div class="ttname"><a href="classstrus_1_1IndexRange.html#a5bdeab56d15d08ad34b779be64c84717">strus::IndexRange::len</a></div><div class="ttdeci">int len() const </div><div class="ttdef"><b>Definition:</b> index.hpp:49</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_a37dde9fc46a041d168e235f99ee06dd4"><div class="ttname"><a href="classstrus_1_1IndexRange.html#a37dde9fc46a041d168e235f99ee06dd4">strus::IndexRange::defined</a></div><div class="ttdeci">bool defined() const </div><div class="ttdef"><b>Definition:</b> index.hpp:53</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_a37787b6bbbeaa687b381cea9c4efab71"><div class="ttname"><a href="classstrus_1_1IndexRange.html#a37787b6bbbeaa687b381cea9c4efab71">strus::IndexRange::end</a></div><div class="ttdeci">Index end() const </div><div class="ttdef"><b>Definition:</b> index.hpp:45</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_af05b3e404904004c37f61f972dd65b3e"><div class="ttname"><a href="classstrus_1_1IndexRange.html#af05b3e404904004c37f61f972dd65b3e">strus::IndexRange::IndexRange</a></div><div class="ttdeci">IndexRange()</div><div class="ttdef"><b>Definition:</b> index.hpp:58</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_ab6298b5c69064beb9fb6e1989ff1ecdd"><div class="ttname"><a href="classstrus_1_1IndexRange.html#ab6298b5c69064beb9fb6e1989ff1ecdd">strus::IndexRange::IndexRange</a></div><div class="ttdeci">IndexRange(const IndexRange &amp;o)</div><div class="ttdef"><b>Definition:</b> index.hpp:62</div></div>
 <div class="ttc" id="namespacestrus_html_ac119a1148d695b5aa8a38a919c7cb7f9"><div class="ttname"><a href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">strus::GlobalCounter</a></div><div class="ttdeci">int64_t GlobalCounter</div><div class="ttdoc">Number type generally used for indices globally shared between different instances of strus...</div><div class="ttdef"><b>Definition:</b> index.hpp:32</div></div>
+<div class="ttc" id="classstrus_1_1IndexRange_html_a88b4757a2a12a9000f4a910fde91cb0b"><div class="ttname"><a href="classstrus_1_1IndexRange.html#a88b4757a2a12a9000f4a910fde91cb0b">strus::IndexRange::start</a></div><div class="ttdeci">Index start() const </div><div class="ttdef"><b>Definition:</b> index.hpp:41</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

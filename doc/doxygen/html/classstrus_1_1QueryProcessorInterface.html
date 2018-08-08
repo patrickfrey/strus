@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -76,7 +76,8 @@
 Public Types</h2></td></tr>
 <tr class="memitem:a037a1d7e54e477cb69db5a34e5d9a193"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> { <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193aebb46c3fe674f3e6062eecb71bb95c50">PostingJoinOperator</a>, 
 <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193aca809cb3abcdb793c35350b1079a9c69">WeightingFunction</a>, 
-<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193afd4302fe2ed2e3d231372de4d45984f3">SummarizerFunction</a>
+<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193afd4302fe2ed2e3d231372de4d45984f3">SummarizerFunction</a>, 
+<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193a9a1d22841a6e5f2bf2584515a18902ae">ScalarFunctionParser</a>
  }</td></tr>
 <tr class="memdesc:a037a1d7e54e477cb69db5a34e5d9a193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for fetching the list of available functions.  <a href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">More...</a><br/></td></tr>
 <tr class="separator:a037a1d7e54e477cb69db5a34e5d9a193"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -86,6 +87,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4db360d2b72feedbd1f9915301b5dbdb"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a4db360d2b72feedbd1f9915301b5dbdb">~QueryProcessorInterface</a> ()</td></tr>
 <tr class="memdesc:a4db360d2b72feedbd1f9915301b5dbdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a4db360d2b72feedbd1f9915301b5dbdb">More...</a><br/></td></tr>
 <tr class="separator:a4db360d2b72feedbd1f9915301b5dbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab28fe2431589df3fc629ce2d4c5c6b1a"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ab28fe2431589df3fc629ce2d4c5c6b1a">getResourceFilePath</a> (const std::string &amp;filename) const =0</td></tr>
+<tr class="memdesc:ab28fe2431589df3fc629ce2d4c5c6b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the absolute path of a resource file.  <a href="#ab28fe2431589df3fc629ce2d4c5c6b1a">More...</a><br/></td></tr>
+<tr class="separator:ab28fe2431589df3fc629ce2d4c5c6b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a256d0c946e2565dfaeab061de9770d28"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a256d0c946e2565dfaeab061de9770d28">definePostingJoinOperator</a> (const std::string &amp;name, <a class="el" href="classstrus_1_1PostingJoinOperatorInterface.html">PostingJoinOperatorInterface</a> *op)=0</td></tr>
 <tr class="memdesc:a256d0c946e2565dfaeab061de9770d28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a new posting set join operation.  <a href="#a256d0c946e2565dfaeab061de9770d28">More...</a><br/></td></tr>
 <tr class="separator:a256d0c946e2565dfaeab061de9770d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -141,6 +145,9 @@ Public Member Functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="a037a1d7e54e477cb69db5a34e5d9a193afd4302fe2ed2e3d231372de4d45984f3"></a>SummarizerFunction</em>&#160;</td><td class="fielddoc">
 <p>Addresses a summarization function. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a037a1d7e54e477cb69db5a34e5d9a193a9a1d22841a6e5f2bf2584515a18902ae"></a>ScalarFunctionParser</em>&#160;</td><td class="fielddoc">
+<p>Addresses a parser for a language for arithmetic expression as string. </p>
 </td></tr>
 </table>
 
@@ -411,6 +418,38 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ab28fe2431589df3fc629ce2d4c5c6b1a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::string strus::QueryProcessorInterface::getResourceFilePath </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the absolute path of a resource file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>name of the resource file </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a1c2407ac79768922c876ef220de5e106"></a>
 <div class="memitem">
 <div class="memproto">
@@ -517,7 +556,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

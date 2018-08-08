@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -59,7 +59,6 @@
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classstrus_1_1VectorStorageSearchInterface-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -72,23 +71,19 @@
 
 <p><code>#include &lt;<a class="el" href="vectorStorageSearchInterface_8hpp_source.html">vectorStorageSearchInterface.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html">Result</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weighted feature number as result of search.  <a href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html#details">More...</a><br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:adcd9f7bb9618d4b0574bc80776073adc"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#adcd9f7bb9618d4b0574bc80776073adc">~VectorStorageSearchInterface</a> ()</td></tr>
 <tr class="memdesc:adcd9f7bb9618d4b0574bc80776073adc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#adcd9f7bb9618d4b0574bc80776073adc">More...</a><br/></td></tr>
 <tr class="separator:adcd9f7bb9618d4b0574bc80776073adc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a56af68fb8d512feb5f15e498dde557"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html">Result</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a6a56af68fb8d512feb5f15e498dde557">findSimilar</a> (const std::vector&lt; double &gt; &amp;vec, unsigned int maxNofResults) const =0</td></tr>
-<tr class="memdesc:a6a56af68fb8d512feb5f15e498dde557"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find all features that are within maximum simiarity distance of the model (or at least try to with best effort, if the model is probabilistic).  <a href="#a6a56af68fb8d512feb5f15e498dde557">More...</a><br/></td></tr>
-<tr class="separator:a6a56af68fb8d512feb5f15e498dde557"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25b25e791061b7ec941e96dc71d41fec"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html">Result</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a25b25e791061b7ec941e96dc71d41fec">findSimilarFromSelection</a> (const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;candidates, const std::vector&lt; double &gt; &amp;vec, unsigned int maxNofResults) const =0</td></tr>
-<tr class="memdesc:a25b25e791061b7ec941e96dc71d41fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find all features from a list of candidates that are within maximum simiarity distance of the model.  <a href="#a25b25e791061b7ec941e96dc71d41fec">More...</a><br/></td></tr>
-<tr class="separator:a25b25e791061b7ec941e96dc71d41fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d88ff8aa16ad4292795ba4fc885d4a7"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a3d88ff8aa16ad4292795ba4fc885d4a7">findSimilar</a> (const std::vector&lt; float &gt; &amp;vec, unsigned int maxNofResults) const =0</td></tr>
+<tr class="memdesc:a3d88ff8aa16ad4292795ba4fc885d4a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find all features that are within maximum simiarity distance of the model (or at least try to with best effort, if the model is probabilistic).  <a href="#a3d88ff8aa16ad4292795ba4fc885d4a7">More...</a><br/></td></tr>
+<tr class="separator:a3d88ff8aa16ad4292795ba4fc885d4a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a614a20570047ffb5e7d75b339ea42fa9"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
+&lt; <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a614a20570047ffb5e7d75b339ea42fa9">findSimilarFromSelection</a> (const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;candidates, const std::vector&lt; float &gt; &amp;vec, unsigned int maxNofResults) const =0</td></tr>
+<tr class="memdesc:a614a20570047ffb5e7d75b339ea42fa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find all features from a list of candidates that are within maximum simiarity distance of the model.  <a href="#a614a20570047ffb5e7d75b339ea42fa9">More...</a><br/></td></tr>
+<tr class="separator:a614a20570047ffb5e7d75b339ea42fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86e08cdb6775181da30be08331999114"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a86e08cdb6775181da30be08331999114">close</a> ()=0</td></tr>
 <tr class="memdesc:a86e08cdb6775181da30be08331999114"><td class="mdescLeft">&#160;</td><td class="mdescRight">Explicit close of the database access, if database was used.  <a href="#a86e08cdb6775181da30be08331999114">More...</a><br/></td></tr>
 <tr class="separator:a86e08cdb6775181da30be08331999114"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,7 +143,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6a56af68fb8d512feb5f15e498dde557"></a>
+<a class="anchor" id="a3d88ff8aa16ad4292795ba4fc885d4a7"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -156,9 +151,9 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::vector&lt;<a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html">Result</a>&gt; strus::VectorStorageSearchInterface::findSimilar </td>
+          <td class="memname">virtual std::vector&lt;<a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a>&gt; strus::VectorStorageSearchInterface::findSimilar </td>
           <td>(</td>
-          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>vec</em>, </td>
         </tr>
         <tr>
@@ -191,7 +186,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a25b25e791061b7ec941e96dc71d41fec"></a>
+<a class="anchor" id="a614a20570047ffb5e7d75b339ea42fa9"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -199,7 +194,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::vector&lt;<a class="el" href="classstrus_1_1VectorStorageSearchInterface_1_1Result.html">Result</a>&gt; strus::VectorStorageSearchInterface::findSimilarFromSelection </td>
+          <td class="memname">virtual std::vector&lt;<a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a>&gt; strus::VectorStorageSearchInterface::findSimilarFromSelection </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>candidates</em>, </td>
@@ -207,7 +202,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>vec</em>, </td>
         </tr>
         <tr>
@@ -248,7 +243,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

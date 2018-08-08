@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -61,6 +61,7 @@
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="structstrus_1_1FunctionDescription_1_1Parameter-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">strus::FunctionDescription::Parameter Struct Reference</div>  </div>
@@ -96,6 +97,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9b061a9050e16e0157a4ed22e708a1b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#ab239411a50668b599f45a0c355c35517">Type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#a9b061a9050e16e0157a4ed22e708a1b3">type</a> () const </td></tr>
 <tr class="memdesc:a9b061a9050e16e0157a4ed22e708a1b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the type of the parameter.  <a href="#a9b061a9050e16e0157a4ed22e708a1b3">More...</a><br/></td></tr>
 <tr class="separator:a9b061a9050e16e0157a4ed22e708a1b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dde734da0abe001cb0649b9ce0e27ef"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#a8dde734da0abe001cb0649b9ce0e27ef">typeName</a> () const </td></tr>
+<tr class="memdesc:a8dde734da0abe001cb0649b9ce0e27ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the type of the parameter as string.  <a href="#a8dde734da0abe001cb0649b9ce0e27ef">More...</a><br/></td></tr>
+<tr class="separator:a8dde734da0abe001cb0649b9ce0e27ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2eff4c68bcd99299dd11423765d924e"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#ad2eff4c68bcd99299dd11423765d924e">name</a> () const </td></tr>
 <tr class="memdesc:ad2eff4c68bcd99299dd11423765d924e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of the parameter.  <a href="#ad2eff4c68bcd99299dd11423765d924e">More...</a><br/></td></tr>
 <tr class="separator:ad2eff4c68bcd99299dd11423765d924e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -105,6 +109,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa3c92937bec523cc9bd321e67cd64ec6"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#aa3c92937bec523cc9bd321e67cd64ec6">domain</a> () const </td></tr>
 <tr class="memdesc:aa3c92937bec523cc9bd321e67cd64ec6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the description of the parameter domain.  <a href="#aa3c92937bec523cc9bd321e67cd64ec6">More...</a><br/></td></tr>
 <tr class="separator:aa3c92937bec523cc9bd321e67cd64ec6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ab7874d0cd70c705205c6b4b7b017f002"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#ab7874d0cd70c705205c6b4b7b017f002">typeName</a> (<a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#ab239411a50668b599f45a0c355c35517">Type</a> i)</td></tr>
+<tr class="separator:ab7874d0cd70c705205c6b4b7b017f002"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Structure that describes a parameter. </p>
@@ -316,6 +325,55 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ab7874d0cd70c705205c6b4b7b017f002"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static const char* strus::FunctionDescription::Parameter::typeName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structstrus_1_1FunctionDescription_1_1Parameter.html#ab239411a50668b599f45a0c355c35517">Type</a>&#160;</td>
+          <td class="paramname"><em>i</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8dde734da0abe001cb0649b9ce0e27ef"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* strus::FunctionDescription::Parameter::typeName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the type of the parameter as string. </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="functionDescription_8hpp_source.html">functionDescription.hpp</a></li>
 </ul>
@@ -323,7 +381,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

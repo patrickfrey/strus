@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.15</span>
+   &#160;<span id="projectnumber">0.16</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -94,26 +93,39 @@
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        };</div>
 <div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classstrus_1_1MetaDataRestrictionInterface.html#a607f0618df32a1b6b28fa5d8e6d7208ea606e46aec1761a87089d0ee5e699d021">   39</a></span>&#160;        <span class="keyword">enum</span> {<a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#a607f0618df32a1b6b28fa5d8e6d7208ea606e46aec1761a87089d0ee5e699d021">NofCompareOperators</a>=((int)<a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988a153df242f665ba40cb073870b6604e28">CompareGreaterEqual</a>+1)};</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#aa6ed04e0184676f7237ba8e2dcfda6d6">addCondition</a>(</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a>&amp; opr,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                        <span class="keyword">const</span> std::string&amp; name,</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; operand,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                        <span class="keywordtype">bool</span> newGroup=<span class="keyword">true</span>)=0;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInstanceInterface.html">MetaDataRestrictionInstanceInterface</a>* <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#a8579cb2fed01193d09a26c9be0778cf6">createInstance</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">virtual</span> std::string <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ad37d7dffb1c90ed15390eeac1b6c613d">tostring</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;};</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} <span class="comment">//namespace</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classstrus_1_1MetaDataRestrictionInterface.html#aaa45349ab1f084254ed5d9eebe0aab9c">   42</a></span>&#160;        <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#aaa45349ab1f084254ed5d9eebe0aab9c">compareOperatorStr</a>( <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> op)</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ar[] = {<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;&lt;=&quot;</span>,<span class="stringliteral">&quot;==&quot;</span>,<span class="stringliteral">&quot;!=&quot;</span>,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&gt;=&quot;</span>,0};</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                <span class="keywordflow">return</span> ar[ (int)op];</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        }</div>
+<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="classstrus_1_1MetaDataRestrictionInterface.html#a12bc549460617ba2e69ac238ff6ebdd6">   48</a></span>&#160;        <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#a12bc549460617ba2e69ac238ff6ebdd6">compareOperatorName</a>( <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> op)</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        {</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ar[] = {<span class="stringliteral">&quot;lt&quot;</span>,<span class="stringliteral">&quot;le&quot;</span>,<span class="stringliteral">&quot;eq&quot;</span>,<span class="stringliteral">&quot;ne&quot;</span>,<span class="stringliteral">&quot;gt&quot;</span>,<span class="stringliteral">&quot;ge&quot;</span>,0};</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keywordflow">return</span> ar[ (int)op];</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        }</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#aa6ed04e0184676f7237ba8e2dcfda6d6">addCondition</a>(</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a>&amp; opr,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                        <span class="keyword">const</span> std::string&amp; name,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; operand,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                        <span class="keywordtype">bool</span> newGroup=<span class="keyword">true</span>)=0;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1MetaDataRestrictionInstanceInterface.html">MetaDataRestrictionInstanceInterface</a>* <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#a8579cb2fed01193d09a26c9be0778cf6">createInstance</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keyword">virtual</span> std::string <a class="code" href="classstrus_1_1MetaDataRestrictionInterface.html#ad37d7dffb1c90ed15390eeac1b6c613d">tostring</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;};</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;} <span class="comment">//namespace</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_a12bc549460617ba2e69ac238ff6ebdd6"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#a12bc549460617ba2e69ac238ff6ebdd6">strus::MetaDataRestrictionInterface::compareOperatorName</a></div><div class="ttdeci">static const char * compareOperatorName(CompareOperator op)</div><div class="ttdoc">Get the operator name as string. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:48</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_ac59a8751007b64ee4218fb3250ccf988a0af5904ecd93a02d495f5c8cd5345997"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988a0af5904ecd93a02d495f5c8cd5345997">strus::MetaDataRestrictionInterface::CompareEqual</a></div><div class="ttdoc">operator &#39;==&#39; respecting machine epsilon </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:33</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInstanceInterface_html"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInstanceInterface.html">strus::MetaDataRestrictionInstanceInterface</a></div><div class="ttdoc">Class for building up a metadata restriction. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInstanceInterface.hpp:18</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html">strus::MetaDataRestrictionInterface</a></div><div class="ttdoc">Class for building up a metadata restriction. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:21</div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_ac59a8751007b64ee4218fb3250ccf988a02e66b08968ef27a3475799a668c58f4"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988a02e66b08968ef27a3475799a668c58f4">strus::MetaDataRestrictionInterface::CompareGreater</a></div><div class="ttdoc">operator &#39;&gt;&#39; respecting machine epsilon </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:35</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_ac59a8751007b64ee4218fb3250ccf988afa82c4674823370988671f34514301f2"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988afa82c4674823370988671f34514301f2">strus::MetaDataRestrictionInterface::CompareLessEqual</a></div><div class="ttdoc">operator &#39;&lt;=&#39; respecting machine epsilon </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:32</div></div>
+<div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_aaa45349ab1f084254ed5d9eebe0aab9c"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#aaa45349ab1f084254ed5d9eebe0aab9c">strus::MetaDataRestrictionInterface::compareOperatorStr</a></div><div class="ttdeci">static const char * compareOperatorStr(CompareOperator op)</div><div class="ttdoc">Get the operator as string. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:42</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_a8579cb2fed01193d09a26c9be0778cf6"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#a8579cb2fed01193d09a26c9be0778cf6">strus::MetaDataRestrictionInterface::createInstance</a></div><div class="ttdeci">virtual MetaDataRestrictionInstanceInterface * createInstance() const =0</div><div class="ttdoc">Create an instance of this metadata restriction. </div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_a7dc9a47c1ef8a621025a3d5c27e2197e"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#a7dc9a47c1ef8a621025a3d5c27e2197e">strus::MetaDataRestrictionInterface::~MetaDataRestrictionInterface</a></div><div class="ttdeci">virtual ~MetaDataRestrictionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:25</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataRestrictionInterface_html_ac59a8751007b64ee4218fb3250ccf988"><div class="ttname"><a href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">strus::MetaDataRestrictionInterface::CompareOperator</a></div><div class="ttdeci">CompareOperator</div><div class="ttdoc">Comparison operator for restrictions. </div><div class="ttdef"><b>Definition:</b> metaDataRestrictionInterface.hpp:29</div></div>
@@ -127,7 +139,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
