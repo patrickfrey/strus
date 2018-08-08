@@ -8,8 +8,10 @@
 #include "databaseClient.hpp"
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
+#include "leveldbErrorCode.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
@@ -62,13 +64,13 @@ class DatabaseBackupCursor
 	,public DatabaseCursor
 {
 public:
-	DatabaseBackupCursor( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+	DatabaseBackupCursor( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
 		:DatabaseCursor( conn_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
-			const char*& key,
+			const char*& keyptr,
 			std::size_t& keysize,
-			const char*& blk,
+			const char*& blkptr,
 			std::size_t& blksize)
 	{
 		try
@@ -83,9 +85,9 @@ public:
 			}
 			if (!m_key.defined()) return false;
 			Slice blkslice = value();
-			key = m_key.ptr();
+			keyptr = m_key.ptr();
 			keysize = m_key.size();
-			blk = blkslice.ptr();
+			blkptr = blkslice.ptr();
 			blksize = blkslice.size();
 			return true;
 		}
@@ -127,7 +129,7 @@ void DatabaseClient::writeImm(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' writeImm: %s"), MODULENAME, *m_errorhnd);
@@ -148,7 +150,7 @@ void DatabaseClient::removeImm(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' removeImm: %s"), MODULENAME, *m_errorhnd);
@@ -177,7 +179,7 @@ bool DatabaseClient::readValue(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 		return true;
 	}

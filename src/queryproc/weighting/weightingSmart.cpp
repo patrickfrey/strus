@@ -15,14 +15,14 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInstanceInterface.hpp"
 #include "strus/base/string_format.hpp"
-#include "private/utils.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 
-#define METHOD_NAME "SMART"
+#define THIS_METHOD_NAME const_cast<char*>("SMART")
 #define NOF_IMPLICIT_ARGUMENTS 4
 
 using namespace strus;
@@ -41,7 +41,7 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 {
 	if (!m_func.get())
 	{
-		throw strus::runtime_error( "%s", _TXT("failed to create weighting function instance"));
+		throw std::runtime_error( _TXT("failed to create weighting function instance"));
 	}
 }
 
@@ -53,16 +53,16 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			m_featar.push_back( Feature( itr_, (double)weight_, stats_));
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
+			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionContextSmart::setVariableValue( const std::string& name, double value)
@@ -118,7 +118,7 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
 
 	if (!m_metadatahnd.empty())
 	{
@@ -158,15 +158,15 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 	{
 		if (m_func.get()) m_func.reset();
 
-		if (utils::caseInsensitiveEquals( name, "function"))
+		if (strus::caseInsensitiveEquals( name, "function"))
 		{
 			if (!m_expression.empty())
 			{
-				throw strus::runtime_error( "%s", _TXT( "expression defined twice"));
+				throw std::runtime_error( _TXT( "expression defined twice"));
 			}
 			m_expression = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata"))
+		else if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			if (m_metadataar.size() > WeightingFunctionContextSmart::MaxNofParameter)
 			{
@@ -179,14 +179,14 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 			throw strus::runtime_error(_TXT( "unknown string type parameter: %s"), name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "metadata"))
+		if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			throw strus::runtime_error(_TXT( "parameter '%s' not expected as numeric"), name.c_str());
 		}
@@ -196,7 +196,7 @@ void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& nam
 			if (m_func.get()) m_func->setDefaultVariableValue( name, value);
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceSmart::initFunction() const
@@ -237,7 +237,7 @@ std::vector<std::string> WeightingFunctionInstanceSmart::getVariables() const
 	
 		return m_func->getVariables();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, std::vector<std::string>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<std::string>());
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctionContext(
@@ -263,7 +263,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctio
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextSmart( m_func.get(), metadata, metadatahnd, (double)nofdocs, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceSmart::tostring() const
@@ -289,7 +289,7 @@ std::string WeightingFunctionInstanceSmart::tostring() const
 		}
 		return msg.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 WeightingFunctionInstanceInterface* WeightingFunctionSmart::createInstance(
@@ -299,7 +299,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionSmart::createInstance(
 	{
 		return new WeightingFunctionInstanceSmart( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionSmart::getDescription() const
@@ -314,7 +314,7 @@ FunctionDescription WeightingFunctionSmart::getDescription() const
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
 

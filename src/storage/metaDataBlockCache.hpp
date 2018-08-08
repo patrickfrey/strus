@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
-#include "private/utils.hpp"
+#include "strus/base/shared_ptr.hpp"
 
 namespace strus {
 
@@ -47,7 +47,7 @@ private:
 	DatabaseClientInterface* m_database;
 	MetaDataDescription m_descr;
 	DatabaseAdapter_DocMetaData m_dbadapter;
-	utils::SharedPtr<MetaDataBlock> m_ar[ CacheSize];
+	strus::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
 	std::vector<unsigned int> m_voidar;
 };
 

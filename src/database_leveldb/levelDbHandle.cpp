@@ -9,8 +9,13 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
+#include "strus/base/thread.hpp"
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
+#include <iostream>
+#include <sstream>
+#include <cstring>
 
 using namespace strus;
 
@@ -52,7 +57,7 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	}
 	if (m_cachesize_k)
 	{
-		if (m_cachesize_k * 1024 < m_cachesize_k) throw strus::runtime_error( "%s", _TXT( "size of cache out of range"));
+		if (m_cachesize_k * 1024 < m_cachesize_k) throw std::runtime_error( _TXT( "size of cache out of range"));
 		m_dboptions.block_cache = leveldb::NewLRUCache( m_cachesize_k * 1024);
 	}
 	if (!m_compression)
@@ -105,9 +110,9 @@ void LevelDbHandle::cleanup()
 	}
 }
 
-utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
+strus::shared_ptr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
 {
-	utils::ScopedLock lock( m_map_mutex);
+	strus::scoped_lock lock( m_map_mutex);
 	std::string path = normalizePath( path_);
 
 	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
@@ -120,7 +125,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 	}
 	if (mi == m_map.end())
 	{
-		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
+		strus::shared_ptr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
 		m_map.push_back( rt);
 		return rt;
 	}
@@ -132,7 +137,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 		||  (writeBufferSize_ && (*mi)->writeBufferSize() != writeBufferSize_)
 		||  (blockSize_ && (*mi)->blockSize() != blockSize_))
 		{
-			throw strus::runtime_error( "%s", _TXT( "level DB key value store with the same path opened twice but with different settings"));
+			throw std::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
 		}
 		return *mi;
 	}
@@ -140,7 +145,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 
 void LevelDbHandleMap::dereference( const char* path)
 {
-	utils::ScopedLock lock( m_map_mutex);
+	strus::scoped_lock lock( m_map_mutex);
 	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
@@ -175,7 +180,7 @@ void LevelDbConnection::close()
 
 void LevelDbConnection::delete_iterators()
 {
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	std::list<leveldb::Iterator*>::iterator ii = m_itrlist.begin(), ie = m_itrlist.end();
 	for (; ii != ie; ++ii)
 	{
@@ -189,13 +194,13 @@ void LevelDbConnection::delete_iterators()
 
 LevelDbConnection::IteratorHandle LevelDbConnection::newIterator( const leveldb::ReadOptions& opt)
 {
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	m_itrlist.push_back((leveldb::Iterator*)0);
 
 	leveldb::DB* dbh = db();
-	if (!dbh) throw strus::runtime_error( "%s", _TXT("cannot create a levelDB iterator on a connection closed"));
+	if (!dbh) throw std::runtime_error( _TXT("cannot create a levelDB iterator on a connection closed"));
 	leveldb::Iterator* itr = dbh->NewIterator( opt);
-	if (!itr) throw strus::runtime_error( "%s", _TXT("failed to create a levelDB iterator"));
+	if (!itr) throw std::runtime_error( _TXT("failed to create a levelDB iterator"));
 
 	m_itrlist.back() = itr;
 	IteratorHandle last = m_itrlist.end();
@@ -208,7 +213,7 @@ void LevelDbConnection::deleteIterator( IteratorHandle& ihnd)
 	{
 		delete *ihnd;
 	}
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	m_itrlist.erase( ihnd);
 }
 

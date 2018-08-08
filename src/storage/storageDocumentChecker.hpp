@@ -9,6 +9,7 @@
 #define _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/index.hpp"
 #include <string>
 #include <vector>
 #include <set>
@@ -41,6 +42,11 @@ public:
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_);
+
+	virtual void addSearchIndexStructure(
+			const std::string& struct_,
+			const IndexRange& source_,
+			const IndexRange& sink_);
 
 	virtual void addForwardIndexTerm(
 			const std::string& type_,
@@ -111,10 +117,36 @@ private:
 		std::set<Index> poset;
 	};
 
+	struct Structure
+	{
+		std::string structname;
+		IndexRange source;
+		IndexRange sink;
+	
+		Structure( const std::string& structname_, const IndexRange& source_, const IndexRange& sink_)
+			:structname(structname_),source(source_),sink(sink_){}
+		Structure( const Structure& o)
+			:structname(o.structname),source(o.source),sink(o.sink){}
+
+		bool operator < ( const Structure& o) const
+		{
+			if (structname < o.structname) return true;
+			if (structname > o.structname) return false;
+			if (source.end() < o.source.end()) return true;
+			if (source.end() > o.source.end()) return false;
+			if (sink.end() < o.sink.end()) return true;
+			if (sink.end() > o.sink.end()) return false;
+			if (source.start() < o.source.start()) return true;
+			if (source.start() > o.source.start()) return false;
+			return (sink.start() < o.sink.start());
+		}
+	};
+
 	typedef std::map<Term,TermAttributes> TermMap;
 	typedef std::map<InvKey,std::string> InvTermMap;
 	typedef std::map<std::string,NumericVariant> MetaDataMap;
 	typedef std::map<std::string,std::string> AttributeMap;
+	typedef std::vector<Structure> StructureList;
 
 private:
 	const StorageClient* m_storage;
@@ -123,6 +155,7 @@ private:
 	InvTermMap m_invTermMap;
 	MetaDataMap m_metaDataMap;
 	AttributeMap m_attributeMap;
+	StructureList m_structurelist;
 	std::vector<std::string> m_userlist;
 	std::string m_docid;
 	Index m_docno;

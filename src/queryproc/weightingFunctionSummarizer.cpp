@@ -16,12 +16,13 @@
 #include "strus/reference.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include <string>
 #include <vector>
-
+#include <iostream>
+#include <sstream>
 using namespace strus;
 
 /// \brief Summarizer context created from a weighting function context
@@ -122,8 +123,8 @@ public:
 	{
 		try
 		{
-			if (utils::caseInsensitiveEquals( itemname, "weight")
-			||  utils::caseInsensitiveEquals( itemname, m_name))
+			if (strus::caseInsensitiveEquals( itemname, "weight")
+			||  strus::caseInsensitiveEquals( itemname, m_name))
 			{
 				m_resultname = resultname;
 			}

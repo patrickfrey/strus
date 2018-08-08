@@ -58,23 +58,23 @@ public:
 	virtual ~DatabaseCursorInterface(){}
 
 	/// \brief Move cursor to the least upper bound key stored in the database
-	/// \param[in] key pointer to the key of the item to seek
+	/// \param[in] keystr pointer to the key of the item to seek
 	/// \param[in] keysize size of 'key' in bytes
 	/// \param[in] domainkeysize size of 'key' that defines the key value domain (the subset set of keys to search in)
 	/// \return the key of the element found or an undefined key
 	virtual Slice seekUpperBound(
-			const char* key,
+			const char* keystr,
 			std::size_t keysize,
 			std::size_t domainkeysize)=0;
 
 	/// \brief Move cursor to the least upper bound key stored in the database with upper limit specified by key and not by the domain key size
-	/// \param[in] key pointer to the key of the item to seek
+	/// \param[in] keystr pointer to the key of the item to seek
 	/// \param[in] keysize size of 'key' in bytes
 	/// \param[in] upkey pointer to the upper limit key that does not belong anymore to the key domain scanned
 	/// \param[in] upkeysize size of 'upkey' in bytes
 	/// \return the key of the element found or an undefined key
 	virtual Slice seekUpperBoundRestricted(
-			const char* key,
+			const char* keystr,
 			std::size_t keysize,
 			const char* upkey,
 			std::size_t upkeysize)=0;

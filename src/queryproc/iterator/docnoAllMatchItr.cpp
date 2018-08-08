@@ -18,7 +18,7 @@ DocnoAllMatchItr::DocnoAllMatchItr( const std::vector<PostingIteratorReference>&
 	:m_args(orderByDocumentFrequency( args_.begin(), args_.end()))
 	,m_curdocno(0),m_curdocno_candidate(0)
 {
-	if (m_args.empty()) throw strus::runtime_error( "%s", _TXT("passed empty set of argument postings to docno all match iterator"));
+	if (m_args.empty()) throw std::runtime_error( _TXT("passed empty set of argument postings to docno all match iterator"));
 }
 
 DocnoAllMatchItr::DocnoAllMatchItr(

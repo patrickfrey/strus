@@ -13,6 +13,7 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -29,9 +30,9 @@
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include "strus/base/configParser.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include <memory>
 
 using namespace strus;
@@ -43,17 +44,18 @@ class StorageObjectBuilder
 	:public StorageObjectBuilderInterface
 {
 public:
-	explicit StorageObjectBuilder( ErrorBufferInterface* errorhnd_)
-		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
-		,m_storage(strus::createStorageType_std(errorhnd_))
-		,m_db( strus::createDatabaseType_leveldb( errorhnd_))
+	explicit StorageObjectBuilder( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
+		:m_queryProcessor( strus::createQueryProcessor(filelocator_,errorhnd_))
+		,m_storage(strus::createStorageType_std( filelocator_->getWorkingDirectory(), errorhnd_))
+		,m_db( strus::createDatabaseType_leveldb( filelocator_->getWorkingDirectory(), errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
+		,m_filelocator(filelocator_)
 	{
-		if (!m_queryProcessor.get()) throw strus::runtime_error( "%s", _TXT("error creating query processor"));
-		if (!m_storage.get()) throw strus::runtime_error( "%s", _TXT("error creating default storage"));
+		if (!m_queryProcessor.get()) throw std::runtime_error( _TXT("error creating query processor"));
+		if (!m_storage.get()) throw std::runtime_error( _TXT("error creating default storage"));
 		if (!m_db.get()) throw strus::runtime_error(_TXT("error creating default database '%s'"), "leveldb");
-		if (!m_statsproc.get()) throw strus::runtime_error( "%s", _TXT("error creating default statistics processor"));
+		if (!m_statsproc.get()) throw std::runtime_error( _TXT("error creating default statistics processor"));
 	}
 
 	virtual ~StorageObjectBuilder(){}
@@ -66,7 +68,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || utils::tolower( name) == "leveldb")
+			if (name.empty() || string_conv::tolower( name) == "leveldb")
 			{
 				return m_db.get();
 			}
@@ -85,7 +87,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || utils::tolower( name) == "default")
+			if (name.empty() || string_conv::tolower( name) == "default")
 			{
 				return m_statsproc.get();
 			}
@@ -98,7 +100,7 @@ public:
 	}
 	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const
 	{
-		m_errorhnd->report(_TXT("unknown vector space model: '%s'"), name.c_str());
+		m_errorhnd->report( ErrorCodeNotFound, _TXT("unknown vector space model: '%s'"), name.c_str());
 		return 0;
 	}
 	virtual QueryEvalInterface* createQueryEval() const
@@ -112,11 +114,13 @@ private:
 	Reference<DatabaseInterface> m_db;			///< database handle
 	Reference<StatisticsProcessorInterface> m_statsproc;	///< statistics processor handle
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
+	const FileLocatorInterface* m_filelocator;		///< file locator interface
 };
 
 
 DLL_PUBLIC StorageObjectBuilderInterface*
 	strus::createStorageObjectBuilder_default(
+		const FileLocatorInterface* filelocator, 
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -126,7 +130,7 @@ DLL_PUBLIC StorageObjectBuilderInterface*
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return new StorageObjectBuilder( errorhnd);
+		return new StorageObjectBuilder( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating default storage object builder: %s"), *errorhnd, 0);
 }
@@ -165,7 +169,7 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 				altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
 		if (!altermetatable.get())
 		{
-			errorhnd->report(_TXT("error creating alter metadata table client"));
+			errorhnd->explain( _TXT("error creating alter metadata table client: %s"));
 			return 0;
 		}
 		return altermetatable.release(); //... ownership returned
@@ -219,7 +223,7 @@ DLL_PUBLIC StorageClientInterface*
 			statsproc = objbuilder->getStatisticsProcessor( statsprocname);
 			if (!statsproc)
 			{
-				errorhnd->report(_TXT("error getting statistics message processor"));
+				errorhnd->explain( _TXT("error getting statistics message processor: %s"));
 				return 0;
 			}
 		}
@@ -227,7 +231,6 @@ DLL_PUBLIC StorageClientInterface*
 			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
-			errorhnd->report(_TXT("error creating storage client"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned
@@ -273,7 +276,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 			storage( sti->createClient( configstr, dbi));
 		if (!storage.get())
 		{
-			errorhnd->report(_TXT("error creating storage client"));
+			errorhnd->explain( _TXT("error creating vector storage client: %s"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned

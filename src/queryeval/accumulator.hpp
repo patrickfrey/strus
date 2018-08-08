@@ -14,7 +14,7 @@
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
-#include "private/utils.hpp"
+#include "strus/base/dynamic_bitset.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -120,7 +120,7 @@ private:
 	std::vector<Reference<InvAclIteratorInterface> > m_aclRestrictions;
 	unsigned int m_selectoridx;
 	Index m_docno;
-	utils::DynamicBitset m_visited;
+	strus::dynamic_bitset m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
 	unsigned int m_nofDocumentsRanked;

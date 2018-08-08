@@ -9,6 +9,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <cstring>
 #include <stdexcept>
 
@@ -16,7 +17,7 @@ using namespace strus;
 
 #define MODULENAME "DatabaseCursor"
 
-DatabaseCursor::DatabaseCursor( const utils::SharedPtr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
+DatabaseCursor::DatabaseCursor( const strus::shared_ptr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
 	:m_conn(conn_),m_dboptions(),m_itrhnd(),m_itr(0),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
 {
 	leveldb::DB* db = m_conn->db();
@@ -57,7 +58,7 @@ void DatabaseCursor::initDomain( const char* domainkey, std::size_t domainkeysiz
 {
 	if (domainkeysize+1 >= sizeof(m_domainkey))
 	{
-		throw strus::runtime_error( "%s", _TXT( "key domain prefix string exceeds maximum size allowed"));
+		throw std::runtime_error( _TXT( "key domain prefix string exceeds maximum size allowed"));
 	}
 	std::memcpy( m_domainkey, domainkey, m_domainkeysize=domainkeysize);
 	m_domainkey[ m_domainkeysize] = 0xFF;
@@ -76,7 +77,7 @@ DatabaseCursorInterface::Slice DatabaseCursor::getCurrentKey() const
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
-		const char* key,
+		const char* keystr,
 		std::size_t keysize,
 		std::size_t domainkeysize)
 {
@@ -85,15 +86,15 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
 		leveldb::DB* db = m_conn->db();
 		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-		initDomain( key, domainkeysize);
-		m_itr->Seek( leveldb::Slice( key,keysize));
+		initDomain( keystr, domainkeysize);
+		m_itr->Seek( leveldb::Slice( keystr, keysize));
 		return getCurrentKey();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek upper bound: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBoundRestricted(
-		const char* key,
+		const char* keystr,
 		std::size_t keysize,
 		const char* upkey,
 		std::size_t upkeysize)
@@ -103,7 +104,7 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBoundRestricted(
 		leveldb::DB* db = m_conn->db();
 		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-		m_itr->Seek( leveldb::Slice( key,keysize));
+		m_itr->Seek( leveldb::Slice( keystr,keysize));
 		if (m_itr->Valid())
 		{
 			std::size_t kk = upkeysize < keysize ? upkeysize : keysize;

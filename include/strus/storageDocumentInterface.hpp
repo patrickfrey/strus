@@ -28,11 +28,20 @@ public:
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
-	/// \remark Weights accumulated for each type,value,position tuple
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_)=0;
+
+	/// \brief Add a structure (relation of ordinal position ranges) in the the document for retrieval
+	/// \param[in] struct_ structure type name
+	/// \param[in] source_ position range of the relation source in the document
+	/// \param[in] sink_ position range of the relation sink in the document
+	/// \remark Source index ranges must not overlap, sink index ranges must not overlap
+	virtual void addSearchIndexStructure(
+			const std::string& struct_,
+			const IndexRange& source_,
+			const IndexRange& sink_)=0;
 
 	/// \brief Add one occurrence of a term to the forward index for summarization of the document
 	/// \param[in] type_ type name of the term

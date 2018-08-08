@@ -21,9 +21,10 @@
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/unordered_map.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "statisticsUpdateIterator.hpp"
@@ -35,6 +36,7 @@
 #include "metaDataRestriction.hpp"
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
+#include "structIterator.hpp"
 #include "browsePostingIterator.hpp"
 #include "metaDataRangePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
@@ -75,6 +77,7 @@ StorageClient::StorageClient(
 	:m_database(database_->createClient( databaseConfig))
 	,m_next_typeno(0)
 	,m_next_termno(0)
+	,m_next_structno(0)
 	,m_next_docno(0)
 	,m_next_userno(0)
 	,m_next_attribno(0)
@@ -86,7 +89,7 @@ StorageClient::StorageClient(
 {
 	try
 	{
-		if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
+		if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
 		m_metadescr.load( m_database.get());
 		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
 
@@ -96,12 +99,12 @@ StorageClient::StorageClient(
 	catch (const std::bad_alloc& err)
 	{
 		cleanup();
-		throw strus::runtime_error( "%s", _TXT("out of memory creating storage client"));
+		throw std::runtime_error( _TXT("out of memory creating storage client"));
 	}
 	catch (const std::runtime_error& err)
 	{
 		cleanup();
-		throw strus::runtime_error(_TXT("error creating storage client: %s"), err.what());
+		throw strus::runtime_error(_TXT("error in constructor: %s"), err.what());
 	}
 }
 
@@ -161,6 +164,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	ByteOrderMark storage_byteOrderMark;
 	Index next_termno_;
 	Index next_typeno_;
+	Index next_structno_;
 	Index next_docno_;
 	Index next_attribno_;
 	Index nof_documents_;
@@ -175,6 +179,10 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	||  !varstor.load( "NofDocs", nof_documents_))
 	{
 		throw strus::runtime_error( "%s",  _TXT( "corrupt storage, not all mandatory variables defined"));
+	}
+	if (!varstor.load( "StructNo", next_structno_))
+	{
+		next_structno_	= 0;
 	}
 	if (!varstor.load( "Version", version_))
 	{
@@ -197,6 +205,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	}
 	m_next_termno.set( next_termno_);
 	m_next_typeno.set( next_typeno_);
+	m_next_structno.set( next_structno_);
 	m_next_docno.set( next_docno_);
 	m_next_attribno.set( next_attribno_);
 	m_nof_documents.set( nof_documents_);
@@ -206,7 +215,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 void StorageClient::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error storing variables"));
+	if (!transaction.get()) throw std::runtime_error( _TXT("error storing variables"));
 	getVariablesWriteBatch( transaction.get(), 0);
 	transaction->commit();
 }
@@ -218,6 +227,7 @@ void StorageClient::getVariablesWriteBatch(
 	DatabaseAdapter_Variable::Writer varstor( m_database.get());
 	varstor.store( transaction, "TermNo", m_next_termno.value());
 	varstor.store( transaction, "TypeNo", m_next_typeno.value());
+	varstor.store( transaction, "StructNo", m_next_structno.value());
 	varstor.store( transaction, "DocNo", m_next_docno.value());
 	varstor.store( transaction, "AttribNo", m_next_attribno.value());
 	varstor.store( transaction, "NofDocs", m_nof_documents.value() + nof_documents_incr);
@@ -244,7 +254,12 @@ Index StorageClient::getTermValue( const std::string& name) const
 
 Index StorageClient::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::Reader( m_database.get()).get( utils::tolower( name));
+	return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
+}
+
+Index StorageClient::getStructType( const std::string& name) const
+{
+	return DatabaseAdapter_StructType::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
 Index StorageClient::getDocno( const std::string& name) const
@@ -259,7 +274,7 @@ Index StorageClient::getUserno( const std::string& name) const
 
 Index StorageClient::getAttributeno( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( utils::tolower( name));
+	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
 std::vector<std::string> StorageClient::getAttributeNames() const
@@ -295,6 +310,20 @@ PostingIteratorInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }
 
+StructIteratorInterface*
+	StorageClient::createStructIterator(
+		const std::string& structstr) const
+{
+	try
+	{
+		Index structno = getStructType( structstr);
+		if (!structno) return new NullStructIterator();
+
+		return new StructIterator( this, m_database.get(), structno, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating structure iterator: %s"), *m_errorhnd, 0);
+}
+
 PostingIteratorInterface*
 	StorageClient::createFieldPostingIterator(
 		const std::string& meta_fieldStart,
@@ -318,7 +347,6 @@ PostingIteratorInterface*
 	{
 		if (maxpos == 0)
 		{
-			if (restriction) delete restriction;
 			return new NullPostingIterator("?");
 		}
 		else
@@ -326,16 +354,7 @@ PostingIteratorInterface*
 			return new BrowsePostingIterator( restriction, m_next_docno.value()-1, maxpos);
 		}
 	}
-	catch (const std::bad_alloc& err)
-	{
-		m_errorhnd->report( _TXT("out of memory creating browse posting iterator"));
-	}
-	catch (const std::runtime_error& err)
-	{
-		m_errorhnd->report( _TXT("error creating browse posting iterator: %s"), err.what());
-	}
-	if (restriction) delete restriction;
-	return 0;
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating browse posting iterator: %s"), *m_errorhnd, 0);
 }
 
 ForwardIteratorInterface*
@@ -435,7 +454,7 @@ StorageTransactionInterface*
 				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
-		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
@@ -466,7 +485,7 @@ class TypenoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	TypenoAllocator( StorageClient* storage_)
+	explicit TypenoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -481,11 +500,30 @@ private:
 	StorageClient* m_storage;
 };
 
+class StructnoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	explicit StructnoAllocator( StorageClient* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name)
+	{
+		return m_storage->allocStructnoImm( name);
+	}
+	virtual Index alloc()
+	{
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "structno");
+	}
+
+private:
+	StorageClient* m_storage;
+};
+
 class DocnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	DocnoAllocator( StorageClient* storage_)
+	explicit DocnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -503,13 +541,13 @@ class UsernoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	UsernoAllocator( StorageClient* storage_)
+	explicit UsernoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
 		if (!m_storage->withAcl())
 		{
-			throw strus::runtime_error( "%s", _TXT( "storage configured without ACL. No users can be created"));
+			throw std::runtime_error( _TXT( "storage configured without ACL. No users can be created"));
 		}
 		return m_storage->allocUsernoImm( name);
 	}
@@ -525,7 +563,7 @@ class AttribnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	AttribnoAllocator( StorageClient* storage_)
+	explicit AttribnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
@@ -543,7 +581,7 @@ class TermnoAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	TermnoAllocator( StorageClient* storage_)
+	explicit TermnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 
 	virtual Index getOrCreate( const std::string& name)
@@ -562,6 +600,11 @@ private:
 KeyAllocatorInterface* StorageClient::createTypenoAllocator()
 {
 	return new TypenoAllocator( this);
+}
+
+KeyAllocatorInterface* StorageClient::createStructnoAllocator()
+{
+	return new StructnoAllocator( this);
 }
 
 KeyAllocatorInterface* StorageClient::createDocnoAllocator()
@@ -604,10 +647,23 @@ Index StorageClient::allocTypenoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_typeno_mutex);
+	strus::scoped_lock lock( m_immalloc_typeno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
+	}
+	return rt;
+}
+
+Index StorageClient::allocStructnoImm( const std::string& name)
+{
+	Index rt;
+	DatabaseAdapter_StructType::ReadWriter stor(m_database.get());
+
+	strus::scoped_lock lock( m_immalloc_structno_mutex);
+	if (!stor.load( name, rt))
+	{
+		stor.storeImm( name, rt = m_next_structno.allocIncrement());
 	}
 	return rt;
 }
@@ -617,7 +673,7 @@ Index StorageClient::allocUsernoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_userno_mutex);
+	strus::scoped_lock lock( m_immalloc_userno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno.allocIncrement());
@@ -630,7 +686,7 @@ Index StorageClient::allocAttribnoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_attribno_mutex);
+	strus::scoped_lock lock( m_immalloc_attribno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
@@ -641,6 +697,11 @@ Index StorageClient::allocAttribnoImm( const std::string& name)
 Index StorageClient::maxTermTypeNo() const
 {
 	return m_next_typeno.value() -1;
+}
+
+Index StorageClient::maxStructTypeNo() const
+{
+	return m_next_structno.value() -1;
 }
 
 IndexSetIterator StorageClient::getAclIterator( const Index& docno) const
@@ -714,7 +775,16 @@ ValueIteratorInterface* StorageClient::createTermTypeIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_TermType>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating term type iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "term type", *m_errorhnd, 0);
+}
+
+ValueIteratorInterface* StorageClient::createStructTypeIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_StructType>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "struct type", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createTermValueIterator() const
@@ -723,7 +793,7 @@ ValueIteratorInterface* StorageClient::createTermValueIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_TermValue>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating term value iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "term value", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createDocIdIterator() const
@@ -732,7 +802,7 @@ ValueIteratorInterface* StorageClient::createDocIdIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_DocId>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating document id iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "document id", *m_errorhnd, 0);
 }
 
 ValueIteratorInterface* StorageClient::createUserNameIterator() const
@@ -741,7 +811,7 @@ ValueIteratorInterface* StorageClient::createUserNameIterator() const
 	{
 		return new ValueIterator<DatabaseAdapter_UserName>( m_database.get(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating user name iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating %s iterator: %s"), "user name", *m_errorhnd, 0);
 }
 
 Index StorageClient::documentStatistics(
@@ -829,8 +899,8 @@ MetaDataRestrictionInterface* StorageClient::createMetaDataRestriction() const
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error loading termno map"));
-	utils::UnorderedMap<std::string,Index> termno_map;
+	if (!transaction.get()) throw std::runtime_error( _TXT("error loading termno map"));
+	strus::unordered_map<std::string,Index> termno_map;
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
@@ -903,7 +973,7 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool si
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
+			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -923,7 +993,7 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
+			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -1068,7 +1138,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		{
 			if (key.size() == 0)
 			{
-				m_errorhnd->report( _TXT( "found empty key in storage"));
+				m_errorhnd->report( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
 				return false;
 			}
 			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);

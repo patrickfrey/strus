@@ -13,26 +13,26 @@
 
 using namespace strus;
 
-DatabaseKey::DatabaseKey( char prefix)
+DatabaseKey::DatabaseKey( char prefix_)
 {
-	m_buf[ 0] = (char)prefix;
+	m_buf[ 0] = (char)prefix_;
 	m_size = 1;
 }
 
-DatabaseKey::DatabaseKey( char prefix, const std::string& varname)
+DatabaseKey::DatabaseKey( char prefix_, const std::string& varname)
 {
 	if (varname.size() >= MaxKeySize-1)
 	{
 		throw strus::runtime_error( _TXT( "database variable key out of range '%s'"), varname.c_str());
 	}
-	m_buf[ 0] = prefix;
+	m_buf[ 0] = prefix_;
 	std::memcpy( m_buf+1, varname.c_str(), varname.size());
 	m_size = varname.size()+1;
 }
 
-DatabaseKey::DatabaseKey( char prefix, const BlockKey& blkkey, const Index& elemidx)
+DatabaseKey::DatabaseKey( char prefix_, const BlockKey& blkkey, const Index& elemidx)
 {
-	m_buf[ 0] = (char)prefix;
+	m_buf[ 0] = (char)prefix_;
 	m_size = 1;
 	Index elem1 = blkkey.elem(1);
 	Index elem2 = blkkey.elem(2);
@@ -41,9 +41,9 @@ DatabaseKey::DatabaseKey( char prefix, const BlockKey& blkkey, const Index& elem
 	if (elemidx) addElem( elemidx);
 }
 
-DatabaseKey::DatabaseKey( char prefix, const Index& idx)
+DatabaseKey::DatabaseKey( char prefix_, const Index& idx)
 {
-	m_buf[ 0] = prefix;
+	m_buf[ 0] = prefix_;
 	m_size = 1;
 	addElem( idx);
 }
@@ -69,15 +69,15 @@ void DatabaseKey::addElem( const std::string& var)
 	m_size += var.size();
 }
 
-void DatabaseKey::addPrefix( char prefix)
+void DatabaseKey::addPrefix( char prefix_)
 {
 	if (m_size == MaxKeySize) throw strus::runtime_error( _TXT( "static buffer overflow (%s)"), __FUNCTION__);
-	m_buf[ m_size++] = prefix;
+	m_buf[ m_size++] = prefix_;
 }
 
 void DatabaseKey::resize( std::size_t n)
 {
-	if (n > m_size) throw strus::runtime_error( "%s", _TXT( "resize in database key only allowed as shrinking of size"));
+	if (n > m_size) throw std::runtime_error( _TXT( "resize in database key only allowed as shrinking of size"));
 	m_size = n;
 }
 

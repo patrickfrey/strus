@@ -42,6 +42,12 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
+	/// \brief Implementation of StorageDocumentUpdateInterface::addSearchIndexTerm( const std::string&, const std::string&, const Index&);
+	virtual void addSearchIndexStructure(
+			const std::string& struct_,
+			const IndexRange& source_,
+			const IndexRange& sink_);
+
 	/// \brief Implementation of StorageDocumentUpdateInterface::addForwardIndexTerm( const std::string&, const std::string&, const Index&);
 	virtual void addForwardIndexTerm(
 			const std::string& type_,
@@ -51,6 +57,10 @@ public:
 	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexTerm( const std::string&);
 	virtual void clearSearchIndexTerm(
 			const std::string& type_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexStructure( const std::string&);
+	virtual void clearSearchIndexStructure(
+			const std::string& struct_);
 
 	/// \brief Implementation of StorageDocumentUpdateInterface::clearForwardIndexTerm( const std::string&);
 	virtual void clearForwardIndexTerm(
@@ -96,8 +106,10 @@ private:
 	Index m_docno;						///< document number
 	TermMap m_terms;					///< map of all search index terms added
 	InvMap m_invs;						///< map of all forward index terms added
-	std::set<Index> m_delete_search_typenolist;		///< set with typeno of types to remove from the search index (exclusive add of index features in update)
-	std::set<Index> m_delete_forward_typenolist;		///< set with typeno of types to remove from the forward index (exclusive add of index features in update)
+	std::set<Index> m_delete_search_typenolist;		///< set with typeno of types to remove from the search index
+	std::set<Index> m_delete_forward_typenolist;		///< set with typeno of types to remove from the forward index
+	std::set<Index> m_delete_search_structnolist;		///< set with structno of types to remove from the search index
+	std::vector<DocStructure> m_structures;			///< structures to add
 	std::vector<DocAttribute> m_attributes;			///< attributes to update
 	std::vector<DocMetaData> m_metadata;			///< metadata to update
 	std::vector<Index> m_add_userlist;			///< list of users to add to this document access

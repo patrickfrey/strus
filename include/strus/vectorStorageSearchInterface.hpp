@@ -9,6 +9,7 @@
 #ifndef _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/vectorQueryResult.hpp"
 #include <vector>
 #include <limits>
 #include <cmath>
@@ -22,53 +23,16 @@ public:
 	/// \brief Destructor
 	virtual ~VectorStorageSearchInterface(){}
 
-	/// \brief Weighted feature number as result of search
-	class Result
-	{
-	public:
-		/// \brief Default constructor
-		Result()
-			:m_featidx(0),m_weight(0.0){}
-		/// \brief Copy constructor
-		Result( const Result& o)
-			:m_featidx(o.m_featidx),m_weight(o.m_weight){}
-		/// \brief Constructor
-		Result( const Index& featidx_, double weight_)
-			:m_featidx(featidx_),m_weight(weight_){}
-
-		Index featidx() const			{return m_featidx;}
-		double weight() const			{return m_weight;}
-
-		void setWeight( double weight_)		{m_weight = weight_;}
-
-		bool operator < ( const Result& o) const
-		{
-			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return true;
-			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return false;
-			return m_featidx < o.m_featidx;
-		}
-		bool operator > ( const Result& o) const
-		{
-			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return false;
-			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return true;
-			return m_featidx > o.m_featidx;
-		}
-
-	private:
-		Index m_featidx;
-		double m_weight;
-	};
-
 	/// \brief Find all features that are within maximum simiarity distance of the model (or at least try to with best effort, if the model is probabilistic).
 	/// \param[in] vec vector to calculate the features from
 	/// \param[in] maxNofResults limits the number of results returned
-	virtual std::vector<Result> findSimilar( const std::vector<double>& vec, unsigned int maxNofResults) const=0;
+	virtual std::vector<VectorQueryResult> findSimilar( const std::vector<float>& vec, unsigned int maxNofResults) const=0;
 
 	/// \brief Find all features from a list of candidates that are within maximum simiarity distance of the model.
 	/// \param[in] candidates list of candidates to search in
 	/// \param[in] vec vector to calculate the features from
 	/// \param[in] maxNofResults limits the number of results returned
-	virtual std::vector<Result> findSimilarFromSelection( const std::vector<Index>& candidates, const std::vector<double>& vec, unsigned int maxNofResults) const=0;
+	virtual std::vector<VectorQueryResult> findSimilarFromSelection( const std::vector<Index>& candidates, const std::vector<float>& vec, unsigned int maxNofResults) const=0;
 
 	/// \brief Explicit close of the database access, if database was used
 	/// \note this function is useful in interpreter context where a garbagge collection may delay the deletion of an object

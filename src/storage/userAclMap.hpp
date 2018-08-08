@@ -77,7 +77,7 @@ private:
 		bool isMember);
 
 public:
-	typedef LocalStructAllocator<std::pair<UsrAclKey,bool> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const UsrAclKey,bool> > MapAllocator;
 	typedef std::map<UsrAclKey,bool,UsrAclKey_cmpByUsrDoc,MapAllocator> UsrDocMap;
 	typedef std::map<UsrAclKey,bool,UsrAclKey_cmpByDocUsr,MapAllocator> DocUsrMap;
 

@@ -9,9 +9,9 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/string_conv.hpp"
 #include <limits>
 #include <stdexcept>
 #include <sstream>
@@ -171,7 +171,7 @@ static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOpe
 
 MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFunction( const char* type, CompareOperator cmpop)
 {
-	if (utils::caseInsensitiveEquals( type, "float16"))
+	if (strus::caseInsensitiveEquals( type, "float16"))
 	{
 		switch (cmpop)
 		{
@@ -188,9 +188,9 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat16;
 		}
-		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
+		throw std::runtime_error( _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveEquals( type, "float32"))
+	else if (strus::caseInsensitiveEquals( type, "float32"))
 	{
 		switch (cmpop)
 		{
@@ -207,9 +207,9 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat32;
 		}
-		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
+		throw std::runtime_error( _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveStartsWith( type, "int"))
+	else if (strus::caseInsensitiveStartsWith( type, "int"))
 	{
 		switch (cmpop)
 		{
@@ -226,9 +226,9 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualInt;
 		}
-		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
+		throw std::runtime_error( _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveStartsWith( type, "uint"))
+	else if (strus::caseInsensitiveStartsWith( type, "uint"))
 	{
 		switch (cmpop)
 		{
@@ -245,7 +245,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualUInt;
 		}
-		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
+		throw std::runtime_error( _TXT( "unknown meta data compare function"));
 	}
 	else
 	{
@@ -276,7 +276,7 @@ MetaDataRestrictionInstance::MetaDataRestrictionInstance(
 {
 	if (!m_metadata.get())
 	{
-		throw strus::runtime_error( "%s", _TXT("failed to create metadata reader interface"));
+		throw std::runtime_error( _TXT("failed to create metadata reader interface"));
 	}
 }
 

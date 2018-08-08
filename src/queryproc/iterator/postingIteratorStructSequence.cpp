@@ -196,12 +196,12 @@ PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "sequence_struct");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "sequence_struct");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'sequence_struct'"));
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for 'sequence_struct'"));
 		return 0;
 	}
 	try
@@ -228,12 +228,12 @@ PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "sequence");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "sequence");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "sequence");
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for '%s'"), "sequence");
 		return 0;
 	}
 	try
@@ -259,12 +259,12 @@ PostingIteratorInterface* PostingJoinStructChain::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "chain_struct");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "chain_struct");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'chain_struct'"));
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for 'chain_struct'"));
 		return 0;
 	}
 	try
@@ -291,12 +291,12 @@ PostingIteratorInterface* PostingJoinChain::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "chain");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "chain");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "chain");
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for '%s'"), "chain");
 		return 0;
 	}
 	try

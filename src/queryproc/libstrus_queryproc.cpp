@@ -15,7 +15,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor( ErrorBufferInterface* errorhnd)
+DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd)
 {
 	static bool intl_initialized = false;
 	try
@@ -25,7 +25,7 @@ DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor( ErrorBufferInte
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new QueryProcessor( errorhnd);
+		return new QueryProcessor( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query processor: %s"), *errorhnd, 0);
 }

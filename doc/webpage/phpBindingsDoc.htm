@@ -13,7 +13,7 @@
 <div class="product">
 	<div class="product_logo"> <img class="product_logo_img" src="images/logotype.jpg" alt="Strus"/></div>
 	<div class="product_name">Strus PHP Bindings</div>
-	<div class="product_release">0.15.0</div>
+	<div class="product_release">0.16.0</div>
 	<div class="product_author">Patrick P. Frey</div>
 	<div class="product_copyright">Patrick P. Frey</div>
 	<div class="product_license">Mozilla Public License v. 2.0 (MPLv2)</div>
@@ -28,13 +28,15 @@
 	<div class="navclass" id="nav_1" onclick="activateClassNav('1');">Context</div>
 <div class="navclass" id="nav_2" onclick="activateClassNav('2');">StorageClient</div>
 <div class="navclass" id="nav_3" onclick="activateClassNav('3');">StorageTransaction</div>
-<div class="navclass" id="nav_4" onclick="activateClassNav('4');">VectorStorageSearcher</div>
-<div class="navclass" id="nav_5" onclick="activateClassNav('5');">VectorStorageClient</div>
-<div class="navclass" id="nav_6" onclick="activateClassNav('6');">VectorStorageTransaction</div>
-<div class="navclass" id="nav_7" onclick="activateClassNav('7');">DocumentAnalyzer</div>
-<div class="navclass" id="nav_8" onclick="activateClassNav('8');">QueryAnalyzer</div>
-<div class="navclass" id="nav_9" onclick="activateClassNav('9');">QueryEval</div>
-<div class="navclass" id="nav_10" onclick="activateClassNav('10');">Query</div>
+<div class="navclass" id="nav_4" onclick="activateClassNav('4');">Inserter</div>
+<div class="navclass" id="nav_5" onclick="activateClassNav('5');">InserterTransaction</div>
+<div class="navclass" id="nav_6" onclick="activateClassNav('6');">VectorStorageSearcher</div>
+<div class="navclass" id="nav_7" onclick="activateClassNav('7');">VectorStorageClient</div>
+<div class="navclass" id="nav_8" onclick="activateClassNav('8');">VectorStorageTransaction</div>
+<div class="navclass" id="nav_9" onclick="activateClassNav('9');">DocumentAnalyzer</div>
+<div class="navclass" id="nav_10" onclick="activateClassNav('10');">QueryAnalyzer</div>
+<div class="navclass" id="nav_11" onclick="activateClassNav('11');">QueryEval</div>
+<div class="navclass" id="nav_12" onclick="activateClassNav('12');">Query</div>
 
 </div>  <!-- navclasslist -->
 <h3 class="nav_title_memberlist" id="title_1">Context</h3>
@@ -43,19 +45,26 @@
 <div class="navmethod" id="nav_1_2" onclick="showMethod('1_2')">loadModule</div>
 <div class="navmethod" id="nav_1_3" onclick="showMethod('1_3')">addModulePath</div>
 <div class="navmethod" id="nav_1_4" onclick="showMethod('1_4')">addResourcePath</div>
-<div class="navmethod" id="nav_1_5" onclick="showMethod('1_5')">createStorageClient</div>
-<div class="navmethod" id="nav_1_6" onclick="showMethod('1_6')">createVectorStorageClient</div>
-<div class="navmethod" id="nav_1_7" onclick="showMethod('1_7')">createStorage</div>
-<div class="navmethod" id="nav_1_8" onclick="showMethod('1_8')">createVectorStorage</div>
-<div class="navmethod" id="nav_1_9" onclick="showMethod('1_9')">destroyStorage</div>
-<div class="navmethod" id="nav_1_10" onclick="showMethod('1_10')">storageExists</div>
-<div class="navmethod" id="nav_1_11" onclick="showMethod('1_11')">detectDocumentClass</div>
-<div class="navmethod" id="nav_1_12" onclick="showMethod('1_12')">createDocumentAnalyzer</div>
-<div class="navmethod" id="nav_1_13" onclick="showMethod('1_13')">createQueryAnalyzer</div>
-<div class="navmethod" id="nav_1_14" onclick="showMethod('1_14')">createQueryEval</div>
-<div class="navmethod" id="nav_1_15" onclick="showMethod('1_15')">unpackStatisticBlob</div>
-<div class="navmethod" id="nav_1_16" onclick="showMethod('1_16')">close</div>
-<div class="navmethod" id="nav_1_17" onclick="showMethod('1_17')">debug_serialize</div>
+<div class="navmethod" id="nav_1_5" onclick="showMethod('1_5')">defineWorkingDirectory</div>
+<div class="navmethod" id="nav_1_6" onclick="showMethod('1_6')">endConfig</div>
+<div class="navmethod" id="nav_1_7" onclick="showMethod('1_7')">createStorageClient</div>
+<div class="navmethod" id="nav_1_8" onclick="showMethod('1_8')">createVectorStorageClient</div>
+<div class="navmethod" id="nav_1_9" onclick="showMethod('1_9')">createStorage</div>
+<div class="navmethod" id="nav_1_10" onclick="showMethod('1_10')">createVectorStorage</div>
+<div class="navmethod" id="nav_1_11" onclick="showMethod('1_11')">destroyStorage</div>
+<div class="navmethod" id="nav_1_12" onclick="showMethod('1_12')">storageExists</div>
+<div class="navmethod" id="nav_1_13" onclick="showMethod('1_13')">detectDocumentClass</div>
+<div class="navmethod" id="nav_1_14" onclick="showMethod('1_14')">createDocumentAnalyzer</div>
+<div class="navmethod" id="nav_1_15" onclick="showMethod('1_15')">createQueryAnalyzer</div>
+<div class="navmethod" id="nav_1_16" onclick="showMethod('1_16')">createQueryEval</div>
+<div class="navmethod" id="nav_1_17" onclick="showMethod('1_17')">createInserter</div>
+<div class="navmethod" id="nav_1_18" onclick="showMethod('1_18')">unpackStatisticBlob</div>
+<div class="navmethod" id="nav_1_19" onclick="showMethod('1_19')">close</div>
+<div class="navmethod" id="nav_1_20" onclick="showMethod('1_20')">debug_serialize</div>
+<div class="navmethod" id="nav_1_21" onclick="showMethod('1_21')">introspection</div>
+<div class="navmethod" id="nav_1_22" onclick="showMethod('1_22')">enableDebugTrace</div>
+<div class="navmethod" id="nav_1_23" onclick="showMethod('1_23')">disableDebugTrace</div>
+<div class="navmethod" id="nav_1_24" onclick="showMethod('1_24')">fetchDebugTrace</div>
 
 </div> <!-- navmemberlist -->
 <h3 class="nav_title_memberlist" id="title_2">StorageClient</h3>
@@ -79,6 +88,7 @@
 <div class="navmethod" id="nav_2_17" onclick="showMethod('2_17')">config</div>
 <div class="navmethod" id="nav_2_18" onclick="showMethod('2_18')">configstring</div>
 <div class="navmethod" id="nav_2_19" onclick="showMethod('2_19')">close</div>
+<div class="navmethod" id="nav_2_20" onclick="showMethod('2_20')">introspection</div>
 
 </div> <!-- navmemberlist -->
 <h3 class="nav_title_memberlist" id="title_3">StorageTransaction</h3>
@@ -90,96 +100,115 @@
 <div class="navmethod" id="nav_3_5" onclick="showMethod('3_5')">rollback</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_4">VectorStorageSearcher</h3>
+<h3 class="nav_title_memberlist" id="title_4">Inserter</h3>
 <div class="navmemberlist" id="list_4">
-	<div class="navmethod" id="nav_4_1" onclick="showMethod('4_1')">findSimilar</div>
-<div class="navmethod" id="nav_4_2" onclick="showMethod('4_2')">findSimilarFromSelection</div>
-<div class="navmethod" id="nav_4_3" onclick="showMethod('4_3')">close</div>
+	<div class="navmethod" id="nav_4_1" onclick="showMethod('4_1')">createTransaction</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_5">VectorStorageClient</h3>
+<h3 class="nav_title_memberlist" id="title_5">InserterTransaction</h3>
 <div class="navmemberlist" id="list_5">
-	<div class="navmethod" id="nav_5_1" onclick="showMethod('5_1')">createSearcher</div>
-<div class="navmethod" id="nav_5_2" onclick="showMethod('5_2')">createTransaction</div>
-<div class="navmethod" id="nav_5_3" onclick="showMethod('5_3')">conceptClassNames</div>
-<div class="navmethod" id="nav_5_4" onclick="showMethod('5_4')">conceptFeatures</div>
-<div class="navmethod" id="nav_5_5" onclick="showMethod('5_5')">nofConcepts</div>
-<div class="navmethod" id="nav_5_6" onclick="showMethod('5_6')">featureConcepts</div>
-<div class="navmethod" id="nav_5_7" onclick="showMethod('5_7')">featureVector</div>
-<div class="navmethod" id="nav_5_8" onclick="showMethod('5_8')">featureName</div>
-<div class="navmethod" id="nav_5_9" onclick="showMethod('5_9')">featureIndex</div>
-<div class="navmethod" id="nav_5_10" onclick="showMethod('5_10')">nofFeatures</div>
-<div class="navmethod" id="nav_5_11" onclick="showMethod('5_11')">config</div>
-<div class="navmethod" id="nav_5_12" onclick="showMethod('5_12')">configstring</div>
-<div class="navmethod" id="nav_5_13" onclick="showMethod('5_13')">close</div>
+	<div class="navmethod" id="nav_5_1" onclick="showMethod('5_1')">insertDocument</div>
+<div class="navmethod" id="nav_5_2" onclick="showMethod('5_2')">deleteDocument</div>
+<div class="navmethod" id="nav_5_3" onclick="showMethod('5_3')">deleteUserAccessRights</div>
+<div class="navmethod" id="nav_5_4" onclick="showMethod('5_4')">commit</div>
+<div class="navmethod" id="nav_5_5" onclick="showMethod('5_5')">rollback</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_6">VectorStorageTransaction</h3>
+<h3 class="nav_title_memberlist" id="title_6">VectorStorageSearcher</h3>
 <div class="navmemberlist" id="list_6">
-	<div class="navmethod" id="nav_6_1" onclick="showMethod('6_1')">addFeature</div>
-<div class="navmethod" id="nav_6_2" onclick="showMethod('6_2')">defineFeatureConceptRelation</div>
-<div class="navmethod" id="nav_6_3" onclick="showMethod('6_3')">commit</div>
-<div class="navmethod" id="nav_6_4" onclick="showMethod('6_4')">rollback</div>
-<div class="navmethod" id="nav_6_5" onclick="showMethod('6_5')">close</div>
+	<div class="navmethod" id="nav_6_1" onclick="showMethod('6_1')">findSimilar</div>
+<div class="navmethod" id="nav_6_2" onclick="showMethod('6_2')">findSimilarFromSelection</div>
+<div class="navmethod" id="nav_6_3" onclick="showMethod('6_3')">close</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_7">DocumentAnalyzer</h3>
+<h3 class="nav_title_memberlist" id="title_7">VectorStorageClient</h3>
 <div class="navmemberlist" id="list_7">
-	<div class="navmethod" id="nav_7_1" onclick="showMethod('7_1')">addSearchIndexFeature</div>
-<div class="navmethod" id="nav_7_2" onclick="showMethod('7_2')">addForwardIndexFeature</div>
-<div class="navmethod" id="nav_7_3" onclick="showMethod('7_3')">addPatternLexem</div>
-<div class="navmethod" id="nav_7_4" onclick="showMethod('7_4')">defineMetaData</div>
-<div class="navmethod" id="nav_7_5" onclick="showMethod('7_5')">defineAggregatedMetaData</div>
-<div class="navmethod" id="nav_7_6" onclick="showMethod('7_6')">defineAttribute</div>
-<div class="navmethod" id="nav_7_7" onclick="showMethod('7_7')">addSearchIndexFeatureFromPatternMatch</div>
-<div class="navmethod" id="nav_7_8" onclick="showMethod('7_8')">addForwardIndexFeatureFromPatternMatch</div>
-<div class="navmethod" id="nav_7_9" onclick="showMethod('7_9')">defineMetaDataFromPatternMatch</div>
-<div class="navmethod" id="nav_7_10" onclick="showMethod('7_10')">defineAttributeFromPatternMatch</div>
-<div class="navmethod" id="nav_7_11" onclick="showMethod('7_11')">definePatternMatcherPostProc</div>
-<div class="navmethod" id="nav_7_12" onclick="showMethod('7_12')">definePatternMatcherPostProcFromFile</div>
-<div class="navmethod" id="nav_7_13" onclick="showMethod('7_13')">defineDocument</div>
-<div class="navmethod" id="nav_7_14" onclick="showMethod('7_14')">analyzeSingle</div>
-<div class="navmethod" id="nav_7_15" onclick="showMethod('7_15')">analyzeMultiPart</div>
+	<div class="navmethod" id="nav_7_1" onclick="showMethod('7_1')">createSearcher</div>
+<div class="navmethod" id="nav_7_2" onclick="showMethod('7_2')">createTransaction</div>
+<div class="navmethod" id="nav_7_3" onclick="showMethod('7_3')">conceptClassNames</div>
+<div class="navmethod" id="nav_7_4" onclick="showMethod('7_4')">conceptFeatures</div>
+<div class="navmethod" id="nav_7_5" onclick="showMethod('7_5')">nofConcepts</div>
+<div class="navmethod" id="nav_7_6" onclick="showMethod('7_6')">featureConcepts</div>
+<div class="navmethod" id="nav_7_7" onclick="showMethod('7_7')">featureVector</div>
+<div class="navmethod" id="nav_7_8" onclick="showMethod('7_8')">featureName</div>
+<div class="navmethod" id="nav_7_9" onclick="showMethod('7_9')">featureIndex</div>
+<div class="navmethod" id="nav_7_10" onclick="showMethod('7_10')">nofFeatures</div>
+<div class="navmethod" id="nav_7_11" onclick="showMethod('7_11')">config</div>
+<div class="navmethod" id="nav_7_12" onclick="showMethod('7_12')">configstring</div>
+<div class="navmethod" id="nav_7_13" onclick="showMethod('7_13')">close</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_8">QueryAnalyzer</h3>
+<h3 class="nav_title_memberlist" id="title_8">VectorStorageTransaction</h3>
 <div class="navmemberlist" id="list_8">
-	<div class="navmethod" id="nav_8_1" onclick="showMethod('8_1')">addElement</div>
-<div class="navmethod" id="nav_8_2" onclick="showMethod('8_2')">addElementFromPatternMatch</div>
-<div class="navmethod" id="nav_8_3" onclick="showMethod('8_3')">addPatternLexem</div>
-<div class="navmethod" id="nav_8_4" onclick="showMethod('8_4')">definePatternMatcherPostProc</div>
-<div class="navmethod" id="nav_8_5" onclick="showMethod('8_5')">definePatternMatcherPostProcFromFile</div>
-<div class="navmethod" id="nav_8_6" onclick="showMethod('8_6')">defineImplicitGroupBy</div>
-<div class="navmethod" id="nav_8_7" onclick="showMethod('8_7')">analyzeTermExpression</div>
-<div class="navmethod" id="nav_8_8" onclick="showMethod('8_8')">analyzeMetaDataExpression</div>
+	<div class="navmethod" id="nav_8_1" onclick="showMethod('8_1')">addFeature</div>
+<div class="navmethod" id="nav_8_2" onclick="showMethod('8_2')">defineFeatureConceptRelation</div>
+<div class="navmethod" id="nav_8_3" onclick="showMethod('8_3')">commit</div>
+<div class="navmethod" id="nav_8_4" onclick="showMethod('8_4')">rollback</div>
+<div class="navmethod" id="nav_8_5" onclick="showMethod('8_5')">close</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_9">QueryEval</h3>
+<h3 class="nav_title_memberlist" id="title_9">DocumentAnalyzer</h3>
 <div class="navmemberlist" id="list_9">
-	<div class="navmethod" id="nav_9_1" onclick="showMethod('9_1')">addTerm</div>
-<div class="navmethod" id="nav_9_2" onclick="showMethod('9_2')">addSelectionFeature</div>
-<div class="navmethod" id="nav_9_3" onclick="showMethod('9_3')">addRestrictionFeature</div>
-<div class="navmethod" id="nav_9_4" onclick="showMethod('9_4')">addExclusionFeature</div>
-<div class="navmethod" id="nav_9_5" onclick="showMethod('9_5')">addSummarizer</div>
-<div class="navmethod" id="nav_9_6" onclick="showMethod('9_6')">addWeightingFunction</div>
-<div class="navmethod" id="nav_9_7" onclick="showMethod('9_7')">defineWeightingFormula</div>
-<div class="navmethod" id="nav_9_8" onclick="showMethod('9_8')">createQuery</div>
+	<div class="navmethod" id="nav_9_1" onclick="showMethod('9_1')">addSearchIndexFeature</div>
+<div class="navmethod" id="nav_9_2" onclick="showMethod('9_2')">addForwardIndexFeature</div>
+<div class="navmethod" id="nav_9_3" onclick="showMethod('9_3')">addPatternLexem</div>
+<div class="navmethod" id="nav_9_4" onclick="showMethod('9_4')">defineMetaData</div>
+<div class="navmethod" id="nav_9_5" onclick="showMethod('9_5')">defineAggregatedMetaData</div>
+<div class="navmethod" id="nav_9_6" onclick="showMethod('9_6')">defineAttribute</div>
+<div class="navmethod" id="nav_9_7" onclick="showMethod('9_7')">addSearchIndexFeatureFromPatternMatch</div>
+<div class="navmethod" id="nav_9_8" onclick="showMethod('9_8')">addForwardIndexFeatureFromPatternMatch</div>
+<div class="navmethod" id="nav_9_9" onclick="showMethod('9_9')">defineMetaDataFromPatternMatch</div>
+<div class="navmethod" id="nav_9_10" onclick="showMethod('9_10')">defineAttributeFromPatternMatch</div>
+<div class="navmethod" id="nav_9_11" onclick="showMethod('9_11')">definePatternMatcherPostProc</div>
+<div class="navmethod" id="nav_9_12" onclick="showMethod('9_12')">definePatternMatcherPostProcFromFile</div>
+<div class="navmethod" id="nav_9_13" onclick="showMethod('9_13')">defineSubDocument</div>
+<div class="navmethod" id="nav_9_14" onclick="showMethod('9_14')">defineSubContent</div>
+<div class="navmethod" id="nav_9_15" onclick="showMethod('9_15')">analyzeSingle</div>
+<div class="navmethod" id="nav_9_16" onclick="showMethod('9_16')">analyzeMultiPart</div>
+<div class="navmethod" id="nav_9_17" onclick="showMethod('9_17')">introspection</div>
 
 </div> <!-- navmemberlist -->
-<h3 class="nav_title_memberlist" id="title_10">Query</h3>
+<h3 class="nav_title_memberlist" id="title_10">QueryAnalyzer</h3>
 <div class="navmemberlist" id="list_10">
-	<div class="navmethod" id="nav_10_1" onclick="showMethod('10_1')">addFeature</div>
-<div class="navmethod" id="nav_10_2" onclick="showMethod('10_2')">addMetaDataRestriction</div>
-<div class="navmethod" id="nav_10_3" onclick="showMethod('10_3')">defineTermStatistics</div>
-<div class="navmethod" id="nav_10_4" onclick="showMethod('10_4')">defineGlobalStatistics</div>
-<div class="navmethod" id="nav_10_5" onclick="showMethod('10_5')">addDocumentEvaluationSet</div>
-<div class="navmethod" id="nav_10_6" onclick="showMethod('10_6')">setMaxNofRanks</div>
-<div class="navmethod" id="nav_10_7" onclick="showMethod('10_7')">setMinRank</div>
-<div class="navmethod" id="nav_10_8" onclick="showMethod('10_8')">addAccess</div>
-<div class="navmethod" id="nav_10_9" onclick="showMethod('10_9')">setWeightingVariables</div>
-<div class="navmethod" id="nav_10_10" onclick="showMethod('10_10')">setDebugMode</div>
-<div class="navmethod" id="nav_10_11" onclick="showMethod('10_11')">evaluate</div>
-<div class="navmethod" id="nav_10_12" onclick="showMethod('10_12')">tostring</div>
+	<div class="navmethod" id="nav_10_1" onclick="showMethod('10_1')">addElement</div>
+<div class="navmethod" id="nav_10_2" onclick="showMethod('10_2')">addElementFromPatternMatch</div>
+<div class="navmethod" id="nav_10_3" onclick="showMethod('10_3')">addPatternLexem</div>
+<div class="navmethod" id="nav_10_4" onclick="showMethod('10_4')">definePatternMatcherPostProc</div>
+<div class="navmethod" id="nav_10_5" onclick="showMethod('10_5')">definePatternMatcherPostProcFromFile</div>
+<div class="navmethod" id="nav_10_6" onclick="showMethod('10_6')">defineImplicitGroupBy</div>
+<div class="navmethod" id="nav_10_7" onclick="showMethod('10_7')">declareElementPriority</div>
+<div class="navmethod" id="nav_10_8" onclick="showMethod('10_8')">analyzeTermExpression</div>
+<div class="navmethod" id="nav_10_9" onclick="showMethod('10_9')">analyzeSingleTermExpression</div>
+<div class="navmethod" id="nav_10_10" onclick="showMethod('10_10')">analyzeMetaDataExpression</div>
+<div class="navmethod" id="nav_10_11" onclick="showMethod('10_11')">introspection</div>
+
+</div> <!-- navmemberlist -->
+<h3 class="nav_title_memberlist" id="title_11">QueryEval</h3>
+<div class="navmemberlist" id="list_11">
+	<div class="navmethod" id="nav_11_1" onclick="showMethod('11_1')">addTerm</div>
+<div class="navmethod" id="nav_11_2" onclick="showMethod('11_2')">addSelectionFeature</div>
+<div class="navmethod" id="nav_11_3" onclick="showMethod('11_3')">addRestrictionFeature</div>
+<div class="navmethod" id="nav_11_4" onclick="showMethod('11_4')">addExclusionFeature</div>
+<div class="navmethod" id="nav_11_5" onclick="showMethod('11_5')">addSummarizer</div>
+<div class="navmethod" id="nav_11_6" onclick="showMethod('11_6')">addWeightingFunction</div>
+<div class="navmethod" id="nav_11_7" onclick="showMethod('11_7')">defineWeightingFormula</div>
+<div class="navmethod" id="nav_11_8" onclick="showMethod('11_8')">createQuery</div>
+
+</div> <!-- navmemberlist -->
+<h3 class="nav_title_memberlist" id="title_12">Query</h3>
+<div class="navmemberlist" id="list_12">
+	<div class="navmethod" id="nav_12_1" onclick="showMethod('12_1')">addFeature</div>
+<div class="navmethod" id="nav_12_2" onclick="showMethod('12_2')">addMetaDataRestriction</div>
+<div class="navmethod" id="nav_12_3" onclick="showMethod('12_3')">defineTermStatistics</div>
+<div class="navmethod" id="nav_12_4" onclick="showMethod('12_4')">defineGlobalStatistics</div>
+<div class="navmethod" id="nav_12_5" onclick="showMethod('12_5')">addDocumentEvaluationSet</div>
+<div class="navmethod" id="nav_12_6" onclick="showMethod('12_6')">setMaxNofRanks</div>
+<div class="navmethod" id="nav_12_7" onclick="showMethod('12_7')">setMinRank</div>
+<div class="navmethod" id="nav_12_8" onclick="showMethod('12_8')">addAccess</div>
+<div class="navmethod" id="nav_12_9" onclick="showMethod('12_9')">setWeightingVariables</div>
+<div class="navmethod" id="nav_12_10" onclick="showMethod('12_10')">setDebugMode</div>
+<div class="navmethod" id="nav_12_11" onclick="showMethod('12_11')">evaluate</div>
+<div class="navmethod" id="nav_12_12" onclick="showMethod('12_12')">tostring</div>
 
 </div> <!-- navmemberlist -->
 
@@ -223,6 +252,26 @@ Object representing a transaction of the storage
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_4">
+<h2 class="content_title">StrusInserter</h2>
+<p class="leadtext">
+Object representing a client connection to the storage and an analyzer providing inserts of content to be analyzed
+</p>
+<div class="callremarks"></div> <!-- callremarks -->
+<div class="callnotes"><div class="note">The only way to construct an inserter instance is to call Context::createInserter( storage, analyzer)</div>
+
+</div> <!-- callnotes -->
+</div> <!-- classdescription -->
+<div class="classdescription" id="description_5">
+<h2 class="content_title">StrusInserterTransaction</h2>
+<p class="leadtext">
+Object representing a transaction of the storage for insering content to be analyzed
+</p>
+<div class="callremarks"></div> <!-- callremarks -->
+<div class="callnotes"><div class="note">The only way to construct an inserter transaction instance is to call Inserter::createTransaction()</div>
+
+</div> <!-- callnotes -->
+</div> <!-- classdescription -->
+<div class="classdescription" id="description_6">
 <h2 class="content_title">StrusVectorStorageSearcher</h2>
 <p class="leadtext">
 Object used to search for similar vectors in the collection
@@ -232,7 +281,7 @@ Object used to search for similar vectors in the collection
 
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_5">
+<div class="classdescription" id="description_7">
 <h2 class="content_title">StrusVectorStorageClient</h2>
 <p class="leadtext">
 Object representing a client connection to a vector storage 
@@ -242,7 +291,7 @@ Object representing a client connection to a vector storage
 
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_6">
+<div class="classdescription" id="description_8">
 <h2 class="content_title">StrusVectorStorageTransaction</h2>
 <p class="leadtext">
 Object representing a vector storage transaction
@@ -252,7 +301,7 @@ Object representing a vector storage transaction
 
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_7">
+<div class="classdescription" id="description_9">
 <h2 class="content_title">StrusDocumentAnalyzer</h2>
 <p class="leadtext">
 Analyzer object representing a program for segmenting, 
@@ -264,7 +313,7 @@ Analyzer object representing a program for segmenting,
 </div> <!-- callremarks -->
 <div class="callnotes"></div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_8">
+<div class="classdescription" id="description_10">
 <h2 class="content_title">StrusQueryAnalyzer</h2>
 <p class="leadtext">
 Analyzer object representing a set of function for transforming a field,
@@ -276,7 +325,7 @@ Analyzer object representing a set of function for transforming a field,
 </div> <!-- callremarks -->
 <div class="callnotes"></div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_9">
+<div class="classdescription" id="description_11">
 <h2 class="content_title">StrusQueryEval</h2>
 <p class="leadtext">
 Query evaluation program object representing an information retrieval scheme for documents in a storage.
@@ -286,7 +335,7 @@ Query evaluation program object representing an information retrieval scheme for
 
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
-<div class="classdescription" id="description_10">
+<div class="classdescription" id="description_12">
 <h2 class="content_title">StrusQuery</h2>
 <p class="leadtext">
 Query program object representing a retrieval method for documents in a storage.
@@ -306,9 +355,9 @@ Constructor
 <div class="parameterlist"><div class="param">
 <div class="paramname">config</div>
 <div class="paramdescr">(optional) context configuration. If not defined, create context for local mode with own module loader</div>
-<div class="paramexamples"><div class="example">{rpc="localhost:7181"}</div>
-<div class="example">{trace="log=dump;file=stdout"}</div>
-<div class="example">{threads=12}</div>
+<div class="paramexamples"><div class="example">[rpc=&gt;"localhost:7181"]</div>
+<div class="example">[trace=&gt;"log=dump;file=stdout"]</div>
+<div class="example">[threads=&gt;12]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -337,9 +386,14 @@ Load a module
 
 </div> <!-- callremarks -->
 
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="annotation_subtitle">name</div>
+<div class="annotation"><div class="note">this function is not thread safe and should only be called in the initialization phase before calling endConfig when used in a multithreaded context.</div>
+</div> <!-- annotation -->
+</div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">loadModule("storage_vector")</div>
+<div class="callexamples"><div class="example">loadModule( "storage_vector")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -354,7 +408,7 @@ Add one or more paths from where to try to load modules from
 <div class="parameterlist"><div class="param">
 <div class="paramname">paths</div>
 <div class="paramdescr">a string or a list of module search paths</div>
-<div class="paramexamples"><div class="example">{"/home/bob/modules", "/home/anne/modules"}</div>
+<div class="paramexamples"><div class="example">["/home/bob/modules", "/home/anne/modules"]</div>
 <div class="example">"/home/bob/modules"</div>
 </div> <!-- paramexamples -->
 
@@ -365,9 +419,14 @@ Add one or more paths from where to try to load modules from
 
 </div> <!-- callremarks -->
 
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="annotation_subtitle">paths</div>
+<div class="annotation"><div class="note">this function is not thread safe and should only be called in the initialization phase before calling endConfig when used in a multithreaded context.</div>
+</div> <!-- annotation -->
+</div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addModulePath("/home/bob/modules")</div>
+<div class="callexamples"><div class="example">addModulePath( "/home/bob/modules")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -382,7 +441,7 @@ Add a path where to load analyzer resource files from
 <div class="parameterlist"><div class="param">
 <div class="paramname">paths</div>
 <div class="paramdescr">a string or a list of resource search paths</div>
-<div class="paramexamples"><div class="example">{"/home/bob/resources", "/home/anne/resources"}</div>
+<div class="paramexamples"><div class="example">["/home/bob/resources", "/home/anne/resources"]</div>
 <div class="example">"/home/bob/resources"</div>
 </div> <!-- paramexamples -->
 
@@ -399,6 +458,47 @@ Add a path where to load analyzer resource files from
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_5">
+<h2 class="content_title">defineWorkingDirectory</h2>
+<p class="text">
+Define the working directory where files are written to
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">path</div>
+<div class="paramdescr">a string specifying the working directory</div>
+<div class="paramexamples"><div class="example">"/srv/strus"</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="note">All paths used for data written must be relative from the working directory, if the working directory is defined</div>
+
+</div> <!-- callnotes -->
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_6">
+<h2 class="content_title">endConfig</h2>
+<p class="text">
+End the configuration of the context, creates the object builders
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="note">no parameters defined</div></div>
+<h4 class="content_subtitle">Remarks</h4>
+<div class="callremarks"><div class="remark">If this function is not called, then the object builders are created on the first request</div>
+
+</div> <!-- callremarks -->
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_7">
 <h2 class="content_title">createStorageClient</h2>
 <p class="text">
 Create a storage client instance
@@ -413,17 +513,10 @@ Create a storage client instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createStorageClient()</div>
-<div class="example">createStorageClient("path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT")</div>
-<div class="example">createStorageClient({path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT"})</div>
-<div class="example">createStorageClient({
- 	path="/srv/searchengine/storage"
- 	metadata="doclen UINT32, date UINT32, docweight FLOAT"
- 	max_open_files=256
- 	write_buffer_size="4K"
- 	block_size="4M"
- 	cache="1G"
- 	})</div>
+<div class="callexamples"><div class="example">createStorageClient( )</div>
+<div class="example">createStorageClient( "path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT")</div>
+<div class="example">createStorageClient( [path=&gt;"/srv/searchengine/storage", metadata=&gt;"doclen UINT32, date UINT32, docweight FLOAT"])</div>
+<div class="example">createStorageClient( [path=&gt;"/srv/searchengine/storage", metadata=&gt;"doclen UINT32, date UINT32, docweight FLOAT", max_open_files=&gt;256, write_buffer_size=&gt;"4K", block_size=&gt;"4M", cache=&gt;"1G"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -433,7 +526,7 @@ Create a storage client instance
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_6">
+<div class="memberdescription" id="description_1_8">
 <h2 class="content_title">createVectorStorageClient</h2>
 <p class="text">
 Create a vector storage client instance
@@ -448,9 +541,9 @@ Create a vector storage client instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createVectorStorageClient()</div>
-<div class="example">createVectorStorageClient("path=/srv/searchengine/vecstorage")</div>
-<div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
+<div class="callexamples"><div class="example">createVectorStorageClient( )</div>
+<div class="example">createVectorStorageClient( "path=/srv/searchengine/vecstorage")</div>
+<div class="example">createVectorStorageClient( [path=&gt;"/srv/searchengine/vecstorage"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -460,7 +553,7 @@ Create a vector storage client instance
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_7">
+<div class="memberdescription" id="description_1_9">
 <h2 class="content_title">createStorage</h2>
 <p class="text">
 Create a new storage (physically) described by config
@@ -479,14 +572,14 @@ Create a new storage (physically) described by config
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createStorage("path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT; acl=yes")</div>
-<div class="example">createStorage({path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT", acl=true})</div>
+<div class="callexamples"><div class="example">createStorage( "path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT; acl=yes")</div>
+<div class="example">createStorage( [path=&gt;"/srv/searchengine/storage", metadata=&gt;"doclen UINT32, date UINT32, docweight FLOAT", acl=&gt;TRUE])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_8">
+<div class="memberdescription" id="description_1_10">
 <h2 class="content_title">createVectorStorage</h2>
 <p class="text">
 Create a new storage (physically) described by config
@@ -505,14 +598,14 @@ Create a new storage (physically) described by config
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createVectorStorageClient("path=/srv/searchengine/vecstorage")</div>
-<div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
+<div class="callexamples"><div class="example">createVectorStorageClient( "path=/srv/searchengine/vecstorage")</div>
+<div class="example">createVectorStorageClient( [path=&gt;"/srv/searchengine/vecstorage"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_9">
+<div class="memberdescription" id="description_1_11">
 <h2 class="content_title">destroyStorage</h2>
 <p class="text">
 Delete the storage (physically) described by config
@@ -535,14 +628,14 @@ Delete the storage (physically) described by config
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">destroyStorage("path=/srv/searchengine/storage")</div>
-<div class="example">destroyStorage({path="/srv/searchengine/storage"})</div>
+<div class="callexamples"><div class="example">destroyStorage( "path=/srv/searchengine/storage")</div>
+<div class="example">destroyStorage( [path=&gt;"/srv/searchengine/storage"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_10">
+<div class="memberdescription" id="description_1_12">
 <h2 class="content_title">storageExists</h2>
 <p class="text">
 Tests if the storage described by config exists
@@ -561,8 +654,8 @@ Tests if the storage described by config exists
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">storageExists("path=/srv/searchengine/storage")</div>
-<div class="example">storageExists({path="/srv/searchengine/storage"})</div>
+<div class="callexamples"><div class="example">storageExists( "path=/srv/searchengine/storage")</div>
+<div class="example">storageExists( [path=&gt;"/srv/searchengine/storage"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -572,7 +665,7 @@ Tests if the storage described by config exists
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_11">
+<div class="memberdescription" id="description_1_13">
 <h2 class="content_title">detectDocumentClass</h2>
 <p class="text">
 Detect the type of document from its content
@@ -587,20 +680,20 @@ Detect the type of document from its content
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">detectDocumentClass("&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;doc&gt;...&lt;/doc&gt;")</div>
+<div class="callexamples"><div class="example">detectDocumentClass( "&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;doc&gt;...&lt;/doc&gt;")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the document class</div>
-<div class="resultexamples"><div class="example">{mimetype="application/xml", encoding="UTF-8", scheme="customer"}</div>
-<div class="example">{mimetype="application/json", encoding="UTF-8"}</div>
+<div class="resultexamples"><div class="example">[mimetype=&gt;"application/xml", encoding=&gt;"UTF-8", scheme=&gt;"customer"]</div>
+<div class="example">[mimetype=&gt;"application/json", encoding=&gt;"UTF-8"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_12">
+<div class="memberdescription" id="description_1_14">
 <h2 class="content_title">createDocumentAnalyzer</h2>
 <p class="text">
 Create a document analyzer instance
@@ -609,9 +702,9 @@ Create a document analyzer instance
 <div class="parameterlist"><div class="param">
 <div class="paramname">doctype</div>
 <div class="paramdescr">structure describing the segmenter to use (either document class description structure or segmenter name)</div>
-<div class="paramexamples"><div class="example">{mimetype="application/xml", encoding="UTF-8", scheme="customer"}</div>
-<div class="example">{mimetype="application/json", encoding="UTF-8"}</div>
-<div class="example">{segmenter="textwolf"}</div>
+<div class="paramexamples"><div class="example">[mimetype=&gt;"application/xml", encoding=&gt;"UTF-8", scheme=&gt;"customer"]</div>
+<div class="example">[mimetype=&gt;"application/json", encoding=&gt;"UTF-8"]</div>
+<div class="example">[segmenter=&gt;"textwolf"]</div>
 <div class="example">"application/json"</div>
 <div class="example">"json"</div>
 </div> <!-- paramexamples -->
@@ -621,7 +714,7 @@ Create a document analyzer instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createDocumentAnalyzer({mimetype="application/xml", encoding="UTF-8"})</div>
+<div class="callexamples"><div class="example">createDocumentAnalyzer( [mimetype=&gt;"application/xml", encoding=&gt;"UTF-8"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -631,7 +724,7 @@ Create a document analyzer instance
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_13">
+<div class="memberdescription" id="description_1_15">
 <h2 class="content_title">createQueryAnalyzer</h2>
 <p class="text">
 Create a query analyzer instance
@@ -641,7 +734,7 @@ Create a query analyzer instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createQueryAnalyzer()</div>
+<div class="callexamples"><div class="example">createQueryAnalyzer( )</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -651,7 +744,7 @@ Create a query analyzer instance
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_14">
+<div class="memberdescription" id="description_1_16">
 <h2 class="content_title">createQueryEval</h2>
 <p class="text">
 Create a query evaluation instance
@@ -661,17 +754,47 @@ Create a query evaluation instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createQueryEval()</div>
+<div class="callexamples"><div class="example">createQueryEval( )</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
-<div class="resultdescr">quer evaluation interface (class QueryEval)</div>
+<div class="resultdescr">query evaluation interface (class QueryEval)</div>
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_15">
+<div class="memberdescription" id="description_1_17">
+<h2 class="content_title">createInserter</h2>
+<p class="text">
+Create an inserter based on a storage and a document analyzer
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">storage</div>
+<div class="paramdescr">storage client to insert into</div>
+
+</div> <!-- param -->
+<div class="param">
+<div class="paramname">analyzer</div>
+<div class="paramdescr">document analyzer to use for preparing the documents to insert</div>
+
+</div> <!-- param -->
+</div>
+
+
+<h4 class="content_subtitle">Examples</h4>
+<div class="callexamples"><div class="example">createInserter( $storage, $analyzer)</div>
+</div> <!-- callexamples -->
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">inserter interface (class Inserter)</div>
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_18">
 <h2 class="content_title">unpackStatisticBlob</h2>
 <p class="text">
 Unpack a statistics blob retrieved from a storage
@@ -701,7 +824,7 @@ Unpack a statistics blob retrieved from a storage
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_16">
+<div class="memberdescription" id="description_1_19">
 <h2 class="content_title">close</h2>
 <p class="text">
 Force cleanup to circumvent object pooling mechanisms in an interpreter context
@@ -714,7 +837,7 @@ Force cleanup to circumvent object pooling mechanisms in an interpreter context
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_1_17">
+<div class="memberdescription" id="description_1_20">
 <h2 class="content_title">debug_serialize</h2>
 <p class="text">
 Debug method that returns the serialization of the arguments as string
@@ -725,6 +848,11 @@ Debug method that returns the serialization of the arguments as string
 <div class="paramdescr">structure to serialize as string for visualization (debuging)</div>
 
 </div> <!-- param -->
+<div class="param">
+<div class="paramname">deterministic</div>
+<div class="paramdescr">(optional) true, if output is deterministic</div>
+
+</div> <!-- param -->
 </div>
 
 <h4 class="content_subtitle">Notes</h4>
@@ -733,7 +861,7 @@ Debug method that returns the serialization of the arguments as string
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">debug_serialize({surname="John", lastname="Doe", company={name="ACME", url="acme.com"}})</div>
+<div class="callexamples"><div class="example">debug_serialize( [surname=&gt;"John", lastname=&gt;"Doe", company=&gt;[name=&gt;"ACME", url=&gt;"acme.com"]])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -741,6 +869,90 @@ Debug method that returns the serialization of the arguments as string
 <div class="resultdescr">the input serialization as string</div>
 <div class="resultexamples"><div class="example">"open name 'surname' value 'John' name 'lastname' value 'Doe' name 'company' open name 'name' value 'ACME' name 'url' value 'acme.com' close close"</div>
 </div> <!-- resultexamples -->
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_21">
+<h2 class="content_title">introspection</h2>
+<p class="text">
+Introspect a structure starting from a root path
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">path</div>
+<div class="paramdescr">list of idenfifiers describing the access path to the element to introspect</div>
+<div class="paramexamples"><div class="example">["queryproc", "weightfunc"]</div>
+<div class="example">["weightfunc"]</div>
+<div class="example">["env"]</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">the structure to introspect starting from the path</div>
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_22">
+<h2 class="content_title">enableDebugTrace</h2>
+<p class="text">
+Enable the debug trace interface for a named component for the current thread
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">component</div>
+<div class="paramdescr">name of component to enable debug tracing for</div>
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_23">
+<h2 class="content_title">disableDebugTrace</h2>
+<p class="text">
+Disable the debug trace interface for a named component for the current thread
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">component</div>
+<div class="paramdescr">name of component to disable debug tracing for</div>
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_1_24">
+<h2 class="content_title">fetchDebugTrace</h2>
+<p class="text">
+Fetch all debug trace messages of the current thread
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="note">no parameters defined</div></div>
+
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="annotation_subtitle">return</div>
+<div class="annotation"><div class="note">Clears all messages stored for the current thread</div>
+</div> <!-- annotation -->
+</div> <!-- callnotes -->
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">all messages</div>
 
 </div> <!-- result -->
 </div>
@@ -910,17 +1122,17 @@ Get an iterator on the set of postings inserted
 <div class="parameterlist"><div class="param">
 <div class="paramname">expression</div>
 <div class="paramdescr">query term expression</div>
-<div class="paramexamples"><div class="example">{"sequence", 10, {"sequence", 2, {"word", "complet"}, {"word", "diff"}}, {"sequence", 3, {"word", "you"}, {"word", "expect"}}}</div>
-<div class="example">{"word", "hello"}</div>
-<div class="example">{"sequence", 2, {"word", "ch"}, {"number", "13"}}</div>
+<div class="paramexamples"><div class="example">["sequence", 10, ["sequence", 2, ["word", "complet"], ["word", "diff"]], ["sequence", 3, ["word", "you"], ["word", "expect"]]]</div>
+<div class="example">["word", "hello"]</div>
+<div class="example">["sequence", 2, ["word", "ch"], ["number", "13"]]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
 <div class="param">
 <div class="paramname">restriction</div>
 <div class="paramdescr">(optional) meta data restrictions</div>
-<div class="paramexamples"><div class="example">{{{"=", "country", 12}, {"=", "country", 17}}, {"&lt;", "year", "2007"}}</div>
-<div class="example">{"&lt;", "year", "2002"}</div>
+<div class="paramexamples"><div class="example">[[["=", "country", 12], ["=", "country", 17]], ["&lt;", "year", "2007"]]</div>
+<div class="example">["&lt;", "year", "2002"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -952,24 +1164,24 @@ Get an iterator on records of selected elements for matching documents starting 
 <div class="parameterlist"><div class="param">
 <div class="paramname">what</div>
 <div class="paramdescr">list of items to select: names of document attributes or meta data or "position" for matching positions or "docno" for the document number</div>
-<div class="paramexamples"><div class="example">{"docno", "title", "position"}</div>
+<div class="paramexamples"><div class="example">["docno", "title", "position"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
 <div class="param">
 <div class="paramname">expression</div>
 <div class="paramdescr">query term expression</div>
-<div class="paramexamples"><div class="example">{"within", 5, {"word", "world"}, {"word", "money"}}</div>
-<div class="example">{"word", "hello"}</div>
-<div class="example">{"sequence", 2, {"word", "ch"}, {"number", "13"}}</div>
+<div class="paramexamples"><div class="example">["within", 5, ["word", "world"], ["word", "money"]]</div>
+<div class="example">["word", "hello"]</div>
+<div class="example">["sequence", 2, ["word", "ch"], ["number", "13"]]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
 <div class="param">
 <div class="paramname">restriction</div>
 <div class="paramdescr">(optional) meta data restrictions</div>
-<div class="paramexamples"><div class="example">{{{"=", "country", 12}, {"=", "country", 17}}, {"&lt;", "year", "2007"}}</div>
-<div class="example">{"&lt;", "year", "2002"}</div>
+<div class="paramexamples"><div class="example">[[["=", "country", 12], ["=", "country", 17]], ["&lt;", "year", "2007"]]</div>
+<div class="example">["&lt;", "year", "2002"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -984,7 +1196,7 @@ Get an iterator on records of selected elements for matching documents starting 
 <div class="param">
 <div class="paramname">accesslist</div>
 <div class="paramdescr">(optional) list of access restrictions (one of them must match)</div>
-<div class="paramexamples"><div class="example">{"public", "devel"}</div>
+<div class="paramexamples"><div class="example">["public", "devel"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1088,7 +1300,7 @@ Get the list of inserted document attribute names
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">list of names</div>
-<div class="resultexamples"><div class="example">{"name", "title", "docid"}</div>
+<div class="resultexamples"><div class="example">["name", "title", "docid"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
@@ -1107,7 +1319,7 @@ Get the list of inserted document metadata names
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">list of names</div>
-<div class="resultexamples"><div class="example">{"date", "ccode", "category"}</div>
+<div class="resultexamples"><div class="example">["date", "ccode", "category"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
@@ -1190,7 +1402,7 @@ Get the configuration of this storage
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as structure</div>
-<div class="resultexamples"><div class="example">{path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT"}</div>
+<div class="resultexamples"><div class="example">[path=&gt;"/srv/searchengine/storage", metadata=&gt;"doclen UINT32, date UINT32, docweight FLOAT"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
@@ -1227,6 +1439,33 @@ Close of the storage client
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_2_20">
+<h2 class="content_title">introspection</h2>
+<p class="text">
+Introspect a structure starting from a root path
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">path</div>
+<div class="paramdescr">list of idenfifiers describing the access path to the element to introspect</div>
+<div class="paramexamples"><div class="example">["config"]</div>
+<div class="example">["termtypes"]</div>
+<div class="example">["attributenames"]</div>
+<div class="example">["metadatanames"]</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">the structure to introspect starting from the path</div>
+
+</div> <!-- result -->
+</div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_1">
 <h2 class="content_title">insertDocument</h2>
@@ -1330,6 +1569,129 @@ Rollback all insert or delete or user access right change statements of this tra
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_4_1">
+<h2 class="content_title">createTransaction</h2>
+<p class="text">
+Create a transaction
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="note">no parameters defined</div></div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">the transaction object (class InserterTransaction) created</div>
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_5_1">
+<h2 class="content_title">insertDocument</h2>
+<p class="text">
+Prepare the inserting a document into the storage
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">docid</div>
+<div class="paramdescr">the identifier of the document to insert or empty if document id is extracted by analyzer</div>
+
+</div> <!-- param -->
+<div class="param">
+<div class="paramname">doc</div>
+<div class="paramdescr">plain content of the document to analyze and insert</div>
+
+</div> <!-- param -->
+<div class="param">
+<div class="paramname">documentClass</div>
+<div class="paramdescr">(optional) (optional) document class of the document to insert (autodetection if undefined)</div>
+
+</div> <!-- param -->
+</div>
+
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="note">The document is physically inserted with the call of 'commit()'</div>
+
+</div> <!-- callnotes -->
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_5_2">
+<h2 class="content_title">deleteDocument</h2>
+<p class="text">
+Prepare the deletion of a document from the storage
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">docid</div>
+<div class="paramdescr">the identifier of the document to delete</div>
+
+</div> <!-- param -->
+</div>
+
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="note">The document is physically deleted with the call of 'commit()'</div>
+
+</div> <!-- callnotes -->
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_5_3">
+<h2 class="content_title">deleteUserAccessRights</h2>
+<p class="text">
+Prepare the deletion of all document access rights of a user
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">username</div>
+<div class="paramdescr">the name of the user to delete all access rights (in the local collection)</div>
+
+</div> <!-- param -->
+</div>
+
+<h4 class="content_subtitle">Notes</h4>
+<div class="callnotes"><div class="note">The user access rights are changed accordingly with the next implicit or explicit call of 'flush'</div>
+
+</div> <!-- callnotes -->
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_5_4">
+<h2 class="content_title">commit</h2>
+<p class="text">
+Commit all insert or delete or user access right change statements of this transaction.
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="note">no parameters defined</div></div>
+<h4 class="content_subtitle">Remarks</h4>
+<div class="callremarks"><div class="remark">throws an error on failure</div>
+
+</div> <!-- callremarks -->
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_5_5">
+<h2 class="content_title">rollback</h2>
+<p class="text">
+Rollback all insert or delete or user access right change statements of this transaction.
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="note">no parameters defined</div></div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_6_1">
 <h2 class="content_title">findSimilar</h2>
 <p class="text">
 Find the most similar vectors to vector
@@ -1356,7 +1718,7 @@ Find the most similar vectors to vector
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_4_2">
+<div class="memberdescription" id="description_6_2">
 <h2 class="content_title">findSimilarFromSelection</h2>
 <p class="text">
 Find the most similar vectors to vector in a selection of features addressed by index
@@ -1388,7 +1750,7 @@ Find the most similar vectors to vector in a selection of features addressed by 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_4_3">
+<div class="memberdescription" id="description_6_3">
 <h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
@@ -1401,7 +1763,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_1">
+<div class="memberdescription" id="description_7_1">
 <h2 class="content_title">createSearcher</h2>
 <p class="text">
 Create a searcher object for scanning the vectors for similarity
@@ -1434,7 +1796,7 @@ Create a searcher object for scanning the vectors for similarity
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_2">
+<div class="memberdescription" id="description_7_2">
 <h2 class="content_title">createTransaction</h2>
 <p class="text">
 Create a vector storage transaction instance
@@ -1451,7 +1813,7 @@ Create a vector storage transaction instance
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_3">
+<div class="memberdescription" id="description_7_3">
 <h2 class="content_title">conceptClassNames</h2>
 <p class="text">
 Get the list of concept class names defined
@@ -1464,13 +1826,13 @@ Get the list of concept class names defined
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the list</div>
-<div class="resultexamples"><div class="example">{"flections", "entityrel"}</div>
+<div class="resultexamples"><div class="example">["flections", "entityrel"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_4">
+<div class="memberdescription" id="description_7_4">
 <h2 class="content_title">conceptFeatures</h2>
 <p class="text">
 Get the list of indices of features represented by a learnt concept feature
@@ -1501,13 +1863,13 @@ Get the list of indices of features represented by a learnt concept feature
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the resulting vector indices (index is order of insertion starting from 0)</div>
-<div class="resultexamples"><div class="example">{2121, 5355, 35356, 214242, 8309732, 32432424}</div>
+<div class="resultexamples"><div class="example">[2121, 5355, 35356, 214242, 8309732, 32432424]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_5">
+<div class="memberdescription" id="description_7_5">
 <h2 class="content_title">nofConcepts</h2>
 <p class="text">
 Get the number of concept features learnt for a class
@@ -1537,7 +1899,7 @@ Get the number of concept features learnt for a class
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_6">
+<div class="memberdescription" id="description_7_6">
 <h2 class="content_title">featureConcepts</h2>
 <p class="text">
 Get the set of learnt concepts of a class for a feature defined
@@ -1568,13 +1930,13 @@ Get the set of learnt concepts of a class for a feature defined
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the resulting concept feature indices (indices of learnt concepts starting from 1)</div>
-<div class="resultexamples"><div class="example">{2121, 5355, 35356, 214242, 8309732, 32432424}</div>
+<div class="resultexamples"><div class="example">[2121, 5355, 35356, 214242, 8309732, 32432424]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_7">
+<div class="memberdescription" id="description_7_7">
 <h2 class="content_title">featureVector</h2>
 <p class="text">
 Get the vector assigned to a feature addressed by index
@@ -1595,13 +1957,13 @@ Get the vector assigned to a feature addressed by index
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the vector</div>
-<div class="resultexamples"><div class="example">{0.08721391, 0.01232134, 0.02342453, 0.0011312, 0.0012314, 0.087232243}</div>
+<div class="resultexamples"><div class="example">[0.08721391, 0.01232134, 0.02342453, 0.0011312, 0.0012314, 0.087232243]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_8">
+<div class="memberdescription" id="description_7_8">
 <h2 class="content_title">featureName</h2>
 <p class="text">
 Get the name of a feature by its index starting from 0
@@ -1628,7 +1990,7 @@ Get the name of a feature by its index starting from 0
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_9">
+<div class="memberdescription" id="description_7_9">
 <h2 class="content_title">featureIndex</h2>
 <p class="text">
 Get the index starting from 0 of a feature by its name
@@ -1655,7 +2017,7 @@ Get the index starting from 0 of a feature by its name
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_10">
+<div class="memberdescription" id="description_7_10">
 <h2 class="content_title">nofFeatures</h2>
 <p class="text">
 Get the number of feature vectors defined
@@ -1675,7 +2037,7 @@ Get the number of feature vectors defined
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_11">
+<div class="memberdescription" id="description_7_11">
 <h2 class="content_title">config</h2>
 <p class="text">
 Get the configuration of this vector storage
@@ -1688,13 +2050,13 @@ Get the configuration of this vector storage
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as structure</div>
-<div class="resultexamples"><div class="example">{path='storage', commit=10, dim=300, bit=64, var=32, simdist=340, maxdist=640, realvecweights=1}</div>
+<div class="resultexamples"><div class="example">[path=&gt;'storage', commit=&gt;10, dim=&gt;300, bit=&gt;64, var=&gt;32, simdist=&gt;340, maxdist=&gt;640, realvecweights=&gt;1]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_12">
+<div class="memberdescription" id="description_7_12">
 <h2 class="content_title">configstring</h2>
 <p class="text">
 Get the configuration of this vector storage as string
@@ -1713,7 +2075,7 @@ Get the configuration of this vector storage as string
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_5_13">
+<div class="memberdescription" id="description_7_13">
 <h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
@@ -1726,7 +2088,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_6_1">
+<div class="memberdescription" id="description_8_1">
 <h2 class="content_title">addFeature</h2>
 <p class="text">
 Add named feature to vector storage
@@ -1743,7 +2105,7 @@ Add named feature to vector storage
 <div class="param">
 <div class="paramname">vec</div>
 <div class="paramdescr">vector assigned to the feature</div>
-<div class="paramexamples"><div class="example">{0.08721391, 0.01232134, 0.02342453, 0.0011312, 0.0012314, 0.087232243}</div>
+<div class="paramexamples"><div class="example">[0.08721391, 0.01232134, 0.02342453, 0.0011312, 0.0012314, 0.087232243]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1754,7 +2116,7 @@ Add named feature to vector storage
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_6_2">
+<div class="memberdescription" id="description_8_2">
 <h2 class="content_title">defineFeatureConceptRelation</h2>
 <p class="text">
 Assign a concept (index) to a feature referenced by index
@@ -1788,7 +2150,7 @@ Assign a concept (index) to a feature referenced by index
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_6_3">
+<div class="memberdescription" id="description_8_3">
 <h2 class="content_title">commit</h2>
 <p class="text">
 Commit of the transaction
@@ -1805,7 +2167,7 @@ Commit of the transaction
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_6_4">
+<div class="memberdescription" id="description_8_4">
 <h2 class="content_title">rollback</h2>
 <p class="text">
 Rollback of the transaction
@@ -1818,7 +2180,7 @@ Rollback of the transaction
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_6_5">
+<div class="memberdescription" id="description_8_5">
 <h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
@@ -1831,7 +2193,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_1">
+<div class="memberdescription" id="description_9_1">
 <h2 class="content_title">addSearchIndexFeature</h2>
 <p class="text">
 Define a feature to insert into the inverted index (search index) is selected, tokenized and normalized
@@ -1858,7 +2220,7 @@ Define a feature to insert into the inverted index (search index) is selected, t
 <div class="paramname">tokenizer</div>
 <div class="paramdescr">tokenizer function description to use for this feature</div>
 <div class="paramexamples"><div class="example">"split"</div>
-<div class="example">{"regex", "[0-9]+"}</div>
+<div class="example">["regex", "[0-9]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1866,8 +2228,8 @@ Define a feature to insert into the inverted index (search index) is selected, t
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1885,13 +2247,13 @@ Define a feature to insert into the inverted index (search index) is selected, t
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addSearchIndexFeature("word", "/doc/elem", "word", {"lc", {"stem", "en"}})</div>
+<div class="callexamples"><div class="example">addSearchIndexFeature( "word", "/doc/elem", "word", ["lc", ["stem", "en"]])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_2">
+<div class="memberdescription" id="description_9_2">
 <h2 class="content_title">addForwardIndexFeature</h2>
 <p class="text">
 Define a feature to insert into the forward index (for summarization) is selected, tokenized and normalized
@@ -1917,7 +2279,7 @@ Define a feature to insert into the forward index (for summarization) is selecte
 <div class="paramname">tokenizer</div>
 <div class="paramdescr">tokenizer function description to use for this feature</div>
 <div class="paramexamples"><div class="example">"split"</div>
-<div class="example">{"regex", "[0-9]+"}</div>
+<div class="example">["regex", "[0-9]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1925,8 +2287,8 @@ Define a feature to insert into the forward index (for summarization) is selecte
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1947,7 +2309,7 @@ Define a feature to insert into the forward index (for summarization) is selecte
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_3">
+<div class="memberdescription" id="description_9_3">
 <h2 class="content_title">addPatternLexem</h2>
 <p class="text">
 Declare an element to be used as lexem by post processing pattern matching but not put into the result of document analysis
@@ -1973,7 +2335,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="paramname">tokenizer</div>
 <div class="paramdescr">tokenizer (ownership passed to this) to use for this feature</div>
 <div class="paramexamples"><div class="example">"split"</div>
-<div class="example">{"regex", "[0-9]+"}</div>
+<div class="example">["regex", "[0-9]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1981,8 +2343,8 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizers (element ownership passed to this) to use for this feature</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -1993,7 +2355,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_4">
+<div class="memberdescription" id="description_9_4">
 <h2 class="content_title">defineMetaData</h2>
 <p class="text">
 Define a feature to insert as meta data is selected, tokenized and normalized
@@ -2019,7 +2381,7 @@ Define a feature to insert as meta data is selected, tokenized and normalized
 <div class="paramname">tokenizer</div>
 <div class="paramdescr">tokenizer function description to use for this feature</div>
 <div class="paramexamples"><div class="example">"split"</div>
-<div class="example">{"regex", "[0-9]+"}</div>
+<div class="example">["regex", "[0-9]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2027,8 +2389,8 @@ Define a feature to insert as meta data is selected, tokenized and normalized
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2039,7 +2401,7 @@ Define a feature to insert as meta data is selected, tokenized and normalized
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_5">
+<div class="memberdescription" id="description_9_5">
 <h2 class="content_title">defineAggregatedMetaData</h2>
 <p class="text">
 Declare some aggregated value of the document to be put into the meta data table used for restrictions, weighting and summarization.
@@ -2055,7 +2417,7 @@ Declare some aggregated value of the document to be put into the meta data table
 <div class="param">
 <div class="paramname">function</div>
 <div class="paramdescr">defining how and from what the value is aggregated</div>
-<div class="paramexamples"><div class="example">{"count", "word"}</div>
+<div class="paramexamples"><div class="example">["count", "word"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2066,7 +2428,7 @@ Declare some aggregated value of the document to be put into the meta data table
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_6">
+<div class="memberdescription" id="description_9_6">
 <h2 class="content_title">defineAttribute</h2>
 <p class="text">
 Define a feature to insert as document attribute (for summarization) is selected, tokenized and normalized
@@ -2092,7 +2454,7 @@ Define a feature to insert as document attribute (for summarization) is selected
 <div class="paramname">tokenizer</div>
 <div class="paramdescr">tokenizer function description to use for this feature</div>
 <div class="paramexamples"><div class="example">"split"</div>
-<div class="example">{"regex", "[0-9]+"}</div>
+<div class="example">["regex", "[0-9]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2100,8 +2462,8 @@ Define a feature to insert as document attribute (for summarization) is selected
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2112,7 +2474,7 @@ Define a feature to insert as document attribute (for summarization) is selected
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_7">
+<div class="memberdescription" id="description_9_7">
 <h2 class="content_title">addSearchIndexFeatureFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching as feature to insert into the search index, normalized
@@ -2136,8 +2498,8 @@ Define a result of pattern matching as feature to insert into the search index, 
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2158,7 +2520,7 @@ Define a result of pattern matching as feature to insert into the search index, 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_8">
+<div class="memberdescription" id="description_9_8">
 <h2 class="content_title">addForwardIndexFeatureFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching as feature to insert into the forward index, normalized
@@ -2182,8 +2544,8 @@ Define a result of pattern matching as feature to insert into the forward index,
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2204,7 +2566,7 @@ Define a result of pattern matching as feature to insert into the forward index,
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_9">
+<div class="memberdescription" id="description_9_9">
 <h2 class="content_title">defineMetaDataFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching to insert as metadata, normalized
@@ -2228,8 +2590,8 @@ Define a result of pattern matching to insert as metadata, normalized
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2240,7 +2602,7 @@ Define a result of pattern matching to insert as metadata, normalized
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_10">
+<div class="memberdescription" id="description_9_10">
 <h2 class="content_title">defineAttributeFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching to insert as document attribute, normalized
@@ -2264,8 +2626,8 @@ Define a result of pattern matching to insert as document attribute, normalized
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for this feature in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2276,7 +2638,7 @@ Define a result of pattern matching to insert as document attribute, normalized
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_11">
+<div class="memberdescription" id="description_9_11">
 <h2 class="content_title">definePatternMatcherPostProc</h2>
 <p class="text">
 Declare a pattern matcher on the document features after other query analysis
@@ -2300,7 +2662,7 @@ Declare a pattern matcher on the document features after other query analysis
 <div class="paramname">lexems</div>
 <div class="paramdescr">list of all lexems generated by the feeder (analyzer)</div>
 <div class="paramexamples"><div class="example">"word"</div>
-<div class="example">{"word", "number"}</div>
+<div class="example">["word", "number"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2316,7 +2678,7 @@ Declare a pattern matcher on the document features after other query analysis
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_12">
+<div class="memberdescription" id="description_9_12">
 <h2 class="content_title">definePatternMatcherPostProcFromFile</h2>
 <p class="text">
 Declare a pattern matcher on the document features after other query analysis
@@ -2350,8 +2712,8 @@ Declare a pattern matcher on the document features after other query analysis
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_13">
-<h2 class="content_title">defineDocument</h2>
+<div class="memberdescription" id="description_9_13">
+<h2 class="content_title">defineSubDocument</h2>
 <p class="text">
 Declare a sub document for the handling of multi part documents in an analyzed content or documents of different types with one configuration
 </p>
@@ -2381,7 +2743,34 @@ Declare a sub document for the handling of multi part documents in an analyzed c
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_14">
+<div class="memberdescription" id="description_9_14">
+<h2 class="content_title">defineSubContent</h2>
+<p class="text">
+Declare a sub parrt of a document with a different document class, needing a switching of the segmenter
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">selectexpr</div>
+<div class="paramdescr">an expression that defines the area of the sub content</div>
+<div class="paramexamples"><div class="example">"/doc/content"</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+<div class="param">
+<div class="paramname">documentClass</div>
+<div class="paramdescr">document class of the content, determines what segmenter to use for this part</div>
+<div class="paramexamples"><div class="example">[mimetype=&gt;"application/json", encoding=&gt;"UTF-8"]</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_9_15">
 <h2 class="content_title">analyzeSingle</h2>
 <p class="text">
 Analye a content and return the analyzed document structure (analyzing single document)
@@ -2397,8 +2786,8 @@ Analye a content and return the analyzed document structure (analyzing single do
 <div class="param">
 <div class="paramname">documentClass</div>
 <div class="paramdescr">(optional) document class of the document to analyze, if not specified the document class is guessed from the content with document class detection</div>
-<div class="paramexamples"><div class="example">{mimetype="application/xml", encoding="UTF-8", scheme="customer"}</div>
-<div class="example">{mimetype="application/json", encoding="UTF-8"}</div>
+<div class="paramexamples"><div class="example">[mimetype=&gt;"application/xml", encoding=&gt;"UTF-8", scheme=&gt;"customer"]</div>
+<div class="example">[mimetype=&gt;"application/json", encoding=&gt;"UTF-8"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2413,7 +2802,7 @@ Analye a content and return the analyzed document structure (analyzing single do
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_7_15">
+<div class="memberdescription" id="description_9_16">
 <h2 class="content_title">analyzeMultiPart</h2>
 <p class="text">
 Analye a content and return the analyzed document structures as iterator (analyzing multipart document)
@@ -2429,8 +2818,8 @@ Analye a content and return the analyzed document structures as iterator (analyz
 <div class="param">
 <div class="paramname">documentClass</div>
 <div class="paramdescr">(optional) document class of the document set to analyze, if not specified the document class is guessed from the content with document class detection</div>
-<div class="paramexamples"><div class="example">{mimetype="application/xml", encoding="UTF-8", scheme="customer"}</div>
-<div class="example">{mimetype="application/json", encoding="UTF-8"}</div>
+<div class="paramexamples"><div class="example">[mimetype=&gt;"application/xml", encoding=&gt;"UTF-8", scheme=&gt;"customer"]</div>
+<div class="example">[mimetype=&gt;"application/json", encoding=&gt;"UTF-8"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2449,7 +2838,29 @@ Analye a content and return the analyzed document structures as iterator (analyz
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_1">
+<div class="memberdescription" id="description_9_17">
+<h2 class="content_title">introspection</h2>
+<p class="text">
+Introspect a structure starting from a root path
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">path</div>
+<div class="paramdescr">list of idenfifiers describing the access path to the element to introspect</div>
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">the structure to introspect starting from the path</div>
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_10_1">
 <h2 class="content_title">addElement</h2>
 <p class="text">
 Defines an element (term, metadata) of query analysis.
@@ -2476,7 +2887,7 @@ Defines an element (term, metadata) of query analysis.
 <div class="paramdescr">tokenizer function description to use for the features of this field type</div>
 <div class="paramexamples"><div class="example">"content"</div>
 <div class="example">"word"</div>
-<div class="example">{"regex", "[A-Za-z]+"}</div>
+<div class="example">["regex", "[A-Za-z]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2484,8 +2895,8 @@ Defines an element (term, metadata) of query analysis.
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for the features of this field type in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
-<div class="example">{"date2int", "d", "%Y-%m-%d"}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
+<div class="example">["date2int", "d", "%Y-%m-%d"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2496,7 +2907,7 @@ Defines an element (term, metadata) of query analysis.
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_2">
+<div class="memberdescription" id="description_10_2">
 <h2 class="content_title">addElementFromPatternMatch</h2>
 <p class="text">
 Defines an element from a pattern matching result.
@@ -2519,7 +2930,7 @@ Defines an element from a pattern matching result.
 <div class="param">
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer functions</div>
-<div class="paramexamples"><div class="example">{"lc", {"stem", "en"}}</div>
+<div class="paramexamples"><div class="example">["lc", ["stem", "en"]]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2530,7 +2941,7 @@ Defines an element from a pattern matching result.
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_3">
+<div class="memberdescription" id="description_10_3">
 <h2 class="content_title">addPatternLexem</h2>
 <p class="text">
 Declare an element to be used as lexem by post processing pattern matching but not put into the result of query analysis
@@ -2557,7 +2968,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="paramdescr">tokenizer function description to use for the features of this field type</div>
 <div class="paramexamples"><div class="example">"content"</div>
 <div class="example">"word"</div>
-<div class="example">{"regex", "[A-Za-z]+"}</div>
+<div class="example">["regex", "[A-Za-z]+"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2565,7 +2976,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="paramname">normalizers</div>
 <div class="paramdescr">list of normalizer function descriptions to use for the features of this field type in the ascending order of appearance</div>
 <div class="paramexamples"><div class="example">"uc"</div>
-<div class="example">{"lc", {"convdia", "en"}}</div>
+<div class="example">["lc", ["convdia", "en"]]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2576,7 +2987,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_4">
+<div class="memberdescription" id="description_10_4">
 <h2 class="content_title">definePatternMatcherPostProc</h2>
 <p class="text">
 Declare a pattern matcher on the query features after other query analysis
@@ -2598,7 +3009,7 @@ Declare a pattern matcher on the query features after other query analysis
 <div class="param">
 <div class="paramname">lexems</div>
 <div class="paramdescr">list of all lexems generated by the feeder (analyzer)</div>
-<div class="paramexamples"><div class="example">{"word", "number", "name"}</div>
+<div class="paramexamples"><div class="example">["word", "number", "name"]</div>
 <div class="example">"word"</div>
 </div> <!-- paramexamples -->
 
@@ -2615,7 +3026,7 @@ Declare a pattern matcher on the query features after other query analysis
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_5">
+<div class="memberdescription" id="description_10_5">
 <h2 class="content_title">definePatternMatcherPostProcFromFile</h2>
 <p class="text">
 Declare a pattern matcher on the query features after other query analysis
@@ -2643,7 +3054,7 @@ Declare a pattern matcher on the query features after other query analysis
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_6">
+<div class="memberdescription" id="description_10_6">
 <h2 class="content_title">defineImplicitGroupBy</h2>
 <p class="text">
 Declare an implicit grouping operation for a query field type. The implicit group operation is always applied when more than one term are resulting from analysis of this field to ensure that you get only one node in the query from it.
@@ -2658,6 +3069,15 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 
 </div> <!-- param -->
 <div class="param">
+<div class="paramname">groupBy</div>
+<div class="paramdescr">kind of selection of the arguments grouped ("position": elements with same position get their own group, "all" (or "" default): all elements of the field get into one group</div>
+<div class="paramexamples"><div class="example">"position"</div>
+<div class="example">"all"</div>
+<div class="example">""</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+<div class="param">
 <div class="paramname">opname</div>
 <div class="paramdescr">query operator name generated as node for grouping</div>
 <div class="paramexamples"><div class="example">"join"</div>
@@ -2667,7 +3087,7 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 </div> <!-- param -->
 <div class="param">
 <div class="paramname">range</div>
-<div class="paramdescr">positional range attribute for the node used for grouping (0 for no range)</div>
+<div class="paramdescr">(optional) positional range attribute for the node used for grouping (0 for no range)</div>
 <div class="paramexamples"><div class="example">0</div>
 <div class="example">2</div>
 </div> <!-- paramexamples -->
@@ -2675,18 +3095,9 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 </div> <!-- param -->
 <div class="param">
 <div class="paramname">cardinality</div>
-<div class="paramdescr">cardinality attribute for the node used for grouping (0 for all)</div>
+<div class="paramdescr">(optional) cardinality attribute for the node used for grouping (0 for all)</div>
 <div class="paramexamples"><div class="example">0</div>
 <div class="example">3</div>
-</div> <!-- paramexamples -->
-
-</div> <!-- param -->
-<div class="param">
-<div class="paramname">groupBy</div>
-<div class="paramdescr">kind of selection of the arguments grouped ("position": elements with same position get their own group, "all" (or "" default): all elements of the field get into one group</div>
-<div class="paramexamples"><div class="example">"position"</div>
-<div class="example">"all"</div>
-<div class="example">""</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2697,17 +3108,44 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_7">
+<div class="memberdescription" id="description_10_7">
+<h2 class="content_title">declareElementPriority</h2>
+<p class="text">
+That all query elements assigned to a feature type get a priority that causes the elimination of all elements with a lower priority that are completely covered by a single element of this type.
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">type</div>
+<div class="paramdescr">feature type name</div>
+<div class="paramexamples"><div class="example">"word"</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+<div class="param">
+<div class="paramname">priority</div>
+<div class="paramdescr">priority value assigned to 'type'</div>
+<div class="paramexamples"><div class="example">1</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="note">no value returned</div></div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_10_8">
 <h2 class="content_title">analyzeTermExpression</h2>
 <p class="text">
-Analye the term expression and return the result structure
+Analye a term expression
 </p>
 <h4 class="content_subtitle">Parameter</h4>
 <div class="parameterlist"><div class="param">
 <div class="paramname">expression</div>
 <div class="paramdescr">query term expression tree</div>
-<div class="paramexamples"><div class="example">{"within", 5, {"word", "Worlds"}, {"word", "powers"}}</div>
-<div class="example">{"word", "PUBLIC"}</div>
+<div class="paramexamples"><div class="example">["within", 5, ["word", "Worlds"], ["word", "powers"]]</div>
+<div class="example">["word", "PUBLIC"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2718,23 +3156,55 @@ Analye the term expression and return the result structure
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">structure analyzed</div>
-<div class="resultexamples"><div class="example">{"within", 5, {"word", "world"}, {"word", "power"}}</div>
-<div class="example">{"word", "public"}</div>
+<div class="resultexamples"><div class="example">["within", 5, ["word", "world"], ["word", "power"]]</div>
+<div class="example">["word", "public"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_8_8">
+<div class="memberdescription" id="description_10_9">
+<h2 class="content_title">analyzeSingleTermExpression</h2>
+<p class="text">
+Analye a unique term expression resulting in a single and unique result
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">expression</div>
+<div class="paramdescr">query term expression tree</div>
+<div class="paramexamples"><div class="example">["within", 5, ["word", "Worlds"], ["word", "powers"]]</div>
+<div class="example">["word", "PUBLIC"]</div>
+</div> <!-- paramexamples -->
+
+</div> <!-- param -->
+</div>
+<h4 class="content_subtitle">Remarks</h4>
+<div class="callremarks"><div class="remark">issues an error if the result does not exist or is not unique</div>
+
+</div> <!-- callremarks -->
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">structure analyzed</div>
+<div class="resultexamples"><div class="example">["within", 5, ["word", "world"], ["word", "power"]]</div>
+<div class="example">["word", "public"]</div>
+</div> <!-- resultexamples -->
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_10_10">
 <h2 class="content_title">analyzeMetaDataExpression</h2>
 <p class="text">
-Analye the metadata expression and return the result structure
+Analye a metadata expression
 </p>
 <h4 class="content_subtitle">Parameter</h4>
 <div class="parameterlist"><div class="param">
 <div class="paramname">expression</div>
 <div class="paramdescr">query metadata expression tree</div>
-<div class="paramexamples"><div class="example">{"&lt;", "year", "26.9.2017"}</div>
+<div class="paramexamples"><div class="example">["&lt;", "year", "26.9.2017"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2745,13 +3215,35 @@ Analye the metadata expression and return the result structure
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">structure analyzed</div>
-<div class="resultexamples"><div class="example">{"&lt;", "year", "17071"}</div>
+<div class="resultexamples"><div class="example">["&lt;", "year", "17071"]</div>
 </div> <!-- resultexamples -->
 
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_1">
+<div class="memberdescription" id="description_10_11">
+<h2 class="content_title">introspection</h2>
+<p class="text">
+Introspect a structure starting from a root path
+</p>
+<h4 class="content_subtitle">Parameter</h4>
+<div class="parameterlist"><div class="param">
+<div class="paramname">path</div>
+<div class="paramdescr">list of idenfifiers describing the access path to the element to introspect</div>
+
+</div> <!-- param -->
+</div>
+
+
+
+<h4 class="content_subtitle">Result</h4>
+<div class="callresult"><div class="result">
+<div class="resultdescr">the structure to introspect starting from the path</div>
+
+</div> <!-- result -->
+</div>
+</div> <!-- memberdescription -->
+<div class="memberdescription" id="description_11_1">
 <h2 class="content_title">addTerm</h2>
 <p class="text">
 Declare a term that is used in the query evaluation as structural element without beeing part of the query (for example punctuation used for match fields summarization)
@@ -2785,7 +3277,7 @@ Declare a term that is used in the query evaluation as structural element withou
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_2">
+<div class="memberdescription" id="description_11_2">
 <h2 class="content_title">addSelectionFeature</h2>
 <p class="text">
 Declare a feature set to be used as selecting feature
@@ -2805,7 +3297,7 @@ Declare a feature set to be used as selecting feature
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_3">
+<div class="memberdescription" id="description_11_3">
 <h2 class="content_title">addRestrictionFeature</h2>
 <p class="text">
 Declare a feature set to be used as restriction
@@ -2825,7 +3317,7 @@ Declare a feature set to be used as restriction
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_4">
+<div class="memberdescription" id="description_11_4">
 <h2 class="content_title">addExclusionFeature</h2>
 <p class="text">
 Declare a feature set to be used as exclusion
@@ -2845,7 +3337,7 @@ Declare a feature set to be used as exclusion
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_5">
+<div class="memberdescription" id="description_11_5">
 <h2 class="content_title">addSummarizer</h2>
 <p class="text">
 Declare a summarizer
@@ -2863,7 +3355,7 @@ Declare a summarizer
 <div class="param">
 <div class="paramname">parameter</div>
 <div class="paramdescr">the parameters of the summarizer to add (parameter name 'debug' reserved for declaring the debug info attribute)</div>
-<div class="paramexamples"><div class="example">{sentencesize=40, windowsize=100, cardinality=5}</div>
+<div class="paramexamples"><div class="example">[sentencesize=&gt;40, windowsize=&gt;100, cardinality=&gt;5]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2876,14 +3368,14 @@ Declare a summarizer
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addSummarizer("attribute", {{"name", "docid"}, {"debug", "debug_attribute"}})</div>
-<div class="example">addSummarizer("metadata", {{"name", "cross"}, {"debug", "debug_metadata"}})</div>
+<div class="callexamples"><div class="example">addSummarizer( "attribute", [["name", "docid"], ["debug", "debug_attribute"]])</div>
+<div class="example">addSummarizer( "metadata", [["name", "cross"], ["debug", "debug_metadata"]])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_6">
+<div class="memberdescription" id="description_11_6">
 <h2 class="content_title">addWeightingFunction</h2>
 <p class="text">
 Add a weighting function to use as summand of the total document weight
@@ -2899,7 +3391,7 @@ Add a weighting function to use as summand of the total document weight
 <div class="param">
 <div class="paramname">parameter</div>
 <div class="paramdescr">the parameters of the weighting function to add</div>
-<div class="paramexamples"><div class="example">{b=0.75, k=1.2, avgdoclen=1000, match={feature="seek"}, debug="debug_weighting"}</div>
+<div class="paramexamples"><div class="example">[b=&gt;0.75, k=&gt;1.2, avgdoclen=&gt;1000, match=&gt;[feature=&gt;"seek"], debug=&gt;"debug_weighting"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -2907,13 +3399,13 @@ Add a weighting function to use as summand of the total document weight
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addWeightingFunction("tf", {match={feature="seek"}, debug="debug_weighting"})</div>
+<div class="callexamples"><div class="example">addWeightingFunction( "tf", [match=&gt;[feature=&gt;"seek"], debug=&gt;"debug_weighting"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_7">
+<div class="memberdescription" id="description_11_7">
 <h2 class="content_title">defineWeightingFormula</h2>
 <p class="text">
 Define the weighting formula to use for calculating the total weight from the weighting function results (sum of the weighting function results is the default)
@@ -2935,13 +3427,13 @@ Define the weighting formula to use for calculating the total weight from the we
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">defineWeightingFormula("_0 / _1")</div>
+<div class="callexamples"><div class="example">defineWeightingFormula( "_0 / _1")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_9_8">
+<div class="memberdescription" id="description_11_8">
 <h2 class="content_title">createQuery</h2>
 <p class="text">
 Create a query to instantiate based on this query evaluation scheme
@@ -2963,7 +3455,7 @@ Create a query to instantiate based on this query evaluation scheme
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_1">
+<div class="memberdescription" id="description_12_1">
 <h2 class="content_title">addFeature</h2>
 <p class="text">
 Create a feature from the query expression passed
@@ -2980,8 +3472,8 @@ Create a feature from the query expression passed
 <div class="param">
 <div class="paramname">expr</div>
 <div class="paramdescr">query expression that defines the postings of the feature and the variables attached</div>
-<div class="paramexamples"><div class="example">{"contains", 0, 1, {"word", "hello"}, {"word", "world"}}</div>
-<div class="example">{from="title_start", to="title_end"}</div>
+<div class="paramexamples"><div class="example">["contains", 0, 1, ["word", "hello"], ["word", "world"]]</div>
+<div class="example">[from=&gt;"title_start", to=&gt;"title_end"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3003,14 +3495,14 @@ Create a feature from the query expression passed
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addFeature("select", {"contains", 0, 1, {"word", "hello"}, {"word", "world"}})</div>
-<div class="example">addFeature("titlefield", {from="title_start", to="title_end"})</div>
+<div class="callexamples"><div class="example">addFeature( "select", ["contains", 0, 1, ["word", "hello"], ["word", "world"]])</div>
+<div class="example">addFeature( "titlefield", [from=&gt;"title_start", to=&gt;"title_end"])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_2">
+<div class="memberdescription" id="description_12_2">
 <h2 class="content_title">addMetaDataRestriction</h2>
 <p class="text">
 Define a meta data restriction
@@ -3019,8 +3511,8 @@ Define a meta data restriction
 <div class="parameterlist"><div class="param">
 <div class="paramname">expression</div>
 <div class="paramdescr">meta data expression tree interpreted as CNF (conjunctive normalform "AND" of "OR"s)</div>
-<div class="paramexamples"><div class="example">{{{"=", "country", 12}, {"=", "country", 17}}, {"&lt;", "year", "2007"}}</div>
-<div class="example">{"&lt;", "year", "2002"}</div>
+<div class="paramexamples"><div class="example">[[["=", "country", 12], ["=", "country", 17]], ["&lt;", "year", "2007"]]</div>
+<div class="example">["&lt;", "year", "2002"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3042,7 +3534,7 @@ Define a meta data restriction
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_3">
+<div class="memberdescription" id="description_12_3">
 <h2 class="content_title">defineTermStatistics</h2>
 <p class="text">
 Define term statistics to use for a term for weighting it in this query
@@ -3065,7 +3557,7 @@ Define term statistics to use for a term for weighting it in this query
 <div class="param">
 <div class="paramname">stats</div>
 <div class="paramdescr">the structure with the statistics to set</div>
-<div class="paramexamples"><div class="example">{df=74653}</div>
+<div class="paramexamples"><div class="example">[df=&gt;74653]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3073,13 +3565,13 @@ Define term statistics to use for a term for weighting it in this query
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">defineTermStatistics("word", "game", {df=74653})</div>
+<div class="callexamples"><div class="example">defineTermStatistics( "word", "game", [df=&gt;74653])</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_4">
+<div class="memberdescription" id="description_12_4">
 <h2 class="content_title">defineGlobalStatistics</h2>
 <p class="text">
 Define the global statistics to use for weighting in this query
@@ -3088,7 +3580,7 @@ Define the global statistics to use for weighting in this query
 <div class="parameterlist"><div class="param">
 <div class="paramname">stats</div>
 <div class="paramdescr">the structure with the statistics to set</div>
-<div class="paramexamples"><div class="example">{nofdocs=1234331}</div>
+<div class="paramexamples"><div class="example">[nofdocs=&gt;1234331]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3099,7 +3591,7 @@ Define the global statistics to use for weighting in this query
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_5">
+<div class="memberdescription" id="description_12_5">
 <h2 class="content_title">addDocumentEvaluationSet</h2>
 <p class="text">
 Define a set of documents the query is evaluated on. By default the query is evaluated on all documents in the storage
@@ -3108,7 +3600,7 @@ Define a set of documents the query is evaluated on. By default the query is eva
 <div class="parameterlist"><div class="param">
 <div class="paramname">docnolist</div>
 <div class="paramdescr">list of documents to evaluate the query on (array of positive integers)</div>
-<div class="paramexamples"><div class="example">{1, 23, 2345, 3565, 4676, 6456, 8855, 12203}</div>
+<div class="paramexamples"><div class="example">[1, 23, 2345, 3565, 4676, 6456, 8855, 12203]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3119,7 +3611,7 @@ Define a set of documents the query is evaluated on. By default the query is eva
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_6">
+<div class="memberdescription" id="description_12_6">
 <h2 class="content_title">setMaxNofRanks</h2>
 <p class="text">
 Set number of ranks to evaluate starting with the first rank (the maximum size of the result rank list)
@@ -3141,7 +3633,7 @@ Set number of ranks to evaluate starting with the first rank (the maximum size o
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_7">
+<div class="memberdescription" id="description_12_7">
 <h2 class="content_title">setMinRank</h2>
 <p class="text">
 Set the index of the first rank to be returned
@@ -3162,7 +3654,7 @@ Set the index of the first rank to be returned
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_8">
+<div class="memberdescription" id="description_12_8">
 <h2 class="content_title">addAccess</h2>
 <p class="text">
 Allow read access to documents having a specific ACL tag
@@ -3171,7 +3663,7 @@ Allow read access to documents having a specific ACL tag
 <div class="parameterlist"><div class="param">
 <div class="paramname">rolelist</div>
 <div class="paramdescr">Add ACL tag or list of ACL tags that selects documents to be candidates of the result</div>
-<div class="paramexamples"><div class="example">{"public", "devel", "sys"}</div>
+<div class="paramexamples"><div class="example">["public", "devel", "sys"]</div>
 </div> <!-- paramexamples -->
 
 </div> <!-- param -->
@@ -3186,7 +3678,7 @@ Allow read access to documents having a specific ACL tag
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_9">
+<div class="memberdescription" id="description_12_9">
 <h2 class="content_title">setWeightingVariables</h2>
 <p class="text">
 Assign values to variables of the weighting formula
@@ -3204,7 +3696,7 @@ Assign values to variables of the weighting formula
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_10">
+<div class="memberdescription" id="description_12_10">
 <h2 class="content_title">setDebugMode</h2>
 <p class="text">
 Switch on debug mode that creates debug info of query evaluation methods and summarization as attributes of the query result
@@ -3226,7 +3718,7 @@ Switch on debug mode that creates debug info of query evaluation methods and sum
 <h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_11">
+<div class="memberdescription" id="description_12_11">
 <h2 class="content_title">evaluate</h2>
 <p class="text">
 Evaluate this query and return the result
@@ -3243,7 +3735,7 @@ Evaluate this query and return the result
 </div> <!-- result -->
 </div>
 </div> <!-- memberdescription -->
-<div class="memberdescription" id="description_10_12">
+<div class="memberdescription" id="description_12_12">
 <h2 class="content_title">tostring</h2>
 <p class="text">
 Map the contents of the query to a readable string
@@ -3264,7 +3756,7 @@ Map the contents of the query to a readable string
 </div> <!-- content -->
 
 <div class="about">
-<i>generated by papugaDoc (Strus 0.15.0)</i>
+<i>generated by papugaDoc (Strus 0.16.0)</i>
 </div>
 
 </div>

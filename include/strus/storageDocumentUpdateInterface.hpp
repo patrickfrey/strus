@@ -28,11 +28,22 @@ public:
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ ordinal position (term count position) of the term in the document
-	/// \note All forward index terms of this type that are not readded with this document update get removed
+	/// \note All search index terms of this type that are not readded with this document update get removed
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_)=0;
+
+	/// \brief Add a structure (relation of ordinal position ranges) in the the document for retrieval
+	/// \param[in] struct_ structure type name
+	/// \param[in] source_ position range of the relation source in the document
+	/// \param[in] sink_ position range of the relation sink in the document
+	/// \remark Source index ranges must not overlap, sink index ranges must not overlap
+	/// \note All search index structures of this type that are not readded with this document update get removed
+	virtual void addSearchIndexStructure(
+			const std::string& struct_,
+			const IndexRange& source_,
+			const IndexRange& sink_)=0;
 
 	/// \brief Add one occurrence of a term to the forward index excluding all features of this type previously added in another update context.
 	/// \param[in] type_ type name of the term
@@ -50,6 +61,12 @@ public:
 	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
 	virtual void clearSearchIndexTerm(
 			const std::string& type_)=0;
+
+	/// \brief Clear all previous occurrencies of a structure in a document in the search index
+	/// \param[in] struct_ type name of the structures to erase
+	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
+	virtual void clearSearchIndexStructure(
+			const std::string& struct_)=0;
 
 	/// \brief Clear all previous occurrencies of a term type in a document in the forward index
 	/// \param[in] type_ type name of the terms to erase

@@ -29,12 +29,21 @@ public:
 	ForwardIndexBlock( const ForwardIndexBlock& o)
 		:DataBlock(o){}
 	ForwardIndexBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( id_, ptr_, size_){}
+		:DataBlock( id_, ptr_, size_)
+	{
+		initFrame();
+	}
 
 	ForwardIndexBlock& operator=( const ForwardIndexBlock& o)
 	{
 		DataBlock::operator =(o);
+		initFrame();
 		return *this;
+	}
+	void swap( DataBlock& o)
+	{
+		DataBlock::swap( o);
+		initFrame();
 	}
 
 	void setId( const Index& id_);
@@ -81,6 +90,7 @@ public:
 	{
 		return const_iterator( this, charend());
 	}
+	void initFrame(){}
 };
 
 }

@@ -10,9 +10,10 @@
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
+#include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/local_ptr.hpp"
-#include "random.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -32,7 +33,7 @@
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-static strus::Random g_random;
+static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
@@ -60,7 +61,8 @@ static std::string randomTerm()
 	static const char* alphabet
 		= {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
 	unsigned int val = g_random.get( 0, std::numeric_limits<int>::max());
-	unsigned int le = g_random.get( 1, 20, 10, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int le = g_random.select( 11, 0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	if (le == 0) le = g_random.get( 1, 20);
 	unsigned int li = 0;
 	for (; li < le; ++li)
 	{
@@ -163,7 +165,7 @@ static unsigned int getUintValue( const char* arg)
 
 int main( int argc, const char* argv[])
 {
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 	if (!g_errorhnd) return -1;
 
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
@@ -229,8 +231,7 @@ int main( int argc, const char* argv[])
 		double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << std::endl;
 
-		typedef strus::StatisticsViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
-		DocumentFrequencyChange rec;
+		strus::TermStatisticsChange rec;
 
 		std::set<Term> termset;
 		while (msgblksize)

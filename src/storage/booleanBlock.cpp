@@ -65,7 +65,7 @@ bool BooleanBlock::Node::tryExpandRange( const Index& to_)
 	switch (type)
 	{
 		case DiffNode:
-			if (elemno >= to_) throw strus::runtime_error( "%s", _TXT( "internal: call try expand range with node end within node"));
+			if (elemno >= to_) throw std::runtime_error( _TXT( "internal: call try expand range with node end within node"));
 			alt.diff += (to_ - elemno);
 			elemno = to_;
 			return true;
@@ -216,7 +216,7 @@ void BooleanBlock::Node::getLastRange( Index& from_, Index& to_) const
 	}
 }
 
-void BooleanBlock::initFrameData()
+void BooleanBlock::initFrame()
 {
 	if (!empty())
 	{
@@ -450,7 +450,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 
 		if (elemno < from_)
 		{
-			throw strus::runtime_error( "%s", _TXT( "internal: ranges not appended in order in boolean block"));
+			throw std::runtime_error( _TXT( "internal: ranges not appended in order in boolean block"));
 		}
 		if (elemno <= to_)
 		{
@@ -491,7 +491,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 		Node newnod;
 		newnod.init( elemno, elemno + rangesize);
 		append( &newnod, sizeof(newnod));
-		initFrameData();
+		initFrame();
 	}
 }
 
@@ -616,7 +616,7 @@ void BooleanBlock::check() const
 	{
 		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || rangemax > id() || rangemin <= prevmax)
 		{
-			throw strus::runtime_error( "%s", _TXT( "created illegal boolean block"));
+			throw std::runtime_error( _TXT( "created illegal boolean block"));
 		}
 	}
 }

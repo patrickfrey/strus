@@ -24,7 +24,7 @@ public:
 	/// \brief Add a feature to the repository for later retrieval
 	/// \param[in] name name of the feature associated with the vector to add
 	/// \param[in] vec vector to add
-	virtual void addFeature( const std::string& name, const std::vector<double>& vec)=0;
+	virtual void addFeature( const std::string& name, const std::vector<float>& vec)=0;
 
 	/// \brief Define a relation element 
 	/// \param[in] conceptClass name of the concept class to distiguish different relations
@@ -32,7 +32,7 @@ public:
 	/// \param[in] conidx index of the concept
 	virtual void defineFeatureConceptRelation( const std::string& conceptClass, const Index& featidx, const Index& conidx)=0;
 
-	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const std::vector<double>&) till now
+	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const std::vector<float>&) till now
 	/// \return true on success, false if failed
 	virtual bool commit()=0;
 

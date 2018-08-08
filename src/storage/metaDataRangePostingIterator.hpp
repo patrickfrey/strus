@@ -49,10 +49,10 @@ public:
 	virtual ~MetaDataRangePostingIterator()
 	{}
 
-	Index skipDocImpl( const Index& docno)
+	Index skipDocImpl( const Index& docno_)
 	{
-		if (docno == m_docno && docno) return m_docno;
-		m_docno = docno ? (docno-1) : 0;
+		if (docno_ == m_docno && docno_) return m_docno;
+		m_docno = docno_ ? (docno_-1) : 0;
 		m_posno = 0;
 		do
 		{
@@ -66,14 +66,14 @@ public:
 		return m_docno;
 	}
 
-	virtual Index skipDoc( const Index& docno)
+	virtual Index skipDoc( const Index& docno_)
 	{
-		return skipDocImpl( docno);
+		return skipDocImpl( docno_);
 	}
 
-	virtual Index skipDocCandidate( const Index& docno)
+	virtual Index skipDocCandidate( const Index& docno_)
 	{
-		return skipDocImpl( docno);
+		return skipDocImpl( docno_);
 	}
 
 	virtual Index skipPos( const Index& firstpos)

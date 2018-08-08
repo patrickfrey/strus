@@ -10,7 +10,12 @@
 #include <libintl.h>
 #include <stdexcept>
 
-#define _TXT(STRING) gettext(STRING)
+#ifdef __APPLE__
+#define _TXT(STRING) STRING
+//... switch of gettext support for Apple because of warning "format string is not a string literal (potentially insecure) [-Wformat-security]"
+#else
+#define _TXT(STRING) const_cast<const char*>(gettext(STRING))
+#endif
 
 namespace strus
 {
@@ -21,6 +26,15 @@ namespace strus
 std::runtime_error runtime_error( const char* format, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 1, 2)))
+#endif
+	;
+
+/// \brief Implementation of std::runtime_error with error code as additional argument
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::runtime_error runtime_error_ec( int apperrno, const char* format, ...)
+#ifdef __GNUC__
+	__attribute__ ((format (printf, 2, 3)))
 #endif
 	;
 

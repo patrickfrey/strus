@@ -12,7 +12,9 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/fileio.hpp"
 #include "database.hpp"
+#include "leveldbErrorCode.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <stdexcept>
@@ -40,9 +42,11 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 
 		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+			m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");
 			return 0;
 		}
+		if (!expandDatabaseFullPath( path)) return NULL;
+
 		if (!isDir( path))
 		{
 			throw strus::runtime_error( _TXT( "unknown path '%s' specified in database configuration string"), path.c_str());
@@ -68,7 +72,7 @@ bool Database::exists( const std::string& configsource) const
 
 		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+			m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");
 			return false;
 		}
 		path.push_back( dirSeparator());
@@ -81,6 +85,20 @@ bool Database::exists( const std::string& configsource) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error checking if database exists: %s"), *m_errorhnd, false);
 }
 
+bool Database::expandDatabaseFullPath( std::string& path) const
+{
+	if (!m_workdir.empty())
+	{
+		if (strus::hasUpdirReference( path))
+		{
+			m_errorhnd->report( ErrorCodeInvalidFilePath, _TXT( "path in database configuration must not contain up-directory references ('..') if workdir is specified"));
+			return false;
+		}
+		path = strus::joinFilePath( m_workdir, path);
+	}
+	return true;
+}
+
 bool Database::createDatabase( const std::string& configsource) const
 {
 	try
@@ -91,9 +109,10 @@ bool Database::createDatabase( const std::string& configsource) const
 
 		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+			m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");
 			return false;
 		}
+		if (!expandDatabaseFullPath( path)) return false;
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
@@ -113,7 +132,7 @@ bool Database::createDatabase( const std::string& configsource) const
 		{
 			std::string err = status.ToString();
 			if (db) delete db;
-			m_errorhnd->report( _TXT( "failed to create LevelDB key value store database: %s"), err.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "failed to create LevelDB key value store database: %s"), err.c_str());
 			return false;
 		}
 		if (db) delete db;
@@ -131,16 +150,17 @@ bool Database::destroyDatabase( const std::string& configsource) const
 
 		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+			m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");
 			return false;
 		}
+		if (!expandDatabaseFullPath( path)) return false;
 
 		leveldb::Options options;
 		leveldb::Status status = leveldb::DestroyDB( path, options);
 		if (!status.ok())
 		{
 			std::string err = status.ToString();
-			m_errorhnd->report( _TXT( "failed to remove key value store database: %s"), err.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "failed to remove key value store database: %s"), err.c_str());
 			return false;
 		}
 		return true;
@@ -155,29 +175,31 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	{
 		leveldb::DB* db = 0;
 		strus::local_ptr<leveldb::DB> dbref;
-
-		// Open the database created:
-		std::string path;
-		std::string src = configsource;
-
-		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
-			return false;
-		}
-		leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
-		if (!status.ok())
-		{
-			std::string err = status.ToString();
-			if (db) delete db;
-			m_errorhnd->report( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
-			return false;
-		}
-		else
-		{
-			dbref.reset( db);
-		}
+			// Open the database created:
+			std::string path;
+			std::string src = configsource;
+	
+			if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
+			{
+				m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");
+				return false;
+			}
+			if (!expandDatabaseFullPath( path)) return false;
 
+			leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
+			if (!status.ok())
+			{
+				std::string err = status.ToString();
+				if (db) delete db;
+				m_errorhnd->report( leveldbErrorCode(status), _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
+				return false;
+			}
+			else
+			{
+				dbref.reset( db);
+			}
+		}
 		unsigned int blkcnt = 0;
 		leveldb::WriteBatch batch;
 		leveldb::WriteOptions options;
@@ -197,7 +219,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 				if (!status.ok())
 				{
 					std::string statusstr( status.ToString());
-					m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
+					m_errorhnd->report( leveldbErrorCode(status), _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 					batch.Clear();
 					return false;
 				}
@@ -216,7 +238,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			if (!status.ok())
 			{
 				std::string statusstr( status.ToString());
-				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
+				m_errorhnd->report( leveldbErrorCode(status), _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 				batch.Clear();
 				return false;
 			}

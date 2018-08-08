@@ -2,12 +2,15 @@ Library for building a competitive, scalable search engine for information retri
 A solution for small projects as well as larger scale applications.
 
 Licenced as MPLv2 (Mozilla Public License, Version 2 - https://www.mozilla.org/en-US/MPL/2.0)
+For 3rdParty licenses see LICENSE.3rdParty
 
+The project Strus implements a set of libraries, tools for building a competitive, 
+scalable search engine for text retrieval.
+It is a solution for small projects as well as larger scale applications.
 Strus project homepage at http://project-strus.net with articles, links, documentation.
-Binary packages available.
 
-* Contributors welcome
-* Open for sharing ideas
-* Open for interesting projects
+For installation see description files INSTALL.<platform> in the top level directory of the project.
 
+The project is built regularly with Travis (https://travis-ci.org/patrickfrey/strus) 
+and with OpenSuse (https://build.opensuse.org/package/show/home:PatrickFrey/strus):
 

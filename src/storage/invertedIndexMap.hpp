@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STORAGE_POSINFO_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_STORAGE_POSINFO_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_INVERTED_INDEX_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_INVERTED_INDEX_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
 #include "booleanBlock.hpp"
@@ -17,9 +17,9 @@
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
 #include <vector>
-#include <iostream>
 #include <set>
 #include <map>
+#include <iostream>
 
 namespace strus {
 
@@ -65,7 +65,7 @@ private:
 
 		MapKey( const MapKey& o)
 			:termkey(o.termkey),docno(o.docno){}
-		MapKey( const Index& typeno_, const Index& termno_, const std::size_t& docno_)
+		MapKey( const Index& typeno_, const Index& termno_, const Index& docno_)
 			:termkey(BlockKey(typeno_,termno_).index()),docno(docno_){}
 
 		bool operator < (const MapKey& o) const

@@ -18,6 +18,7 @@
 #include "userAclMap.hpp"
 #include "posinfoBlock.hpp"
 #include "invertedIndexMap.hpp"
+#include "structIndexMap.hpp"
 #include "forwardIndexBlock.hpp"
 #include "forwardIndexMap.hpp"
 #include "keyMap.hpp"
@@ -50,6 +51,7 @@ public:
 		DatabaseClientInterface* database_,
 		const MetaDataDescription* metadescr_,
 		const Index& maxtypeno_,
+		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
@@ -85,6 +87,7 @@ public:
 public:/*Document,DocumentUpdate*/
 	Index getOrCreateTermValue( const std::string& name);
 	Index getOrCreateTermType( const std::string& name);
+	Index getOrCreateStructType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);
 	Index getOrCreateDocno( const std::string& name);
 	Index getOrCreateUserno( const std::string& name);
@@ -104,11 +107,16 @@ public:/*Document,DocumentUpdate*/
 
 	void deleteIndex( const Index& docno);
 	void deleteDocSearchIndexType( const Index& docno, const Index& typeno);
+	void deleteDocSearchIndexStructure( const Index& docno, const Index& structno);
 	void deleteDocForwardIndexType( const Index& docno, const Index& typeno);
 
 	void definePosinfoPosting(
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
+
+	void defineStructure(
+		const Index& structno,
+		const Index& docno, const IndexRange& source, const IndexRange& sink);
 
 	void openForwardIndexDocument( const Index& docno);
 
@@ -129,10 +137,12 @@ private:
 	MetaDataMap m_metaDataMap;				///< map of meta data blocks for writing
 
 	InvertedIndexMap m_invertedIndexMap;			///< map of posinfo postings for writing
+	StructIndexMap m_structIndexMap;			///< map of structures for writing
 	ForwardIndexMap m_forwardIndexMap;			///< map of forward index for writing
 	UserAclMap m_userAclMap;				///< map of user rights for writing (forward and inverted)
 
 	KeyMap m_termTypeMap;					///< map of term types
+	KeyMap m_structTypeMap;					///< map of struct types
 	KeyMap m_termValueMap;					///< map of term values
 	KeyMap m_docIdMap;					///< map of document ids
 	KeyMap m_userIdMap;					///< map of user ids

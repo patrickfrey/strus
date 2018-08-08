@@ -11,6 +11,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
+#include <cstring>
 
 using namespace strus;
 
@@ -50,6 +51,16 @@ bool DatabaseAdapter_StringIndex::Cursor::skip( const std::string& key, std::str
 	dbkey.append( key);
 	DatabaseCursorInterface::Slice reskey( m_cursor->seekUpperBound( dbkey.c_str(), dbkey.size(), 1));
 	return getData( reskey, keyfound, value);
+}
+
+bool DatabaseAdapter_StringIndex::Cursor::skipPrefix( const std::string& key, std::string& keyfound, Index& value)
+{
+	return skip( key, keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
+}
+
+bool DatabaseAdapter_StringIndex::Cursor::loadNextPrefix( const std::string& key, std::string& keyfound, Index& value)
+{
+	return loadNext( keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
 }
 
 Index DatabaseAdapter_StringIndex::Reader::get( const std::string& key) const
@@ -327,6 +338,21 @@ bool DatabaseAdapter_DocFrequency::Cursor::loadNext( Index& typeno, Index& termn
 {
 	DatabaseCursorInterface::Slice key( m_cursor->seekNext());
 	return getData( key, typeno, termno, df);
+}
+
+bool DatabaseAdapter_DocFrequency::Cursor::loadFirst_typeno( const Index& typeno, Index& termno, Index& df)
+{
+	DatabaseKey dbkey( (char)KeyPrefix, typeno);
+	Index typeno_key;
+	DatabaseCursorInterface::Slice key( m_cursor->seekFirst( dbkey.ptr(), dbkey.size()));
+	return (getData( key, typeno_key, termno, df) && typeno_key == typeno);
+}
+
+bool DatabaseAdapter_DocFrequency::Cursor::loadNext_typeno( const Index& typeno, Index& termno, Index& df)
+{
+	DatabaseCursorInterface::Slice key( m_cursor->seekNext());
+	Index typeno_key;
+	return getData( key, typeno_key, termno, df) && typeno == typeno_key;
 }
 
 bool DatabaseAdapter_DocFrequency::load( const DatabaseClientInterface* database, const Index& typeno, const Index& termno, Index& df)

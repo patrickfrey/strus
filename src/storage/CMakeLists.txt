@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set( libstrus_storage_source_files
+set( source_files
 	attributeMap.cpp
 	attributeReader.cpp
 	aclReader.cpp
@@ -36,9 +36,13 @@ set( libstrus_storage_source_files
 	browsePostingIterator.cpp
 	statisticsInitIterator.cpp
 	statisticsUpdateIterator.cpp
+	docIndexNode.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp
 	postingIterator.cpp
+	structBlock.cpp
+	structIndexMap.cpp
+	structIterator.cpp
 	storageAlterMetaDataTable.cpp
 	storage.cpp
 	storageClient.cpp
@@ -52,26 +56,29 @@ set( libstrus_storage_source_files
 )
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
 	"${Intl_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${CNODETRIE_INCLUDE_DIRS}" 
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${MAIN_SOURCE_DIR}/database_leveldb"
 	"${MAIN_SOURCE_DIR}/statsproc"
 	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 # ------------------------------
 # STORAGE LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
-add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
+add_cppcheck( strus_storage_static ${source_files} libstrus_storage.cpp )
+
+add_library( strus_storage_static STATIC ${source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_base )
 set_property( TARGET strus_storage_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
@@ -80,7 +87,7 @@ target_link_libraries( strus_storage strus_storage_static ${Boost_LIBRARIES} str
 set_target_properties(
     strus_storage
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )
@@ -90,7 +97,7 @@ target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval stru
 set_target_properties(
     strus_storage_objbuild
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )

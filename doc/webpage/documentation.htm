@@ -88,9 +88,14 @@
 		<li><a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">strus program loader</a>:
 			Functions to instantiate strus components from source</li>
 		</ul>
+
 		<h3>Language bindings</h3>
-		<p class="description">The language bindings are currently rewritten. A new solution with bindings to Lua, Python3 and PHP7
-		will be available on start of October.
+		<p class="description">Bindings are available for Lua, Python3 and PHP7. To enable the language bindings for Python and PHP
+		you have to build strusBindings (or strusAll) with cmake -DWITH_PHP=YES, resp. with -DWITH_PYTHON=YES. The language bindings
+		are referenced as "strus". Currently there are not many tutorials available. You can have a look at the tests (
+		for <a href="https://github.com/patrickfrey/strusBindings/tree/master/tests/php7">PHP</a>,
+		<a href="https://github.com/patrickfrey/strusBindings/tree/master/tests/lua">Lua</a>,
+		<a href="https://github.com/patrickfrey/strusBindings/tree/master/tests/python3">Python</a>) for examples.
 		</p>
 
 		<h2>Functions documentation</h2>

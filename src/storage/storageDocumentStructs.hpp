@@ -45,6 +45,18 @@ struct InvMapKey
 };
 typedef std::map<InvMapKey, std::string> InvMap;
 
+struct DocStructure
+{
+	Index structno;
+	IndexRange source;
+	IndexRange sink;
+
+	DocStructure( const Index& structno_, const IndexRange& source_, const IndexRange& sink_)
+		:structno(structno_),source(source_),sink(sink_){}
+	DocStructure( const DocStructure& o)
+		:structno(o.structno),source(o.source),sink(o.sink){}
+};
+
 struct DocAttribute
 {
 	std::string name;

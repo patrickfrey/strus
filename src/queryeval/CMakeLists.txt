@@ -10,12 +10,13 @@ set( source_files
 )
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
+	"${Intl_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${strusbase_LIBRARY_DIRS}"
 )
@@ -25,6 +26,8 @@ link_directories(
 # QUERY EVAL LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
+add_cppcheck( strus_queryeval_static ${source_files} libstrus_queryeval.cpp )
+
 add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_base strus_private_utils )
 set_property( TARGET strus_queryeval_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
@@ -35,7 +38,7 @@ target_link_libraries( strus_queryeval strus_queryeval_static  strus_base strus_
 set_target_properties(
     strus_queryeval
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )

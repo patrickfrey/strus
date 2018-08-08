@@ -12,8 +12,8 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
 #include <string>
@@ -48,12 +48,12 @@ bool StorageAlterMetaDataTable::commit()
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( _TXT( "called alter meta data table commit twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit twice"));
 		return false;
 	}
 	if (m_rollback)
 	{
-		m_errorhnd->report( _TXT( "called alter meta data table commit after rollback"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit after rollback"));
 		return false;
 	}
 	strus::local_ptr<DatabaseTransactionInterface>
@@ -80,11 +80,11 @@ void StorageAlterMetaDataTable::rollback()
 {
 	if (m_rollback)
 	{
-		m_errorhnd->report( _TXT( "called alter meta data table rollback twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table rollback twice"));
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( _TXT( "called alter meta data table rollback after commit"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table rollback after commit"));
 	}
 	m_rollback = true;
 }
@@ -96,9 +96,9 @@ void StorageAlterMetaDataTable::renameElementReset(
 	std::vector<std::string>::iterator di = m_metadescr_resets.begin(), de = m_metadescr_resets.end();
 	for (; di != de; ++di)
 	{
-		if (utils::caseInsensitiveEquals( oldname, *di))
+		if (strus::caseInsensitiveEquals( oldname, *di))
 		{
-			*di = utils::tolower( name);
+			*di = string_conv::tolower( name);
 			break;
 		}
 	}
@@ -112,7 +112,7 @@ void StorageAlterMetaDataTable::changeElementType(
 	MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 	for (; mi != me; ++mi)
 	{
-		if (utils::caseInsensitiveEquals( mi.name(), name))
+		if (strus::caseInsensitiveEquals( mi.name(), name))
 		{
 			chgdescr.add( type, name);
 		}
@@ -138,8 +138,10 @@ void StorageAlterMetaDataTable::alterElement(
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
 	
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
-	
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("altered metadata element '%s' does not exist"), name.c_str());
+		}
 		changeElementType( name, type);
 	}
 	CATCH_ERROR_MAP( _TXT("error altering meta data element: %s"), *m_errorhnd);
@@ -154,8 +156,11 @@ void StorageAlterMetaDataTable::renameElement(
 		m_metadescr_old.renameElement( oldname, name);
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
-	
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
+
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("renamed metadata element '%s' does not exist"), name.c_str());
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error renaming meta data element: %s"), *m_errorhnd);
 }
@@ -165,13 +170,15 @@ void StorageAlterMetaDataTable::deleteElement(
 {
 	try
 	{
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
-	
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("deleted metadata element '%s' does not exist"), name.c_str());
+		}
 		MetaDataDescription chgdescr;
 		MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 		for (; mi != me; ++mi)
 		{
-			if (utils::caseInsensitiveEquals( mi.name(), name))
+			if (strus::caseInsensitiveEquals( mi.name(), name))
 			{
 				continue;
 			}
@@ -181,7 +188,7 @@ void StorageAlterMetaDataTable::deleteElement(
 			}
 		}
 		m_metadescr_new = chgdescr;
-		m_metadescr_resets.push_back( utils::tolower( name));
+		m_metadescr_resets.push_back( string_conv::tolower( name));
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting meta data element: %s"), *m_errorhnd);
 }
@@ -191,7 +198,7 @@ void StorageAlterMetaDataTable::clearElement(
 {
 	try
 	{
-		m_metadescr_resets.push_back( utils::tolower( name));
+		m_metadescr_resets.push_back( string_conv::tolower( name));
 	}
 	CATCH_ERROR_MAP( _TXT("error clearing meta data element value: %s"), *m_errorhnd);
 }

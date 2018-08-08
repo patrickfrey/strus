@@ -30,6 +30,10 @@ public:
 	/// \brief Destructor
 	virtual ~QueryProcessorInterface(){}
 
+	/// \brief Get the absolute path of a resource file
+	/// \param[in] filename name of the resource file
+	virtual std::string getResourceFilePath( const std::string& filename) const=0;
+
 	/// \brief Define a new posting set join operation
 	/// \param[in] name the name of the function
 	/// \param[in] op the function reference (ownership passed to this)
@@ -81,7 +85,8 @@ public:
 	{
 		PostingJoinOperator,		///< Addresses a posting iterator join operator
 		WeightingFunction,		///< Addresses a weighting function
-		SummarizerFunction		///< Addresses a summarization function
+		SummarizerFunction,		///< Addresses a summarization function
+		ScalarFunctionParser		///< Addresses a parser for a language for arithmetic expression as string
 	};
 
 	/// \brief Get a list of all functions of a specific type available

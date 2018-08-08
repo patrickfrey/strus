@@ -47,7 +47,7 @@ void StorageDocument::addSearchIndexTerm(
 	{
 		if (position_ <= 0)
 		{
-			m_errorhnd->report( _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
 		}
 		else
 		{
@@ -59,6 +59,26 @@ void StorageDocument::addSearchIndexTerm(
 	CATCH_ERROR_MAP( _TXT("error adding search index term to document: %s"), *m_errorhnd);
 }
 
+void StorageDocument::addSearchIndexStructure(
+		const std::string& struct_,
+		const IndexRange& source_,
+		const IndexRange& sink_)
+{
+	try
+	{
+		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
+		}
+		else
+		{
+			Index structno = m_transaction->getOrCreateStructType( struct_);
+			m_structures.push_back( DocStructure( structno, source_, sink_));
+		}
+	}
+	CATCH_ERROR_MAP( _TXT("error adding search index structure to document: %s"), *m_errorhnd);
+}
+
 void StorageDocument::addForwardIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
@@ -68,7 +88,7 @@ void StorageDocument::addForwardIndexTerm(
 	{
 		if (position_ <= 0)
 		{
-			m_errorhnd->report( _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
 		}
 		else
 		{
@@ -138,16 +158,21 @@ void StorageDocument::done()
 			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
 		}
 
-		//[2.3] Insert new index elements (forward index and inverted index):
+		//[2.3] Insert new index elements (forward index, inverted index and structures):
 		TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 		for (; ti != te; ++ti)
 		{
 			//[2.3.1] Insert inverted index
-			std::vector<Index> pos;
-			pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
+			std::vector<Index> pos( ti->second.pos.begin(), ti->second.pos.end());
 			m_transaction->definePosinfoPosting(
 					ti->first.first, ti->first.second, m_docno, pos);
 		}
+		std::vector<DocStructure>::const_iterator si = m_structures.begin(), se = m_structures.end();
+		for (; si != se; ++si)
+		{
+			m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
+		}
+		
 		m_transaction->openForwardIndexDocument( m_docno);
 		InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 		for (; ri != re; ++ri)

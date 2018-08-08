@@ -10,7 +10,8 @@ set( source_files
 )
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
+	"${Intl_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${MAIN_SOURCE_DIR}/statsproc" 
 	"${CNODETRIE_INCLUDE_DIRS}" 
@@ -18,7 +19,7 @@ include_directories(
 )
 
 link_directories(
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"
@@ -27,13 +28,15 @@ link_directories(
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
+add_cppcheck( strus_statsproc ${source_files} libstrus_statsproc.cpp )
+
 add_library( strus_statsproc SHARED ${source_files} libstrus_statsproc.cpp )
 target_link_libraries( strus_statsproc strus_private_utils strus_base compactnodetrie_strus_static )
 
 set_target_properties(
     strus_statsproc
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )

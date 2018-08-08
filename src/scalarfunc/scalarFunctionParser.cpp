@@ -9,7 +9,6 @@
 /// \file scalarFunctionParser.cpp
 #include "scalarFunctionParser.hpp"
 #include "scalarFunction.hpp"
-#include "private/utils.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/bitOperations.hpp"
@@ -163,7 +162,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 	}
 	if (!isDigit(*si))
 	{
-		throw strus::runtime_error( "%s", _TXT("number expected"));
+		throw std::runtime_error( _TXT("number expected"));
 	}
 	for (;si < se && isDigit(*si); ++si)
 	{
@@ -193,21 +192,23 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 	{
 		throw strus::runtime_error( "%s",  _TXT( "unexpected end of expression, operand expected"));
 	}
-	std::string::const_iterator start = si;
-	if (isAlpha(*si))
 	{
-		// ... check if it is a function call and step back to 'start' if not
-		std::string funcname = parseIdentifier( si, se);
-		skipSpaces( si, se);
-		if (*si == '(')
+		std::string::const_iterator start = si;
+		if (isAlpha(*si))
 		{
-			++si;
-			parseFunctionCall( func, ctx, funcname, si, se);
-			return;
-		}
-		else
-		{
-			si = start;
+			// ... check if it is a function call and step back to 'start' if not
+			std::string funcname = parseIdentifier( si, se);
+			skipSpaces( si, se);
+			if (*si == '(')
+			{
+				++si;
+				parseFunctionCall( func, ctx, funcname, si, se);
+				return;
+			}
+			else
+			{
+				si = start;
+			}
 		}
 	}
 	if (*si == '_')
@@ -570,4 +571,10 @@ ScalarFunctionInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error parsing and creating scalar function: %s"), *m_errorhnd, 0);
 }
 
+const char* ScalarFunctionParser::getDescription() const
+{
+	return _TXT("parser for arithmetic expressions on double precision floating point values with operators *,-,*,/ "
+			"and unary and binary functions as defined in the C math library. "
+			"External arguments are adressed with decimal numbers with a preceding '_', e.g. _0 for the first argument");
+}
 

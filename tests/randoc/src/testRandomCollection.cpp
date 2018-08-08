@@ -9,6 +9,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -22,7 +23,7 @@
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/base/local_ptr.hpp"
-#include "random.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -44,7 +45,7 @@
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_GENERATE_READABLE_NAMES
 
-static strus::Random g_random;
+static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
@@ -85,7 +86,8 @@ static std::string randomTerm()
 	static const char* alphabet
 		= {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
 	unsigned int val = g_random.get( 0, std::numeric_limits<int>::max());
-	unsigned int le = g_random.get( 1, 20, 10, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int sel = g_random.select( 11, 0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int le = sel == 0 ? g_random.get( 1, 20) : sel;
 	unsigned int li = 0;
 	for (; li < le; ++li)
 	{
@@ -230,15 +232,14 @@ struct RandomCollection
 			std::cerr << "ERROR max document size has to be at least 3" << std::endl;
 			maxDocumentSize = 3;
 		}
-		unsigned int di = 0;
-		for (; di < nofDocuments; ++di)
+		for (unsigned int di = 0; di < nofDocuments; ++di)
 		{
 			unsigned int tiny_docsize  = g_random.get( 2, 3 + (maxDocumentSize/16)) + (maxDocumentSize/16);
 			unsigned int small_docsize = g_random.get( 2, 3 + (maxDocumentSize/8)) + (maxDocumentSize/8);
 			unsigned int med_docsize   = g_random.get( 2, 3 + (maxDocumentSize/4)) + (maxDocumentSize/4);
 			unsigned int big_docsize   = g_random.get( 2, 3 + (maxDocumentSize/2)) + (maxDocumentSize/2);
 
-			unsigned int docsize = g_random.get( 2, maxDocumentSize, 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
+			unsigned int docsize = g_random.select( 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
 			docar.push_back( RandomDoc( di+1, nofDocuments, termCollection, docsize));
 		}
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
@@ -425,8 +426,8 @@ struct RandomQuery
 				arg.push_back( pickOcc.term);
 
 				unsigned int maxRange = pickDoc.occurrencear.back().pos - pickOcc.pos;
-				range = g_random.get( 0, maxRange+1, 8, 1, 2, 3, 5, 7, 9, 11, 13);
-
+				range = g_random.select( 9, 0, 1, 2, 3, 5, 7, 9, 11, 13);
+				if (range == 0) range = g_random.get( 0, maxRange+1);
 				unsigned int maxNofPicks = MaxNofArgs-2;
 				if (operation == StructWithin || operation == Within)
 				{
@@ -972,7 +973,7 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 	if (!g_errorhnd)
 	{
 		std::cerr << "construction of error buffer failed" << std::endl;
@@ -997,18 +998,21 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
+		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
+
 		const char* config = argv[1];
 		unsigned int nofDocuments = getUintValue( argv[2]);
 		unsigned int maxDocumentSize = getUintValue( argv[3]);
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
+		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( "", g_errorhnd));
 		if (!dbi.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
+		strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( "", g_errorhnd));
 		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -1092,7 +1096,7 @@ int main( int argc, const char* argv[])
 #endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			strus::local_ptr<strus::QueryProcessorInterface> 
-				queryproc( strus::createQueryProcessor( g_errorhnd));
+				queryproc( strus::createQueryProcessor( filelocator.get(), g_errorhnd));
 			if (!queryproc.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
@@ -1185,6 +1189,7 @@ int main( int argc, const char* argv[])
 				rsum += rcnt;
 				std::cerr << std::endl;
 				std::cerr << "verified " << rsum << " query results" << std::endl;
+				std::cerr << (nofQueriesFailed ? "ERR":"OK") << std::endl;
 				return (nofQueriesFailed?2:0);
 			}
 		}

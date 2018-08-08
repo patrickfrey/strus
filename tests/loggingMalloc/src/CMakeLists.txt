@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
 	"${Intl_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${MAIN_SOURCE_DIR}/utils"
@@ -9,8 +9,9 @@ include_directories(
 )
 link_directories(
 	"${MAIN_SOURCE_DIR}/utils"
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 add_executable( testLoggingMalloc testLoggingMalloc.cpp )

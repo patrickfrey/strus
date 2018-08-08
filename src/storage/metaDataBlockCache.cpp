@@ -8,6 +8,7 @@
 #include "metaDataBlockCache.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
 
@@ -49,7 +50,7 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
-	utils::SharedPtr<MetaDataBlock> blkref = m_ar[ blkidx];
+	strus::shared_ptr<MetaDataBlock> blkref = m_ar[ blkidx];
 	while (!blkref.get())
 	{
 		MetaDataBlock* newblk = m_dbadapter.loadPtr( blockno);

@@ -9,16 +9,16 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
 using namespace strus;
 
-#define METHOD_NAME "constant"
+#define THIS_METHOD_NAME const_cast<char*>("constant")
 
 void WeightingFunctionContextConstant::addWeightingFeature(
 		const std::string& name_,
@@ -28,7 +28,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			if (m_precalc)
 			{
@@ -41,15 +41,15 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionContextConstant::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 double WeightingFunctionContextConstant::call( const Index& docno)
@@ -86,7 +86,7 @@ std::string WeightingFunctionContextConstant::debugCall( const Index& docno)
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
 
-	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
 	double res_precalc = 0.0;
 	if (m_precalc)
 	{
@@ -131,26 +131,26 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 	{
 		addNumericParameter( name, parameterValue( name, value));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "precalc"))
+	if (strus::caseInsensitiveEquals( name, "precalc"))
 	{
 		m_precalc = value.toint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "match"))
+	else if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "weight"))
+	else if (strus::caseInsensitiveEquals( name, "weight"))
 	{
 		m_weight = (double)value;
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -163,7 +163,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceConstant::createFunc
 	{
 		return new WeightingFunctionContextConstant( m_weight, m_precalc, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceConstant::tostring() const
@@ -175,7 +175,7 @@ std::string WeightingFunctionInstanceConstant::tostring() const
 			<< "weight=" << m_weight << ", " << "precalc=" << (m_precalc?"1":"0");
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -186,7 +186,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionConstant::createInstance(
 	{
 		return new WeightingFunctionInstanceConstant( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionConstant::getDescription() const

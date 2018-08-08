@@ -34,6 +34,34 @@ void AttributeMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 			++mi;
 		}
 	}
+	DeleteList newdeletes;
+	DeleteList::const_iterator di = m_deletes.begin(), de = m_deletes.end();
+	for (; di != de; ++di)
+	{
+		Index docno = BlockKey(*di).elem(1);
+		if (KeyMap::isUnknown( docno))
+		{
+			Index varno = BlockKey(*di).elem(2);
+			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+			if (ri == renamemap.end())
+			{
+				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "attribute map");
+			}
+			if (varno)
+			{
+				newdeletes.push_back( BlockKey( ri->second, varno).index());
+			}
+			else
+			{
+				newdeletes.push_back( BlockKey( ri->second).index());
+			}
+		}
+		else
+		{
+			newdeletes.push_back( *di);
+		}
+	}
+	m_deletes = newdeletes;
 }
 
 void AttributeMap::defineAttribute( const Index& docno, const Index& varno, const std::string& value)

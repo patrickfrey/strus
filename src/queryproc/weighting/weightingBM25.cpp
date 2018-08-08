@@ -11,6 +11,7 @@
 #include "private/errorUtils.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include <cmath>
 #include <ctime>
 #include <iomanip>
@@ -18,7 +19,7 @@
 #include <sstream>
 
 using namespace strus;
-#define METHOD_NAME "BM25"
+#define THIS_METHOD_NAME const_cast<char*>("BM25")
 #undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
@@ -46,7 +47,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 
 void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionContextBM25::addWeightingFeature(
@@ -57,7 +58,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			double nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
 			double idf = 0.0;
@@ -76,10 +77,10 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
+			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 
@@ -127,7 +128,7 @@ std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
 
-	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
 	double res = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (int fidx=0 ;fi != fe; ++fi,++fidx)
@@ -161,50 +162,50 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
+		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
-			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
-		else if (utils::caseInsensitiveEquals( name, "k1")
-		||  utils::caseInsensitiveEquals( name, "b")
-		||  utils::caseInsensitiveEquals( name, "avgdoclen"))
+		else if (strus::caseInsensitiveEquals( name, "k1")
+		||  strus::caseInsensitiveEquals( name, "b")
+		||  strus::caseInsensitiveEquals( name, "avgdoclen"))
 		{
 			addNumericParameter( name, parameterValue( name, value));
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "k1"))
+	else if (strus::caseInsensitiveEquals( name, "k1"))
 	{
 		m_parameter.k1 = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "b"))
+	else if (strus::caseInsensitiveEquals( name, "b"))
 	{
 		m_parameter.b = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+	else if (strus::caseInsensitiveEquals( name, "avgdoclen"))
 	{
 		m_parameter.avgDocLength = (double)value;
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
 	}
 }
 
@@ -219,7 +220,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextBM25( storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceBM25::tostring() const
@@ -234,7 +235,7 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 		;
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -245,7 +246,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
 	{
 		return new WeightingFunctionInstanceBM25( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), METHOD_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionBM25::getDescription() const
@@ -261,6 +262,6 @@ FunctionDescription WeightingFunctionBM25::getDescription() const
 		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

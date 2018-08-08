@@ -38,6 +38,19 @@ public:
 	/// \brief Number of comparison operators
 	enum {NofCompareOperators=((int)CompareGreaterEqual+1)};
 
+	/// \brief Get the operator as string
+	static const char* compareOperatorStr( CompareOperator op)
+	{
+		static const char* ar[] = {"<","<=","==","!=",">",">=",0};
+		return ar[ (int)op];
+	}
+	/// \brief Get the operator name as string
+	static const char* compareOperatorName( CompareOperator op)
+	{
+		static const char* ar[] = {"lt","le","eq","ne","gt","ge",0};
+		return ar[ (int)op];
+	}
+
 	/// \brief Add a condition on the metadata to this metadata restriction
 	/// \param[in] opr condition compare operator
 	/// \param[in] name name of meta data element to check

@@ -106,7 +106,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
 	if (vi == m_invtermmap.end())
 	{
-		if (docno == 0) throw strus::runtime_error( "%s", _TXT( "illegal document number for insert (posinfo)"));
+		if (docno == 0) throw std::runtime_error( _TXT( "illegal document number for insert (posinfo)"));
 		if (m_invterms.size()) m_invterms.push_back( InvTerm());
 
 		m_invtermmap[ m_docno = docno] = m_invterms.size();
@@ -116,7 +116,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	{
 		if (m_docno && m_docno != docno)
 		{
-			throw strus::runtime_error( "%s", _TXT( "inverted index operations not grouped by document"));
+			throw std::runtime_error( _TXT( "inverted index operations not grouped by document"));
 		}
 		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
@@ -177,86 +177,137 @@ void InvertedIndexMap::renameNewNumbers(
 		const std::map<Index,Index>& docnoUnknownMap,
 		const std::map<Index,Index>& termUnknownMap)
 {
-	// Rename terms:
-	Map::iterator mi = m_map.begin(), me = m_map.end();
-	while (mi != me)
 	{
-		Index termno = BlockKey(mi->first.termkey).elem(2);
-		Index docno = mi->first.docno;
-		if (KeyMap::isUnknown( termno) || KeyMap::isUnknown( docno))
+		// Rename terms:
+		Map::iterator mi = m_map.begin(), me = m_map.end();
+		while (mi != me)
 		{
-			Index typeno = BlockKey( mi->first.termkey).elem(1);
-			Index new_termno;
-			if (KeyMap::isUnknown( termno))
+			Index termno = BlockKey(mi->first.termkey).elem(2);
+			Index docno = mi->first.docno;
+			if (KeyMap::isUnknown( termno) || KeyMap::isUnknown( docno))
 			{
-				std::map<Index,Index>::const_iterator ri = termUnknownMap.find( termno);
-				if (ri == termUnknownMap.end())
+				Index typeno = BlockKey( mi->first.termkey).elem(1);
+				Index new_termno;
+				if (KeyMap::isUnknown( termno))
 				{
-					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "posinfo map");
+					std::map<Index,Index>::const_iterator ri = termUnknownMap.find( termno);
+					if (ri == termUnknownMap.end())
+					{
+						throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "posinfo map");
+					}
+					new_termno = ri->second;
 				}
-				new_termno = ri->second;
+				else
+				{
+					new_termno = termno;
+				}
+				Index new_docno;
+				if (KeyMap::isUnknown( docno))
+				{
+					std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( docno);
+					if (ri == docnoUnknownMap.end())
+					{
+						throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
+					}
+					new_docno = ri->second;
+				}
+				else
+				{
+					new_docno = docno;
+				}
+				MapKey newkey( typeno, new_termno, new_docno);
+				m_map[ newkey] = mi->second;
+				m_map.erase( mi++);
 			}
 			else
 			{
-				new_termno = termno;
+				++mi;
 			}
-			Index new_docno;
-			if (KeyMap::isUnknown( docno))
+		}
+	}{
+		// Rename inv:
+		InvTermList::iterator li = m_invterms.begin(), le = m_invterms.end();
+		for (; li != le; ++li)
+		{
+			if (KeyMap::isUnknown( li->termno))
 			{
-				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( docno);
+				std::map<Index,Index>::const_iterator ri = termUnknownMap.find( li->termno);
+				if (ri == termUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "inv posinfo map");
+				}
+				li->termno = ri->second;
+			}
+		}
+	}{
+		InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
+		while (di != de)
+		{
+			if (KeyMap::isUnknown( di->first))
+			{
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( di->first);
+				if (ri == docnoUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inv posinfo map");
+				}
+				m_invtermmap[ ri->second] = di->second;
+				m_invtermmap.erase( di++);
+			}
+			else
+			{
+				++di;
+			}
+		}
+	}{
+		// Rename deletes:
+		std::vector<Index> eraselist;
+	
+		std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
+		for (; ui != ue; ++ui)
+		{
+			if (KeyMap::isUnknown( ui->first))
+			{
+				eraselist.push_back( ui->first);
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( ui->first);
+				if (ri == docnoUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inverted index map");
+				}
+				m_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ri->second, ui->second));
+			}
+			
+		}
+		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
+		for (; ei != ee; ++ei)
+		{
+			m_docno_typeno_deletes.erase( *ei);
+		}
+	}{
+		std::vector<Index> eraselist;
+		std::set<Index>::const_iterator ti = m_docno_deletes.begin(), te = m_docno_deletes.end();
+		for (; ti != te; ++ti)
+		{
+			if (KeyMap::isUnknown( *ti))
+			{
+				eraselist.push_back( *ti);
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( *ti);
 				if (ri == docnoUnknownMap.end())
 				{
 					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
 				}
-				new_docno = ri->second;
+				m_docno_deletes.insert( ri->second);
 			}
-			else
-			{
-				new_docno = docno;
-			}
-			MapKey newkey( typeno, new_termno, new_docno);
-			m_map[ newkey] = mi->second;
-			m_map.erase( mi++);
+			
 		}
-		else
+		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
+		for (; ei != ee; ++ei)
 		{
-			++mi;
+			m_docno_deletes.erase( *ei);
 		}
+	}{
+		// Rename df:
+		m_dfmap.renameNewTermNumbers( termUnknownMap);
 	}
-	// Rename inv:
-	InvTermList::iterator li = m_invterms.begin(), le = m_invterms.end();
-	for (; li != le; ++li)
-	{
-		if (KeyMap::isUnknown( li->termno))
-		{
-			std::map<Index,Index>::const_iterator ri = termUnknownMap.find( li->termno);
-			if (ri == termUnknownMap.end())
-			{
-				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "inv posinfo map");
-			}
-			li->termno = ri->second;
-		}
-	}
-	InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
-	while (di != de)
-	{
-		if (KeyMap::isUnknown( di->first))
-		{
-			std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( di->first);
-			if (ri == docnoUnknownMap.end())
-			{
-				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inv posinfo map");
-			}
-			m_invtermmap[ ri->second] = di->second;
-			m_invtermmap.erase( di++);
-		}
-		else
-		{
-			++di;
-		}
-	}
-	// Rename df:
-	m_dfmap.renameNewTermNumbers( termUnknownMap);
 }
 
 void InvertedIndexMap::getWriteBatch(
@@ -266,139 +317,142 @@ void InvertedIndexMap::getWriteBatch(
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv)
 {
-	// [1] Get deletes:
 	DatabaseAdapter_InverseTerm::ReadWriter dbadapter_inv( m_database);
-	std::set<Index>::const_iterator di = m_docno_deletes.begin(), de = m_docno_deletes.end();
-	for (; di != de; ++di)
+	// [1] Get deletes:
 	{
-		InvTermBlock invblk;
-		if (dbadapter_inv.load( *di, invblk))
+		std::set<Index>::const_iterator di = m_docno_deletes.begin(), de = m_docno_deletes.end();
+		for (; di != de; ++di)
 		{
-			char const* ei = invblk.begin();
-			const char* ee = invblk.end();
-			for (;ei != ee; ei = invblk.next( ei))
+			InvTermBlock invblk;
+			if (dbadapter_inv.load( *di, invblk))
 			{
-				InvTerm it = invblk.element_at( ei);
-
-				// ensure old search index elements are deleted:
-				MapKey key( it.typeno, it.termno, *di);
-				m_map[ key];	//... construct member (default 0) if it does not exist
-						// <=> mark as deleted, if not member of set of inserts
-
-				// decrement stats for all old elements, for the new elements it will be incremented again:
-				m_dfmap.decrement( it.typeno, it.termno);
-			}
-			dbadapter_inv.remove( transaction, *di);
-		}
-	}
-	std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
-	for (; ui != ue; ++ui)
-	{
-		InvTermBlock invblk;
-		if (dbadapter_inv.load( ui->first, invblk))
-		{
-			if (m_invterms.size()) m_invterms.push_back( InvTerm());
-			std::size_t newinvtermidx = m_invterms.size();
-			char const* ei = invblk.begin();
-			const char* ee = invblk.end();
-			for (;ei != ee; ei = invblk.next( ei))
-			{
-				InvTerm it = invblk.element_at( ei);
-
-				if (ui->second.find( it.typeno) != ui->second.end())
+				char const* ei = invblk.begin();
+				const char* ee = invblk.end();
+				for (;ei != ee; ei = invblk.next( ei))
 				{
+					InvTerm it = invblk.element_at( ei);
+	
 					// ensure old search index elements are deleted:
-					MapKey key( it.typeno, it.termno, ui->first);
+					MapKey key( it.typeno, it.termno, *di);
 					m_map[ key];	//... construct member (default 0) if it does not exist
 							// <=> mark as deleted, if not member of set of inserts
+	
+					// decrement stats for all old elements, for the new elements it will be incremented again:
+					m_dfmap.decrement( it.typeno, it.termno);
 				}
-				else
-				{
-					// Ensure that all elements that are not part of a partial delete are readded again:
-					m_invterms.push_back( it);
-				}
-				// decrement stats for all old elements, for the new elements it will be incremented again:
-				m_dfmap.decrement( it.typeno, it.termno);
+				dbadapter_inv.remove( transaction, *di);
 			}
-			InvTermMap::iterator iitr = m_invtermmap.find( ui->first);
-			if (iitr != m_invtermmap.end())
-			{
-				std::size_t li = iitr->second, le = m_invterms.size();
-				for (; li != le && m_invterms[li].typeno; ++li)
-				{
-					if (ui->second.find( m_invterms[li].typeno) == ui->second.end())
-					{
-						throw strus::runtime_error( "%s", _TXT("mixing partial update with insert is not allowed"));
-					}
-					m_invterms.push_back( m_invterms[li]);
-				}
-			}
-			m_invtermmap[ ui->first] = newinvtermidx;
-			dbadapter_inv.remove( transaction, ui->first);
 		}
-	}
-
-	// [2] Get inv and df map inserts:
-	InvTermMap::const_iterator vi = m_invtermmap.begin(), ve = m_invtermmap.end();
-	for (; vi != ve; ++vi)
-	{
-		InvTermBlock invblk;
-		invblk.setId( vi->first);
-		InvTermList::const_iterator li = m_invterms.begin() + vi->second, le = m_invterms.end();
-
-		for (; li != le && li->typeno; ++li)
+	}{
+		std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
+		for (; ui != ue; ++ui)
 		{
-			// inv blk:
-			invblk.append( li->typeno, li->termno, li->ff, li->firstpos);
-			// df map:
-			m_dfmap.increment( li->typeno, li->termno);
+			InvTermBlock invblk;
+			if (dbadapter_inv.load( ui->first, invblk))
+			{
+				if (m_invterms.size()) m_invterms.push_back( InvTerm());
+				std::size_t newinvtermidx = m_invterms.size();
+				char const* ei = invblk.begin();
+				const char* ee = invblk.end();
+				for (;ei != ee; ei = invblk.next( ei))
+				{
+					InvTerm it = invblk.element_at( ei);
+
+					if (ui->second.find( it.typeno) != ui->second.end())
+					{
+						// ensure old search index elements are deleted:
+						MapKey key( it.typeno, it.termno, ui->first);
+						m_map[ key];	//... construct member (default 0) if it does not exist
+								// <=> mark as deleted, if not member of set of inserts
+					}
+					else
+					{
+						// Ensure that all elements that are not part of a partial delete are readded again:
+						m_invterms.push_back( it);
+					}
+					// decrement stats for all old elements, for the new elements it will be incremented again:
+					m_dfmap.decrement( it.typeno, it.termno);
+				}
+				InvTermMap::iterator iitr = m_invtermmap.find( ui->first);
+				if (iitr != m_invtermmap.end())
+				{
+					std::size_t li = iitr->second, le = m_invterms.size();
+					for (; li != le && m_invterms[li].typeno; ++li)
+					{
+						if (ui->second.find( m_invterms[li].typeno) == ui->second.end())
+						{
+							throw std::runtime_error( _TXT("mixing partial update with insert is not allowed"));
+						}
+						m_invterms.push_back( m_invterms[li]);
+					}
+				}
+				m_invtermmap[ ui->first] = newinvtermidx;
+				dbadapter_inv.remove( transaction, ui->first);
+			}
 		}
-		dbadapter_inv.store( transaction, invblk);
+	}{
+		// [2] Get inv and df map inserts:
+		InvTermMap::const_iterator vi = m_invtermmap.begin(), ve = m_invtermmap.end();
+		for (; vi != ve; ++vi)
+		{
+			InvTermBlock invblk;
+			invblk.setId( vi->first);
+			InvTermList::const_iterator li = m_invterms.begin() + vi->second, le = m_invterms.end();
+	
+			for (; li != le && li->typeno; ++li)
+			{
+				// inv blk:
+				invblk.append( li->typeno, li->termno, li->ff, li->firstpos);
+				// df map:
+				m_dfmap.increment( li->typeno, li->termno);
+			}
+			dbadapter_inv.store( transaction, invblk);
+		}
+	}{
+		// [3] Get index inserts and term deletes (defined in [1]):
+		Map::const_iterator mi = m_map.begin(), me = m_map.end();
+		while (mi != me)
+		{
+			Map::const_iterator
+				ei = mi,
+				ee = mi;
+			for (; ee != me && ee->first.termkey == ei->first.termkey; ++ee){}
+			mi = ee;
+	
+			BlockKey blkkey( ei->first.termkey);
+			Index typeno = blkkey.elem(1);
+			Index termno = blkkey.elem(2);
+			DatabaseAdapter_PosinfoBlock::WriteCursor dbadapter_posinfo( m_database, typeno, termno);
+	
+			PosinfoBlockBuilder newposblk;
+			std::vector<BooleanBlock::MergeRange> docrangear;
+	
+			// [1] Merge new elements with existing upper bound blocks:
+			mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
+	
+			// [2] Write the new blocks that could not be merged into existing ones:
+			insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
+	
+			BooleanBlock newdocblk;
+	
+			std::vector<BooleanBlock::MergeRange>::iterator
+				di = docrangear.begin(),
+				de = docrangear.end();
+			Index lastInsertBlockId = docrangear.back().to;
+	
+			// [3] Update document list of the term (boolean block) in the database:
+			DatabaseAdapter_DocListBlock::WriteCursor dbadapter_doclist( m_database, typeno, termno);
+	
+			// [3.1] Merge new docno boolean block elements
+			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
+	
+			// [3.2] Insert new docno boolean block elements
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
+		}
+	}{
+		// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
+		m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 	}
-
-	// [3] Get index inserts and term deletes (defined in [1]):
-	Map::const_iterator mi = m_map.begin(), me = m_map.end();
-	while (mi != me)
-	{
-		Map::const_iterator
-			ei = mi,
-			ee = mi;
-		for (; ee != me && ee->first.termkey == ei->first.termkey; ++ee){}
-		mi = ee;
-
-		BlockKey blkkey( ei->first.termkey);
-		Index typeno = blkkey.elem(1);
-		Index termno = blkkey.elem(2);
-		DatabaseAdapter_PosinfoBlock::WriteCursor dbadapter_posinfo( m_database, typeno, termno);
-
-		PosinfoBlockBuilder newposblk;
-		std::vector<BooleanBlock::MergeRange> docrangear;
-
-		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
-
-		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
-
-		BooleanBlock newdocblk;
-
-		std::vector<BooleanBlock::MergeRange>::iterator
-			di = docrangear.begin(),
-			de = docrangear.end();
-		Index lastInsertBlockId = docrangear.back().to;
-
-		// [3] Update document list of the term (boolean block) in the database:
-		DatabaseAdapter_DocListBlock::WriteCursor dbadapter_doclist( m_database, typeno, termno);
-
-		// [3.1] Merge new docno boolean block elements
-		BooleanBlockBatchWrite::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
-
-		// [3.2] Insert new docno boolean block elements
-		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
-	}
-
-	// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
-	m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 }
 
 void InvertedIndexMap::defineDocnoRangeElement(
@@ -534,7 +588,7 @@ void InvertedIndexMap::mergePosBlock(
 		PosinfoBlockBuilder& newblk)
 {
 	newblk.setId( oldblk.id());
-	PosinfoBlock::Cursor blkcursor;
+	DocIndexNodeCursor blkcursor;
 
 	Index old_docno = oldblk.firstDoc( blkcursor);
 	while (ei != ee && old_docno)

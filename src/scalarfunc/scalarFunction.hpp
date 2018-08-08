@@ -114,7 +114,7 @@ public://ScalarFunctionInstance
 		std::size_t rt = indexOperand( ip);
 		if (rt >= endval)
 		{
-			throw strus::runtime_error( "%s", _TXT("illegal operand in instruction"));
+			throw std::runtime_error( _TXT("illegal operand in instruction"));
 		}
 		return rt;
 	}
@@ -123,7 +123,7 @@ public://ScalarFunctionInstance
 		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_binfuncar.size())
 		{
-			throw strus::runtime_error( "%s", _TXT("illegal operand in instruction"));
+			throw std::runtime_error( _TXT("illegal operand in instruction"));
 		}
 		return m_binfuncar[ rtidx];
 	}
@@ -132,7 +132,7 @@ public://ScalarFunctionInstance
 		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_unfuncar.size())
 		{
-			throw strus::runtime_error( "%s", _TXT("illegal operand in instruction"));
+			throw std::runtime_error( _TXT("illegal operand in instruction"));
 		}
 		return m_unfuncar[ rtidx];
 	}
@@ -141,7 +141,7 @@ public://ScalarFunctionInstance
 		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_nfuncar.size())
 		{
-			throw strus::runtime_error( "%s", _TXT("illegal operand in instruction"));
+			throw std::runtime_error( _TXT("illegal operand in instruction"));
 		}
 		return m_nfuncar[ rtidx];
 	}

@@ -7,6 +7,7 @@
  */
 #include "strus/reference.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -32,14 +33,15 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/index.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <string>
 #include <cstring>
 #include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
+#include <algorithm>
 
 #undef STRUS_LOWLEVEL_DEBUG
 static strus::ErrorBufferInterface* g_errorhnd = 0;
@@ -52,9 +54,9 @@ public:
 		:dbi(o.dbi),sti(o.sti),sci(o.sci){}
 	~Storage(){}
 
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
-	strus::utils::SharedPtr<strus::StorageInterface> sti;
-	strus::utils::SharedPtr<strus::StorageClientInterface> sci;
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
+	strus::shared_ptr<strus::StorageInterface> sti;
+	strus::shared_ptr<strus::StorageClientInterface> sci;
 
 	void open( const char* options);
 };
@@ -62,12 +64,12 @@ public:
 
 void Storage::open( const char* config)
 {
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	sti.reset( strus::createStorageType_std( g_errorhnd));
+	sti.reset( strus::createStorageType_std( "", g_errorhnd));
 	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -88,8 +90,8 @@ void Storage::open( const char* config)
 
 static void destroyStorage( const char* config)
 {
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -451,10 +453,12 @@ int main( int argc, const char* argv[])
 				return -1;
 			}
 		}
-		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 		if (!g_errorhnd) return -1;
-	
-		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( g_errorhnd);
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
+		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
+
+		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( filelocator.get(), g_errorhnd);
 		if (!qpi.get())
 		{
 			throw strus::runtime_error("failed to create query processor instance");

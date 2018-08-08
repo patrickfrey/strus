@@ -7,7 +7,8 @@
  */
 #ifndef _STRUS_DATABASE_LEVELDB_HANDLE_HPP_INCLUDED
 #define _STRUS_DATABASE_LEVELDB_HANDLE_HPP_INCLUDED
-#include "private/utils.hpp"
+#include "strus/base/shared_ptr.hpp"
+#include "strus/base/thread.hpp"
 #include <leveldb/db.h>
 #include <vector>
 #include <string>
@@ -77,7 +78,7 @@ public:
 	/// \param[in] writeBufferSize_ size of write buffer per file
 	/// \param[in] blockSize_ block size on disk (size of units)
 	/// \note the method throws if the configuration parameters are incompatible to an existing instance
-	utils::SharedPtr<LevelDbHandle> create(
+	strus::shared_ptr<LevelDbHandle> create(
 			const std::string& path_,
 			unsigned int maxOpenFiles,
 			unsigned int cachesize_k,
@@ -89,8 +90,8 @@ public:
 	void dereference( const char* path_);
 
 private:
-	utils::Mutex m_map_mutex;
-	typedef utils::SharedPtr<LevelDbHandle> LevelDbHandleRef;
+	strus::mutex m_map_mutex;
+	typedef strus::shared_ptr<LevelDbHandle> LevelDbHandleRef;
 	std::vector<LevelDbHandleRef> m_map;
 };
 
@@ -98,8 +99,8 @@ private:
 class LevelDbConnection
 {
 public:
-	LevelDbConnection( const utils::SharedPtr<LevelDbHandleMap>& dbmap_,
-				const utils::SharedPtr<LevelDbHandle>& db_)
+	LevelDbConnection( const strus::shared_ptr<LevelDbHandleMap>& dbmap_,
+				const strus::shared_ptr<LevelDbHandle>& db_)
 		:m_dbmap(dbmap_),m_db(db_){}
 	LevelDbConnection( const LevelDbConnection& o)
 		:m_dbmap(o.m_dbmap),m_db(o.m_db){}
@@ -132,9 +133,9 @@ private:
 	void delete_iterators();
 
 private:
-	utils::SharedPtr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
-	utils::SharedPtr<LevelDbHandle> m_db;			///< shared levelDB handle
-	utils::Mutex m_mutex;					///< mutex for access of iterators
+	strus::shared_ptr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
+	strus::shared_ptr<LevelDbHandle> m_db;			///< shared levelDB handle
+	strus::mutex m_mutex;					///< mutex for access of iterators
 	std::list<leveldb::Iterator*> m_itrlist;		///< list of allocated iterators
 };
 

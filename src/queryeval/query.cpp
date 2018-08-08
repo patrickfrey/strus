@@ -9,7 +9,6 @@
 #include "queryEval.hpp"
 #include "accumulator.hpp"
 #include "ranker.hpp"
-#include "keyMap.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -22,10 +21,11 @@
 #include "strus/reference.hpp"
 #include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
-#include "private/utils.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/debugTraceInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -33,8 +33,18 @@
 #include <utility>
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_DBGTRACE_COMPONENT_NAME "query"
+#define DEBUG_OPEN( NAME) if (m_debugtrace) m_debugtrace->open( NAME);
+#define DEBUG_CLOSE() if (m_debugtrace) m_debugtrace->close();
+#define DEBUG_EVENT1( NAME, FMT, ID)				if (m_debugtrace) m_debugtrace->event( NAME, FMT, ID);
+#define DEBUG_EVENT2( NAME, FMT, ID, VAL)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, ID, VAL);
+#define DEBUG_EVENT3( NAME, FMT, X1, X2, X3)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3);
+#define DEBUG_EVENT4( NAME, FMT, X1, X2, X3, X4)		if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3, X4);
+#define DEBUG_EVENT1_IAR( NAME, FMT, VAL)			if (m_debugtrace) {std::vector<Index>::const_iterator vi=VAL.begin(), ve=VAL.end(); std::ostringstream out; out<<"{";for (int vidx=0;vi!=ve;++vi,++vidx) {if (vidx)out<<","; out<<*vi;}out<<"}"; std::string valstr(out.str()); m_debugtrace->event( NAME, FMT, valstr.c_str());}
+#define DEBUG_EVENT1_STR( NAME, FMT, VAL)			if (m_debugtrace) {std::string valstr(VAL); m_debugtrace->event( NAME, FMT, valstr.c_str());}
 
 using namespace strus;
 
@@ -60,8 +70,12 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_globstats()
 	,m_debugMode(false)
 	,m_errorhnd(errorhnd_)
+	,m_debugtrace(0)
 {
-	if (!m_metaDataReader.get()) throw strus::runtime_error( "%s", _TXT("error creating meta data reader"));
+	DebugTraceInterface* dbgi = m_errorhnd->debugTrace();
+	if (dbgi) m_debugtrace = dbgi->createTraceContext( STRUS_DBGTRACE_COMPONENT_NAME);
+
+	if (!m_metaDataReader.get()) throw std::runtime_error( _TXT("error creating meta data reader"));
 	const ScalarFunctionInterface* weightingFormula = m_queryEval->weightingFormula();
 	if (weightingFormula)
 	{
@@ -78,6 +92,11 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	}
 }
 
+Query::~Query()
+{
+	if (m_debugtrace) delete m_debugtrace;
+}
+
 bool Query::TermKey::operator<( const TermKey& o) const
 {
 	int cmpres;
@@ -88,26 +107,23 @@ bool Query::TermKey::operator<( const TermKey& o) const
 	return 0;
 }
 
-void Query::printStack( std::ostream& out, std::size_t indent) const
+std::string Query::printStack() const
 {
+	std::ostringstream out;
 	std::vector<NodeAddress>::const_iterator si = m_stack.begin(), se = m_stack.end();
 	std::size_t sidx = m_stack.size();
-	out << std::string( indent*2, ' ') << "Stack" << std::endl;
+	out << "Stack" << std::endl;
 	for (--sidx; si != se; ++si,--sidx)
 	{
 		out << "STK [" << sidx << "] ";
-		printNode( out, *si, indent+1);
+		printNode( out, *si, 1);
 	}
+	return out.str();
 }
 
 void Query::pushTerm( const std::string& type_, const std::string& value_, const Index& length_)
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s %u stack %u\n", type_.c_str(), value_.c_str(), length_, (unsigned int)m_stack.size());
-	std::cerr << buf;
-	printStack( std::cerr, 1);
-#endif
+	DEBUG_EVENT3( "term", "type='%s' value='%s' len=%d", type_.c_str(), value_.c_str(), length_);
 	try
 	{
 		m_terms.push_back( Term( type_, value_, length_));
@@ -120,12 +136,7 @@ void Query::pushDocField(
 		const std::string& metadataRangeStart,
 		const std::string& metadataRangeEnd)
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "pushField [%s:%s] stack %u\n", metadataRangeStart.c_str(), metadataRangeEnd.c_str(), (unsigned int)m_stack.size());
-	std::cerr << buf;
-	printStack( std::cerr, 1);
-#endif
+	DEBUG_EVENT2( "docfield", "start='%s' end='%s'", metadataRangeStart.c_str(), metadataRangeEnd.c_str());
 	try
 	{
 		m_docfields.push_back( DocField( metadataRangeStart, metadataRangeEnd));
@@ -136,17 +147,12 @@ void Query::pushDocField(
 
 void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsigned int argc, int range_, unsigned int cardinality_)
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "pushExpression %u stack %u\n", (unsigned int)argc, (unsigned int)m_stack.size());
-	std::cerr << buf;
-	printStack( std::cerr, 1);
-#endif
+	DEBUG_EVENT3( "expression", "argc=%d range=%d cardinality=%d", argc, range_, cardinality_);
 	try
 	{
 		if (argc > m_stack.size())
 		{
-			m_errorhnd->report( _TXT( "illegal expression definition: size of expression bigger than stack size"));
+			m_errorhnd->report( ErrorCodeValueOutOfRange, _TXT( "illegal expression definition: size of expression bigger than stack size"));
 		}
 		else
 		{
@@ -166,11 +172,12 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsig
 
 void Query::attachVariable( const std::string& name_)
 {
+	DEBUG_EVENT1( "variable", "name='%s'", name_.c_str());
 	try
 	{
 		if (m_stack.empty())
 		{
-			m_errorhnd->report( _TXT( "cannot attach variable (query stack empty)"));
+			m_errorhnd->report( ErrorCodeInvalidOperation, _TXT( "cannot attach variable (query stack empty)"));
 		}
 		m_variableAssignments.insert( std::pair<NodeAddress,std::string>( m_stack.back(), name_));
 	}
@@ -179,16 +186,12 @@ void Query::attachVariable( const std::string& name_)
 
 void Query::defineFeature( const std::string& set_, double weight_)
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "defineFeature %s stack %u\n", set_.c_str(), (unsigned int)m_stack.size());
-	std::cerr << buf;
-	printStack( std::cerr, 1);
-#endif
+	DEBUG_EVENT1_STR( "stack", "%s", printStack())
+	DEBUG_EVENT2( "feature", "set=%s weight=%f", set_.c_str(), weight_);
 	try
 	{
-		if (m_stack.empty()) throw strus::runtime_error( "%s", _TXT("no term or expression defined"));
-		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
+		if (m_stack.empty()) throw std::runtime_error( _TXT("no term or expression defined"));
+		m_features.push_back( Feature( string_conv::tolower(set_), m_stack.back(), weight_));
 		m_stack.pop_back();
 	}
 	CATCH_ERROR_MAP( _TXT("error define feature of query: %s"), *m_errorhnd);
@@ -200,6 +203,7 @@ void Query::addMetaDataRestrictionCondition(
 {
 	try
 	{
+		DEBUG_EVENT4( "restriction", "op='%s' name='%s' operand='%s' newgroup=%s", MetaDataRestrictionInterface::compareOperatorStr(opr), name.c_str(), operand.tostring().c_str(), newGroup?"true":"false");
 		if (!m_metaDataRestriction.get())
 		{
 			m_metaDataRestriction.reset( m_storage->createMetaDataRestriction());
@@ -214,6 +218,7 @@ void Query::addDocumentEvaluationSet(
 {
 	try
 	{
+		DEBUG_EVENT1_IAR( "evalset", "%s", docnolist_)
 		m_evalset_docnolist.insert( m_evalset_docnolist.end(), docnolist_.begin(), docnolist_.end());
 		std::sort( m_evalset_docnolist.begin(), m_evalset_docnolist.end());
 		m_evalset_defined = true;
@@ -418,7 +423,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
-				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
 				break;
@@ -427,7 +432,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const DocField& docfield = m_docfields[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd));
-				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression (doc field) posting iterator"));
+				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression (doc field) posting iterator"));
 				TermStatistics termstats( m_globstats.nofDocumentsInserted());
 				// ... Doc Field features get the global statistics, because they are supposed to appear in every document
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), termstats);
@@ -436,7 +441,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
-				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
 				break;
@@ -570,7 +575,7 @@ void Query::setWeightingVariableValue(
 			case QueryEval::VariableAssignment::FormulaFunction:
 				if (!m_weightingFormula.get())
 				{
-					m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+					m_errorhnd->report( ErrorCodeOperationOrder, _TXT("try to defined weighting variable without weighting formula defined"));
 				}
 				m_weightingFormula->setVariableValue( name, value);
 				break;
@@ -588,23 +593,24 @@ QueryResult Query::evaluate() const
 	const char* evaluationPhase = "query feature postings initialization";
 	try
 	{
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "evaluate query:" << std::endl;
-		print( std::cout);
-#endif
+		DEBUG_OPEN("eval")
+		DEBUG_EVENT1_STR( "query", "%s", tostring())
 		// [1] Check initial conditions:
 		if (m_nofRanks == 0)
 		{
+			DEBUG_CLOSE()
 			return QueryResult();
 		}
 		if (m_queryEval->weightingFunctions().empty())
 		{
-			m_errorhnd->report( _TXT( "cannot evaluate query, no weighting function defined"));
+			m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "cannot evaluate query, no weighting function defined"));
+			DEBUG_CLOSE()
 			return QueryResult();
 		}
 		if (m_queryEval->selectionSets().empty())
 		{
-			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
+			m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "cannot evaluate query, no selection features defined"));
+			DEBUG_CLOSE()
 			return QueryResult();
 		}
 		NodeStorageDataMap nodeStorageDataMap;
@@ -618,7 +624,11 @@ QueryResult Query::evaluate() const
 			{
 				Reference<PostingIteratorInterface> postingsElem(
 					createNodePostingIterator( fi->node, nodeStorageDataMap));
-				if (!postingsElem.get()) return QueryResult();
+				if (!postingsElem.get())
+				{
+					DEBUG_CLOSE()
+					return QueryResult();
+				}
 				postings.push_back( postingsElem);
 			}
 		}
@@ -663,10 +673,12 @@ QueryResult Query::evaluate() const
 				we = m_queryEval->weightingFunctions().end();
 			for (; wi != we; ++wi)
 			{
+				DEBUG_OPEN( "function" )
+				DEBUG_EVENT1( "name", "%s", wi->functionName().c_str())
 				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
-				if (!execContext.get()) throw strus::runtime_error( "%s", _TXT("error creating weighting function context"));
+				if (!execContext.get()) throw std::runtime_error( _TXT("error creating weighting function context"));
 	
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = wi->featureParameters().begin(),
@@ -682,16 +694,12 @@ QueryResult Query::evaluate() const
 							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							execContext->addWeightingFeature(
 								si->parameterName(), nd.itr, fi->weight, nd.stats);
-#ifdef STRUS_LOWLEVEL_DEBUG
-							std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
-#endif
+							DEBUG_EVENT3( "parameter", "%s= feature %s weight=%f", si->parameterName().c_str(), fi->set.c_str(), fi->weight)
 						}
 					}
 				}
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "add feature " << wi->functionName() << std::endl;
-#endif
 				accumulator.addWeightingElement( execContext.release());
+				DEBUG_CLOSE()
 			}
 		}
 		// [4.3.1] Define feature weighting variable values:
@@ -699,6 +707,7 @@ QueryResult Query::evaluate() const
 			vi = m_weightingvars.begin(), ve = m_weightingvars.end();
 		for (; vi != ve; ++vi)
 		{
+			DEBUG_EVENT3( "variable", "index=%d name=%s value=%f", (int)vi->index, vi->varname.c_str(), vi->value)
 			accumulator.defineWeightingVariableValue( vi->index, vi->varname, vi->value);
 		}
 
@@ -707,6 +716,7 @@ QueryResult Query::evaluate() const
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 		for (; ui != ue; ++ui)
 		{
+			DEBUG_EVENT1( "user-restriction", "name=%s", ui->c_str())
 			Reference<InvAclIteratorInterface> invAcl( m_storage->createInvAclIterator( *ui));
 			if (invAcl.get())
 			{
@@ -714,7 +724,7 @@ QueryResult Query::evaluate() const
 			}
 			else if (m_errorhnd->hasError())
 			{
-				throw strus::runtime_error( "%s", _TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
+				throw std::runtime_error( _TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
 			}
 		}
 		// [4.5] Define the feature restrictions:
@@ -730,6 +740,7 @@ QueryResult Query::evaluate() const
 				{
 					if (*xi == fi->set)
 					{
+						DEBUG_EVENT1( "feature-restriction", "name=%s", xi->c_str())
 						accumulator.addFeatureRestriction(
 							nodeStorageData( fi->node, nodeStorageDataMap).itr, false);
 					}
@@ -749,12 +760,14 @@ QueryResult Query::evaluate() const
 				{
 					if (*xi == fi->set)
 					{
+						DEBUG_EVENT1( "feature-exclusion", "name=%s", xi->c_str())
 						accumulator.addFeatureRestriction(
 							nodeStorageData( fi->node, nodeStorageDataMap).itr, true);
 					}
 				}
 			}
 		}
+		DEBUG_OPEN("ranking")
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> ranks;
@@ -774,8 +787,7 @@ QueryResult Query::evaluate() const
 			}
 			prev_state = state;
 		}
-		std::vector<WeightedDocument>
-			resultlist = ranker.result( m_minRank);
+		std::vector<WeightedDocument> resultlist = ranker.result( m_minRank);
 	
 		// [6] Summarization:
 		evaluationPhase = "summarization";
@@ -793,7 +805,7 @@ QueryResult Query::evaluate() const
 					zi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
-				if (!closure) throw strus::runtime_error( "%s", _TXT("error creating summarizer context"));
+				if (!closure) throw std::runtime_error( _TXT("error creating summarizer context"));
 
 				// [5.2] Add features with their variables assigned to summarizer:
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
@@ -831,9 +843,7 @@ QueryResult Query::evaluate() const
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
-#endif
+			DEBUG_EVENT2( "result", "docno=%d weight=%f", ri->docno(), ri->weight())
 			std::vector<SummaryElement> summaries;
 
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
@@ -871,12 +881,23 @@ QueryResult Query::evaluate() const
 					}
 				}
 			}
+			if (m_debugtrace)
+			{
+				std::vector<SummaryElement>::const_iterator
+					ai = summaries.begin(), ae = summaries.end();
+				for (;ai != ae; ++ai)
+				{
+					DEBUG_EVENT4( "summary", "name=%s value='%s' weight=%f index=%d", ai->name().c_str(), ai->value().c_str(), ai->weight(), ai->index())
+				}
+			}
 			ranks.push_back( ResultDocument( *ri, summaries));
 		}
 		if (m_errorhnd->hasError())
 		{
 			throw strus::runtime_error( _TXT("error evaluating query: %s"), m_errorhnd->fetchError());
 		}
+		DEBUG_CLOSE()/*ranking*/
+		DEBUG_CLOSE()/*eval*/
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());

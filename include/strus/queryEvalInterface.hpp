@@ -57,6 +57,22 @@ public:
 	/// \param[in] set_ name of the set of the exclusion feature
 	virtual void addExclusionFeature( const std::string& set_)=0;
 
+	/// \brief Define a set of features to be used for weighting
+	/// \return the list of all weighting feature set names declared
+	virtual std::vector<std::string> getWeightingFeatureSets() const=0;
+
+	/// \brief Define a set of features to be used as selection (declare what documents to weight)
+	/// \return the list of all selecting feature set names declared
+	virtual std::vector<std::string> getSelectionFeatureSets() const=0;
+
+	/// \brief Get the set names of features to be used as restriction (exclude documents that do not contain a feature of the set declared)
+	/// \return the list of all restriction feature set names declared
+	virtual std::vector<std::string> getRestrictionFeatureSets() const=0;
+
+	/// \brief Get the set names of features to be used as exclusion (exclude documents that contain a feature of the set declared)
+	/// \return the list of all exclusion feature set names declared
+	virtual std::vector<std::string> getExclusionFeatureSets() const=0;
+
 	/// \class FeatureParameter
 	/// \brief Structure that describes a feature that is subject of summarization or weighting
 	class FeatureParameter

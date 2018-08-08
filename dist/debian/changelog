@@ -1,3 +1,40 @@
+strus (0.16.0-1) unstable; urgency=low
+  * change handling of gettext to avoid warning: return a const char* 
+  * make use of debug interface in strus base instead of low level debug defines
+  * moved pseudo random number generator to strus base
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 11 May 2018 15:00:00 +0100
+
+strus (0.15.7-1) unstable; urgency=low
+  * added make target cppcheck for static code analysis
+  * adapted changes in error handling defined in strus base: simplified error codes
+  * improve some error messages
+  * added skipPrefix (skip to first element with a prefix) in valueIteratorInterface
+  * fix some smaller build issues
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 15 Mar 2018 10:00:00 +0100
+
+strus (0.15.6-1) unstable; urgency=low
+  * added some functions for introspection needed by the webservice
+  * adapted error handling to changes in base: mandatory error codes everywhere
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 12 Feb 2018 22:00:00 +0100
+
+strus (0.15.5-1) unstable; urgency=low
+  * fixed several build issues: Build with Clang, Fix bugs in travis build
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 29 Dec 2017 13:00:00 +0100
+
+strus (0.15.4-1) unstable; urgency=low
+  * changed paramater renaming option name in summarizer 'metadata' and 'attribute'
+  * added -Wshadow for C++ build
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 4 Dec 2017 12:00:00 +0100
+
+strus (0.15.3-1) unstable; urgency=low
+  * RPath fixes and some CMake file reorganization
+  * fixed missing check of meta data element names, causing a logic error in the commit
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Oct, 13 Sep 2017 13:00:00 +0100
+
+strus (0.15.2-1) unstable; urgency=low
+  * bring up travis build, some minor fixes
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 27 Sep 2017 15:30:00 +0100
+
 strus (0.15.1-1) unstable; urgency=low
   * release to cleanup mess with missing CHANGELOG in 0.15.0
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 4 Sep 2017 15:30:00 +0100

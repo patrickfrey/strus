@@ -37,14 +37,26 @@ public:
 public:
 	InvTermBlock(){}
 	InvTermBlock( const InvTermBlock& o)
-		:DataBlock(o){}
+		:DataBlock(o)
+	{
+		initFrame();
+	}
 	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated=false)
-		:DataBlock( id_, ptr_, size_, allocated){}
+		:DataBlock( id_, ptr_, size_, allocated)
+	{
+		initFrame();
+	}
 
 	InvTermBlock& operator=( const InvTermBlock& o)
 	{
 		DataBlock::operator =(o);
+		initFrame();
 		return *this;
+	}
+	void swap( DataBlock& o)
+	{
+		DataBlock::swap( o);
+		initFrame();
 	}
 
 	Element element_at( const char* itr) const;
@@ -61,6 +73,8 @@ public:
 	const char* next( const char* ref) const;
 
 	void append( const Index& typeno, const Index& termno, const Index& ff, const Index& firstpos);
+
+	void initFrame(){}
 };
 
 }//namespace

@@ -60,6 +60,8 @@ public:
 			const std::string& src,
 			const std::vector<std::string>& argumentNames) const;
 
+	virtual const char* getDescription() const;
+
 private:
 	typedef std::map<std::string,std::size_t> ArgumentNameMap;
 	struct ParserContext

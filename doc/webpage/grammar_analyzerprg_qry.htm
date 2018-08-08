@@ -15,30 +15,71 @@
 <div id="content">
 	<h1>Strus query analyzer configuration</h1>
 	<h2>Language grammar</h2>
-	<p class="description">class="description">The grammar for the query analysis differs slightly from the the document analysis.
-	The sections that can be defined for query analysis are restricted to the following:
-	<ul>
-	<li>MetaData</li>
-	<li>SearchIndex</li>
-	<li>PatternLexem</li>
-	<li>PatternMatch</li>
-	</ul>
-	Not implemented are <i>Attribute</i>, <i>ForwardIndex</i>, <i>Aggregator</i>, <i>Document</i>, and <i>Content</i>,
-	as they do not make sense in the query.
-	</p>
-	<p class="description">
-	Another difference is the selection of elements to process. In the document you define
-	selection expressions for the segmenter. In the query analysis you define names of query
-	field types instead. The name 'default' is reserved for the default query field type,
-	used when no name for the field is specified in the query.
-	</p>
+	<p class="description">class="description">The grammar for the query analysis differs slightly from the the document analysis.</p>
+
+	<h3>EBNF</h3>
+	<pre>
+IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
+STRING         : &lt;single or double quoted string with backslash escaping&gt;
+PRIORITY       : &lt;integer specifying the priority assigned to a feature&gt;
+PRGFILENAME    : &lt;Name of a program to load (e.g. a program with patterns to match)&gt;
+MODULEID       : &lt;Identifier or string identifying a module to use&gt;
+config         = configsection config
+               ;
+configsection  = "[" "Priority" "]" prioritydeflist
+               | "[" "Element" "]" featdeflist
+               | "[" "PatternLexem" "]" lexemdeflist
+               | "[" "PatternMatch" MODULEID "]" prgdeflist
+               ;
+prioritydeflist= prioritydef prioritydeflist
+               |
+               ;
+prioritydef    = type "=" PRIORITY ";"
+               ;
+featdeflist    = featdef featdeflist
+               |
+               ;
+featdef        = type "=" normalizer tokenizer fieldname ";"
+               ;
+type           = IDENTIFIER ;
+prgdef         = type "=" PRGFILENAME ";"
+               ;
+prgdeflist     = prgdef prgdeflist
+               ;
+normalizer     = functioncall ":" normalizer
+               | functioncall
+               ;
+tokenizer      = functioncall
+               ;
+functioncall   = functionname "(" argumentlist ")" ;
+               | functionname
+               ;
+functionname   = IDENTIFIER ;
+argumentlist   = argument "," argumentlist
+               |
+               ;
+argument       = IDENTIFIER
+               | STRING
+               ;
+fieldname      = fieldname
+               ;
+	</pre>
+	<h3>Meaning of the sections</h3>
+	<h5>Priority</h5>
+	<p class="description">Definitions of query term priorities. Terms with higher priority oust term definitions with lower priority they cover completely.</p>
+	<h5>Element</h5>
+	<p class="description">The declarations in this section are query term definitions</p>
+	<h5>PatternLexem</h5>
+	<p class="description">The declarations in this section are lexem definitions that are not inserted into the index. They are just used to feed post processing pattern matchers with lexems.</p>
+	<h5>PatternMatch</h5>
+	<p class="description">The declarations in this section define pattern matching programs. The pattern matcher module is selection with the argument &lt;moduleid&gt; of the section header. There exists no pattern matcher in the core. The standard pattern matcher name "std" is implemented in the module "analyzer_pattern" of the project strusPattern.</p>
+
 	<h3>Example</h3>
 	<pre>
-[SearchIndex]
-        word = lc:convdia(en):stem(en) word word;
-        word = lc:convdia(en):stem(en) word default;
-[MetaData]
-        language = dictmap("language.txt"):lc language;
+[Element]
+	word = lc:convdia(en):stem(en) word word;
+[PatternLexem]
+	token = orig word word;
 	</pre>
 </div>
 </div>

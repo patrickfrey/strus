@@ -24,6 +24,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <list>
 #include <limits>
 #include <algorithm>
 
@@ -50,7 +51,7 @@ static uint32_t randuint( uint32_t mi, uint32_t me)
 	return (int32_t)((uint32_t)rand() % (me - mi) + mi);
 }
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 class MetaDataReader
 	:public strus::MetaDataReaderInterface
@@ -159,6 +160,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	{
 		strus::NumericVariant val;
 		strus::Index eh = descr->getHandle( *ci);
+		if (eh < 0) throw std::runtime_error("meta data element is not defined");
 		const strus::MetaDataElement* elem = descr->get(eh);
 		switch (elem->type())
 		{
@@ -199,6 +201,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi,++cidx)
 	{
 		strus::Index eh = descr->getHandle( *ci);
+		if (eh < 0) throw std::runtime_error("meta data element is not defined");
 		const strus::MetaDataElement* elem = descr->get(eh);
 		strus::NumericVariant val( rt.getValue( elem));
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -449,7 +452,7 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
-	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1));
+	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/));
 
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
@@ -496,12 +499,11 @@ int main( int argc, const char* argv[])
 					{
 						std::string expressionstr;
 						bool expectedResult = (bool)randuint(0,2);
+						strus::Reference<MetaDataReader> mdreader( new MetaDataReader( &descr, data));
 						strus::Reference<strus::MetaDataRestrictionInstanceInterface>
-							restriction =
-								randomMetaDataRestriction(
-									new MetaDataReader( &descr, data),
-									&descr, rc, expectedResult, expressionstr);
-
+							restriction( randomMetaDataRestriction( mdreader.get(), &descr, rc, expectedResult, expressionstr));
+						mdreader.release();
+						// ... mdreader passed with ownership to MetaDataRestrictionInstance
 #ifdef STRUS_LOWLEVEL_DEBUG
 						std::cerr << "test " << di << "/" << ri << "/" << xi << std::endl;
 						reportTest( std::cerr, restriction, expressionstr, rc, expectedResult);

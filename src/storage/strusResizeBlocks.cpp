@@ -10,12 +10,12 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "databaseAdapter.hpp"
 #include "storageClient.hpp"
 #include "forwardIndexBlock.hpp"
@@ -28,8 +28,6 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
-
-#undef STRUS_LOWLEVEL_DEBUG
 
 static void printUsage()
 {
@@ -93,17 +91,17 @@ static void commitTransaction( strus::DatabaseClientInterface& database, strus::
 {
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error in storage transaction"));
+		throw std::runtime_error( _TXT("error in storage transaction"));
 	}
 	transaction->commit();
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error in storage transaction commit"));
+		throw std::runtime_error( _TXT("error in storage transaction commit"));
 	}
 	transaction.reset( database.createTransaction());
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error creating new storage transaction"));
+		throw std::runtime_error( _TXT("error creating new storage transaction"));
 	}
 }
 
@@ -128,9 +126,9 @@ static void resizeBlocks(
 	}
 	if (!transaction.get())
 	{
-		throw strus::runtime_error( "%s", _TXT("failed to create storage transaction"));
+		throw std::runtime_error( _TXT("failed to create storage transaction"));
 	}
-	if (strus::utils::caseInsensitiveEquals( blocktype, "forwardindex"))
+	if (strus::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
 		strus::ForwardIndexMap fwdmap( storage.databaseClient(), storage.maxTermTypeNo(), newsize?newsize:strus::ForwardIndexBlock::MaxBlockTokens);
 		strus::Index di = 1, de = storage.maxDocumentNumber()+1;
@@ -199,7 +197,7 @@ static void resizeBlocks(
 
 int main( int argc, const char* argv[])
 {
-	strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2));
+	strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2, NULL/*debug trace interface*/));
 	if (!errorBuffer.get())
 	{
 		std::cerr << _TXT("failed to create error buffer") << std::endl;
@@ -272,9 +270,9 @@ int main( int argc, const char* argv[])
 		std::string blocktype( argv[ argi+1]);
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
-		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( g_errorBuffer);
+		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( "", g_errorBuffer);
 		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
-		if (g_errorBuffer->hasError()) throw strus::runtime_error( "%s", _TXT("error in initialization"));
+		if (g_errorBuffer->hasError()) throw std::runtime_error( _TXT("error in initialization"));
 
 		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 

@@ -5,28 +5,55 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
-#include <stdio.h>
-#include <stdlib.h>
 #include <libintl.h>
 #include <locale.h>
 #include <cstdarg>
 #include <string>
+#include <cstdlib>
+#include <cstdio>
 
 #define STRUS_GETTEXT_PACKAGE		"@STRUS_GETTEXT_PACKAGE@"
 #define STRUS_GETTEXT_LOCALEDIR		"@STRUS_GETTEXT_LOCALEDIR@"
 
+enum {MsgBufSize=4096};
+
 std::runtime_error strus::runtime_error( const char* format, ...)
 {
-	char buffer[ 1024];
+	char buffer[ MsgBufSize];
 	va_list args;
 	va_start( args, format);
 	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, format);
-	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
-	buffer[ sizeof(buffer)-1] = 0;
+	std::size_t buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
+	if (buffersize >= sizeof(buffer)-1)
+	{
+		buffer[ sizeof(buffer)-1] = 0;
+		buffersize = sizeof(buffer)-1;
+	}
 	std::runtime_error rt( std::string( buffer, buffersize));
-	va_end (args);
+	va_end( args);
+	return rt;
+}
+
+std::runtime_error strus::runtime_error_ec( int apperrno, const char* format, ...)
+{
+	char buffer[ MsgBufSize];
+	std::size_t buffersize = 0;
+	if (apperrno)
+	{
+		buffersize = std::snprintf( buffer, sizeof(buffer), "[#%d] ", apperrno);
+	}
+	va_list args;
+	va_start( args, format);
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, format);
+	buffersize += vsnprintf( buffer+buffersize, sizeof(buffer)-buffersize, formatTranslation, args);
+	if (buffersize >= sizeof(buffer)+1)
+	{
+		buffer[ sizeof(buffer)-1] = 0;
+		buffersize = sizeof(buffer)-1;
+	}
+	std::runtime_error rt( std::string( buffer, buffersize));
+	va_end( args);
 	return rt;
 }
 
@@ -43,7 +70,7 @@ std::logic_error strus::logic_error( const char* format, ...)
 	return rt;
 }
 
-DLL_PUBLIC void strus::initMessageTextDomain()
+void strus::initMessageTextDomain()
 {
 #ifdef ENABLE_NLS
 	::bindtextdomain( STRUS_GETTEXT_PACKAGE, STRUS_GETTEXT_LOCALEDIR);

@@ -20,10 +20,12 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args_)
-	,m_selected(args_.size())
+	,m_selected()
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
+	if (args_.size() > MaxNofFeatures) throw std::runtime_error(_TXT( "too many arguments for union iterator"));
+
 	std::vector<Reference<PostingIteratorInterface> >::const_iterator
 		ai = args_.begin(), ae = args_.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
@@ -178,17 +180,17 @@ PostingIteratorInterface* PostingJoinUnion::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "union");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "union");
 		return 0;
 	}
 	if (range != 0)
 	{
-		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "union");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no range argument expected for '%s'"), "union");
 		return 0;
 	}
 	if (itrs.size() == 0)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "union");
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for '%s'"), "union");
 		return 0;
 	}
 	try

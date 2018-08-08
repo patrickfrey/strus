@@ -10,7 +10,6 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include <cstdio>
 #include <cstring>
 
@@ -35,7 +34,7 @@ PositionWindow::PositionWindow()
 	,m_range(0)
 	,m_cardinality(0)
 	,m_windowsize(0)
-	,m_isnew_bitset(0)
+	,m_isnew_bitset()
 	,m_evaluationType(MaxWin)
 {}
 
@@ -46,7 +45,7 @@ PositionWindow::PositionWindow(
 		unsigned int cardinality_,
 		Index firstpos_,
 		EvaluationType evaluationType_)
-	:m_isnew_bitset(0)
+	:m_isnew_bitset()
 {
 	init( args, nofargs, range_, cardinality_, firstpos_, evaluationType_);
 }
@@ -63,7 +62,7 @@ void PositionWindow::init(
 	m_range = range_;
 	m_cardinality = (cardinality_>0?cardinality_:nofargs);
 	m_windowsize = 0;
-	m_isnew_bitset = strus::utils::BitSet( nofargs);
+	m_isnew_bitset.reset();
 	m_evaluationType = evaluationType_;
 
 	if (nofargs > MaxNofArguments)
@@ -80,19 +79,18 @@ void PositionWindow::init(
 	for (; ai != ae; ++ai)
 	{
 		m_itrar[ ai] = args[ai];
-		Index pos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
-		if (pos)
+		Index wpos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
+		if (wpos)
 		{
 			// Insert element:
 			std::size_t pi = 0, pe = m_arsize;
-			for (; pi != pe && m_posar[pi] < pos; ++pi){}
+			for (; pi != pe && m_posar[pi] < wpos; ++pi){}
 			std::memmove( m_posar+pi+1, m_posar+pi, (pe-pi)*sizeof(Index));
 			std::memmove( m_window+pi+1, m_window+pi, (pe-pi)*sizeof(PostingIteratorInterface*));
 			++m_arsize;
-			m_posar[ pi] = pos;
+			m_posar[ pi] = wpos;
 			m_window[ pi] = ai;
-			m_isnew_bitset <<= 1;
-			m_isnew_bitset.set(0);
+			m_isnew_bitset.insert( 0, true);
 		}
 	}
 	m_windowsize = (m_evaluationType == MinWin) ? getMinWinSize() : getMaxWinSize();
@@ -130,32 +128,32 @@ bool PositionWindow::advance( const Index& advancepos)
 	// Change the position of the first element in the sliding window by the calculated size:
 	std::size_t idx = m_window[ 0];
 	PostingIteratorInterface* itr = m_itrar[ idx];
-	Index pos = m_posar[0] + skipsize;
+	Index apos = m_posar[0] + skipsize;
 
-	if (pos < advancepos)
+	if (apos < advancepos)
 	{
-		pos = advancepos;
+		apos = advancepos;
 	}
-	pos = itr ? itr->skipPos( pos) : 0;
-	if (pos)
+	apos = itr ? itr->skipPos( apos) : 0;
+	if (apos)
 	{
 		// Rearrange array to be sorted again by positions:
 		std::size_t pi = 0, pe = m_arsize;
-		for (++pi; pi != pe && m_posar[pi] < pos; ++pi)
+		for (++pi; pi != pe && m_posar[pi] < apos; ++pi)
 		{
 			m_posar[ pi-1] = m_posar[ pi];
 			m_window[ pi-1] = m_window[ pi];
 		}
-		m_posar[ pi-1] = pos;
+		m_posar[ pi-1] = apos;
 		m_window[ pi-1] = idx;
 
-		m_isnew_bitset >>= 1;					//... remove first bit
-		m_isnew_bitset.insert( pi-1);				//... insert new position bit
+		m_isnew_bitset.remove( 0);				//... remove first bit
+		m_isnew_bitset.insert( pi-1, true);			//... insert new position bit
 	}
 	else
 	{
 		// Remove first element:
-		m_isnew_bitset >>= 1;					//... remove first bit
+		m_isnew_bitset.remove( 0);				//... remove first bit
 		--m_arsize;
 		if (m_arsize)
 		{
@@ -189,12 +187,12 @@ bool PositionWindow::next()
 	return true;
 }
 
-bool PositionWindow::skip( const Index& pos)
+bool PositionWindow::skip( const Index& pos_)
 {
 	m_isnew_bitset.reset();
 	do
 	{
-		if (!advance( pos)) return false;
+		if (!advance( pos_)) return false;
 	}
 	while (!m_windowsize);
 	return true;

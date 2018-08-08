@@ -41,8 +41,15 @@
 		<ul>
 			<li><b>Status</b><br />Development status is <i>Alpha</i>.</li>
 			<li><b>License</b><br /><a href="https://www.mozilla.org/en-US/MPL/2.0/">MPL (Mozilla Public License) 2.0</a></li>
-			<li><b>Contact</b><br />Contact us by mail: contact <i>at</i> project <i>dash</i> strus <i>dot</i> net or follow us on twitter <a href="https://twitter.com/ProjectStrus">@ProjectStrus</a> or subscribe to the <a href="https://groups.google.com/forum/#!forum/project-strus">mailing list</a>.</li>
-			<li><b>Whiteboard</b><br />Take part in the development of <i>Strus</i> or just inform yourself what is going on and have a look at the <i>Strus</i> <a href="whiteboard.htm">whiteboard</a>.</li>
+			<li><b>Contact</b><br />Contact us by mail: <img src="email_contact.jpg" alt="contact at project dash strus dot net"/> or follow us on twitter <a href="https://twitter.com/ProjectStrus">@ProjectStrus</a> or subscribe to the <a href="https://groups.google.com/forum/#!forum/project-strus">mailing list</a>.</li>
+			<li><b>Roadmap</b><br /><br />
+				<ol>
+				<li>Reimplementation of the <a href="wikipediaToXML.html">Wikimedia to XML conversion</a></li>
+				<li>POS tagging of Wikipedia (with <i>SyntaxNet</i>/<i>TensorFlow</i>).</li>
+				<li>Rebuild Wikipedia demo search based on <i>strusWebService</i>.</li>
+				<li>Implement new core features: (a) Structure relations as operator, (b) Entropy value replacing ff</li>
+				</ol>
+			</li>
 		</ul>
 	</div>
 
@@ -73,16 +80,39 @@
 
 		<h2>Installation</h2>
 		<p class="description">
-		There is a short <a href="installation.htm">installation guide</a> on how to 
-		fetch the <i>Strus</i> sources from Github and build them on your own.
-		Support of packaging and docker images has been given up temporarily. 
-		We have to figure out what type of deployment and infrastructure we will actively support
-		in the future.
+		For installation see description files <b>INSTALL.&lt;platform.&gt;</b> in the top level directory of each project.
+		The descriptions of the project installations are intended to be self contained.
+		For example for <i>Ubuntu</i>: <a href="https://github.com/patrickfrey/strusBase/blob/master/INSTALL.Ubuntu.md">strusBase</a>,
+		<a href="https://github.com/patrickfrey/strus/blob/master/INSTALL.Ubuntu.md">strus</a>,
+		<a href="https://github.com/patrickfrey/strusAnalyzer/blob/master/INSTALL.Ubuntu.md">strusAnalyzer</a>,
+		<a href="https://github.com/patrickfrey/strusTrace/blob/master/INSTALL.Ubuntu.md">strusTrace</a>,
+		<a href="https://github.com/patrickfrey/strusModule/blob/master/INSTALL.Ubuntu.md">strusModule</a>,
+		<a href="https://github.com/patrickfrey/strusRpc/blob/master/INSTALL.Ubuntu.md">strusRpc</a>,
+		<a href="https://github.com/patrickfrey/strusVector/blob/master/INSTALL.Ubuntu.md">strusVector</a>,
+		<a href="https://github.com/patrickfrey/strusPattern/blob/master/INSTALL.Ubuntu.md">strusPattern</a>,
+		<a href="https://github.com/patrickfrey/strusUtilities/blob/master/INSTALL.Ubuntu.md">strusUtilities</a>,
+		<a href="https://github.com/patrickfrey/strusBindings/blob/master/INSTALL.Ubuntu.md">strusBindings</a>
+		and <a href="https://github.com/patrickfrey/strusAll/blob/master/INSTALL.Ubuntu.md">strusAll</a>.
+		</p>
+
+		<h2>Regular Builds</h2>
+		<p class="description">
+		The software is built regurarly on <a href="https://travis-ci.org/patrickfrey">Travis</a> (on commit of the master branch)
+		and on <a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">the OpenSUSE build cluster</a> (currently triggered manually).
 		</p>
 
 		<h2>Documentation</h2>
 		<p class="description">The documentation is work in progress.
 		What is available can be found <a href="documentation.htm">here</a>.
+		</p>
+		<h3>The inverted case of pattern matching</h3>
+		<p class="description">
+		The documentation for doing high performance pattern matching with many thousands of patterns 
+		can be found <a href="introduction_struspattern.htm">here</a>.
+		It allows you to define tokens with regular expressions in text and to define patterns with these tokens as alphabet.
+		With the help of <a href="https://01.org/hyperscan">Hyperscan</a> that builds one DFA for all regular expressions 
+		<i>StrusPattern</i> gets a competitive performance.
+		Approximative matching on Unicode strings with edit distance is also supported.
 		</p>
 
 		<h2>Story</h2>
@@ -95,8 +125,53 @@
 		<table>
 
 		<tr>
+		<td><p class="timestamp">July 12th, 2018</p></td>
+		<td><p class="newstext">The Wikimedia to XML conversion  has been rewritten and a better XML schema has been defined.
+		A documentation can be found <a href="wikipediaToXML.html">here</a>.
+		The program takes the Wikipedia XML dump and creates one XML file for every document.
+		The XML schema used tries to map the Wikipedia content in a way appropriate for information retrieval.
+		It is intended to be usable for other projects outside the strus context too.
+		Currently, The project <i>strusWikipediaSearch</i> is in an intermediate state and needs cleanup, but it should be
+		possible to build it.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">June 13th, 2018</p></td>
+		<td><p class="newstext">Some new bugs appeared in the Wikipedia demo search with the latest updates of the Python bindings.
+		Query terms with non ascii characters like umlauts are not normalized correctly anymore. Summarization seems also to be
+		broken, some characters on the tail of words are swallowed. We will fix these issues soon.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">May 15th, 2018</p></td>
+		<td><p class="newstext">The Wikipedia demo search has been updated and is running now with latest software.
+		The development of the <i>strusWebService</i> is ongoing.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Jan 3rd, 2018</p></td>
+		<td><p class="newstext">We reactivated the <a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">OpenSUSE builds</a>
+		and solved the issues related to the <a href="https://travis-ci.org/patrickfrey">Travis build</a>.
+		There are still some open issues in the <i>OpenSUSE</i> builds left, especially with the language bindings, but we intend to solve
+		them soon.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Nov 12th, 2017</p></td>
+		<td><p class="newstext">Improved language bindings based on <a href="https://github.com/patrickfrey/papuga">Papuga</a>.
+		Allowing now data structures to pass as classes with data members also for PHP7 and Python3 bindings.
+		Return value structures can be declared as structures with data members instead of returning them as dictionaries.
+		</p></td>
+		</tr>
+
+		<tr>
 		<td><p class="timestamp">Sep 26th, 2017</p></td>
-		<td><p class="newstext">The documentations of the language bindings for Lua, PHP7 and Python3 based on papuga are now available.
+		<td><p class="newstext">The documentations of the language bindings for Lua, PHP7 and Python3 based on
+		<a href="https://github.com/patrickfrey/papuga">Papuga</a> are available now.
 		Click on sidebar language logos.
 		</p></td>
 		</tr>
@@ -138,11 +213,7 @@
 		<td><p class="newstext">We are currently working on a replacement
 		of the language bindings. The Lua bindings are finished and PHP 7,Python 3.0
 		and other value typed scripting languages will follow soon.
-		An interface documentation (work in progress) can be found <a href="luaBindingsDoc.htm">here</a>.
-		The new language bindings will also cover requests in XML and JSON.
 		The previous version of the language bindings were a big obstacle and risk for further development.
-		The bindings are now based on a standalone project named "Papuga" (Polish word for parrot)
-		that will be also published soon.
 		</p></td>
 		</tr>
 

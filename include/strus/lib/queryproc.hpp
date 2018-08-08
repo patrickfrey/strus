@@ -19,10 +19,12 @@ class QueryProcessorInterface;
 class StorageClientInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class FileLocatorInterface;
 
 /// \brief Create a query processor with the functions and operators needed for query evaluation
 /// \return the allocated processor
-QueryProcessorInterface* createQueryProcessor( ErrorBufferInterface* errorhnd);
+QueryProcessorInterface* createQueryProcessor( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

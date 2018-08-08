@@ -8,9 +8,11 @@
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
+#include "leveldbErrorCode.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <memory>
@@ -21,7 +23,7 @@ using namespace strus;
 
 #define MODULENAME "DatabaseTransaction"
 
-DatabaseTransaction::DatabaseTransaction( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+DatabaseTransaction::DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
 	:m_conn(conn_),m_batch(),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
 {}
 
@@ -35,7 +37,7 @@ DatabaseCursorInterface* DatabaseTransaction::createCursor( const DatabaseOption
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
 		return new DatabaseCursor( m_conn, options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
@@ -74,7 +76,7 @@ void DatabaseTransaction::removeSubTree(
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
 
 		strus::local_ptr<leveldb::Iterator> itr( db->NewIterator( leveldb::ReadOptions()));
 		for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
@@ -94,7 +96,7 @@ bool DatabaseTransaction::commit()
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "commit");
+		if (!db) throw strus::runtime_error_ec( ErrorCodeOperationOrder, _TXT("called method '%s::%s' after close"), MODULENAME, "commit");
 
 		if (m_errorhnd->hasError())
 		{
@@ -107,7 +109,7 @@ bool DatabaseTransaction::commit()
 		if (!status.ok())
 		{
 			std::string statusstr( status.ToString());
-			m_errorhnd->report( _TXT( "error in commit when writing transaction batch: %s"), statusstr.c_str());
+			m_errorhnd->report( leveldbErrorCode(status), _TXT( "error in commit when writing transaction batch: %s"), statusstr.c_str());
 			return false;
 		}
 		m_batch.Clear();

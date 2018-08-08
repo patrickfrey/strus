@@ -31,6 +31,11 @@ public:
 			Numeric,		///< parameter specifies a numeric constant (NumericVariant type)
 			String			///< parameter specifies a string constant or enumeration item as string
 		};
+		static const char* typeName( Type i)
+		{
+			static const char* ar[] = {"Feature","Attribute","Metadata","Numeric","String",0};
+			return ar[i];
+		}
 
 		/// \brief Constructor
 		Parameter( const Type& type_, const std::string& name_, const std::string& text_, const std::string& domain_)
@@ -41,7 +46,9 @@ public:
 
 		/// \brief Get the type of the parameter
 		Type type() const			{return m_type;}
-		
+		/// \brief Get the type of the parameter as string
+		const char* typeName() const		{return typeName(m_type);}
+
 		/// \brief Get the name of the parameter
 		const std::string& name() const		{return m_name;}
 

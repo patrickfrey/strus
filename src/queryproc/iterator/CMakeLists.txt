@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(source_files
+set( source_files
 	iterator_standard.cpp
 	postingIteratorIntersect.cpp
 	postingIteratorUnion.cpp
@@ -21,6 +21,7 @@ set(source_files
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
+  "${Intl_INCLUDE_DIRS}"
   "${STRUS_INCLUDE_DIRS}"
   "${MAIN_SOURCE_DIR}/queryproc/iterator"
   "${MAIN_SOURCE_DIR}/queryproc/utils"
@@ -34,6 +35,8 @@ link_directories(
 # -------------------------------------
 # LIBRARY
 # -------------------------------------
+add_cppcheck( iterator_standard ${source_files} )
+
 add_library( iterator_standard STATIC ${source_files})
 target_link_libraries( iterator_standard strus_base )
 set_property( TARGET iterator_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )

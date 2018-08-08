@@ -28,7 +28,7 @@ public:
 
 	virtual int nofDocumentsInsertedChange();
 
-	virtual bool nextDfChange( DocumentFrequencyChange& rec);
+	virtual bool nextDfChange( TermStatisticsChange& rec);
 
 private:
 	const StatisticsHeader* m_hdr;

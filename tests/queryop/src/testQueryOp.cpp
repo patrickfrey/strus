@@ -8,18 +8,19 @@
 #include "strus/reference.hpp"
 #include "strus/lib/error.hpp"
 #include "strus/lib/queryproc.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/index.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include <string>
 #include <cstring>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <memory>
 
@@ -38,10 +39,10 @@ public:
 
 	virtual ~ErathosthenesSievePostingIterator(){}
 
-	virtual strus::Index skipDoc( const strus::Index& docno)
+	virtual strus::Index skipDoc( const strus::Index& docno_)
 	{
 		if (!m_divisor) return m_docno=0;
-		unsigned int lo = (unsigned int)docno >= (m_divisor*2) ? docno : (m_divisor*2);
+		unsigned int lo = (unsigned int)docno_ >= (m_divisor*2) ? docno_ : (m_divisor*2);
 		strus::Index rt = ((lo-1) / m_divisor) * m_divisor + m_divisor;
 		rt = (rt > m_maxdocno)?0:rt;
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -50,10 +51,10 @@ public:
 		return m_docno = rt;
 	}
 
-	virtual strus::Index skipDocCandidate( const strus::Index& docno)
+	virtual strus::Index skipDocCandidate( const strus::Index& docno_)
 	{
 		if (!m_divisor) return m_docno=0;
-		unsigned int lo = (unsigned int)docno >= (m_divisor*2) ? docno : (m_divisor*2);
+		unsigned int lo = (unsigned int)docno_ >= (m_divisor*2) ? docno_ : (m_divisor*2);
 		strus::Index rt = ((lo-1) / m_divisor) * m_divisor + m_divisor;
 		rt = (rt > m_maxdocno)?0:rt;
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -171,23 +172,24 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 				std::cout << "skipped (prime number): " << dn << std::endl;
 			}
 		}
-		strus::Index next_result = nextNonPrimeNumber( curr_docno);
-		if (next_result > maxno)
 		{
-			if (next_docno != 0)
+			strus::Index next_result = nextNonPrimeNumber( curr_docno);
+			if (next_result > maxno)
 			{
-				throw strus::runtime_error("unexpected document number in join: found %u != expected %u", next_docno, 0);
+				if (next_docno != 0)
+				{
+					throw strus::runtime_error("unexpected document number in join: found %u != expected %u", next_docno, 0);
+				}
 			}
-		}
-		else
-		{
-			if (next_docno != next_result)
+			else
 			{
-				throw strus::runtime_error("unexpected document number in join: found %u != expected %u", next_docno, next_result);
+				if (next_docno != next_result)
+				{
+					throw strus::runtime_error("unexpected document number in join: found %u != expected %u", next_docno, next_result);
+				}
 			}
+			curr_docno = next_docno?(next_docno+1):0;
 		}
-		curr_docno = next_docno?(next_docno+1):0;
-
 		strus::Index curr_posno = 0;
 		strus::Index next_posno = 0;
 		do
@@ -373,10 +375,12 @@ int main( int argc, const char* argv[])
 				return -1;
 			}
 		}
-		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 		if (!g_errorhnd) return -1;
-	
-		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( g_errorhnd);
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
+		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
+
+		strus::Reference<strus::QueryProcessorInterface> qpi = strus::createQueryProcessor( filelocator.get(), g_errorhnd);
 		if (!qpi.get())
 		{
 			throw strus::runtime_error("failed to create query processor instance");

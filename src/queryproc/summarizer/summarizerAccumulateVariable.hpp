@@ -14,13 +14,14 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/bitset.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "private/localStructAllocator.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 namespace strus
 {
@@ -55,6 +56,8 @@ class SummarizerFunctionContextAccumulateVariable
 	:public SummarizerFunctionContextInterface
 {
 public:
+	enum {MaxNofFeatures=128};
+
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] data_ parameter
@@ -96,12 +99,12 @@ private:
 	typedef LocalStructAllocator<std::pair<const Index,double> > PosWeightAllocator;
 	typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
 
-	strus::utils::BitSet getCandidateSet( const Index& docno);
-	PosWeightMap buildPosWeightMap( const strus::utils::BitSet& docsel);
+	std::vector<unsigned int> getCandidateSet( const Index& docno) const;
+	PosWeightMap buildPosWeightMap( const std::vector<unsigned int>& fsel);
 
 	std::vector<SummaryElement> getSummariesFromPosWeightMap( const PosWeightMap& posWeightMap);
 
-	void printPosWeights( std::ostream& out, const strus::utils::BitSet& docsel);
+	void printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel);
 
 private:
 	const StorageClientInterface* m_storage;			///< storage interface

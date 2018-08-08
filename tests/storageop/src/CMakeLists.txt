@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
 	"${Intl_INCLUDE_DIRS}"
 	"${MAIN_TESTS_DIR}/utils"
 	"${MAIN_SOURCE_DIR}/storage"
@@ -13,8 +13,9 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/queryeval"
 	"${MAIN_SOURCE_DIR}/queryproc"
 	"${MAIN_SOURCE_DIR}/utils"
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 add_executable( testStorageOp testStorageOp.cpp)

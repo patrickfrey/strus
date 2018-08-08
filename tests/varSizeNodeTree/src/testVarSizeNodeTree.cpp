@@ -7,8 +7,8 @@
  */
 #include "compactNodeTrie.hpp"
 #include "strus/index.hpp"
+#include "strus/base/numstring.hpp"
 #include "private/stringMap.hpp"
-#include "private/utils.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -18,6 +18,7 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 
 static void initRand()
 {
@@ -67,8 +68,8 @@ int main( int argc, const char** argv)
 		unsigned int nofQueries;
 		try
 		{
-			nofInserts = strus::utils::toint( argv[1]);
-			nofQueries = strus::utils::toint( argv[2]);
+			nofInserts = strus::numstring_conv::touint( argv[ 1], std::numeric_limits<int>::max());
+			nofQueries = strus::numstring_conv::touint( argv[ 2], std::numeric_limits<int>::max());
 		}
 		catch (const std::exception& e)
 		{
@@ -141,19 +142,19 @@ int main( int argc, const char** argv)
 		}
 		duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		std::cerr << "queried variable size node tree " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
-
-		TestMap::const_iterator
-			ti = testmap.begin(), te = testmap.end();
-
-		for (; ti != te; ++ti)
 		{
-			conotrie::CompactNodeTrie::NodeData val;
-			if (!origmap.get( ti->first, val))
+			TestMap::const_iterator
+				ti = testmap.begin(), te = testmap.end();
+	
+			for (; ti != te; ++ti)
 			{
-				throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
+				conotrie::CompactNodeTrie::NodeData val;
+				if (!origmap.get( ti->first, val))
+				{
+					throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
+				}
 			}
 		}
-
 		conotrie::CompactNodeTrie::const_iterator
 			oi = origmap.begin(), oe = origmap.end();
 		std::size_t oidx = 0;

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(source_files
+set( source_files
 	weighting_standard.cpp
 	weightingSmart.cpp
 	weightingScalar.cpp
@@ -15,7 +15,8 @@ set(source_files
 )
 
 include_directories(
-  "${Boost_INCLUDE_DIRS}"
+  ${Boost_INCLUDE_DIRS}
+  "${Intl_INCLUDE_DIRS}"
   "${STRUS_INCLUDE_DIRS}"
   "${MAIN_SOURCE_DIR}/queryproc/utils"
   "${MAIN_SOURCE_DIR}/queryproc/weighting"
@@ -23,7 +24,7 @@ include_directories(
 )
 
 link_directories(
-  "${Boost_LIBRARY_DIRS}"
+  ${Boost_LIBRARY_DIRS}
   "${MAIN_SOURCE_DIR}/utils"
   "${strusbase_LIBRARY_DIRS}"
 )
@@ -31,6 +32,8 @@ link_directories(
 # ------------------------------------
 # LIBRARY
 # ------------------------------------
+add_cppcheck( weighting_standard ${source_files} )
+
 add_library( weighting_standard STATIC ${source_files})
 target_link_libraries( weighting_standard strus_private_utils strus_base queryproc_utils )
 set_property( TARGET weighting_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )

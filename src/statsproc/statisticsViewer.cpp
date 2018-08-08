@@ -39,7 +39,7 @@ int StatisticsViewer::nofDocumentsInsertedChange()
 	return rt;
 }
 
-bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
+bool StatisticsViewer::nextDfChange( TermStatisticsChange& rec)
 {
 	try
 	{
@@ -97,7 +97,7 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 		{
 			increment = -increment;
 		}
-		rec = DocumentFrequencyChange( type, value, increment);
+		rec = TermStatisticsChange( type, value, increment);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message viewer fetching next df change: %s"), *m_errorhnd, false);
