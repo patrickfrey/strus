@@ -1011,10 +1011,25 @@ DLL_PUBLIC int strus::loadDocumentUserRightsAssignments(
 	}
 }
 
+static void parseVectorFeatureType( char const*& type, std::size_t& typesize, char const*& term, std::size_t& termsize, const char* item, std::size_t itemsize, char typeValueSeparator)
+{
+	type = term = item;
+	termsize = itemsize;
+	typesize = 0;
+	for (; typesize < termsize && type[ typesize] != typeValueSeparator; ++typesize){}
+	if (typesize == termsize)
+	{
+		throw strus::runtime_error( _TXT("value with not type but type/value separator specified"));
+	}
+	term = type + typesize + 1;
+	termsize -= typesize + 1;
+}
+
 static void loadVectorStorageVectors_word2vecBin( 
 		VectorStorageClientInterface* client,
 		const std::string& vectorfile,
 		bool networkOrder,
+		char typeValueSeparator,
 		ErrorBufferInterface* errorhnd)
 {
 	unsigned int linecnt = 0;
@@ -1077,6 +1092,12 @@ static void loadVectorStorageVectors_word2vecBin(
 			for (; si < se && (unsigned char)*si > 32; ++si){}
 			const char* term = linebuf;
 			std::size_t termsize = si - linebuf;
+			const char* type = linebuf;
+			std::size_t typesize = 0;
+			if (typeValueSeparator)
+			{
+				parseVectorFeatureType( type, typesize, term, termsize, term, termsize, typeValueSeparator);
+			}
 			++si;
 			if (si+vecsize*sizeof(float) > se)
 			{
@@ -1127,7 +1148,7 @@ static void loadVectorStorageVectors_word2vecBin(
 					throw strus::runtime_error( _TXT("illegal value in vector: %f %f"), *vi, len);
 				}
 			}
-			transaction->addFeature( std::string(term, termsize), vec);
+			transaction->defineVector( std::string( type, typesize), std::string( term, termsize), vec);
 			if (debugtrace)
 			{
 				std::string termstr( term, termsize);
@@ -1171,6 +1192,7 @@ static void loadVectorStorageVectors_word2vecBin(
 static void loadVectorStorageVectors_word2vecText( 
 		VectorStorageClientInterface* client,
 		const std::string& vectorfile,
+		char typeValueSeparator,
 		ErrorBufferInterface* errorhnd)
 {
 	unsigned int linecnt = 0;
@@ -1215,6 +1237,12 @@ static void loadVectorStorageVectors_word2vecText(
 			skipNonSpaces( si);
 			if (si) throw std::runtime_error( _TXT("unexpected end of file"));
 			termsize = si - term;
+			const char* type = term;
+			std::size_t typesize = 0;
+			if (typeValueSeparator)
+			{
+				parseVectorFeatureType( type, typesize, term, termsize, term, termsize, typeValueSeparator);
+			}
 			++si;
 			if (!skipSpaces(si)) throw std::runtime_error( _TXT("unexpected end of line"));
 			while (*si)
@@ -1244,7 +1272,7 @@ static void loadVectorStorageVectors_word2vecText(
 					throw strus::runtime_error( _TXT("illegal value in vector: %f %f"), *vi, len);
 				}
 			}
-			transaction->addFeature( std::string(term, termsize), vec);
+			transaction->defineVector( std::string( type, typesize), std::string( term, termsize), vec);
 			if (debugtrace)
 			{
 				std::string termstr( term, termsize);
@@ -1275,6 +1303,7 @@ DLL_PUBLIC bool strus::loadVectorStorageVectors(
 		VectorStorageClientInterface* client,
 		const std::string& vectorfile,
 		bool networkOrder,
+		char typeValueSeparator,
 		ErrorBufferInterface* errorhnd)
 {
 	char const* filetype = 0;
@@ -1283,12 +1312,12 @@ DLL_PUBLIC bool strus::loadVectorStorageVectors(
 		if (strus::isTextFile( vectorfile))
 		{
 			filetype = "word2vec text file";
-			loadVectorStorageVectors_word2vecText( client, vectorfile, errorhnd);
+			loadVectorStorageVectors_word2vecText( client, vectorfile, typeValueSeparator, errorhnd);
 		}
 		else
 		{
 			filetype = "word2vec binary file";
-			loadVectorStorageVectors_word2vecBin( client, vectorfile, networkOrder, errorhnd);
+			loadVectorStorageVectors_word2vecBin( client, vectorfile, networkOrder, typeValueSeparator, errorhnd);
 		}
 		return true;
 	}

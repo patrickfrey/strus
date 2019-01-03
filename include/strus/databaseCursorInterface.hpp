@@ -42,6 +42,8 @@ public:
 		/// \return the size
 		std::size_t size() const	{return m_size;}
 
+		/// \brief Return the data as a string
+		std::string tostring() const	{return std::string(m_ptr,m_size);}
 		/// \brief Cast of the data to a string
 		operator std::string() const	{return std::string(m_ptr,m_size);}
 		/// \brief Evaluate if the chunk is defined or a NULL reference

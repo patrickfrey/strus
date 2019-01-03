@@ -103,6 +103,7 @@ bool load_vectors(
 		VectorStorageClientInterface* vstorage,
 		const std::string& vectorfile,
 		bool networkOrder,
+		char typeValueSeparator,
 		ErrorBufferInterface* errorhnd);
 
 }//namespace

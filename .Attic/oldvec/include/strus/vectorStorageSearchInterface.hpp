@@ -9,7 +9,6 @@
 #ifndef _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/wordVector.hpp"
 #include "strus/vectorQueryResult.hpp"
 #include <vector>
 #include <limits>
@@ -27,8 +26,13 @@ public:
 	/// \brief Find all features that are within maximum simiarity distance of the model (or at least try to with best effort, if the model is probabilistic).
 	/// \param[in] vec vector to calculate the features from
 	/// \param[in] maxNofResults limits the number of results returned
-	/// \param[in] minSimilarity value between 0 and 1 specifying the minimum similarity a result should have
-	virtual std::vector<VectorQueryResult> findSimilar( const WordVector& vec, int maxNofResults, double minSimilarity) const=0;
+	virtual std::vector<VectorQueryResult> findSimilar( const std::vector<float>& vec, unsigned int maxNofResults) const=0;
+
+	/// \brief Find all features from a list of candidates that are within maximum simiarity distance of the model.
+	/// \param[in] candidates list of candidates to search in
+	/// \param[in] vec vector to calculate the features from
+	/// \param[in] maxNofResults limits the number of results returned
+	virtual std::vector<VectorQueryResult> findSimilarFromSelection( const std::vector<Index>& candidates, const std::vector<float>& vec, unsigned int maxNofResults) const=0;
 
 	/// \brief Explicit close of the database access, if database was used
 	/// \note this function is useful in interpreter context where a garbagge collection may delay the deletion of an object

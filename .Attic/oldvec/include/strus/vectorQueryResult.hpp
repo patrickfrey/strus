@@ -10,7 +10,6 @@
 #ifndef _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
 #define _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
 #include <limits>
-#include <string>
 
 namespace strus {
 
@@ -20,26 +19,34 @@ class VectorQueryResult
 public:
 	/// \brief Default constructor
 	VectorQueryResult()
-		:m_value(),m_weight(0.0){}
+		:m_featidx(0),m_weight(0.0){}
 	/// \brief Copy constructor
 	VectorQueryResult( const VectorQueryResult& o)
-		:m_value(o.m_value),m_weight(o.m_weight){}
+		:m_featidx(o.m_featidx),m_weight(o.m_weight){}
 	/// \brief Constructor
-	VectorQueryResult( const std::string& value_, double weight_)
-		:m_value(value_),m_weight(weight_){}
+	VectorQueryResult( const Index& featidx_, double weight_)
+		:m_featidx(featidx_),m_weight(weight_){}
 
-	const std::string& value() const	{return m_value;}
+	Index featidx() const			{return m_featidx;}
 	double weight() const			{return m_weight;}
 
-	bool operator < (const VectorQueryResult& o) const
+	void setWeight( double weight_)		{m_weight = weight_;}
+
+	bool operator < ( const VectorQueryResult& o) const
 	{
-		if (m_weight < o.m_weight) return true;
-		if (m_weight > o.m_weight) return true;
-		return m_value < o.m_value;
+		if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return true;
+		if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return false;
+		return m_featidx < o.m_featidx;
+	}
+	bool operator > ( const VectorQueryResult& o) const
+	{
+		if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return false;
+		if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return true;
+		return m_featidx > o.m_featidx;
 	}
 
 private:
-	std::string m_value;
+	Index m_featidx;
 	double m_weight;
 };
 

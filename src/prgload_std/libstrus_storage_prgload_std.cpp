@@ -103,6 +103,7 @@ DLL_PUBLIC bool strus::load_vectors(
 		VectorStorageClientInterface* vstorage,
 		const std::string& vectorfile,
 		bool networkOrder,
+		char typeValueSeparator,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -112,7 +113,7 @@ DLL_PUBLIC bool strus::load_vectors(
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return loadVectorStorageVectors( vstorage, vectorfile, networkOrder, errorhnd);
+		return loadVectorStorageVectors( vstorage, vectorfile, networkOrder, typeValueSeparator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading vectors: %s"), *errorhnd, -1);
 }
