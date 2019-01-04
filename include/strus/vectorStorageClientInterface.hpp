@@ -33,9 +33,8 @@ public:
 	/// \param[in] type type of the features to search for
 	/// \param[in] indexPart which part (index starting from 0) of nofParts pieces to build searcher for (possibility to split search into multiple instances/threads)
 	/// \param[in] nofParts how many parts exist (number starting from 1) to select with indexPart (possibility to split into multiple instances)
-	/// \param[in] realVecWeights true if to calculate the real vector weights and diffs for the best matches and not an approximate value derived from the LSH bits differing
 	/// \return the search interface (with ownership)
-	virtual VectorStorageSearchInterface* createSearcher( const std::string& type, int indexPart, int nofParts, bool realVecWeights) const=0;
+	virtual VectorStorageSearchInterface* createSearcher( const std::string& type, int indexPart, int nofParts) const=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface (with ownership)

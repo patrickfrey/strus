@@ -28,7 +28,8 @@ public:
 	/// \param[in] vec vector to calculate the features from
 	/// \param[in] maxNofResults limits the number of results returned
 	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
-	virtual std::vector<VectorQueryResult> findSimilar( const WordVector& vec, int maxNofResults, double minSimilarity) const=0;
+	/// \param[in] realVecWeights true if to calculate the real vector weights and diffs for the best matches and not an approximate value derived from the LSH bits differing
+	virtual std::vector<VectorQueryResult> findSimilar( const WordVector& vec, int maxNofResults, double minSimilarity, bool realVecWeights) const=0;
 
 	/// \brief Explicit close of the database access, if database was used
 	/// \note this function is useful in interpreter context where a garbagge collection may delay the deletion of an object
