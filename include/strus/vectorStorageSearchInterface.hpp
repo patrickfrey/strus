@@ -17,17 +17,17 @@
 
 namespace strus {
 
-/// \brief Interface to repository for vectors and a feature concept relation model previously created with a builder
+/// \brief Search interface to repository for vectors
 class VectorStorageSearchInterface
 {
 public:
 	/// \brief Destructor
 	virtual ~VectorStorageSearchInterface(){}
 
-	/// \brief Find all features that are within maximum simiarity distance of the model (or at least try to with best effort, if the model is probabilistic).
+	/// \brief Find all features that are within maximum simiarity distance.
 	/// \param[in] vec vector to calculate the features from
 	/// \param[in] maxNofResults limits the number of results returned
-	/// \param[in] minSimilarity value between 0 and 1 specifying the minimum similarity a result should have
+	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
 	virtual std::vector<VectorQueryResult> findSimilar( const WordVector& vec, int maxNofResults, double minSimilarity) const=0;
 
 	/// \brief Explicit close of the database access, if database was used

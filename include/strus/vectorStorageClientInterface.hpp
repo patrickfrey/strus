@@ -22,7 +22,7 @@ class VectorStorageTransactionInterface;
 /// \brief Forward declaration
 class ValueIteratorInterface;
 
-/// \brief Interface to a repository for vectors and a feature concept relation model previously created with a builder
+/// \brief Interface to a repository for vectors representing word embeddings
 class VectorStorageClientInterface
 {
 public:
@@ -44,7 +44,7 @@ public:
 
 	/// \brief Get the list of types defined
 	/// \return the list
-	virtual std::vector<std::string> getTypes() const=0;
+	virtual std::vector<std::string> types() const=0;
 
 	/// \brief Create an iterator on the feature values inserted
 	/// \return the iterator
@@ -53,11 +53,11 @@ public:
 	/// \brief Get the list of types assigned to a specific featureValue
 	/// \param[in] featureValue feature value to get the types assigned to
 	/// \return the list of types assigned to 'featureValue'
-	virtual std::vector<std::string> getFeatureTypes( const std::string& featureValue) const=0;
+	virtual std::vector<std::string> featureTypes( const std::string& featureValue) const=0;
 
-	/// \brief Get the number of feature values defined for a type
+	/// \brief Get the number of vectors defined for the features of a type
 	/// \param[in] type name of the type
-	/// \return the number of feature values and also the maximum number assigned to a feature (starting with 1)
+	/// \return the number of vectors
 	virtual int nofVectors( const std::string& type) const=0;
 
 	/// \brief Get the vector assigned to a feature value
@@ -66,7 +66,7 @@ public:
 	/// \return the vector assinged to this feature
 	virtual WordVector featureVector( const std::string& type, const std::string& featureValue) const=0;
 
-	/// \brief Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage
+	/// \brief Calculate a value between 0.0 and 1.0 representing the similarity of two vectors
 	/// \param[in] v1 first input vector
 	/// \param[in] v2 second input vector
 	/// \return the similarity measure
@@ -75,7 +75,7 @@ public:
 	/// \brief Calculate the normalized vector representation of the argument vector
 	virtual WordVector normalize( const WordVector& vec) const=0;
 
-	/// \brief Get the configuration of this model
+	/// \brief Get the configuration of this storage
 	/// \return the configuration string
 	virtual std::string config() const=0;
 

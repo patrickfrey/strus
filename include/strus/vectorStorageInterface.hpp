@@ -23,7 +23,7 @@ class VectorStorageDumpInterface;
 class DatabaseInterface;
 
 
-/// \brief Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way.
+/// \brief Interface for storing an retrieving vectors of floating point numbers representing word embeddings.
 class VectorStorageInterface
 {
 public:
@@ -31,7 +31,7 @@ public:
 	virtual ~VectorStorageInterface(){}
 
 	/// \brief Create a data repository for the data of a vector storage
-	/// \param[in] configsource configuration string of the model and the database (not a filename!)
+	/// \param[in] configsource configuration string of the storage and the database (not a filename!)
 	/// \param[in] database database type for the repository
 	/// \return true on success, false if an error occurred
 	virtual bool createStorage(
@@ -39,8 +39,8 @@ public:
 			const DatabaseInterface* database) const=0;
 
 	/// \brief Create a new vector storage client interface
-	/// \param[in] configsource configuration string of the model and the database (not a filename!)
-	/// \param[in] database database type of the persistent storage where to load the model data from
+	/// \param[in] configsource configuration string of the storage and the database (not a filename!)
+	/// \param[in] database database type of the persistent storage
 	/// \return the client interface (with ownership)
 	/// \remark The repository refered to by the configuration must exist and must have been built (-> createRepository)
 	virtual VectorStorageClientInterface* createClient(

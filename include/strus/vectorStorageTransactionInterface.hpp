@@ -24,14 +24,14 @@ public:
 
 	/// \brief Define a vector for a feature for later retrieval
 	/// \param[in] type of the feature associated with the vector
-	/// \param[in] name name of the feature associated with the vector
+	/// \param[in] feat name of the feature associated with the vector
 	/// \param[in] vec vector to define for this feature
-	virtual void defineVector( const std::string& type, const std::string& name, const WordVector& vec)=0;
+	virtual void defineVector( const std::string& type, const std::string& feat, const WordVector& vec)=0;
 
 	/// \brief Define a feature without vector
 	/// \param[in] type of the feature to add
-	/// \param[in] name name of the feature to add
-	virtual void defineFeature( const std::string& type, const std::string& name)=0;
+	/// \param[in] feat name of the feature to add
+	virtual void defineFeature( const std::string& type, const std::string& feat)=0;
 
 	/// \brief Define some scalar configuration parameter used in calculation (depending on implementation)
 	/// \param[in] name name of the variable (depending on implementation)
