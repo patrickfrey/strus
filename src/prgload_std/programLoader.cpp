@@ -1019,10 +1019,22 @@ static void parseVectorFeatureType( char const*& type, std::size_t& typesize, ch
 	for (; typesize < termsize && type[ typesize] != typeValueSeparator; ++typesize){}
 	if (typesize == termsize)
 	{
-		throw strus::runtime_error( _TXT("value with not type but type/value separator specified"));
+		if ((termsize == 4 && 0==std::memcmp( term, "</s>", termsize))
+		||  (termsize == 1 && (term[0] == '.' || term[0] == ',')))
+		{
+			typesize = 0;
+			type = "";
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("value with not type but type/value separator specified"));
+		}
 	}
-	term = type + typesize + 1;
-	termsize -= typesize + 1;
+	else
+	{
+		term = type + typesize + 1;
+		termsize -= typesize + 1;
+	}
 }
 
 static void loadVectorStorageVectors_word2vecBin( 
