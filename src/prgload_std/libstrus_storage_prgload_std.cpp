@@ -45,7 +45,7 @@ DLL_PUBLIC int strus::load_metadata_assignments(
 		const std::string& metadataName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -55,7 +55,7 @@ DLL_PUBLIC int strus::load_metadata_assignments(
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return loadDocumentMetaDataAssignments( storage, metadataName, attributemapref, file, commitsize, errorhnd);
+		return loadDocumentMetaDataAssignments( storage, metadataName, attributemapref, file, commitSize, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading metadata assignments: %s"), *errorhnd, -1);
 }
@@ -65,7 +65,7 @@ DLL_PUBLIC int strus::load_attribute_assignments(
 		const std::string& attributeName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -75,7 +75,7 @@ DLL_PUBLIC int strus::load_attribute_assignments(
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return loadDocumentAttributeAssignments( storage, attributeName, attributemapref, file, commitsize, errorhnd);
+		return loadDocumentAttributeAssignments( storage, attributeName, attributemapref, file, commitSize, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading attribute assignments: %s"), *errorhnd, -1);
 }
@@ -84,7 +84,7 @@ DLL_PUBLIC int strus::load_user_assignments(
 		StorageClientInterface& storage,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -94,7 +94,7 @@ DLL_PUBLIC int strus::load_user_assignments(
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return loadDocumentUserRightsAssignments( storage, attributemapref, file, commitsize, errorhnd);
+		return loadDocumentUserRightsAssignments( storage, attributemapref, file, commitSize, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading user right assignments: %s"), *errorhnd, -1);
 }
@@ -104,6 +104,7 @@ DLL_PUBLIC bool strus::load_vectors(
 		const std::string& vectorfile,
 		bool networkOrder,
 		char typeValueSeparator,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -113,7 +114,7 @@ DLL_PUBLIC bool strus::load_vectors(
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return loadVectorStorageVectors( vstorage, vectorfile, networkOrder, typeValueSeparator, errorhnd);
+		return loadVectorStorageVectors( vstorage, vectorfile, networkOrder, typeValueSeparator, commitSize, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading vectors: %s"), *errorhnd, -1);
 }

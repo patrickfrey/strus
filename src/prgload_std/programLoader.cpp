@@ -861,7 +861,7 @@ static unsigned int loadStorageValues(
 		const KeyDocnoMap* attributemapref,
 		const std::string& file,
 		StorageValueType valueType,
-		unsigned int commitsize,
+		unsigned int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	InputStream stream( file);
@@ -904,7 +904,7 @@ static unsigned int loadStorageValues(
 					rt += 1;
 				}
 			}
-			if (++commitcnt == commitsize)
+			if (++commitcnt == commitSize)
 			{
 				if (!transaction->commit())
 				{
@@ -943,12 +943,12 @@ DLL_PUBLIC int strus::loadDocumentMetaDataAssignments(
 		const std::string& metadataName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
 	{
-		return loadStorageValues( storage, metadataName, attributemapref, file, StorageValueMetaData, commitsize, errorhnd);
+		return loadStorageValues( storage, metadataName, attributemapref, file, StorageValueMetaData, commitSize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -968,12 +968,12 @@ DLL_PUBLIC int strus::loadDocumentAttributeAssignments(
 		const std::string& attributeName,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
 	{
-		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitsize, errorhnd);
+		return loadStorageValues( storage, attributeName, attributemapref, file, StorageValueAttribute, commitSize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -992,12 +992,12 @@ DLL_PUBLIC int strus::loadDocumentUserRightsAssignments(
 		StorageClientInterface& storage,
 		const std::multimap<std::string,strus::Index>* attributemapref,
 		const std::string& file,
-		int commitsize,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	try
 	{
-		return loadStorageValues( storage, std::string(), attributemapref, file, StorageUserRights, commitsize, errorhnd);
+		return loadStorageValues( storage, std::string(), attributemapref, file, StorageUserRights, commitSize, errorhnd);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1030,6 +1030,7 @@ static void loadVectorStorageVectors_word2vecBin(
 		const std::string& vectorfile,
 		bool networkOrder,
 		char typeValueSeparator,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	unsigned int linecnt = 0;
@@ -1077,6 +1078,12 @@ static void loadVectorStorageVectors_word2vecBin(
 			~charp_scope()			{if (ptr) std::free(ptr);}
 			char* ptr;
 		};
+		int nofVectors = 0;
+		int totalNofVectors = 0;
+		if (commitSize == 0)
+		{
+			commitSize = std::numeric_limits<int>::max();
+		}
 		enum {MaxIdSize = 2048};
 		std::size_t linebufsize = MaxIdSize + vecsize * sizeof(float);
 		char* linebuf = (char*)std::malloc( linebufsize);
@@ -1167,6 +1174,21 @@ static void loadVectorStorageVectors_word2vecBin(
 			{
 				throw strus::runtime_error(_TXT("end of line marker expected after binary vector instead of '%x'"), (unsigned int)(unsigned char)*si);
 			}
+			++totalNofVectors;
+			if (++nofVectors >= commitSize)
+			{
+				nofVectors = 0;
+				if (!transaction->commit())
+				{
+					throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+				}
+				transaction.reset( client->createTransaction());
+				if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
+				if (debugtrace)
+				{
+					if (debugtrace) debugtrace->event( "commit", "inserted vectors %d", totalNofVectors);
+				}
+			}
 			infile.read( linebuf, si - linebuf);
 			linesize = infile.readAhead( linebuf, linebufsize);
 		}
@@ -1178,9 +1200,16 @@ static void loadVectorStorageVectors_word2vecBin(
 		{
 			throw std::runtime_error( _TXT("collection size does not match"));
 		}
-		if (!transaction->commit())
+		if (nofVectors)
 		{
-			throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+			if (!transaction->commit())
+			{
+				throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+			}
+			if (debugtrace)
+			{
+				if (debugtrace) debugtrace->event( "commit", "inserted vectors %d", totalNofVectors);
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -1193,6 +1222,7 @@ static void loadVectorStorageVectors_word2vecText(
 		VectorStorageClientInterface* client,
 		const std::string& vectorfile,
 		char typeValueSeparator,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	unsigned int linecnt = 0;
@@ -1220,6 +1250,12 @@ static void loadVectorStorageVectors_word2vecText(
 			~charp_scope()			{if (ptr) std::free(ptr);}
 			char* ptr;
 		};
+		int nofVectors = 0;
+		int totalNofVectors = 0;
+		if (commitSize == 0)
+		{
+			commitSize = std::numeric_limits<int>::max();
+		}
 		char* linebuf = (char*)std::malloc( LineBufSize);
 		charp_scope linebuf_scope(linebuf);
 		const char* line = infile.readLine( linebuf, LineBufSize);
@@ -1283,14 +1319,36 @@ static void loadVectorStorageVectors_word2vecText(
 			{
 				throw strus::runtime_error(_TXT("add vector failed: %s"), errorhnd->fetchError());
 			}
+			++totalNofVectors;
+			if (++nofVectors >= commitSize)
+			{
+				nofVectors = 0;
+				if (!transaction->commit())
+				{
+					throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+				}
+				transaction.reset( client->createTransaction());
+				if (!transaction.get()) throw std::runtime_error( _TXT("create transaction failed"));
+				if (debugtrace)
+				{
+					if (debugtrace) debugtrace->event( "commit", "inserted vectors %d", totalNofVectors);
+				}
+			}
 		}
 		if (infile.error())
 		{
 			throw strus::runtime_error(_TXT("failed to read from word2vec file '%s': %s"), vectorfile.c_str(), ::strerror(infile.error()));
 		}
-		if (!transaction->commit())
+		if (nofVectors)
 		{
-			throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+			if (!transaction->commit())
+			{
+				throw strus::runtime_error(_TXT("vector storage transaction failed: %s"), errorhnd->fetchError());
+			}
+			if (debugtrace)
+			{
+				if (debugtrace) debugtrace->event( "commit", "inserted vectors %d", totalNofVectors);
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -1304,6 +1362,7 @@ DLL_PUBLIC bool strus::loadVectorStorageVectors(
 		const std::string& vectorfile,
 		bool networkOrder,
 		char typeValueSeparator,
+		int commitSize,
 		ErrorBufferInterface* errorhnd)
 {
 	char const* filetype = 0;
@@ -1312,12 +1371,12 @@ DLL_PUBLIC bool strus::loadVectorStorageVectors(
 		if (strus::isTextFile( vectorfile))
 		{
 			filetype = "word2vec text file";
-			loadVectorStorageVectors_word2vecText( client, vectorfile, typeValueSeparator, errorhnd);
+			loadVectorStorageVectors_word2vecText( client, vectorfile, typeValueSeparator, commitSize, errorhnd);
 		}
 		else
 		{
 			filetype = "word2vec binary file";
-			loadVectorStorageVectors_word2vecBin( client, vectorfile, networkOrder, typeValueSeparator, errorhnd);
+			loadVectorStorageVectors_word2vecBin( client, vectorfile, networkOrder, typeValueSeparator, commitSize, errorhnd);
 		}
 		return true;
 	}
