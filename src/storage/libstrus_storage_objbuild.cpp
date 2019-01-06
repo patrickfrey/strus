@@ -100,7 +100,7 @@ public:
 	}
 	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const
 	{
-		m_errorhnd->report( ErrorCodeNotFound, _TXT("unknown vector space model: '%s'"), name.c_str());
+		m_errorhnd->report( ErrorCodeNotFound, _TXT("unknown vector storage interface: '%s'"), name.c_str());
 		return 0;
 	}
 	virtual QueryEvalInterface* createQueryEval() const
