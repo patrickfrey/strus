@@ -71,6 +71,8 @@ public:
 
 	virtual std::string config() const;
 
+	virtual bool compactDatabase();
+
 	virtual void close();
 
 private:

@@ -186,6 +186,18 @@ bool DatabaseClient::readValue(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' readValue: %s"), MODULENAME, *m_errorhnd, false);
 }
 
+std::string DatabaseClient::config() const
+{
+	try
+	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "config");
+
+		return m_conn->config();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
+}
+
 void DatabaseClient::close()
 {
 	try
@@ -200,16 +212,20 @@ void DatabaseClient::close()
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' close: %s"), MODULENAME, *m_errorhnd);
 }
 
-std::string DatabaseClient::config() const
+
+bool DatabaseClient::compactDatabase()
 {
 	try
 	{
 		leveldb::DB* db = m_conn->db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "config");
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "compactDatabase");
 
-		return m_conn->config();
+		db->CompactRange( NULL, NULL);
+		db->CompactRange( NULL, NULL);
+		// ... has to be called twice, see https://github.com/google/leveldb/issues/227
+		return true;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, false);
 }
 
 
