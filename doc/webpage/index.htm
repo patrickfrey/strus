@@ -125,6 +125,22 @@
 		<table>
 
 		<tr>
+		<td><p class="timestamp">Jan 11th, 2019</p></td>
+		<td><p class="newstext">The vector storage interface for the representation of word embeddings (word2vec and friends) has been rewritten. 
+		Things that have been proven to be useless like the categorization of vectors have been dropped. The everlasting wish of information retrieval
+		to have a key to lookup things persuaded me again, even decades after learning that this never works, to try to force a concept of 
+		similarity that is not transitive into an equivalence relation that is transitive.
+		Though it had some catchy aspects to learn centroid LSH values to represent classes with a genetic algorithm, it was pure stupidity.
+		Instead of classes as the result of a categorysation, a typing of features has been introduced to allow searches of different classes 
+		in the same vector space (verbs,nouns,paragraphs,etc.).
+		Furthermore some issues have been solved in the travis build (papuga,strusBindings,strusAll). There are some problems with the OSX build
+		of the strusVector project. No clue how to get an armadillo library with working norm_dot function. Therefore strusVector has been taken
+		out as dependency from the travis build of projects that may use it (strusUtilities,strusBindings,strusAll). This cleaning up is currently
+		work in progress.
+		</p></td>
+		</tr>
+
+		<tr>
 		<td><p class="timestamp">Dec 7th, 2018</p></td>
 		<td><p class="newstext">Though it's obviously not perfect yet, <a href="wikipediaPosTagging.html">POS tagging</a> gets closer to beeing usable.
 		<a href="wikipediaExampleXML_POS.html">Here</a> you find an example document.
