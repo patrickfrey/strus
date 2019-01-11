@@ -133,7 +133,7 @@ void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const 
 
 bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
-	return m_memberar.size() + nofstructures <= std::numeric_limits<short>::max();
+	return m_memberar.size() + nofstructures <= (std::size_t)std::numeric_limits<short>::max();
 }
 
 StructBlock StructBlockBuilder::createBlock() const
