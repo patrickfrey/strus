@@ -8,15 +8,13 @@
 /// \brief Client interface for mapping vectors of floating point numbers of a given dimension to a list of features.
 #ifndef _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
 #include "strus/wordVector.hpp"
+#include "strus/vectorQueryResult.hpp"
 #include <vector>
 #include <string>
 
 namespace strus {
 
-/// \brief Forward declaration
-class VectorStorageSearchInterface;
 /// \brief Forward declaration
 class VectorStorageTransactionInterface;
 /// \brief Forward declaration
@@ -29,12 +27,18 @@ public:
 	/// \brief Destructor
 	virtual ~VectorStorageClientInterface(){}
 
-	/// \brief Create a search interface for scanning the vectors for similarity to a vector
+	/// \brief Prepare datastructures for calling findSimilar( const WordVector&, int,double,bool)const'
+	/// \remark This method does not have to be called, because the structures for search are built implicitely on the first search. It just avoids a massive delay on the first call of find similar.
 	/// \param[in] type type of the features to search for
-	/// \param[in] indexPart which part (index starting from 0) of nofParts pieces to build searcher for (possibility to split search into multiple instances/threads)
-	/// \param[in] nofParts how many parts exist (number starting from 1) to select with indexPart (possibility to split into multiple instances)
-	/// \return the search interface (with ownership)
-	virtual VectorStorageSearchInterface* createSearcher( const std::string& type, int indexPart, int nofParts) const=0;
+	virtual void prepareSearch( const std::string& type)=0;
+
+	/// \brief Find all features that are within maximum simiarity distance.
+	/// \param[in] type type of the features to search for
+	/// \param[in] vec vector to search similar features of
+	/// \param[in] maxNofResults limits the number of results returned
+	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
+	/// \param[in] realVecWeights true if to calculate the real vector weights and diffs for the best matches and not an approximate value (e.g. the similarity estimation derived from the LSH bits differing)
+	virtual std::vector<VectorQueryResult> findSimilar( const std::string& type, const WordVector& vec, int maxNofResults, double minSimilarity, bool realVecWeights) const=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface (with ownership)
