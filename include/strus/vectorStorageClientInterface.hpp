@@ -10,6 +10,7 @@
 #define _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/wordVector.hpp"
 #include "strus/vectorQueryResult.hpp"
+#include "strus/vectorSearchStatistics.hpp"
 #include <vector>
 #include <string>
 
@@ -39,6 +40,13 @@ public:
 	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
 	/// \param[in] realVecWeights true if to calculate the real vector weights and diffs for the best matches and not an approximate value (e.g. the similarity estimation derived from the LSH bits differing)
 	virtual std::vector<VectorQueryResult> findSimilar( const std::string& type, const WordVector& vec, int maxNofResults, double minSimilarity, bool realVecWeights) const=0;
+
+	/// \brief Find all features that are within maximum simiarity distance and provide some statistics to analyze search performance.
+	/// \param[in] type type of the features to search for
+	/// \param[in] vec vector to search similar features of
+	/// \param[in] maxNofResults limits the number of results returned
+	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
+	virtual VectorSearchStatistics findSimilarWithStats( const std::string& type, const WordVector& vec, int maxNofResults, double minSimilarity) const=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface (with ownership)

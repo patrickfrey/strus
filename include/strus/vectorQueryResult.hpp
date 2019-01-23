@@ -5,16 +5,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Result of a closest vector search
+/// \brief Result of a vector similarity search
 /// \file "vectorQueryResult.hpp"
 #ifndef _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
 #define _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
-#include <limits>
 #include <string>
 
 namespace strus {
 
-/// \brief Result of a vector search (associated feature number with weight)
+/// \brief Result of a vector similarity search (associated feature value with weight)
 class VectorQueryResult
 {
 public:
