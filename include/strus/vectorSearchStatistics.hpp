@@ -54,6 +54,7 @@ public:
 	VectorSearchStatistics( const std::vector<Item>& items_, const std::vector<VectorQueryResult>& results_)
 		:m_items(items_),m_results(results_){}
 #if __cplusplus >= 201103L
+	VectorSearchStatistics( std::vector<Item>&& items_, std::vector<VectorQueryResult>&& results_) :m_items(std::move(items_)),m_results(std::move(results_)) {}
 	VectorSearchStatistics( VectorSearchStatistics&& o) :m_items(std::move(o.m_items)),m_results(std::move(o.m_results)) {}
 	VectorSearchStatistics& operator=( VectorSearchStatistics&& o) {m_items=std::move(o.m_items); m_results=std::move(o.m_results); return *this;}
 #endif
