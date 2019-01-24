@@ -1,3 +1,13 @@
+strus (0.17.0-1) unstable; urgency=low
+  * rewrote vector storage interface
+  * improved performace of ranking list (select and sort best N)
+  * added new method compactDatabase to database client interface for explicit cleanup and compaction
+  * implemented structures (with own storage block type) and structure iterators for weighting (test still missing, therefore this feature does not exist yet)
+  * reorganized posinfo block code
+  * rewrote relocation of resources based on the new file locator interface in strusBase
+  * replaced some low level debug macros with debug trace calls
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 24 Jan 2019 07:30:00 +0100
+
 strus (0.16.0-1) unstable; urgency=low
   * change handling of gettext to avoid warning: return a const char* 
   * make use of debug interface in strus base instead of low level debug defines
