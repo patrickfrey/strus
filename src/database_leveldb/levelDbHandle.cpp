@@ -82,6 +82,8 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	}
 	// Do compaction, if state of db was closed previously without:
 	m_db->CompactRange( NULL, NULL);
+	m_db->CompactRange( NULL, NULL);
+	// ... has to be called twice, see https://github.com/google/leveldb/issues/227
 }
 
 std::string LevelDbHandle::config() const

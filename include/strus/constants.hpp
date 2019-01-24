@@ -86,6 +86,11 @@ struct Constants
 	{
 		return "analyzer_pattern";
 	}
+	/// \brief Get the default type feature separator in a word2vec vector file (where you have only a single identifier describing the item)
+	static char standard_word2vec_type_feature_separator()
+	{
+		return '#';
+	}
 };
 
 }//namespace

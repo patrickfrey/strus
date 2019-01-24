@@ -75,13 +75,18 @@ public:
 			std::string& value,
 			const DatabaseOptions& options) const=0;
 
-	/// \brief Close client connection and eventually do some cleanup.
-	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
-	virtual void close()=0;
-
 	/// \brief Get the interpreted configuration this database client was created with
 	/// \return the configuration as string
 	virtual std::string config() const=0;
+
+	/// \brief Compact database structures for faster read access after the first open
+	/// \note Calling this method speeds up the first open for some database implementations like LevelDB after big inserts.
+	/// \remark This method does not have to be called, it is automatically called on the first open. It may last some minutes for larger databases.
+	virtual bool compactDatabase()=0;
+
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
+	virtual void close()=0;
 };
 
 }//namespace

@@ -1155,6 +1155,7 @@ void StorageClient::close()
 		storeVariables();
 	}
 	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage client: %s"), *m_errorhnd);
+	m_database->compactDatabase();
 	m_database->close();
 	m_close_called = true;
 }

@@ -23,7 +23,7 @@ class VectorStorageDumpInterface;
 class DatabaseInterface;
 
 
-/// \brief Interface for storing an retrieving vectors of floating point numbers representing word embeddings.
+/// \brief Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way.
 class VectorStorageInterface
 {
 public:
@@ -31,7 +31,7 @@ public:
 	virtual ~VectorStorageInterface(){}
 
 	/// \brief Create a data repository for the data of a vector storage
-	/// \param[in] configsource configuration string of the storage and the database (not a filename!)
+	/// \param[in] configsource configuration string of the model and the database (not a filename!)
 	/// \param[in] database database type for the repository
 	/// \return true on success, false if an error occurred
 	virtual bool createStorage(
@@ -39,8 +39,8 @@ public:
 			const DatabaseInterface* database) const=0;
 
 	/// \brief Create a new vector storage client interface
-	/// \param[in] configsource configuration string of the storage and the database (not a filename!)
-	/// \param[in] database database type of the persistent storage
+	/// \param[in] configsource configuration string of the model and the database (not a filename!)
+	/// \param[in] database database type of the persistent storage where to load the model data from
 	/// \return the client interface (with ownership)
 	/// \remark The repository refered to by the configuration must exist and must have been built (-> createRepository)
 	virtual VectorStorageClientInterface* createClient(
@@ -50,10 +50,20 @@ public:
 	/// \brief Create a dump of the contents of a vector storage
 	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by the vector storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
 	/// \return the object to fetch the dump from
 	virtual VectorStorageDumpInterface* createDump(
 			const std::string& configsource,
-			const DatabaseInterface* database) const=0;
+			const DatabaseInterface* database,
+			const std::string& keyprefix) const=0;
+
+	/// \brief Run a storage data build command, grouping features to concepts etc.
+	/// \param[in] commands source with some commands to execute
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by the vector storage
+	/// \return true on success, false on error
+	/// \note This interface is intrusive, we are not happy with it at all
+	virtual bool runBuild( const std::string& commands, const std::string& configsource, const DatabaseInterface* database) const=0;
 };
 
 }//namespace

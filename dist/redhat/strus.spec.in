@@ -382,7 +382,19 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Jan 24 2019 Patrick Frey <patrickpfrey@yahoo.com> 0.17.0-0.1
+- rewrote vector storage interface
+- improved performace of ranking list (select and sort best N)
+- added new method compactDatabase to database client interface for explicit cleanup and compaction
+- implemented structures (with own storage block type) and structure iterators for weighting (test still missing, therefore this feature does not exist yet)
+- reorganized posinfo block code
+- rewrote relocation of resources based on the new file locator interface in strusBase
+- replaced some low level debug macros with debug trace calls
+
 * Fri May 11 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.16.0-0.1
+- change handling of gettext to avoid warning: return a const char* 
+- make use of debug interface in strus base instead of low level debug defines
+- moved pseudo random number generator to strus base
 
 * Thu Mar 15 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.15.7-0.1
 - added make target cppcheck for static code analysis

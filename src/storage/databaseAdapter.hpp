@@ -185,7 +185,7 @@ public:
 		Cursor( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( KeyPrefix, database_){}
 		Cursor( const Cursor& o)
-			:Cursor(o){}
+			:DatabaseAdapter_StringIndex::Cursor(o){}
 	};
 	class Reader
 		:public DatabaseAdapter_StringIndex::Reader
@@ -194,7 +194,7 @@ public:
 		Reader( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
 		Reader( const Reader& o)
-			:Reader(o){}
+			:DatabaseAdapter_StringIndex::Reader(o){}
 	};
 	class Writer
 		:public DatabaseAdapter_StringIndex::Writer
@@ -203,7 +203,7 @@ public:
 		Writer( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
 		Writer( const Writer& o)
-			:Writer(o){}
+			:DatabaseAdapter_StringIndex::Writer(o){}
 	};
 	class ReadWriter
 		:public Reader

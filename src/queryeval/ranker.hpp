@@ -14,6 +14,7 @@
 #include <set>
 #include <vector>
 #include <cstring>
+#include <limits>
 
 namespace strus
 {
@@ -103,6 +104,17 @@ private:
 		{
 			m_brute_ar[ m_brute_index[ 0] = 0] = doc;
 		}
+		else if (doc < lastRank())
+		{
+			if (m_nofRanks < m_maxNofRanks)
+			{
+				bruteInsert_at( m_nofRanks, doc);
+			}
+			else
+			{
+				return;
+			}
+		}
 		else
 		{
 			std::size_t first = 0;
@@ -153,6 +165,14 @@ private:
 			rt.push_back( m_brute_ar[ m_brute_index[ ridx]]);
 		}
 		return rt;
+	}
+
+	const WeightedDocument& lastRank() const
+	{
+		static const WeightedDocument emptyRank( 0, std::numeric_limits<double>::max());
+		if (m_nofRanks == 0) return emptyRank;
+		std::size_t lastElemIdx = (m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks) -1;
+		return m_brute_ar[ m_brute_index[ lastElemIdx]];
 	}
 
 private:

@@ -9,7 +9,6 @@
 #ifndef _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/wordVector.hpp"
 #include <vector>
 #include <string>
 namespace strus {
@@ -22,26 +21,18 @@ public:
 	/// \brief Destructor
 	virtual ~VectorStorageTransactionInterface(){}
 
-	/// \brief Define a vector for a feature for later retrieval
-	/// \param[in] type of the feature associated with the vector
-	/// \param[in] feat name of the feature associated with the vector
-	/// \param[in] vec vector to define for this feature
-	virtual void defineVector( const std::string& type, const std::string& feat, const WordVector& vec)=0;
+	/// \brief Add a feature to the repository for later retrieval
+	/// \param[in] name name of the feature associated with the vector to add
+	/// \param[in] vec vector to add
+	virtual void addFeature( const std::string& name, const std::vector<float>& vec)=0;
 
-	/// \brief Define a feature without vector
-	/// \param[in] type of the feature to add
-	/// \param[in] feat name of the feature to add
-	virtual void defineFeature( const std::string& type, const std::string& feat)=0;
+	/// \brief Define a relation element 
+	/// \param[in] conceptClass name of the concept class to distiguish different relations
+	/// \param[in] featidx index of the feature (see 'VectorStorageClientInterface::featureIndex( const std::string&) const')
+	/// \param[in] conidx index of the concept
+	virtual void defineFeatureConceptRelation( const std::string& conceptClass, const Index& featidx, const Index& conidx)=0;
 
-	/// \brief Define some scalar configuration parameter used in calculation (depending on implementation)
-	/// \param[in] name name of the variable (depending on implementation)
-	/// \param[in] value value assigned to the variable
-	virtual void defineScalar( const std::string& name, double value)=0;
-
-	/// \brief Clear all vectors,types and feature names in the storage
-	virtual void clear()=0;
-
-	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const WordVector&) till now
+	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const std::vector<float>&) till now
 	/// \return true on success, false if failed
 	virtual bool commit()=0;
 

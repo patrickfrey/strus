@@ -242,6 +242,7 @@ public:
 	/// \brief Close client connection and eventually do some cleanup.
 	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
 	/// \note the method does not have to be called necessarily
+	/// \note it calls compactDatabase of the underlying database and can therefore last some time (some minutes in case of leveldb after large inserts).
 	virtual void close()=0;
 };
 

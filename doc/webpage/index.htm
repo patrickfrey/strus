@@ -45,7 +45,7 @@
 			<li><b>Roadmap</b><br /><br />
 				<ol>
 				<li>Reimplementation of the <a href="wikipediaToXML.html">Wikimedia to XML conversion</a></li>
-				<li>POS tagging of Wikipedia (with <i>SyntaxNet</i>/<i>TensorFlow</i>).</li>
+				<li><a href="http://www.project-strus.net/wikipediaPosTagging.html">POS tagging of Wikipedia for information retrieval</a></li>
 				<li>Rebuild Wikipedia demo search based on <i>strusWebService</i>.</li>
 				<li>Implement new core features: (a) Structure relations as operator, (b) Entropy value replacing ff</li>
 				</ol>
@@ -123,6 +123,44 @@
 
 		<h2>News</h2>
 		<table>
+
+		<tr>
+		<td><p class="timestamp">Jan 11th, 2019</p></td>
+		<td><p class="newstext">The vector storage interface for the representation of word embeddings (word2vec and friends) has been rewritten. 
+		Things that have been proven to be useless like the categorization of vectors have been dropped. 
+		Some issues have been solved in the travis build. There are still some problems with the OSX build of the strusVector project.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Dec 7th, 2018</p></td>
+		<td><p class="newstext">Though it's obviously not perfect yet, <a href="wikipediaPosTagging.html">POS tagging</a> gets closer to beeing usable.
+		<a href="wikipediaExampleXML_POS.html">Here</a> you find an example document.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Nov 25th, 2018</p></td>
+		<td><p class="newstext">Documentation about the POS tagging is available <a href="wikipediaPosTagging.html">here</a>.
+		It is work in progress and therefore not complete yet.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Oct 24th, 2018</p></td>
+		<td><p class="newstext">I gave up the idea to use <i>Tensorflow/Syntaxnet</i> for POS tagging of the Wikipedia collection 
+		and switched back to NLTK. I was not able to get a processing rate I needed with the hardware I have using <i>Tensorflow/Syntaxnet</i>.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Aug 16th, 2018</p></td>
+		<td><p class="newstext">The Wikimedia to XML conversion is working and decent.
+		Structures for retrieval have been implemented. Also POS (part of speech) tagging and the dedicated machine for Tensorflow.
+		Development will be shut down till mid of September. I will be on a longer vacation.
+		The next step will be the POS tagging of the collection.
+		</p></td>
+		</tr>
 
 		<tr>
 		<td><p class="timestamp">July 12th, 2018</p></td>

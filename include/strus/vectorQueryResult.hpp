@@ -5,48 +5,40 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Result of a closest vector search
+/// \brief Result of a vector similarity search
 /// \file "vectorQueryResult.hpp"
 #ifndef _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
 #define _STRUS_VECTOR_QUERY_RESULT_HPP_INCLUDED
-#include <limits>
+#include <string>
 
 namespace strus {
 
-/// \brief Result of a vector search (associated feature number with weight)
+/// \brief Result of a vector similarity search (associated feature value with weight)
 class VectorQueryResult
 {
 public:
 	/// \brief Default constructor
 	VectorQueryResult()
-		:m_featidx(0),m_weight(0.0){}
+		:m_value(),m_weight(0.0){}
 	/// \brief Copy constructor
 	VectorQueryResult( const VectorQueryResult& o)
-		:m_featidx(o.m_featidx),m_weight(o.m_weight){}
+		:m_value(o.m_value),m_weight(o.m_weight){}
 	/// \brief Constructor
-	VectorQueryResult( const Index& featidx_, double weight_)
-		:m_featidx(featidx_),m_weight(weight_){}
+	VectorQueryResult( const std::string& value_, double weight_)
+		:m_value(value_),m_weight(weight_){}
 
-	Index featidx() const			{return m_featidx;}
+	const std::string& value() const	{return m_value;}
 	double weight() const			{return m_weight;}
 
-	void setWeight( double weight_)		{m_weight = weight_;}
-
-	bool operator < ( const VectorQueryResult& o) const
+	bool operator < (const VectorQueryResult& o) const
 	{
-		if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return true;
-		if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return false;
-		return m_featidx < o.m_featidx;
-	}
-	bool operator > ( const VectorQueryResult& o) const
-	{
-		if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return false;
-		if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return true;
-		return m_featidx > o.m_featidx;
+		if (m_weight < o.m_weight) return true;
+		if (m_weight > o.m_weight) return true;
+		return m_value < o.m_value;
 	}
 
 private:
-	Index m_featidx;
+	std::string m_value;
 	double m_weight;
 };
 
