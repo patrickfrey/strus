@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -66,7 +66,7 @@
 </div><!--header-->
 <div class="contents">
 
-<p>Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way.  
+<p>Interface for storing an retrieving vectors of floating point numbers representing word embeddings.  
  <a href="classstrus_1_1VectorStorageInterface.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="vectorStorageInterface_8hpp_source.html">vectorStorageInterface.hpp</a>&gt;</code></p>
@@ -83,16 +83,13 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1VectorStorageClientInterface.html">VectorStorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageInterface.html#a3cfeecba2cdaa84b200e16456262f064">createClient</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database) const =0</td></tr>
 <tr class="memdesc:a3cfeecba2cdaa84b200e16456262f064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new vector storage client interface.  <a href="#a3cfeecba2cdaa84b200e16456262f064">More...</a><br/></td></tr>
 <tr class="separator:a3cfeecba2cdaa84b200e16456262f064"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19f297e87af127571637055929fefe26"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1VectorStorageDumpInterface.html">VectorStorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageInterface.html#a19f297e87af127571637055929fefe26">createDump</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database, const std::string &amp;keyprefix) const =0</td></tr>
-<tr class="memdesc:a19f297e87af127571637055929fefe26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the contents of a vector storage.  <a href="#a19f297e87af127571637055929fefe26">More...</a><br/></td></tr>
-<tr class="separator:a19f297e87af127571637055929fefe26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6675533c5cde48840911fa039789d65b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageInterface.html#a6675533c5cde48840911fa039789d65b">runBuild</a> (const std::string &amp;commands, const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database) const =0</td></tr>
-<tr class="memdesc:a6675533c5cde48840911fa039789d65b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a storage data build command, grouping features to concepts etc.  <a href="#a6675533c5cde48840911fa039789d65b">More...</a><br/></td></tr>
-<tr class="separator:a6675533c5cde48840911fa039789d65b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6b7cb03bd15038f2b478e1a179f7d79"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1VectorStorageDumpInterface.html">VectorStorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageInterface.html#ac6b7cb03bd15038f2b478e1a179f7d79">createDump</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database) const =0</td></tr>
+<tr class="memdesc:ac6b7cb03bd15038f2b478e1a179f7d79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the contents of a vector storage.  <a href="#ac6b7cb03bd15038f2b478e1a179f7d79">More...</a><br/></td></tr>
+<tr class="separator:ac6b7cb03bd15038f2b478e1a179f7d79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way. </p>
+<div class="textblock"><p>Interface for storing an retrieving vectors of floating point numbers representing word embeddings. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="afadb9fcaadd4213dd0f4f44a89e6a5ba"></a>
 <div class="memitem">
@@ -155,8 +152,8 @@ Public Member Functions</h2></td></tr>
 <p>Create a new vector storage client interface. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration string of the model and the database (not a filename!) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>database type of the persistent storage where to load the model data from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration string of the storage and the database (not a filename!) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>database type of the persistent storage </td></tr>
   </table>
   </dd>
 </dl>
@@ -165,7 +162,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a19f297e87af127571637055929fefe26"></a>
+<a class="anchor" id="ac6b7cb03bd15038f2b478e1a179f7d79"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -182,13 +179,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
-          <td class="paramname"><em>database</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>keyprefix</em>&#160;</td>
+          <td class="paramname"><em>database</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -208,7 +199,6 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage and the database (not a filename !) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by the vector storage </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">keyprefix</td><td>prefix for keys to resrict the dump to </td></tr>
   </table>
   </dd>
 </dl>
@@ -251,64 +241,12 @@ Public Member Functions</h2></td></tr>
 <p>Create a data repository for the data of a vector storage. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration string of the model and the database (not a filename!) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration string of the storage and the database (not a filename!) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>database type for the repository </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true on success, false if an error occurred </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a6675533c5cde48840911fa039789d65b"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual bool strus::VectorStorageInterface::runBuild </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>commands</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>configsource</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
-          <td class="paramname"><em>database</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Run a storage data build command, grouping features to concepts etc. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">commands</td><td>source with some commands to execute </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage and the database (not a filename !) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by the vector storage </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>true on success, false on error </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>This interface is intrusive, we are not happy with it at all </dd></dl>
 
 </div>
 </div>
@@ -319,7 +257,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

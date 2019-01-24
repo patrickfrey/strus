@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -91,49 +91,51 @@
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                <span class="keyword">const</span> std::string&amp; source,</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                ErrorBufferInterface* errorhnd);</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a826644c097b67f57d0664c113afca822">load_metadata_assignments</a>(</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a64b825b83c1a3bdaa80b7f46b36abb05">load_metadata_assignments</a>(</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                StorageClientInterface&amp; storage,</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                <span class="keyword">const</span> std::string&amp; metadataName,</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                <span class="keyword">const</span> std::multimap&lt;std::string,strus::Index&gt;* attributemapref,</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                <span class="keyword">const</span> std::string&amp; file,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="keywordtype">int</span> commitsize,</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="keywordtype">int</span> commitSize,</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                ErrorBufferInterface* errorhnd);</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a271f7c72c5df17dce1833b3407a38731">load_attribute_assignments</a>(</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a053af17585ab33655942384b718fe732">load_attribute_assignments</a>(</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                StorageClientInterface&amp; storage,</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                <span class="keyword">const</span> std::string&amp; attributeName,</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                <span class="keyword">const</span> std::multimap&lt;std::string,strus::Index&gt;* attributemapref,</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                <span class="keyword">const</span> std::string&amp; file,</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="keywordtype">int</span> commitsize,</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="keywordtype">int</span> commitSize,</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                ErrorBufferInterface* errorhnd);</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a76f182d653b8ac1672c6ab778beef577">load_user_assignments</a>(</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keywordtype">int</span> <a class="code" href="namespacestrus.html#a8e307a45febe74442fdd6f53098e3995">load_user_assignments</a>(</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                StorageClientInterface&amp; storage,</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                <span class="keyword">const</span> std::multimap&lt;std::string,strus::Index&gt;* attributemapref,</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                <span class="keyword">const</span> std::string&amp; file,</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                <span class="keywordtype">int</span> commitsize,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                <span class="keywordtype">int</span> commitSize,</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                ErrorBufferInterface* errorhnd);</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespacestrus.html#a4b9459b5326c99c8bca2a8e449b90c13">load_vectors</a>( </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                VectorStorageClientInterface* vstorage,</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                <span class="keyword">const</span> std::string&amp; vectorfile,</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                <span class="keywordtype">bool</span> networkOrder,</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                ErrorBufferInterface* errorhnd);</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="namespacestrus_html_a76f182d653b8ac1672c6ab778beef577"><div class="ttname"><a href="namespacestrus.html#a76f182d653b8ac1672c6ab778beef577">strus::load_user_assignments</a></div><div class="ttdeci">int load_user_assignments(StorageClientInterface &amp;storage, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitsize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some user rights assignments for a storage from a stream. </div></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespacestrus.html#a55807007cc940d7e98de24ff017a2054">load_vectors</a>( </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                VectorStorageClientInterface* vstorage,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                <span class="keyword">const</span> std::string&amp; vectorfile,</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                <span class="keywordtype">bool</span> networkOrder,</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                <span class="keywordtype">char</span> typeValueSeparator,</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                <span class="keywordtype">int</span> commitSize,</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                ErrorBufferInterface* errorhnd);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="namespacestrus_html_a358b7557effd9d381fc32e2391bad3db"><div class="ttname"><a href="namespacestrus.html#a358b7557effd9d381fc32e2391bad3db">strus::load_queryeval_program</a></div><div class="ttdeci">bool load_queryeval_program(QueryEvalInterface &amp;qeval, const std::vector&lt; std::string &gt; &amp;analyzerterms, const QueryProcessorInterface *qproc, const std::string &amp;source, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load a query evaluation program from source. </div></div>
+<div class="ttc" id="namespacestrus_html_a053af17585ab33655942384b718fe732"><div class="ttname"><a href="namespacestrus.html#a053af17585ab33655942384b718fe732">strus::load_attribute_assignments</a></div><div class="ttdeci">int load_attribute_assignments(StorageClientInterface &amp;storage, const std::string &amp;attributeName, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitSize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some attribute assignments for a storage from a stream. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
-<div class="ttc" id="namespacestrus_html_a271f7c72c5df17dce1833b3407a38731"><div class="ttname"><a href="namespacestrus.html#a271f7c72c5df17dce1833b3407a38731">strus::load_attribute_assignments</a></div><div class="ttdeci">int load_attribute_assignments(StorageClientInterface &amp;storage, const std::string &amp;attributeName, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitsize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some attribute assignments for a storage from a stream. </div></div>
-<div class="ttc" id="namespacestrus_html_a826644c097b67f57d0664c113afca822"><div class="ttname"><a href="namespacestrus.html#a826644c097b67f57d0664c113afca822">strus::load_metadata_assignments</a></div><div class="ttdeci">int load_metadata_assignments(StorageClientInterface &amp;storage, const std::string &amp;metadataName, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitsize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some meta data assignments for a storage from a stream. </div></div>
-<div class="ttc" id="namespacestrus_html_a4b9459b5326c99c8bca2a8e449b90c13"><div class="ttname"><a href="namespacestrus.html#a4b9459b5326c99c8bca2a8e449b90c13">strus::load_vectors</a></div><div class="ttdeci">bool load_vectors(VectorStorageClientInterface *vstorage, const std::string &amp;vectorfile, bool networkOrder, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Adds the feature definitions in the file with path vectorfile to a vector storage. </div></div>
+<div class="ttc" id="namespacestrus_html_a64b825b83c1a3bdaa80b7f46b36abb05"><div class="ttname"><a href="namespacestrus.html#a64b825b83c1a3bdaa80b7f46b36abb05">strus::load_metadata_assignments</a></div><div class="ttdeci">int load_metadata_assignments(StorageClientInterface &amp;storage, const std::string &amp;metadataName, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitSize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some meta data assignments for a storage from a stream. </div></div>
+<div class="ttc" id="namespacestrus_html_a8e307a45febe74442fdd6f53098e3995"><div class="ttname"><a href="namespacestrus.html#a8e307a45febe74442fdd6f53098e3995">strus::load_user_assignments</a></div><div class="ttdeci">int load_user_assignments(StorageClientInterface &amp;storage, const std::multimap&lt; std::string, strus::Index &gt; *attributemapref, const std::string &amp;file, int commitSize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Load some user rights assignments for a storage from a stream. </div></div>
+<div class="ttc" id="namespacestrus_html_a55807007cc940d7e98de24ff017a2054"><div class="ttname"><a href="namespacestrus.html#a55807007cc940d7e98de24ff017a2054">strus::load_vectors</a></div><div class="ttdeci">bool load_vectors(VectorStorageClientInterface *vstorage, const std::string &amp;vectorfile, bool networkOrder, char typeValueSeparator, int commitSize, ErrorBufferInterface *errorhnd)</div><div class="ttdoc">Adds the feature definitions in the file (word2vec text or binary format) given by a path to a vector...</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

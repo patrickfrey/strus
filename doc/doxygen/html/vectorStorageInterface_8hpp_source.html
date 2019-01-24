@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -92,32 +92,28 @@
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* database) <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1VectorStorageDumpInterface.html">VectorStorageDumpInterface</a>* <a class="code" href="classstrus_1_1VectorStorageInterface.html#a19f297e87af127571637055929fefe26">createDump</a>(</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* database,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                        <span class="keyword">const</span> std::string&amp; keyprefix) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1VectorStorageInterface.html#a6675533c5cde48840911fa039789d65b">runBuild</a>( <span class="keyword">const</span> std::string&amp; commands, <span class="keyword">const</span> std::string&amp; configsource, <span class="keyword">const</span> <a class="code" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* database) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;};</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="ttc" id="classstrus_1_1VectorStorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageClientInterface.html">strus::VectorStorageClientInterface</a></div><div class="ttdoc">Interface to a repository for vectors and a feature concept relation model previously created with a ...</div><div class="ttdef"><b>Definition:</b> vectorStorageClientInterface.hpp:23</div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageInterface_html_a19f297e87af127571637055929fefe26"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#a19f297e87af127571637055929fefe26">strus::VectorStorageInterface::createDump</a></div><div class="ttdeci">virtual VectorStorageDumpInterface * createDump(const std::string &amp;configsource, const DatabaseInterface *database, const std::string &amp;keyprefix) const =0</div><div class="ttdoc">Create a dump of the contents of a vector storage. </div></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1VectorStorageDumpInterface.html">VectorStorageDumpInterface</a>* <a class="code" href="classstrus_1_1VectorStorageInterface.html#ac6b7cb03bd15038f2b478e1a179f7d79">createDump</a>(</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* database) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;};</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="ttc" id="classstrus_1_1VectorStorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageClientInterface.html">strus::VectorStorageClientInterface</a></div><div class="ttdoc">Interface to a repository for vectors representing word embeddings. </div><div class="ttdef"><b>Definition:</b> vectorStorageClientInterface.hpp:24</div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageInterface_html_a3cfeecba2cdaa84b200e16456262f064"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#a3cfeecba2cdaa84b200e16456262f064">strus::VectorStorageInterface::createClient</a></div><div class="ttdeci">virtual VectorStorageClientInterface * createClient(const std::string &amp;configsource, const DatabaseInterface *database) const =0</div><div class="ttdoc">Create a new vector storage client interface. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageInterface_html_ae5c41b1795cce17501fcdcaa97d7411f"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#ae5c41b1795cce17501fcdcaa97d7411f">strus::VectorStorageInterface::createStorage</a></div><div class="ttdeci">virtual bool createStorage(const std::string &amp;configsource, const DatabaseInterface *database) const =0</div><div class="ttdoc">Create a data repository for the data of a vector storage. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageDumpInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageDumpInterface.html">strus::VectorStorageDumpInterface</a></div><div class="ttdoc">Interface for fetching the dump of a strus vector storage. </div><div class="ttdef"><b>Definition:</b> vectorStorageDumpInterface.hpp:21</div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html">strus::VectorStorageInterface</a></div><div class="ttdoc">Interface for storing an retrieving vectors of floating point numbers representing document features ...</div><div class="ttdef"><b>Definition:</b> vectorStorageInterface.hpp:27</div></div>
+<div class="ttc" id="classstrus_1_1VectorStorageInterface_html_ac6b7cb03bd15038f2b478e1a179f7d79"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#ac6b7cb03bd15038f2b478e1a179f7d79">strus::VectorStorageInterface::createDump</a></div><div class="ttdeci">virtual VectorStorageDumpInterface * createDump(const std::string &amp;configsource, const DatabaseInterface *database) const =0</div><div class="ttdoc">Create a dump of the contents of a vector storage. </div></div>
+<div class="ttc" id="classstrus_1_1VectorStorageInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html">strus::VectorStorageInterface</a></div><div class="ttdoc">Interface for storing an retrieving vectors of floating point numbers representing word embeddings...</div><div class="ttdef"><b>Definition:</b> vectorStorageInterface.hpp:27</div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageInterface_html_afadb9fcaadd4213dd0f4f44a89e6a5ba"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#afadb9fcaadd4213dd0f4f44a89e6a5ba">strus::VectorStorageInterface::~VectorStorageInterface</a></div><div class="ttdeci">virtual ~VectorStorageInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> vectorStorageInterface.hpp:31</div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageInterface_html_a6675533c5cde48840911fa039789d65b"><div class="ttname"><a href="classstrus_1_1VectorStorageInterface.html#a6675533c5cde48840911fa039789d65b">strus::VectorStorageInterface::runBuild</a></div><div class="ttdeci">virtual bool runBuild(const std::string &amp;commands, const std::string &amp;configsource, const DatabaseInterface *database) const =0</div><div class="ttdoc">Run a storage data build command, grouping features to concepts etc. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseInterface.html">strus::DatabaseInterface</a></div><div class="ttdoc">Interface to the create,destroy the key value store database. </div><div class="ttdef"><b>Definition:</b> databaseInterface.hpp:22</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

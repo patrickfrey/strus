@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -126,10 +126,14 @@
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        {</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="keywordflow">return</span> <span class="stringliteral">&quot;analyzer_pattern&quot;</span>;</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        }</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;};</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="structstrus_1_1Constants.html#ab88e1c4d9aad5dff08e251bbb5ec7ae8">   90</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">char</span> <a class="code" href="structstrus_1_1Constants.html#ab88e1c4d9aad5dff08e251bbb5ec7ae8">standard_word2vec_type_feature_separator</a>()</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                <span class="keywordflow">return</span> <span class="charliteral">&#39;#&#39;</span>;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;};</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="structstrus_1_1Constants_html_abd2e294631885c4879539cfe42311835"><div class="ttname"><a href="structstrus_1_1Constants.html#abd2e294631885c4879539cfe42311835">strus::Constants::identifier_acl</a></div><div class="ttdeci">static const char * identifier_acl()</div><div class="ttdoc">Get the name reserved for addressing ACLs (access control lists) </div><div class="ttdef"><b>Definition:</b> constants.hpp:31</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a73e79db37578b21ed43719ba61f2c9f4"><div class="ttname"><a href="structstrus_1_1Constants.html#a73e79db37578b21ed43719ba61f2c9f4">strus::Constants::identifier_position</a></div><div class="ttdeci">static const char * identifier_position()</div><div class="ttdoc">Get the name reserved for ordinal positions assigned to terms in a document. </div><div class="ttdef"><b>Definition:</b> constants.hpp:36</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a32ba3b1d2ebc904cae3b79d83afd56d8"><div class="ttname"><a href="structstrus_1_1Constants.html#a32ba3b1d2ebc904cae3b79d83afd56d8">strus::Constants::query_empty_postings_termtype</a></div><div class="ttdeci">static const char * query_empty_postings_termtype()</div><div class="ttdoc">Get the term type that does not exist and is reserved for the empty posting set. </div><div class="ttdef"><b>Definition:</b> constants.hpp:59</div></div>
@@ -138,6 +142,7 @@
 <div class="ttc" id="structstrus_1_1Constants_html_a5fc4e2821d0f28137747debf9c164c8b"><div class="ttname"><a href="structstrus_1_1Constants.html#a5fc4e2821d0f28137747debf9c164c8b">strus::Constants::operator_set_union</a></div><div class="ttdeci">static const char * operator_set_union()</div><div class="ttdoc">Get the name of the set union operator for postings. </div><div class="ttdef"><b>Definition:</b> constants.hpp:42</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a8e982758c927ed0f9d8abf1b87971ff0"><div class="ttname"><a href="structstrus_1_1Constants.html#a8e982758c927ed0f9d8abf1b87971ff0">strus::Constants::standard_pattern_matcher_module</a></div><div class="ttdeci">static const char * standard_pattern_matcher_module()</div><div class="ttdoc">Get the name of the standard (default) pattern match module. </div><div class="ttdef"><b>Definition:</b> constants.hpp:85</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a847339d5689eca8ca443bc8cb4520721"><div class="ttname"><a href="structstrus_1_1Constants.html#a847339d5689eca8ca443bc8cb4520721">strus::Constants::attribute_docid</a></div><div class="ttdeci">static const char * attribute_docid()</div><div class="ttdoc">Get the attribute name for the document id. </div><div class="ttdef"><b>Definition:</b> constants.hpp:21</div></div>
+<div class="ttc" id="structstrus_1_1Constants_html_ab88e1c4d9aad5dff08e251bbb5ec7ae8"><div class="ttname"><a href="structstrus_1_1Constants.html#ab88e1c4d9aad5dff08e251bbb5ec7ae8">strus::Constants::standard_word2vec_type_feature_separator</a></div><div class="ttdeci">static char standard_word2vec_type_feature_separator()</div><div class="ttdoc">Get the default type feature separator in a word2vec vector file (where you have only a single identi...</div><div class="ttdef"><b>Definition:</b> constants.hpp:90</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a69569508a1d9e000af0822f2a4e781f8"><div class="ttname"><a href="structstrus_1_1Constants.html#a69569508a1d9e000af0822f2a4e781f8">strus::Constants::standard_vector_storage</a></div><div class="ttdeci">static const char * standard_vector_storage()</div><div class="ttdoc">Get the name of the standard (default) vector storage. </div><div class="ttdef"><b>Definition:</b> constants.hpp:70</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_a7204a6025135be95489ab09b5d4e4792"><div class="ttname"><a href="structstrus_1_1Constants.html#a7204a6025135be95489ab09b5d4e4792">strus::Constants::operator_query_phrase_sequence</a></div><div class="ttdeci">static const char * operator_query_phrase_sequence()</div><div class="ttdoc">Get the name of the set join operator for postings for query phrase terms that got ascending position...</div><div class="ttdef"><b>Definition:</b> constants.hpp:54</div></div>
 <div class="ttc" id="structstrus_1_1Constants_html_ad25b1fa8b954cfc473ec94b9d24a3544"><div class="ttname"><a href="structstrus_1_1Constants.html#ad25b1fa8b954cfc473ec94b9d24a3544">strus::Constants::storage_max_position_info</a></div><div class="ttdeci">static unsigned int storage_max_position_info()</div><div class="ttdoc">Get the maximum position (counted from 1) in a document a token can have. </div><div class="ttdef"><b>Definition:</b> constants.hpp:65</div></div>
@@ -148,7 +153,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

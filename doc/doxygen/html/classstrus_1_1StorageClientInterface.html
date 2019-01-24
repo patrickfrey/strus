@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -294,7 +294,9 @@ Public Member Functions</h2></td></tr>
 
 <p>Close client connection and eventually do some cleanup. </p>
 <dl class="section remark"><dt>Remarks</dt><dd>This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown. </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>the method does not have to be called necessarily </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>the method does not have to be called necessarily </dd>
+<dd>
+it calls compactDatabase of the underlying database and can therefore last some time (some minutes in case of leveldb after large inserts). </dd></dl>
 
 </div>
 </div>
@@ -1247,7 +1249,7 @@ Fields give you the possibility to treat elements in the document differently wh
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

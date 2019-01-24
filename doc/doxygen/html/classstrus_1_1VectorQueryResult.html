@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -66,7 +66,7 @@
 </div><!--header-->
 <div class="contents">
 
-<p>Result of a vector search (associated feature number with weight)  
+<p>Result of a vector similarity search (associated feature value with weight)  
  <a href="classstrus_1_1VectorQueryResult.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="vectorQueryResult_8hpp_source.html">vectorQueryResult.hpp</a>&gt;</code></p>
@@ -79,22 +79,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaa92ee6cf4f956b41bab19ee3cede7ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#aaa92ee6cf4f956b41bab19ee3cede7ae">VectorQueryResult</a> (const <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &amp;o)</td></tr>
 <tr class="memdesc:aaa92ee6cf4f956b41bab19ee3cede7ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="#aaa92ee6cf4f956b41bab19ee3cede7ae">More...</a><br/></td></tr>
 <tr class="separator:aaa92ee6cf4f956b41bab19ee3cede7ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d4f8ee89de60796755171bec81d9d5b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#a2d4f8ee89de60796755171bec81d9d5b">VectorQueryResult</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;featidx_, double weight_)</td></tr>
-<tr class="memdesc:a2d4f8ee89de60796755171bec81d9d5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a2d4f8ee89de60796755171bec81d9d5b">More...</a><br/></td></tr>
-<tr class="separator:a2d4f8ee89de60796755171bec81d9d5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a96b71abfa98ceda7f29eddf4c2b578"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#a2a96b71abfa98ceda7f29eddf4c2b578">featidx</a> () const </td></tr>
-<tr class="separator:a2a96b71abfa98ceda7f29eddf4c2b578"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8039fcfcf6ccea9e11c3ab6a11cbddb4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#a8039fcfcf6ccea9e11c3ab6a11cbddb4">VectorQueryResult</a> (const std::string &amp;value_, double weight_)</td></tr>
+<tr class="memdesc:a8039fcfcf6ccea9e11c3ab6a11cbddb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a8039fcfcf6ccea9e11c3ab6a11cbddb4">More...</a><br/></td></tr>
+<tr class="separator:a8039fcfcf6ccea9e11c3ab6a11cbddb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab19c92f4afd21ef55904b892ecdcc235"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#ab19c92f4afd21ef55904b892ecdcc235">value</a> () const </td></tr>
+<tr class="separator:ab19c92f4afd21ef55904b892ecdcc235"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd502f9d136af974653014e352fc9b3d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#acd502f9d136af974653014e352fc9b3d">weight</a> () const </td></tr>
 <tr class="separator:acd502f9d136af974653014e352fc9b3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae9b99c71c616bac92f061c2c9a98d02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#aae9b99c71c616bac92f061c2c9a98d02">setWeight</a> (double weight_)</td></tr>
-<tr class="separator:aae9b99c71c616bac92f061c2c9a98d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fafbf4e9a30b9281ff682003434e287"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#a2fafbf4e9a30b9281ff682003434e287">operator&lt;</a> (const <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &amp;o) const </td></tr>
 <tr class="separator:a2fafbf4e9a30b9281ff682003434e287"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab61c7ac2511c2755ea54c93f88481712"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorQueryResult.html#ab61c7ac2511c2755ea54c93f88481712">operator&gt;</a> (const <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &amp;o) const </td></tr>
-<tr class="separator:ab61c7ac2511c2755ea54c93f88481712"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Result of a vector search (associated feature number with weight) </p>
+<div class="textblock"><p>Result of a vector similarity search (associated feature value with weight) </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a0433df9c209ae258c6d2cb9e0b5be21b"></a>
 <div class="memitem">
@@ -147,7 +143,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2d4f8ee89de60796755171bec81d9d5b"></a>
+<a class="anchor" id="a8039fcfcf6ccea9e11c3ab6a11cbddb4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -157,8 +153,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">strus::VectorQueryResult::VectorQueryResult </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
-          <td class="paramname"><em>featidx_</em>, </td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>value_</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -184,29 +180,6 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a2a96b71abfa98ceda7f29eddf4c2b578"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::VectorQueryResult::featidx </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a2fafbf4e9a30b9281ff682003434e287"></a>
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +204,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab61c7ac2511c2755ea54c93f88481712"></a>
+<a class="anchor" id="ab19c92f4afd21ef55904b892ecdcc235"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -239,35 +212,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool strus::VectorQueryResult::operator&gt; </td>
+          <td class="memname">const std::string&amp; strus::VectorQueryResult::value </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1VectorQueryResult.html">VectorQueryResult</a> &amp;&#160;</td>
-          <td class="paramname"><em>o</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aae9b99c71c616bac92f061c2c9a98d02"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void strus::VectorQueryResult::setWeight </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>weight_</em></td><td>)</td>
-          <td></td>
         </tr>
       </table>
   </td>
@@ -309,7 +257,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

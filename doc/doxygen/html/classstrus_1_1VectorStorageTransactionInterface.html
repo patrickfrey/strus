@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.16</span>
+   &#160;<span id="projectnumber">0.17</span>
    </div>
   </td>
  </tr>
@@ -76,14 +76,20 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9e53772043fe1a059812b3f38be8e805"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#a9e53772043fe1a059812b3f38be8e805">~VectorStorageTransactionInterface</a> ()</td></tr>
 <tr class="memdesc:a9e53772043fe1a059812b3f38be8e805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a9e53772043fe1a059812b3f38be8e805">More...</a><br/></td></tr>
 <tr class="separator:a9e53772043fe1a059812b3f38be8e805"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aded5f36d34e2a7633747d08f2dd5ddc0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#aded5f36d34e2a7633747d08f2dd5ddc0">addFeature</a> (const std::string &amp;name, const std::vector&lt; float &gt; &amp;vec)=0</td></tr>
-<tr class="memdesc:aded5f36d34e2a7633747d08f2dd5ddc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a feature to the repository for later retrieval.  <a href="#aded5f36d34e2a7633747d08f2dd5ddc0">More...</a><br/></td></tr>
-<tr class="separator:aded5f36d34e2a7633747d08f2dd5ddc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbc7b83a624dd7c0af34b0db488c7d26"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">defineFeatureConceptRelation</a> (const std::string &amp;conceptClass, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;featidx, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;conidx)=0</td></tr>
-<tr class="memdesc:acbc7b83a624dd7c0af34b0db488c7d26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a relation element.  <a href="#acbc7b83a624dd7c0af34b0db488c7d26">More...</a><br/></td></tr>
-<tr class="separator:acbc7b83a624dd7c0af34b0db488c7d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ddecff4ed8a12985e1e4a5a5aaac8b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ac2ddecff4ed8a12985e1e4a5a5aaac8b">defineVector</a> (const std::string &amp;type, const std::string &amp;feat, const <a class="el" href="namespacestrus.html#a71867d033b5f2efcfb62ae454e45300f">WordVector</a> &amp;vec)=0</td></tr>
+<tr class="memdesc:ac2ddecff4ed8a12985e1e4a5a5aaac8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a vector for a feature for later retrieval.  <a href="#ac2ddecff4ed8a12985e1e4a5a5aaac8b">More...</a><br/></td></tr>
+<tr class="separator:ac2ddecff4ed8a12985e1e4a5a5aaac8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e556b7a23fa3195f30afbe295d9a82a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#a7e556b7a23fa3195f30afbe295d9a82a">defineFeature</a> (const std::string &amp;type, const std::string &amp;feat)=0</td></tr>
+<tr class="memdesc:a7e556b7a23fa3195f30afbe295d9a82a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a feature without vector.  <a href="#a7e556b7a23fa3195f30afbe295d9a82a">More...</a><br/></td></tr>
+<tr class="separator:a7e556b7a23fa3195f30afbe295d9a82a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefbc7a1a00a76f6d9cff2254c63b4cbf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#aefbc7a1a00a76f6d9cff2254c63b4cbf">defineScalar</a> (const std::string &amp;name, double value)=0</td></tr>
+<tr class="memdesc:aefbc7a1a00a76f6d9cff2254c63b4cbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define some scalar configuration parameter used in calculation (depending on implementation)  <a href="#aefbc7a1a00a76f6d9cff2254c63b4cbf">More...</a><br/></td></tr>
+<tr class="separator:aefbc7a1a00a76f6d9cff2254c63b4cbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae49d8268d37a9b0fde45809050a3a818"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ae49d8268d37a9b0fde45809050a3a818">clear</a> ()=0</td></tr>
+<tr class="memdesc:ae49d8268d37a9b0fde45809050a3a818"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear all vectors,types and feature names in the storage.  <a href="#ae49d8268d37a9b0fde45809050a3a818">More...</a><br/></td></tr>
+<tr class="separator:ae49d8268d37a9b0fde45809050a3a818"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">commit</a> ()=0</td></tr>
-<tr class="memdesc:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure the persistent storage of the features added with <a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#aded5f36d34e2a7633747d08f2dd5ddc0" title="Add a feature to the repository for later retrieval. ">addFeature(const std::string&amp;,const std::vector&lt;float&gt;&amp;)</a> till now.  <a href="#ad4a4d51ffe2f01398bcce4d3ce9461ce">More...</a><br/></td></tr>
+<tr class="memdesc:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure the persistent storage of the features added with addFeature(const std::string&amp;,const WordVector&amp;) till now.  <a href="#ad4a4d51ffe2f01398bcce4d3ce9461ce">More...</a><br/></td></tr>
 <tr class="separator:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7daf345f9ab7eb8903e46f2a1dd9f77"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ae7daf345f9ab7eb8903e46f2a1dd9f77">rollback</a> ()=0</td></tr>
 <tr class="memdesc:ae7daf345f9ab7eb8903e46f2a1dd9f77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback of the transaction, no changes made.  <a href="#ae7daf345f9ab7eb8903e46f2a1dd9f77">More...</a><br/></td></tr>
@@ -119,7 +125,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aded5f36d34e2a7633747d08f2dd5ddc0"></a>
+<a class="anchor" id="ae49d8268d37a9b0fde45809050a3a818"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -127,21 +133,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::VectorStorageTransactionInterface::addFeature </td>
+          <td class="memname">virtual void strus::VectorStorageTransactionInterface::clear </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; float &gt; &amp;&#160;</td>
-          <td class="paramname"><em>vec</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -151,14 +146,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Add a feature to the repository for later retrieval. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the feature associated with the vector to add </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>vector to add </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Clear all vectors,types and feature names in the storage. </p>
 
 </div>
 </div>
@@ -183,12 +171,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Ensure the persistent storage of the features added with <a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#aded5f36d34e2a7633747d08f2dd5ddc0" title="Add a feature to the repository for later retrieval. ">addFeature(const std::string&amp;,const std::vector&lt;float&gt;&amp;)</a> till now. </p>
+<p>Ensure the persistent storage of the features added with addFeature(const std::string&amp;,const WordVector&amp;) till now. </p>
 <dl class="section return"><dt>Returns</dt><dd>true on success, false if failed </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="acbc7b83a624dd7c0af34b0db488c7d26"></a>
+<a class="anchor" id="a7e556b7a23fa3195f30afbe295d9a82a"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -196,22 +184,16 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::VectorStorageTransactionInterface::defineFeatureConceptRelation </td>
+          <td class="memname">virtual void strus::VectorStorageTransactionInterface::defineFeature </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>conceptClass</em>, </td>
+          <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
-          <td class="paramname"><em>featidx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
-          <td class="paramname"><em>conidx</em>&#160;</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>feat</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -226,12 +208,104 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Define a relation element. </p>
+<p>Define a feature without vector. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">conceptClass</td><td>name of the concept class to distiguish different relations </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">featidx</td><td>index of the feature (see '<a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a13b478bdae75de10cc9cff69c62b9617" title="Get the index starting from 0 of a feature by its name. ">VectorStorageClientInterface::featureIndex( const std::string&amp;) const</a>') </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">conidx</td><td>index of the concept </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>of the feature to add </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">feat</td><td>name of the feature to add </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aefbc7a1a00a76f6d9cff2254c63b4cbf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::VectorStorageTransactionInterface::defineScalar </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define some scalar configuration parameter used in calculation (depending on implementation) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the variable (depending on implementation) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value assigned to the variable </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ac2ddecff4ed8a12985e1e4a5a5aaac8b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::VectorStorageTransactionInterface::defineVector </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>feat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a71867d033b5f2efcfb62ae454e45300f">WordVector</a> &amp;&#160;</td>
+          <td class="paramname"><em>vec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a vector for a feature for later retrieval. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>of the feature associated with the vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">feat</td><td>name of the feature associated with the vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>vector to define for this feature </td></tr>
   </table>
   </dd>
 </dl>
@@ -270,7 +344,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 8 2018 18:30:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 24 2019 11:52:58 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
