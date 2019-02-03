@@ -12,6 +12,7 @@
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
+#include "strus/lib/sentence.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/fileLocatorInterface.hpp"
 #include "strus/constants.hpp"
@@ -106,6 +107,21 @@ public:
 	virtual QueryEvalInterface* createQueryEval() const
 	{
 		return strus::createQueryEval( m_errorhnd);
+	}
+	virtual SentenceAnalyzerInstanceInterface* createSentenceAnalyzer( const std::string& name) const
+	{
+		try
+		{
+			if (name.empty() || string_conv::tolower( name) == "default")
+			{
+				return createSentenceAnalyzerInstance_std( m_errorhnd);
+			}
+			else
+			{
+				throw strus::runtime_error(_TXT("unknown sentence analyzer type: '%s'"), name.c_str());
+			}
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error creating sentence analyzer: %s"), *m_errorhnd, 0);
 	}
 
 private:

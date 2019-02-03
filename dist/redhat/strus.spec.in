@@ -348,6 +348,8 @@ make test
 %{_libdir}/%{name}/libstrus_queryproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_storage.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_storage.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
+%{_libdir}/%{name}/libstrus_sentence.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
+%{_libdir}/%{name}/libstrus_sentence.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_logging.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
@@ -368,6 +370,7 @@ make test
 %{_libdir}/%{name}/libstrus_queryeval.so
 %{_libdir}/%{name}/libstrus_queryproc.so
 %{_libdir}/%{name}/libstrus_storage.so
+%{_libdir}/%{name}/libstrus_sentence.so
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so
 %{_libdir}/%{name}/libstrus_malloc_logging.so
 %{_libdir}/%{name}/libstrus_statsproc.so

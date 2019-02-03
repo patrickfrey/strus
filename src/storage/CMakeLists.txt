@@ -67,6 +67,7 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/utils"
 	"${MAIN_SOURCE_DIR}/database_leveldb"
 	"${MAIN_SOURCE_DIR}/statsproc"
+	"${MAIN_SOURCE_DIR}/sentence"
 	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"
 	"${LevelDB_LIBRARY_PATH}"
@@ -93,7 +94,7 @@ set_target_properties(
 )
 
 add_library( strus_storage_objbuild SHARED libstrus_storage_objbuild.cpp )
-target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_strus_static strus_base )
+target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_sentence compactnodetrie_strus_static strus_base )
 set_target_properties(
     strus_storage_objbuild
     PROPERTIES

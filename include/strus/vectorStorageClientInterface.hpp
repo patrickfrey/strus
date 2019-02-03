@@ -19,6 +19,8 @@ namespace strus {
 class VectorStorageTransactionInterface;
 /// \brief Forward declaration
 class ValueIteratorInterface;
+/// \brief Forward declaration
+class SentenceLexerInstanceInterface;
 
 /// \brief Interface to a repository for vectors representing word embeddings
 class VectorStorageClientInterface
@@ -77,6 +79,11 @@ public:
 
 	/// \brief Calculate the normalized vector representation of the argument vector
 	virtual WordVector normalize( const WordVector& vec) const=0;
+
+	/// \brief Create a lexer for parsing query sentences based on the vector storage
+	/// \return the lexer (with ownership)
+	/// \remark the returned object is dependent on the vector storage client that created it
+	virtual SentenceLexerInstanceInterface* createSentenceLexer() const=0;
 
 	/// \brief Get the configuration of this storage
 	/// \return the configuration string

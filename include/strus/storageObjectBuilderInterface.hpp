@@ -30,6 +30,8 @@ class StorageAlterMetaDataTableInterface;
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class VectorStorageInterface;
+/// \brief Forward declaration
+class SentenceAnalyzerInstanceInterface;
 
 /// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation.
 class StorageObjectBuilderInterface
@@ -52,16 +54,23 @@ public:
 	virtual const QueryProcessorInterface* getQueryProcessor() const=0;
 
 	/// \brief Get the statistics processor interface
+	/// \param[in] name name of the statistics processor type
 	/// \return the statistics processor interface reference
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor( const std::string& name) const=0;
 
 	/// \brief Get a vectorspace model for mapping vectors to features by name
+	/// \param[in] name name of the vector storage type
 	/// \return the vectorspace model interface reference
 	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const=0;
 
 	/// \brief Creates a an interface for query evaluation
-	/// \return the query evaluation object (with ownership returned)
+	/// \return the query evaluation object (with ownership)
 	virtual QueryEvalInterface* createQueryEval() const=0;
+
+	/// \brief Creates a an interface for query sentence analysis
+	/// \param[in] name name of the sentence analyzer type
+	/// \return the query sentence analyzer (with ownership)
+	virtual SentenceAnalyzerInstanceInterface* createSentenceAnalyzer( const std::string& name) const=0;
 };
 
 }//namespace
