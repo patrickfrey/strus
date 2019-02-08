@@ -22,16 +22,25 @@ public:
 	/// \brief Destructor
 	virtual ~SentenceLexerContextInterface(){}
 
-	/// \brief Parse a list of alternatives of the next term in the string parsed
-	/// \return list of alternative picks
-	virtual std::vector<SentenceTerm> altLexems() const=0;
+	/// \brief Get the first alternative split of tokens
+	/// \return true if any split available
+	virtual bool fetchFirstSplit()=0;
 
-	/// \brief Eat the token with a defined length and continue parsing with the next token
-	virtual bool skipToFollow( int length)=0;
+	/// \brief Get the first/next alternative split of tokens
+	/// \return true if next alternative split available
+	virtual bool fetchNextSplit()=0;
 
-	/// \brief Skip back to previous position in string (before the last call of 'skipToNext()'
-	/// \note for backtracking parse state
-	virtual void skipBack()=0;
+	/// \brief Get the number of tokens of the current split
+	/// \return the number of tokens
+	virtual int nofTokens() const=0;
+
+	/// \brief Get the feature value in the context of the current split by index
+	/// \return the feature value string
+	virtual std::string featureValue( int idx)=0;
+
+	/// \brief Get the possible feature types in the context of the current split by index
+	/// \return the feature type list
+	virtual std::vector<std::string> featureTypes( int idx)=0;
 };
 
 }//namespace

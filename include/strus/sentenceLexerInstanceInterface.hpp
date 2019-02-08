@@ -25,10 +25,22 @@ public:
 	/// \brief Destructor
 	virtual ~SentenceLexerInstanceInterface(){}
 
+	/// \brief Define separator of entities in the query
+	/// \param[in] uchr unicode character code for the punctuation character
+	/// \param[in] sbchr ascii character code for the replacement
+	/// \param[in] priority defines the replacement rule of lower priority seperators by higher priority separators
+	virtual void addSeparator( int uchr)=0;
+
+	/// \brief Define a character potentially linking tokens to an entity in the query
+	/// \param[in] uchr unicode character code for the character
+	/// \param[in] sbchr ascii character code for the replacement in an entity
+	/// \param[in] priority defines the replacement rule of lower priority seperators by higher priority linking characters
+	virtual void addLink( int uchr, char sbchr, int priority)=0;
+
 	/// \brief Create an interface for the traversal of a sentence specified
 	/// \param[in] source string to parse with the lexer created
 	/// \return lexer interface for sentence traversal
-	virtual SentenceLexerContextInterface* createLexer( const std::string& source) const=0;
+	virtual SentenceLexerContextInterface* createContext( const std::string& source) const=0;
 
 	/// \brief Get the similarity of a term to a another
 	/// \param[in] term term to check

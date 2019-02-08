@@ -18,24 +18,21 @@ namespace strus {
 class SentenceTerm
 {
 public:
-	SentenceTerm( const std::string& type_, const std::string& value_, int origsize_)
-		:m_type(type_),m_value(value_),m_origsize(origsize_){}
+	SentenceTerm( const std::string& type_, const std::string& value_)
+		:m_type(type_),m_value(value_){}
 	SentenceTerm( const SentenceTerm& o)
-		:m_type(o.m_type),m_value(o.m_value),m_origsize(o.m_origsize){}
+		:m_type(o.m_type),m_value(o.m_value){}
 	SentenceTerm()
-		:m_type(),m_value(),m_origsize(0){}
+		:m_type(),m_value(){}
 
 	/// \brief All alternative type known for this entity
 	std::string type() const	{return m_type;}
 	/// \brief Term value of this entity
 	std::string value() const	{return m_value;}
-	/// \brief Size of this entity in the source in bytes
-	int origsize() const		{return m_origsize;}
 
 private:
 	std::string m_type;
 	std::string m_value;
-	int m_origsize;
 };
 
 
