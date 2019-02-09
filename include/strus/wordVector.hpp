@@ -26,11 +26,11 @@ public:
 	{
 		std::string rt;
 		int ei = 0, ee = size() > maxNofElements ? maxNofElements : size();
-		for (int eidx=0; ei != ee; ++ei,++eidx)
+		for (; ei != ee; ++ei)
 		{
-			if (eidx) rt.append(separator);
+			if (ei) rt.append(separator);
 			char buf[ 32];
-			std::snprintf( buf, sizeof(buf), "%.5f", operator[]( eidx));
+			std::snprintf( buf, sizeof(buf), "%.5f", operator[]( ei));
 			rt.append( buf);
 		}
 		return rt;
