@@ -10,10 +10,32 @@
 #ifndef _STRUS_WORD_VECTOR_INCLUDED
 #define _STRUS_WORD_VECTOR_INCLUDED
 #include <vector>
+#include <string>
+#include <cstdio>
+#include <limits>
 
 namespace strus {
 
-typedef std::vector<float> WordVector;
+class WordVector :public std::vector<float>
+{
+public:
+	WordVector() :std::vector<float>(){}
+	WordVector( const std::vector<float>& o) :std::vector<float>(o){}
+
+	std::string tostring( const char* separator, std::size_t maxNofElements=std::numeric_limits<std::size_t>::max()) const
+	{
+		std::string rt;
+		int ei = 0, ee = size() > maxNofElements ? maxNofElements : size();
+		for (int eidx=0; ei != ee; ++ei,++eidx)
+		{
+			if (eidx) rt.append(separator);
+			char buf[ 32];
+			std::snprintf( buf, sizeof(buf), "%.5f", operator[]( eidx));
+			rt.append( buf);
+		}
+		return rt;
+	}
+};
 
 }//namespace
 #endif
