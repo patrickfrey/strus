@@ -25,17 +25,18 @@ public:
 	/// \brief Destructor
 	virtual ~SentenceLexerInstanceInterface(){}
 
-	/// \brief Define separator of entities in the query
-	/// \param[in] uchr unicode character code for the punctuation character
-	/// \param[in] sbchr ascii character code for the replacement
-	/// \param[in] priority defines the replacement rule of lower priority seperators by higher priority separators
+	/// \brief Define a separator of entities in the query
+	/// \param[in] uchr unicode character code for the separating character
 	virtual void addSeparator( int uchr)=0;
+
+	/// \brief Define a space in the query
+	/// \param[in] uchr unicode character code for the spacing character
+	virtual void addSpace( int uchr)=0;
 
 	/// \brief Define a character potentially linking tokens to an entity in the query
 	/// \param[in] uchr unicode character code for the character
-	/// \param[in] sbchr ascii character code for the replacement in an entity
-	/// \param[in] priority defines the replacement rule of lower priority seperators by higher priority linking characters
-	virtual void addLink( int uchr, char sbchr, int priority)=0;
+	/// \param[in] substchr ascii character code for the replacement in an entity
+	virtual void addLink( int uchr, char substchr)=0;
 
 	/// \brief Create an interface for the traversal of a sentence specified
 	/// \param[in] source string to parse with the lexer created
