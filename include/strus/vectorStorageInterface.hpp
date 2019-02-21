@@ -54,6 +54,23 @@ public:
 	virtual VectorStorageDumpInterface* createDump(
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
+
+	/// \brief Enumeration of different type of configurations
+	///	Needed for getting the correct description of the configuration
+	enum ConfigType
+	{
+		CmdCreateClient,		///< Config description for the creation of an instance accessing the repository
+		CmdCreate			///< Config description for the creation of a repository that does not exist yet
+	};
+
+	/// \brief Gets a configuration description (source string as used by the functions here)
+	///	createStorage(const std::string&) and createClient(const std::string&)
+	///	for the usage printed by programs using this storage implementation.
+	virtual const char* getConfigDescription( const ConfigType& type) const=0;
+
+	/// \brief Get the list of known configuration parameter keys
+	///	for verification of the configuration by programs using this storage implementation.
+	virtual const char** getConfigParameters( const ConfigType& type) const=0;
 };
 
 }//namespace
