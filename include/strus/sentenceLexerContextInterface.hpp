@@ -41,6 +41,10 @@ public:
 	/// \brief Get the possible feature types in the context of the current split by index
 	/// \return the feature type list
 	virtual std::vector<std::string> featureTypes( int idx)=0;
+
+	/// \brief Get a weight for the probability of a list of terms forming a query
+	/// \param[in] terms list of terms to calculate the weight for
+	virtual double getWeight( const std::vector<SentenceTerm>& terms)=0;
 };
 
 }//namespace

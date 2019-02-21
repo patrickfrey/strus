@@ -35,6 +35,25 @@ private:
 	std::string m_value;
 };
 
+class WeightedSentenceTerm
+	:public SentenceTerm
+{
+public:
+	WeightedSentenceTerm( const std::string& type_, const std::string& value_, double weight_)
+		:SentenceTerm(type_,value_),m_weight(weight_){}
+	WeightedSentenceTerm( const WeightedSentenceTerm& o)
+		:SentenceTerm(o),m_weight(o.m_weight){}
+	WeightedSentenceTerm()
+		:SentenceTerm(),m_weight(0.0){}
+
+	double weight() const
+	{
+		return m_weight;
+	}
+
+private:
+	double m_weight;
+};
 
 /// \brief Possible guess of a sentence
 class SentenceGuess

@@ -19,6 +19,7 @@ namespace strus {
 class WordVector :public std::vector<float>
 {
 public:
+	WordVector( std::size_t nn, float initval) :std::vector<float>(nn,initval){}
 	WordVector() :std::vector<float>(){}
 	WordVector( const std::vector<float>& o) :std::vector<float>(o){}
 
@@ -34,6 +35,30 @@ public:
 			rt.append( buf);
 		}
 		return rt;
+	}
+
+	WordVector operator+( const WordVector& o) const
+	{
+		WordVector rt;
+		std::size_t ii = 0, nn = size() > o.size() ? o.size() : size();
+		rt.reserve( nn);
+		std::vector<float>::const_iterator wi = begin(), we = end(), oi = o.begin(), oe = o.end();
+		for (; ii < nn; ++ii,++wi,++oi)
+		{
+			rt.push_back( *wi + *oi);
+		}
+		return rt;
+	}
+	WordVector& operator+=( const WordVector& o)
+	{
+		std::size_t ii = 0, nn = size() > o.size() ? o.size() : size();
+		std::vector<float>::iterator wi = begin(), we = end();
+		std::vector<float>::const_iterator oi = o.begin(), oe = o.end();
+		for (; ii < nn; ++ii,++wi,++oi)
+		{
+			 *wi += *oi;
+		}
+		return *this;
 	}
 };
 
