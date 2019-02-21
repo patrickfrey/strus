@@ -257,7 +257,7 @@ const char* Database::getConfigDescription( const ConfigType& type) const
 			return "path=<LevelDB storage path>\ncreate=<yes/no, yes=do create if database does not exist yet>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>";
 
 		case CmdCreate:
-			return "path=<LevelDB storage path>;compression=<yes/no>";
+			return "path=<LevelDB storage path>\ncompression=<yes/no>";
 
 		case CmdDestroy:
 			return "path=<LevelDB storage path>";
