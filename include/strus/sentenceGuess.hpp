@@ -14,6 +14,7 @@
 #include <vector>
 #include <cmath>
 #include <ctgmath>
+#include <utility>
 #include <limits>
 
 namespace strus {
@@ -23,11 +24,19 @@ class SentenceGuess
 {
 public:
 	/// \brief Constructor
-	SentenceGuess( const std::string classname_, const std::vector<SentenceTerm>& terms_, double weight_)
+	SentenceGuess( const std::string& classname_, const std::vector<SentenceTerm>& terms_, double weight_)
 		:m_classname(classname_),m_terms(terms_),m_weight(weight_){}
 	/// \brief Copy constructor
 	SentenceGuess( const SentenceGuess& o)
 		:m_classname(o.m_classname),m_terms(o.m_terms),m_weight(o.m_weight){}
+	SentenceGuess& operator = ( const SentenceGuess& o)
+		{m_classname=o.m_classname; m_terms=o.m_terms; m_weight=o.m_weight; return *this;}
+#if __cplusplus >= 201103L
+	SentenceGuess( SentenceGuess&& o)
+		:m_classname(std::move(o.m_classname)),m_terms(std::move(o.m_terms)),m_weight(o.m_weight){}
+	SentenceGuess& operator=( SentenceGuess&& o)
+		{m_classname=std::move(o.m_classname); m_terms=std::move(o.m_terms); m_weight=o.m_weight; return *this;}
+#endif
 
 	/// \brief Name of the class of this sentence
 	const std::string& classname() const		{return m_classname;}
@@ -38,7 +47,7 @@ public:
 
 	bool operator < (const SentenceGuess& o) const
 	{
-		return (std::abs( m_weight - o.m_weight) <= std::numeric_limits<double>::epsilon())
+		return (std::abs( m_weight - o.m_weight) <= std::numeric_limits<float>::epsilon())
 			? (m_terms.size() == o.m_terms.size()
 				? (m_classname == o.m_classname
 					? lesserTermList( m_terms, o.m_terms)

@@ -28,6 +28,15 @@ public:
 	SentenceTerm()
 		:m_type(),m_value(){}
 
+	SentenceTerm& operator = ( const SentenceTerm& o)
+		{m_type=o.m_type; m_value=o.m_value; return *this;}
+#if __cplusplus >= 201103L
+	SentenceTerm( SentenceTerm&& o)
+		:m_type(std::move(o.m_type)),m_value(std::move(o.m_value)){}
+	SentenceTerm& operator=( SentenceTerm&& o)
+		{m_type=std::move(o.m_type); m_value=std::move(o.m_value); return *this;}
+#endif
+
 	/// \brief All alternative type known for this entity
 	std::string type() const	{return m_type;}
 	/// \brief Term value of this entity

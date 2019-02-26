@@ -37,17 +37,17 @@ public:
 
 	/// \brief Get the feature value in the context of the current split by index
 	/// \return the feature value string
-	virtual std::string featureValue( int idx)=0;
+	virtual std::string featureValue( int idx) const=0;
 
 	/// \brief Get the possible feature types in the context of the current split by index
 	/// \return the feature type list
-	virtual std::vector<std::string> featureTypes( int idx)=0;
+	virtual std::vector<std::string> featureTypes( int idx) const=0;
 
 	/// \brief Get a ranked list weighting the probability of alternative sentences forming a query
 	/// \param[in] sentences list of alternative sentences to calculate the ranklist for
 	/// \param[in] maxNofResults maximum number of results to return
 	/// \return the ranked list of weighted sentences
-	virtual std::vector<SentenceGuess> rankSentences( const std::vector<SentenceTermList>& sentences, int maxNofResults)=0;
+	virtual std::vector<SentenceGuess> rankSentences( const std::vector<SentenceGuess>& sentences, int maxNofResults) const=0;
 };
 
 }//namespace
