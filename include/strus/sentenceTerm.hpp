@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Structure used as representant of a query term guess
+/// \brief Structure used as representant of a query term
 /// \file sentenceTerm.hpp
 #ifndef _STRUS_SENTENCE_TERM_HPP_INCLUDED
 #define _STRUS_SENTENCE_TERM_HPP_INCLUDED
@@ -14,14 +14,17 @@
 
 namespace strus {
 
-/// \brief Structure used as representant of a query term guess
+/// \brief Structure used as representant of a query term
 class SentenceTerm
 {
 public:
+	/// \brief Constructor
 	SentenceTerm( const std::string& type_, const std::string& value_)
 		:m_type(type_),m_value(value_){}
+	/// \brief Copy constructor
 	SentenceTerm( const SentenceTerm& o)
 		:m_type(o.m_type),m_value(o.m_value){}
+	/// \brief Default constructor
 	SentenceTerm()
 		:m_type(),m_value(){}
 
@@ -30,47 +33,22 @@ public:
 	/// \brief Term value of this entity
 	std::string value() const	{return m_value;}
 
+	bool operator < (const SentenceTerm& o) const
+	{
+		return m_value == o.m_value ? m_type < o.m_type : m_value < o.m_value;
+	}
+	bool operator == (const SentenceTerm& o) const
+	{
+		return m_value == o.m_value && m_type == o.m_type;
+	}
+
 private:
 	std::string m_type;
 	std::string m_value;
 };
 
-class WeightedSentenceTerm
-	:public SentenceTerm
-{
-public:
-	WeightedSentenceTerm( const std::string& type_, const std::string& value_, double weight_)
-		:SentenceTerm(type_,value_),m_weight(weight_){}
-	WeightedSentenceTerm( const WeightedSentenceTerm& o)
-		:SentenceTerm(o),m_weight(o.m_weight){}
-	WeightedSentenceTerm()
-		:SentenceTerm(),m_weight(0.0){}
-
-	double weight() const
-	{
-		return m_weight;
-	}
-
-private:
-	double m_weight;
-};
-
-/// \brief Possible guess of a sentence
-class SentenceGuess
-{
-public:
-	SentenceGuess( const std::string classname_, const std::vector<SentenceTerm>& terms_)
-		:m_classname(classname_),m_terms(terms_){}
-	SentenceGuess( const SentenceGuess& o)
-		:m_classname(o.m_classname),m_terms(o.m_terms){}
-
-	const std::string& classname() const			{return m_classname;}
-	const std::vector<SentenceTerm>& terms() const		{return m_terms;}
-
-private:
-	std::string m_classname;
-	std::vector<SentenceTerm> m_terms;
-};
+/// \brief Structure used as representant of a query term guess
+typedef std::vector<SentenceTerm> SentenceTermList;
 
 }//namespace
 #endif

@@ -10,6 +10,7 @@
 #ifndef _STRUS_SENTENCE_LEXER_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SENTENCE_LEXER_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/sentenceTerm.hpp"
+#include "strus/sentenceGuess.hpp"
 #include <string>
 #include <vector>
 
@@ -42,9 +43,11 @@ public:
 	/// \return the feature type list
 	virtual std::vector<std::string> featureTypes( int idx)=0;
 
-	/// \brief Get a weight for the probability of a list of terms forming a query
-	/// \param[in] terms list of terms to calculate the weight for
-	virtual double getWeight( const std::vector<SentenceTerm>& terms)=0;
+	/// \brief Get a ranked list weighting the probability of alternative sentences forming a query
+	/// \param[in] sentences list of alternative sentences to calculate the ranklist for
+	/// \param[in] maxNofResults maximum number of results to return
+	/// \return the ranked list of weighted sentences
+	virtual std::vector<SentenceGuess> rankSentences( const std::vector<SentenceTermList>& sentences, int maxNofResults)=0;
 };
 
 }//namespace
