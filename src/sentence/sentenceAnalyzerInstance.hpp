@@ -43,34 +43,31 @@ public:
 
 	virtual bool compile();
 
-	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& sentence) const;
+	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const;
 
-private:
+public:/*local static functions*/
 	enum OpCode {
 		OpNop,			///< No operation, goto next instruction
 		OpJmp,			///< Absolute jump to instruction address
 		OpJmpIf,		///< Jump to absolute address if the compare flag is set
 		OpJmpIfNot,		///< Jump to absolute address if the compare flag is not set
+		OpJmpDup,		///< Absolute jump to instruction address with a duplicated instance of the program
 		OpStartCount,		///< Push a counter one the counter stack
 		OpEndCount,		///< Pop the top counter from the counter stack
 		OpDecCount,		///< Decrement the top counter of the counter stack and set the compare flag if the decrementation result got 0
 		OpTestType,		///< Set the compare flag if the argument type and the current token are equal, else unset it, combine subsequent OpTest.. operations with a logical AND
 		OpTestFeat,		///< Set the compare flag if the argument regular expression matches the current token, else unset it, combine subsequent OpTest.. operations with a logical AND
 		OpWeight,		///< Multiply the weight accumulated with this value, the initial weight is 1.0
-		OpMark,			///< Push a mark of the current state that is restored with a OpReject on the state stack
-		OpReMark,		///< OpRelease+OpMark Pop and forget the top state mark from the state stack and push a mark of the current state that is restored with a OpReject on the state stack
-		OpRelease,		///< Pop and forget the top state mark from the state stack
 		OpAccept,		///< Push the current token to the result associated with the current state and move the input token cursor forward
 		OpReject,		///< Reject the current state and reestablish the state on top of the state stack
 		OpResult		///< Add the result associated with the current state to the list of final results
 	};
 	static const char* opCodeName( OpCode opcode)
 	{
-		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","CNT","DEC","TTYPE","TFEAT","WEIGHT","MARK","REMARK","RELEASE","ACCEPT","REJECT","RESULT",0};
+		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","CNT","ENDCNT","DEC","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
 		return ar[ opcode];
 	}
 
-private:
 	struct Instruction
 	{
 		OpCode opcode;
@@ -81,6 +78,29 @@ private:
 		Instruction( const Instruction& o)
 			:opcode(o.opcode),arg(o.arg){}
 	};
+
+	struct Pattern
+	{
+		Reference<RegexSearch> regex;
+		std::string str;
+
+		Pattern( const std::string& str_, ErrorBufferInterface* errorhnd);
+		Pattern( const Pattern& o);
+	};
+
+	struct Program
+	{
+		Program()
+			:instructionar(),patternar(),valuear(),weightar(),addressar(),procar(){}
+
+		std::vector<Instruction> instructionar;
+		std::vector<Pattern> patternar;
+		std::vector<std::string> valuear;
+		std::vector<float> weightar;
+		std::vector<int> addressar;
+		std::vector<int> procar;
+	};
+
 private:
 	void printInstructions( std::ostream& out, int fromAddr, int toAddr) const;
 	std::string instructionToString( const Instruction& instr) const;
@@ -98,22 +118,9 @@ private:
 	void patchOpCodeJmpOffset( int istart, int addr, int patchaddrincr);
 
 private:
-	struct Pattern
-	{
-		Reference<RegexSearch> regex;
-		std::string str;
-
-		Pattern( const std::string& str_, ErrorBufferInterface* errorhnd);
-		Pattern( const Pattern& o);
-	};
-
 	ErrorBufferInterface* m_errorhnd;
 	DebugTraceContextInterface* m_debugtrace;
-	std::vector<Instruction> m_instructionar;
-	std::vector<Pattern> m_patternar;
-	std::vector<std::string> m_valuear;
-	std::vector<float> m_weightar;
-	std::vector<int> m_addressar;
+	Program m_program;
 };
 
 }//namespace

@@ -11,7 +11,6 @@
 #define _STRUS_SENTENCE_GUESS_HPP_INCLUDED
 #include "strus/sentenceTerm.hpp"
 #include <string>
-#include <vector>
 #include <cmath>
 #include <ctgmath>
 #include <utility>
@@ -23,8 +22,11 @@ namespace strus {
 class SentenceGuess
 {
 public:
+	/// \brief Default constructor
+	SentenceGuess()
+		:m_classname(),m_terms(),m_weight(0.0){}
 	/// \brief Constructor
-	SentenceGuess( const std::string& classname_, const std::vector<SentenceTerm>& terms_, double weight_)
+	SentenceGuess( const std::string& classname_, const SentenceTermList& terms_, double weight_)
 		:m_classname(classname_),m_terms(terms_),m_weight(weight_){}
 	/// \brief Copy constructor
 	SentenceGuess( const SentenceGuess& o)
@@ -39,12 +41,19 @@ public:
 #endif
 
 	/// \brief Name of the class of this sentence
+	/// \return the name given to this guess
 	const std::string& classname() const		{return m_classname;}
 	/// \brief List of terms of this sentence
+	/// \return the list of terms
 	const SentenceTermList& terms() const		{return m_terms;}
 	/// \brief Weight assigned to this sentence
+	/// \return the weight
 	double weight() const				{return m_weight;}
+	/// \brief Evaluate if the result is defined (non empty)
+	/// \return true if yes, false else
+	bool valid() const				{return !m_terms.empty();}
 
+	/// \brief Comparator for sorting results according relevance
 	bool operator < (const SentenceGuess& o) const
 	{
 		return (std::abs( m_weight - o.m_weight) <= std::numeric_limits<float>::epsilon())
@@ -54,6 +63,13 @@ public:
 					: m_classname < o.m_classname)
 				: m_terms.size() < o.m_terms.size())
 			: m_weight < o.m_weight;
+	}
+	/// \brief Reset the contents
+	void clear()
+	{
+		m_terms.clear();
+		m_classname.clear();
+		m_weight = 0.0;
 	}
 
 private:

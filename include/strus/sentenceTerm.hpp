@@ -38,9 +38,9 @@ public:
 #endif
 
 	/// \brief All alternative type known for this entity
-	std::string type() const	{return m_type;}
+	const std::string& type() const		{return m_type;}
 	/// \brief Term value of this entity
-	std::string value() const	{return m_value;}
+	const std::string& value() const	{return m_value;}
 
 	bool operator < (const SentenceTerm& o) const
 	{

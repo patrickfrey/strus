@@ -52,8 +52,11 @@ public:
 	/// \return true on success
 	virtual bool compile()=0;
 
-	/// \brief Return all possible interpretations of a sencence that could not be eliminated by priorization
-	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& sentence) const=0;	
+	/// \brief Analyze a sentence and return the best ranked candidates with weight and class name
+	/// \param[in] lexer lexer instance
+	/// \param[in] source source to parse
+	/// \param[in] maxNofResults maximum number of results to return
+	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const=0;	
 };
 
 }//namespace
