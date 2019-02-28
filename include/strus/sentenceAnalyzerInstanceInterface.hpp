@@ -30,6 +30,10 @@ public:
 	/// \param[in] weight weight of the pick (greater is better), value between 0.0 and 1.0
 	virtual void pushTerm( const std::string& type, const std::string& name, float weight)=0;
 
+	/// \brief Push a null symbol on the stack for describing a state switch to the follow state without consuming a symbol
+	/// \param[in] weight weight of the pick (greater is better), value between 0.0 and 1.0
+	virtual void pushNone( float weight)=0;
+
 	/// \brief Define the top elements (specified as number of elements) on the stack as alternatives of a choice
 	/// \param[in] argc number of elements to group together as selection of alternatives
 	virtual void pushAlt( int argc)=0;

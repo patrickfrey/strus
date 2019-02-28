@@ -33,6 +33,8 @@ public:
 
 	virtual void pushTerm( const std::string& type, const std::string& name, float weight);
 
+	virtual void pushNone( float weight);
+
 	virtual void pushAlt( int argc);
 
 	virtual void pushSequenceImm( int argc);

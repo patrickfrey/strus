@@ -186,7 +186,7 @@ void SentenceAnalyzerInstance::pushTerm( const std::string& type, const std::str
 	try
 	{
 		m_program.addressar.push_back( m_program.instructionar.size());
-		pushInstructionString( OpTestType, type);
+		if (!type.empty()) pushInstructionString( OpTestType, type);
 		if (!name.empty()) pushInstructionRegex( OpTestFeat, name);
 		pushInstructionInt( OpJmpIf, m_program.instructionar.size()+1);
 		pushInstruction( OpReject);
@@ -195,6 +195,16 @@ void SentenceAnalyzerInstance::pushTerm( const std::string& type, const std::str
 		pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' operation push term: %s"), MODULENAME, *m_errorhnd);
+}
+
+void SentenceAnalyzerInstance::pushNone( float weight)
+{
+	try
+	{
+		pushInstructionFloat( OpWeight, weight);
+		pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' operation push none: %s"), MODULENAME, *m_errorhnd);
 }
 
 void SentenceAnalyzerInstance::pushAlt( int argc)

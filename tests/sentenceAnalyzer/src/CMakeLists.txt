@@ -16,5 +16,5 @@ link_directories(
 )
 
 add_executable( testSentenceAnalyzerPattern testSentenceAnalyzerPattern.cpp)
-target_link_libraries( testSentenceAnalyzerPattern strus_base strus_private_utils strus_storage_static compactnodetrie_strus_static ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
+target_link_libraries( testSentenceAnalyzerPattern strus_base strus_error strus_private_utils strus_sentence ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 
