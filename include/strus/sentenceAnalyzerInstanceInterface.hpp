@@ -43,9 +43,10 @@ public:
 	virtual void pushSequenceImm( int argc)=0;
 
 	/// \brief Define the top element on the stack to be a repeating structure
-	/// \param[in] times maximum number of repetitions or -1 for unlimited
-	/// \note number of repetitions is between 0 and times, e.g. equivalent to '*'
-	virtual void pushRepeat( int times)=0;
+	/// \param[in] mintimes minimum number of repetitions
+	/// \param[in] maxtimes maximum number of repetitions or -1 for unlimited
+	/// \note number of repetitions is between 0 and times, e.g. equivalent to {1,3} or '*' for 0,-1
+	virtual void pushRepeat( int mintimes, int maxtimes)=0;
 
 	/// \brief Define the last element on the stack as sentence structure
 	/// \param[in] classname name given to the structure

@@ -21,6 +21,9 @@ namespace strus {
 class ErrorBufferInterface;
 /// \brief Forward declaration
 class DebugTraceContextInterface;
+/// \brief Forward declaration
+class SentenceLexerContextInterface;
+
 
 /// \brief Implementation of the sentence analyzer detecting sentence candidates in queries
 class SentenceAnalyzerInstance
@@ -39,7 +42,7 @@ public:
 
 	virtual void pushSequenceImm( int argc);
 
-	virtual void pushRepeat( int times);
+	virtual void pushRepeat( int mintimes, int maxtimes);
 
 	virtual void defineSentence( const std::string& classname, float weight);
 
@@ -57,6 +60,7 @@ public:/*local static functions*/
 		OpStartCount,		///< Push a counter one the counter stack
 		OpEndCount,		///< Pop the top counter from the counter stack
 		OpDecCount,		///< Decrement the top counter of the counter stack and set the compare flag if the decrementation result got 0
+		OpTestCount,		///< Test the top counter to be greater or equal than a value, set testflag if yes
 		OpTestType,		///< Set the compare flag if the argument type and the current token are equal, else unset it, combine subsequent OpTest.. operations with a logical AND
 		OpTestFeat,		///< Set the compare flag if the argument regular expression matches the current token, else unset it, combine subsequent OpTest.. operations with a logical AND
 		OpWeight,		///< Multiply the weight accumulated with this value, the initial weight is 1.0
@@ -66,7 +70,7 @@ public:/*local static functions*/
 	};
 	static const char* opCodeName( OpCode opcode)
 	{
-		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","CNT","ENDCNT","DEC","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
+		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","CNT","ENDCNT","DEC","TCNT","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
 		return ar[ opcode];
 	}
 
@@ -75,10 +79,14 @@ public:/*local static functions*/
 		OpCode opcode;
 		int arg;
 
+		Instruction()
+			:opcode(OpNop),arg(0){}
 		Instruction( OpCode opcode_, int arg_)
 			:opcode(opcode_),arg(arg_){}
 		Instruction( const Instruction& o)
 			:opcode(o.opcode),arg(o.arg){}
+		Instruction& operator = ( const Instruction& o)
+			{opcode=o.opcode; arg=o.arg; return *this;}
 	};
 
 	struct Pattern
@@ -110,6 +118,7 @@ private:
 	void pushInstructionInt( OpCode opcode, int arg);
 	void insertInstructionInt( int iaddr, OpCode opcode, int arg);
 	void insertInstruction( int iaddr, OpCode opcode);
+	void eraseInstruction( int iaddr);
 	void pushInstructionFloat( OpCode opcode, float arg);
 	void pushInstructionRegex( OpCode opcode, const std::string& arg);
 	void pushInstructionString( OpCode opcode, const std::string& arg);
@@ -117,7 +126,10 @@ private:
 
 	static bool isOpCodeJmp( OpCode opcode);
 	void patchOpCodeJmpAbsolute( int istart, int iend, int addr, int patchaddr);
-	void patchOpCodeJmpOffset( int istart, int addr, int patchaddrincr);
+	void patchOpCodeJmpOffset( int addr, int patchaddrincr);
+
+	struct ExecutionContext;
+	void analyzeTermList( ExecutionContext& exectx, const SentenceLexerContextInterface* lexer) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

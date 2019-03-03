@@ -19,11 +19,13 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 using namespace strus;
 
 #define MODULENAME "sentence analyzer"
 #define STRUS_DBGTRACE_COMPONENT_NAME "sentence"
+#undef STRUS_LOWLEVEL_DEBUG
 
 SentenceAnalyzerInstance::SentenceAnalyzerInstance( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_),m_debugtrace(0),m_program()
@@ -78,6 +80,9 @@ std::string SentenceAnalyzerInstance::instructionToString( const Instruction& in
 		case OpEndCount:
 		case OpDecCount:
 			break;
+		case OpTestCount:
+			rt.append( strus::string_format( " %d", instr.arg));
+			break;
 		case OpTestType:
 			rt.push_back(' ');
 			rt.append( m_program.valuear[ instr.arg]);
@@ -117,20 +122,20 @@ void SentenceAnalyzerInstance::pushInstructionInt( OpCode opcode, int arg)
 
 void SentenceAnalyzerInstance::pushInstructionFloat( OpCode opcode, float arg)
 {
-	m_program.weightar.push_back( arg);
 	m_program.instructionar.push_back( Instruction( opcode, m_program.weightar.size()));
+	m_program.weightar.push_back( arg);
 }
 
 void SentenceAnalyzerInstance::pushInstructionRegex( OpCode opcode, const std::string& arg)
 {
-	m_program.patternar.push_back( Pattern( arg, m_errorhnd));
 	m_program.instructionar.push_back( Instruction( opcode, m_program.patternar.size()));
+	m_program.patternar.push_back( Pattern( arg, m_errorhnd));
 }
 
 void SentenceAnalyzerInstance::pushInstructionString( OpCode opcode, const std::string& arg)
 {
-	m_program.valuear.push_back( arg);
 	m_program.instructionar.push_back( Instruction( opcode, m_program.valuear.size()));
+	m_program.valuear.push_back( arg);
 }
 
 void SentenceAnalyzerInstance::pushInstruction( OpCode opcode)
@@ -140,14 +145,14 @@ void SentenceAnalyzerInstance::pushInstruction( OpCode opcode)
 
 void SentenceAnalyzerInstance::insertInstructionInt( int iaddr, OpCode opcode, int arg)
 {
-	patchOpCodeJmpOffset( iaddr, iaddr, +1);
 	m_program.instructionar.insert( m_program.instructionar.begin() + iaddr, Instruction( opcode, arg));
+	patchOpCodeJmpOffset( iaddr, +1);
 }
 
 void SentenceAnalyzerInstance::insertInstruction( int iaddr, OpCode opcode)
 {
-	patchOpCodeJmpOffset( iaddr, iaddr, +1);
 	m_program.instructionar.insert( m_program.instructionar.begin() + iaddr, Instruction( opcode, 0));
+	patchOpCodeJmpOffset( iaddr, +1);
 }
 
 bool SentenceAnalyzerInstance::isOpCodeJmp( OpCode opcode)
@@ -164,22 +169,50 @@ void SentenceAnalyzerInstance::patchOpCodeJmpAbsolute( int istart, int iend, int
 	}
 }
 
-void SentenceAnalyzerInstance::patchOpCodeJmpOffset( int istart, int addr, int patchaddrincr)
+void SentenceAnalyzerInstance::patchOpCodeJmpOffset( int addr, int patchaddrincr)
 {
-	std::vector<Instruction>::iterator ii = m_program.instructionar.begin() + istart, ie = m_program.instructionar.end();
+	std::vector<Instruction>::iterator ii = m_program.instructionar.begin(), ie = m_program.instructionar.end();
 	for (; ii != ie; ++ii)
 	{
-		if (isOpCodeJmp( ii->opcode) && ii->arg >= addr) ii->arg += patchaddrincr;
+		if (isOpCodeJmp( ii->opcode) && ii->arg > addr) ii->arg += patchaddrincr;
 	}
 	std::vector<int>::iterator ai = m_program.addressar.begin(), ae = m_program.addressar.end();
 	for (; ai != ae; ++ai)
 	{
-		if (*ai >= istart) *ai += patchaddrincr;
+		if (*ai > addr) *ai += patchaddrincr;
 	}
 }
 
+void SentenceAnalyzerInstance::eraseInstruction( int iaddr)
+{
+	int ii = 0, ie = m_program.instructionar.size();
+	for (; ii <= iaddr; ++ii)
+	{
+		Instruction& instr = m_program.instructionar[ ii];
+		if (isOpCodeJmp( instr.opcode) && instr.arg > iaddr)
+		{
+			instr.arg -= 1;
+		}
+	}
+	for (; ii != ie; ++ii)
+	{
+		Instruction& instr = m_program.instructionar[ ii];
+		if (isOpCodeJmp( instr.opcode) && instr.arg > iaddr)
+		{
+			instr.arg -= 1;
+		}
+		m_program.instructionar[ ii-1] = m_program.instructionar[ ii];
+	}
+	m_program.instructionar.resize( m_program.instructionar.size()-1);
+	std::vector<int>::iterator ai = m_program.addressar.begin(), ae = m_program.addressar.end();
+	for (; ai != ae; ++ai)
+	{
+		if (*ai >= iaddr) *ai -= 1;
+	}
+}
 
 #define ADDRESS_SUCCESS -1
+#define ADDRESS_TEMPORARY -2
 
 void SentenceAnalyzerInstance::pushTerm( const std::string& type, const std::string& name, float weight)
 {
@@ -188,7 +221,7 @@ void SentenceAnalyzerInstance::pushTerm( const std::string& type, const std::str
 		m_program.addressar.push_back( m_program.instructionar.size());
 		if (!type.empty()) pushInstructionString( OpTestType, type);
 		if (!name.empty()) pushInstructionRegex( OpTestFeat, name);
-		pushInstructionInt( OpJmpIf, m_program.instructionar.size()+1);
+		pushInstructionInt( OpJmpIf, m_program.instructionar.size()+2);
 		pushInstruction( OpReject);
 		pushInstructionFloat( OpWeight, weight);
 		pushInstruction( OpAccept);
@@ -214,6 +247,7 @@ void SentenceAnalyzerInstance::pushAlt( int argc)
 		if (argc > (int)m_program.addressar.size()) throw std::runtime_error(_TXT("bad argument, not enough expressions on the stack"));
 		if (argc == 0) throw std::runtime_error(_TXT("bad argument, no expressions referenced"));
 
+		int entry_addr = m_program.addressar[ m_program.addressar.size() - argc];
 		std::vector<int>::iterator ai = m_program.addressar.begin() + (m_program.addressar.size() - argc), ae = m_program.addressar.end();
 		std::vector<int>::iterator ai_next = ai + 1;
 		for (; ai_next != ae; ++ai,++ai_next)
@@ -221,6 +255,7 @@ void SentenceAnalyzerInstance::pushAlt( int argc)
 			insertInstructionInt( *ai, OpJmpDup, *ai_next);
 		}
 		m_program.addressar.resize( m_program.addressar.size() - argc + 1);
+		m_program.addressar.back() = entry_addr;
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' operation push alt: %s"), MODULENAME, *m_errorhnd);
 }
@@ -233,7 +268,7 @@ void SentenceAnalyzerInstance::pushSequenceImm( int argc)
 		if (argc == 0) throw std::runtime_error(_TXT("bad argument, no expressions referenced"));
 
 		std::vector<int>::iterator ai = m_program.addressar.begin() + (m_program.addressar.size() - argc), ae = m_program.addressar.end();
-		std::vector<int>::iterator ai_next = m_program.addressar.begin() + 1;
+		std::vector<int>::iterator ai_next = ai + 1;
 		for (; ai_next != ae; ++ai,++ai_next)
 		{
 			patchOpCodeJmpAbsolute( *ai, *ai_next, ADDRESS_SUCCESS, *ai_next);
@@ -243,23 +278,59 @@ void SentenceAnalyzerInstance::pushSequenceImm( int argc)
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' operation push sequence immediate: %s"), MODULENAME, *m_errorhnd);
 }
 
-void SentenceAnalyzerInstance::pushRepeat( int times)
+void SentenceAnalyzerInstance::pushRepeat( int mintimes, int maxtimes)
 {
 	try
 	{
 		if (m_program.addressar.empty()) throw std::runtime_error(_TXT("bad argument, not enough expressions on the stack"));
-		if (times <= 0) throw std::runtime_error(_TXT("bad argument, counter has to be a positive integer"));
-		int addr = m_program.addressar.back();
+		if (mintimes < 0) throw std::runtime_error(_TXT("bad argument, min counter has to be a non negative integer"));
+		if (mintimes == maxtimes && mintimes == 1) return;
 
-		insertInstructionInt( addr++, OpStartCount, times);
-		pushInstructionInt( OpJmpDup, m_program.instructionar.size()+2);
+		if (mintimes == 0 && maxtimes == -1)
+		{
+			// [A] Handle case of '*':
+			int loop_addr = m_program.addressar.back();
 
-		patchOpCodeJmpAbsolute( addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
+			insertInstructionInt( loop_addr, OpJmpDup, m_program.instructionar.size()+1);
+			patchOpCodeJmpAbsolute( loop_addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
 
-		pushInstruction( OpDecCount);
-		pushInstructionInt( OpJmpIf, addr/*address of OpJmpDup*/);
-		pushInstruction( OpEndCount);
-		pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
+			pushInstructionInt( OpJmp, loop_addr);
+			pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
+			m_program.addressar.back() = loop_addr;
+		}
+		else
+		{
+			// [B] Handle case of '{start,end}':
+			if (mintimes > maxtimes) throw std::runtime_error(_TXT("bad argument, minimes has to be bigger or equal to max times"));
+			if (maxtimes <= 0) throw std::runtime_error(_TXT("bad argument, max counter has to be a positive integer or -1 (unlimited)"));
+
+			int entry_addr = m_program.addressar.back();
+	
+			insertInstructionInt( entry_addr, OpStartCount, maxtimes);
+			int loop_addr = entry_addr+1;
+			int ins_addr = loop_addr;
+
+			if (mintimes >= 0 && mintimes < maxtimes)
+			{
+				insertInstructionInt( ins_addr, OpTestCount, maxtimes-mintimes+1);
+				ins_addr++;
+				insertInstructionInt( ins_addr, OpJmpIf, ADDRESS_TEMPORARY);
+				ins_addr++;
+			}
+			if (mintimes != maxtimes)
+			{
+				insertInstructionInt( ins_addr, OpJmpDup, m_program.instructionar.size()+2);
+				ins_addr++;
+				patchOpCodeJmpAbsolute( loop_addr, m_program.instructionar.size(), ADDRESS_TEMPORARY, ins_addr);
+			}
+			patchOpCodeJmpAbsolute( ins_addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
+	
+			pushInstruction( OpDecCount);
+			pushInstructionInt( OpJmpIfNot, loop_addr);
+			pushInstruction( OpEndCount);
+			pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
+			m_program.addressar.back() = entry_addr;
+		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' operation push repeat: %s"), MODULENAME, *m_errorhnd);
 }
@@ -278,16 +349,6 @@ void SentenceAnalyzerInstance::defineSentence( const std::string& classname, flo
 		patchOpCodeJmpAbsolute( addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
 		pushInstructionFloat( OpWeight, weight);
 		pushInstructionString( OpResult, classname);
-		if (m_debugtrace)
-		{
-			m_debugtrace->open( "sentencedef");
-			for (int ii=addr; ii<(int)m_program.instructionar.size(); ++ii)
-			{
-				std::string instrstr = instructionToString( m_program.instructionar[ ii]);
-				m_debugtrace->event( "instr", "%d %s", ii, instrstr.c_str());
-			}
-			m_debugtrace->close();
-		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in define sentence of '%s': %s"), MODULENAME, *m_errorhnd);
 }
@@ -297,21 +358,54 @@ bool SentenceAnalyzerInstance::compile()
 	try
 	{
 		if (!m_program.addressar.empty()) throw std::runtime_error(_TXT("sentence definitions not complete (stack is not empty)"));
-		std::vector<Instruction>::iterator ii = m_program.instructionar.begin(), ie = m_program.instructionar.begin();
-		for (; ii != ie; ++ii)
+		int ii = 0, ie = m_program.instructionar.size();
+		for (ii=0; ii != ie; ++ii)
 		{
-			if (isOpCodeJmp( ii->opcode) && ii->arg < 0) throw std::runtime_error(_TXT("not all jump targets resolved"));
+			Instruction& instr = m_program.instructionar[ ii];
+			if (instr.opcode == OpJmp)
+			{
+				if (instr.arg == ii+1)
+				{
+					// Optimization: Elimination of jump to the next address
+					eraseInstruction( ii);
+					--ie;
+				}
+			}
+		}
+		for (ii=0; ii != ie; ++ii)
+		{
+			Instruction& instr = m_program.instructionar[ ii];
+			if (isOpCodeJmp( instr.opcode))
+			{
+				if (instr.arg < 0) throw std::runtime_error(_TXT("unresolved jump target"));
+				if (instr.arg > ie) throw std::runtime_error(_TXT("invalid jump target"));
+			}
 		}
 		if (m_debugtrace)
 		{
-			std::string procarstr;
+			m_debugtrace->open( "program");
 			std::vector<int>::const_iterator pi = m_program.procar.begin(), pe = m_program.procar.end();
+			for (ii=0; ii<ie; ++ii)
+			{
+				const char* prefix = "";
+				if (pi < pe && ii == *pi)
+				{
+					prefix = "*";
+					++pi;
+				}
+				std::string instrstr = instructionToString( m_program.instructionar[ ii]);
+				m_debugtrace->event( "instr", "%d%s %s", ii, prefix, instrstr.c_str());
+			}
+			m_debugtrace->close();
+
+			std::string procarstr;
+			pi = m_program.procar.begin();
 			for (; pi != pe; ++pi)
 			{
 				if (!procarstr.empty()) procarstr.append(", ");
 				procarstr.append( strus::string_format( "%d", *pi));
 			}
-			m_debugtrace->event( "procs", "%s", procarstr.c_str());
+			m_debugtrace->event( "procs", "addr %s", procarstr.c_str());
 		}
 		return true;
 	}
@@ -360,6 +454,13 @@ struct ExecutionData
 		return rt;
 	}
 
+	int copyCounters( int list)
+	{
+		if (list == -1) return list;
+		counterLists.push_back( Counter( counterLists[ list].value, copyCounters( counterLists[ list].prev)));
+		return counterLists.size()-1;
+	}
+
 	int pushCounter( int list, int value)
 	{
 		counterLists.push_back( Counter( value, list));
@@ -376,6 +477,11 @@ struct ExecutionData
 	{
 		if (list == -1) throw std::runtime_error(_TXT("logic error: illegal access of element of empty counter stack"));
 		return 0==--counterLists[ list].value;
+	}
+	bool testCounter( int list, int minval)
+	{
+		if (list == -1) throw std::runtime_error(_TXT("logic error: illegal access of element of empty counter stack"));
+		return minval <= counterLists[ list].value;
 	}
 
 	std::vector<Element> elementLists;
@@ -405,12 +511,38 @@ struct ExecutionState
 		weight = o.weight;
 		return *this;
 	}
-	ExecutionState& withIp( int ip_)
+	ExecutionState duplicate( ExecutionData& execdata, int ip_) const
 	{
-		ip = ip_;
-		return *this;
+		ExecutionState rt( *this);
+		rt.ip = ip_;
+		rt.counters = execdata.copyCounters( counters);
+		return rt;
 	}
-
+	ExecutionState duplicate( ExecutionData& execdata) const
+	{
+		ExecutionState rt( *this);
+		rt.counters = execdata.copyCounters( counters);
+		return rt;
+	}
+	std::string tostring( const ExecutionData& execdata) const
+	{
+		int elementcnt = 0;
+		int ei = elements;
+		while (ei >= 0)
+		{
+			ei = execdata.elementLists[ ei].prev;
+			++elementcnt;
+		}
+		std::string counterstr;
+		int ci = counters;
+		while (ci >= 0)
+		{
+			if (!counterstr.empty()) counterstr.append(",");
+			counterstr.append( strus::string_format("%d", execdata.counterLists[ ci].value));
+			ci = execdata.counterLists[ ci].prev;
+		}
+		return strus::string_format("flag: %s, ip: %d, counters:(%s), elements:%d, weight:%.3f", (testflag?"true":"false"), ip, counterstr.c_str(), elementcnt, weight);
+	}
 	int compare(const ExecutionState& o) const
 	{
 		if (std::abs( weight - o.weight) <= std::numeric_limits<float>::epsilon())
@@ -455,8 +587,8 @@ struct ExecutionState
 					testflag = true;
 					break;
 				case SentenceAnalyzerInstance::OpJmpDup:
-					states.push_back( ExecutionState( *this).withIp( instr.arg));
 					testflag = true;
+					states.push_back( duplicate( data, instr.arg));
 					break;
 				case SentenceAnalyzerInstance::OpStartCount:
 					counters = data.pushCounter( counters, instr.arg);
@@ -469,13 +601,16 @@ struct ExecutionState
 				case SentenceAnalyzerInstance::OpDecCount:
 					testflag = data.decCounter( counters);
 					break;
+				case SentenceAnalyzerInstance::OpTestCount:
+					testflag &= data.testCounter( counters, instr.arg);
+					break;
 				case SentenceAnalyzerInstance::OpTestType:
 					if (termidx < 0) return FeedReject;
 					testflag &= term.type() == program.valuear[ instr.arg];
 					break;
 				case SentenceAnalyzerInstance::OpTestFeat:
 					if (termidx < 0) return FeedReject;
-					testflag &= program.patternar[ instr.arg].regex->match_complete( term.value());
+					testflag &= program.patternar[ instr.arg].regex->match( term.value());
 					break;
 				case SentenceAnalyzerInstance::OpWeight:
 					weight *= program.weightar[ instr.arg];
@@ -494,17 +629,136 @@ struct ExecutionState
 		return FeedReject;
 	}
 
-	SentenceGuess result( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, const SentenceTermList& termlist)
+	SentenceGuess result( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, std::vector<ExecutionState>& states, const SentenceTermList& termlist)
 	{
-		std::vector<ExecutionState> states;
 		SentenceTerm term;
-		if (FeedResult != feed( program, data, states, -1, term)) return SentenceGuess();
-		if (ip == 0 || program.instructionar[ ip-1].opcode != SentenceAnalyzerInstance::OpResult) return SentenceGuess();
-
-		return SentenceGuess( program.valuear[ program.instructionar[ ip-1].arg], data.elementList( elements, termlist), weight);
+		if (FeedResult == feed( program, data, states, -1, term))
+		{
+			if (ip == 0 || program.instructionar[ ip-1].opcode != SentenceAnalyzerInstance::OpResult)
+			{
+				throw std::runtime_error(_TXT("logic error: expected result instruction"));
+			}
+			return SentenceGuess( program.valuear[ program.instructionar[ ip-1].arg], data.elementList( elements, termlist), weight);
+		}
+		else
+		{
+			return SentenceGuess();
+		}
 	}
 };
 
+struct SentenceAnalyzerInstance::ExecutionContext
+{
+	typedef std::map<SentenceTerm,int> TermMap;
+
+	TermMap termmap;
+	std::vector<SentenceTerm> termar;
+	std::vector<SentenceGuess> results;
+	double maxWeight;
+
+	ExecutionContext()
+		:termmap(),termar(),results(),maxWeight(0.0){}
+};
+
+void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( ExecutionContext& exectx, const SentenceLexerContextInterface* lexerctx) const
+{
+	std::vector<ExecutionState> init_states;
+	std::vector<ExecutionState> accept_states;
+
+	std::vector<int>::const_iterator pi = m_program.procar.begin(), pe = m_program.procar.end();
+	for (; pi != pe; ++pi)
+	{
+		init_states.push_back( ExecutionState( *pi));
+	}
+	ExecutionData execdata;
+
+	int ki = 0, ke = lexerctx->nofTokens();
+	for (; ki != ke; ++ki)
+	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "TOKEN " << strus::string_format("%d of %d", ki, ke) << std::endl;
+#endif
+		std::string feat = lexerctx->featureValue( ki);
+		std::vector<std::string> types = lexerctx->featureTypes( ki);
+
+		std::vector<std::string>::const_iterator ti = types.begin(), te = types.end();
+		for (; ti != te; ++ti)
+		{
+			SentenceTerm term( *ti, feat);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "TERM " << strus::string_format("type %s value '%s'", ti->c_str(), feat.c_str()) << std::endl;
+#endif
+			ExecutionContext::TermMap::const_iterator mi = exectx.termmap.find( term);
+			int termidx = mi == exectx.termmap.end() ? exectx.termar.size() : mi->second;
+
+			std::vector<ExecutionState> states = init_states;
+			std::size_t sidx = 0;
+			for (; sidx < states.size(); ++sidx)
+			{
+				ExecutionState state = states[ sidx].duplicate( execdata);
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cerr << "STATE " << state.tostring( execdata) << std::endl;
+#endif
+				switch (state.feed( m_program, execdata, states, termidx, term))
+				{
+					case ExecutionState::FeedResult:
+#ifdef STRUS_LOWLEVEL_DEBUG
+						std::cerr << "RESULT " << state.tostring( execdata) << std::endl;
+#endif
+						break;
+					case ExecutionState::FeedAccept:
+						if (state.weight - std::numeric_limits<float>::epsilon() > exectx.maxWeight)
+						{
+							accept_states.clear();
+						}
+						else if (state.weight + std::numeric_limits<float>::epsilon() < exectx.maxWeight)
+						{
+							break;
+						}
+						exectx.maxWeight = state.weight;
+						if (termidx == (int)exectx.termar.size())
+						{
+							exectx.termmap[ term] = termidx;
+							exectx.termar.push_back( term);
+						}
+#ifdef STRUS_LOWLEVEL_DEBUG
+						std::cerr << "ACCEPT " << state.tostring( execdata) << std::endl;
+#endif
+						accept_states.push_back( state);
+						break;
+					case ExecutionState::FeedReject:
+#ifdef STRUS_LOWLEVEL_DEBUG
+						std::cerr << "REJECT " << state.tostring( execdata) << std::endl;
+#endif
+						break;
+				}
+			}
+		}
+		init_states.clear();
+		std::swap( init_states, accept_states);
+	}
+	std::size_t sidx = 0;
+	for (; sidx != init_states.size(); ++sidx)
+	{
+		ExecutionState state = init_states[ sidx];
+		if (state.weight + std::numeric_limits<float>::epsilon() > exectx.maxWeight)
+		{
+			if (state.weight - std::numeric_limits<float>::epsilon() > exectx.maxWeight)
+			{
+				exectx.results.clear();
+			}
+			else if (state.weight + std::numeric_limits<float>::epsilon() < exectx.maxWeight)
+			{
+				continue;
+			}
+			SentenceGuess result = state.result( m_program, execdata, init_states, exectx.termar);
+			if (result.valid())
+			{
+				exectx.results.push_back( result);
+			}
+		}
+	}
+}
 
 
 std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const
@@ -512,98 +766,16 @@ std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const Sent
 	try
 	{
 		strus::local_ptr<SentenceLexerContextInterface> lexerctx( lexer->createContext( source));
-		std::vector<SentenceGuess> results;
-		ExecutionData data;
-		typedef std::map<SentenceTerm,int> TermMap;
-		TermMap termmap;
-		std::vector<SentenceTerm> termar;
-		std::vector<ExecutionState> init_states;
+		if (!lexerctx.get()) throw std::runtime_error(_TXT("failed to create lexer context"));
 
-		std::vector<int>::const_iterator pi = m_program.procar.begin(), pe = m_program.procar.begin();
-		for (; pi != pe; ++pi)
-		{
-			init_states.push_back( ExecutionState( *pi));
-		}
-		double maxWeight = 0.0;
+		ExecutionContext exectx;
 
 		bool more = lexerctx->fetchFirstSplit();
 		for (; more; more = lexerctx->fetchNextSplit())
 		{
-			std::vector<ExecutionState> start_states = init_states;
-			std::vector<ExecutionState> accept_states;
-
-			int ki = 0, ke = lexerctx->nofTokens();
-			for (; ki != ke; ++ki)
-			{
-				std::string feat = lexerctx->featureValue( ki);
-				std::vector<std::string> types = lexerctx->featureTypes( ki);
-
-				std::vector<std::string>::const_iterator ti = types.begin(), te = types.end();
-				for (; ti != te; ++ti)
-				{
-					SentenceTerm term( *ti, feat);
-					TermMap::const_iterator mi = termmap.find( term);
-					int termidx = mi == termmap.end() ? termar.size() : mi->second;
-
-					std::vector<ExecutionState> states = start_states;
-					while (!states.empty())
-					{
-						std::vector<ExecutionState> dup_states;
-						std::vector<ExecutionState>::iterator si = states.begin(), se = states.end();
-						for (; si != se; ++si)
-						{
-							switch (si->feed( m_program, data, dup_states, termidx, term))
-							{
-								case ExecutionState::FeedResult:
-									break;
-								case ExecutionState::FeedAccept:
-									if (si->weight - std::numeric_limits<float>::epsilon() > maxWeight)
-									{
-										accept_states.clear();
-									}
-									else if (si->weight + std::numeric_limits<float>::epsilon() < maxWeight)
-									{
-										break;
-									}
-									maxWeight = si->weight;
-									if (termidx == (int)termar.size())
-									{
-										termmap[ term] = termidx;
-										termar.push_back( term);
-									}
-									accept_states.push_back( *si);
-									break;
-								case ExecutionState::FeedReject:
-									break;
-							}
-						}
-						states = dup_states;
-					}
-				}
-				start_states = accept_states;
-			}
-			std::vector<ExecutionState>::iterator ai = accept_states.begin(), ae = accept_states.end();
-			for (; ai != ae; ++ai)
-			{
-				if (ai->weight + std::numeric_limits<float>::epsilon() > maxWeight)
-				{
-					if (ai->weight - std::numeric_limits<float>::epsilon() > maxWeight)
-					{
-						results.clear();
-					}
-					else if (ai->weight + std::numeric_limits<float>::epsilon() < maxWeight)
-					{
-						continue;
-					}
-					SentenceGuess result = ai->result( m_program, data, termar);
-					if (result.valid())
-					{
-						results.push_back( result);
-					}
-				}
-			}
+			analyzeTermList( exectx, lexerctx.get());
 		}
-		std::vector<SentenceGuess> rt = lexerctx->rankSentences( results, maxNofResults);
+		std::vector<SentenceGuess> rt = lexerctx->rankSentences( exectx.results, maxNofResults);
 		if (m_errorhnd->hasError())
 		{
 			throw std::runtime_error( m_errorhnd->fetchError());
@@ -615,7 +787,7 @@ std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const Sent
 			for (; ri != re; ++ri)
 			{
 				std::string termliststr = termListString( ri->terms(), ", ");
-				m_debugtrace->event( "guess", "%.3f %s %s", ri->weight(), ri->classname().c_str(), termliststr.c_str());
+				m_debugtrace->event( "guess", "%.3f '%s' (%s)", ri->weight(), ri->classname().c_str(), termliststr.c_str());
 			}
 			m_debugtrace->close();
 		}

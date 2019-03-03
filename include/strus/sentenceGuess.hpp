@@ -64,6 +64,15 @@ public:
 				: m_terms.size() < o.m_terms.size())
 			: m_weight < o.m_weight;
 	}
+	/// \brief Comparator for testing equality
+	bool operator == (const SentenceGuess& o) const
+	{
+		return (std::abs( m_weight - o.m_weight) <= std::numeric_limits<float>::epsilon())
+			&& m_terms.size() == o.m_terms.size()
+			&& m_classname == o.m_classname
+			&& equalTermList( m_terms, o.m_terms);
+	}
+
 	/// \brief Reset the contents
 	void clear()
 	{
@@ -100,6 +109,13 @@ private:
 				return *i1 < *i2;
 			}
 		}
+	}
+	static bool equalTermList( const SentenceTermList& t1, const SentenceTermList& t2)
+	{
+		SentenceTermList::const_iterator i1 = t1.begin(), e1 = t1.end();
+		SentenceTermList::const_iterator i2 = t2.begin(), e2 = t2.end();
+		for (; i1 != e1 && i2 != e2 && *i1 == *i2; ++i1,++i2){}
+		return (i1 == e1 && i2 == e2);
 	}
 
 private:
