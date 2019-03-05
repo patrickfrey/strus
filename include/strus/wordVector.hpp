@@ -42,7 +42,7 @@ public:
 		WordVector rt;
 		std::size_t ii = 0, nn = size() > o.size() ? o.size() : size();
 		rt.reserve( nn);
-		std::vector<float>::const_iterator wi = begin(), we = end(), oi = o.begin(), oe = o.end();
+		std::vector<float>::const_iterator wi = begin(), oi = o.begin();
 		for (; ii < nn; ++ii,++wi,++oi)
 		{
 			rt.push_back( *wi + *oi);
@@ -52,8 +52,8 @@ public:
 	WordVector& operator+=( const WordVector& o)
 	{
 		std::size_t ii = 0, nn = size() > o.size() ? o.size() : size();
-		std::vector<float>::iterator wi = begin(), we = end();
-		std::vector<float>::const_iterator oi = o.begin(), oe = o.end();
+		std::vector<float>::iterator wi = begin();
+		std::vector<float>::const_iterator oi = o.begin();
 		for (; ii < nn; ++ii,++wi,++oi)
 		{
 			 *wi += *oi;

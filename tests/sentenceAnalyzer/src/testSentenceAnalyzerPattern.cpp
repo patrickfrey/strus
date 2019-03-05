@@ -433,7 +433,7 @@ public:
 		std::vector<std::string>::const_iterator si = m_sourcear.begin(), se = m_sourcear.end();
 		for (; si != se; ++si)
 		{
-			std::vector<std::string>::const_iterator ni = m_namear.begin(), ne = m_namear.end();
+			std::vector<std::string>::const_iterator ni = m_namear.begin();
 			std::vector<strus::Reference<strus::RegexSearch> >::const_iterator pi = m_regexar.begin(), pe = m_regexar.end();
 			for (; pi != pe; ++pi,++ni)
 			{
