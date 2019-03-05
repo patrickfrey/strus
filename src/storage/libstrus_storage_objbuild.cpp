@@ -69,7 +69,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || string_conv::tolower( name) == "leveldb")
+			if (name.empty() || string_conv::tolower( name) == strus::Constants::leveldb_database_name())
 			{
 				return m_db.get();
 			}
@@ -88,7 +88,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || string_conv::tolower( name) == "default")
+			if (name.empty() || string_conv::tolower( name) == strus::Constants::standard_statistics_processor())
 			{
 				return m_statsproc.get();
 			}
@@ -112,7 +112,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || string_conv::tolower( name) == "default")
+			if (name.empty() || string_conv::tolower( name) == strus::Constants::standard_sentence_analyzer())
 			{
 				return createSentenceAnalyzerInstance_std( m_errorhnd);
 			}
@@ -223,7 +223,7 @@ DLL_PUBLIC StorageClientInterface*
 		{
 			if (statsprocname.empty())
 			{
-				statsprocname = "default";
+				statsprocname = strus::Constants::standard_statistics_processor();
 			}
 		}
 

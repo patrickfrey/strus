@@ -66,7 +66,12 @@ struct Constants
 	{
 		return 65535;
 	}
-	/// \brief Get the name of the standard (default) vector storage
+	/// \brief Get the name of the leveldb database type used as default database type
+	static const char* leveldb_database_name()
+	{
+		return "leveldb";
+	}
+	/// \brief Get the name of the standard (default) vector storage (naming the storage type in the storage configuration)
 	static const char* standard_vector_storage()
 	{
 		return "vector_std";
@@ -78,6 +83,16 @@ struct Constants
 	}
 	/// \brief Get the name of the standard (default) pattern matcher
 	static const char* standard_pattern_matcher()
+	{
+		return "std";
+	}
+	/// \brief Get the name of the standard (default) sentence analyzer
+	static const char* standard_sentence_analyzer()
+	{
+		return "std";
+	}
+	/// \brief Get the name of the standard (default) statistics processor
+	static const char* standard_statistics_processor()
 	{
 		return "std";
 	}
