@@ -1,26 +1,32 @@
 OSX
 ---
+# The software is regurarly built on OSX with travis, see https://travis-ci.org/patrickfrey/,
+#   build description in dist/travis/before_script.sh and dist/travis/script.sh
 
-Install Homebrew from http://brew.sh/:
+# Steps:
+# 1) Install Homebrew from http://brew.sh/:
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-Install required packages:
+# 2) Install required packages:
 
 brew install cmake boost snappy leveldb
 
-Install gettext with brew, draw necessary links:
+# 3) Install gettext with brew, draw necessary links:
 
 brew install gettext
 brew link --force gettext
 echo 'export PATH="/usr/local/opt/gettext/bin:$PATH"' >> ~/.bash_profile
 
-Build strus with:
+# 4) Build dependent strus packages
+# See installation of project strusBase
+
+# 5) Build strus with:
 
 cmake -G Xcode -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release .
 xcodebuild -configuration Release -target ALL_BUILD
 xcodebuild -configuration Release -target install
 
-Running the tests:
+# 6) Running the tests:
 
 xcodebuild -configuration Release -target RUN_TESTS
