@@ -33,11 +33,6 @@ public:
 	/// \param[in] feat name of the feature to add
 	virtual void defineFeature( const std::string& type, const std::string& feat)=0;
 
-	/// \brief Define some scalar configuration parameter used in calculation (depending on implementation)
-	/// \param[in] name name of the variable (depending on implementation)
-	/// \param[in] value value assigned to the variable
-	virtual void defineScalar( const std::string& name, double value)=0;
-
 	/// \brief Clear all vectors,types and feature names in the storage
 	virtual void clear()=0;
 

@@ -38,9 +38,11 @@ public:
 	/// \param[in] type type of the features to search for
 	/// \param[in] vec vector to search similar features of
 	/// \param[in] maxNofResults limits the number of results returned
-	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have
+	/// \param[in] minSimilarity value between 0.0 and 1.0 specifying the minimum similarity a result should have (if LSH weighting is used only values above 0.5 make sense)
+	/// \param[in] speedRecallFactor factor bigger than 0.0 used to adjust performance/recall, smaller value = better performance, bigger value = better recall
+	/// \remark for the standard LSH implementation a good value is 0.5. In the standard LSH implementation the value describes the accepted difference in bits of a sample, compared with the average error accepted. For example if the accepted difference in bits of the LSH values compared is 400 out of 2048, then the accepted difference for a sample of 64 bits that decides wheter a candidate should be considered further is (1.0 + speedRecallFactor) * 400 / (2048/64)) = (1.0 + speedRecallFactor) * 12.5 bits.
 	/// \param[in] realVecWeights true if to calculate the real vector weights and diffs for the best matches and not an approximate value (e.g. the similarity estimation derived from the LSH bits differing)
-	virtual std::vector<VectorQueryResult> findSimilar( const std::string& type, const WordVector& vec, int maxNofResults, double minSimilarity, bool realVecWeights) const=0;
+	virtual std::vector<VectorQueryResult> findSimilar( const std::string& type, const WordVector& vec, int maxNofResults, double minSimilarity, double speedRecallFactor, bool realVecWeights) const=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface (with ownership)
