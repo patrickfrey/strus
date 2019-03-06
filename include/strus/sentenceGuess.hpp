@@ -12,7 +12,6 @@
 #include "strus/sentenceTerm.hpp"
 #include <string>
 #include <cmath>
-#include <ctgmath>
 #include <utility>
 #include <limits>
 
