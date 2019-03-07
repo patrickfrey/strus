@@ -213,7 +213,7 @@ double SummarizerFunctionContextAccumulateNear::candidateWeight( const Candidate
 	double rt = 0.0;
 	for (std::size_t wi=0; wi<candidate.windowsize; ++wi)
 	{
-		double distweight = 1.0 / std::sqrt( std::fabs( candidate.forwardpos - valid_itrar[ candidate.window[ wi]]->posno()) + DIST_WEIGHT_BASE);
+		double distweight = 1.0 / strus::Math::sqrt( strus::Math::abs( candidate.forwardpos - valid_itrar[ candidate.window[ wi]]->posno()) + DIST_WEIGHT_BASE);
 		rt += m_weightincr[ candidate.window[ wi]] * distweight;
 	}
 	return rt;
