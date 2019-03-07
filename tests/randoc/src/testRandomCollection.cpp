@@ -24,6 +24,7 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
+#include "strus/base/math.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -32,7 +33,6 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <cmath>
 #include <stdexcept>
 #include <ctime>
 #include <algorithm>
@@ -214,7 +214,7 @@ static float tfIdf( unsigned int collSize, unsigned int nofMatchingDocs, unsigne
 	const float k1 = 1.5; //.... [1.2,2.0]
 	const float b = 0.75; // fix
 
-	float IDF = ::log10( collSize / (nofMatchingDocs + 1.0));
+	float IDF = strus::Math::log10( collSize / (nofMatchingDocs + 1.0));
 	float tf = ((float)nofMatchesInDoc * (k1 + 1.0))
 		/ ((float)nofMatchesInDoc 
 			+ (k1 * (1.0 - b + ((b * (float)docLen) / avgDocLen)))

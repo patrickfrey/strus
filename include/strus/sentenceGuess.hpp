@@ -10,8 +10,8 @@
 #ifndef _STRUS_SENTENCE_GUESS_HPP_INCLUDED
 #define _STRUS_SENTENCE_GUESS_HPP_INCLUDED
 #include "strus/sentenceTerm.hpp"
+#include "strus/base/math.hpp"
 #include <string>
-#include <math.h>
 #include <utility>
 #include <limits>
 
@@ -55,7 +55,7 @@ public:
 	/// \brief Comparator for sorting results according relevance
 	bool operator < (const SentenceGuess& o) const
 	{
-		return (::fabs( m_weight - o.m_weight) <= std::numeric_limits<float>::epsilon())
+		return (strus::Math::abs( m_weight - o.m_weight) <= std::numeric_limits<float>::epsilon())
 			? (m_terms.size() == o.m_terms.size()
 				? (m_classname == o.m_classname
 					? lesserTermList( m_terms, o.m_terms)

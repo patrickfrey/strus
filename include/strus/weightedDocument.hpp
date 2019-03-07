@@ -10,8 +10,8 @@
 #ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/base/math.hpp"
 #include <utility>
-#include <cmath>
 #include <limits>
 
 namespace strus {
@@ -40,7 +40,7 @@ public:
 	bool operator < ( const WeightedDocument& o) const
 	{
 		double diff = m_weight - o.m_weight;
-		if (fabs( diff) < std::numeric_limits<double>::epsilon())
+		if (strus::Math::abs( diff) < std::numeric_limits<double>::epsilon())
 		{
 			return m_docno < o.m_docno;
 		}
@@ -53,7 +53,7 @@ public:
 	bool operator > ( const WeightedDocument& o) const
 	{
 		double diff = m_weight - o.m_weight;
-		if (fabs( diff) < std::numeric_limits<double>::epsilon())
+		if (strus::Math::abs( diff) < std::numeric_limits<double>::epsilon())
 		{
 			return m_docno > o.m_docno;
 		}

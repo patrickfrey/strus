@@ -11,7 +11,6 @@
 #include "strus/base/bitOperations.hpp"
 #include <map>
 #include <limits>
-#include <cmath>
 #include <cstring>
 #include <stdexcept>
 

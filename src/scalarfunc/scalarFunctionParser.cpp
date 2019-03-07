@@ -12,9 +12,9 @@
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/bitOperations.hpp"
+#include "strus/base/math.hpp"
 #include "scalarFunctionLinearComb.hpp"
 #include <limits>
-#include <cmath>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -47,7 +47,7 @@ static double if_equal( unsigned int nofargs, const double* args)
 
 static double log_base( double x, double base)
 {
-	return log(x) / log(base);
+	return strus::Math::log(x) / strus::Math::log(base);
 }
 
 static double square( double x)

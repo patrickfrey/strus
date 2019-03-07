@@ -22,13 +22,13 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/base/numstring.hpp"
+#include "strus/base/math.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <cmath>
 
 using namespace strus;
 
@@ -95,7 +95,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
-			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+			double idf = strus::Math::log( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
 			if (idf < 0.00001)
 			{
 				idf = 0.00001;

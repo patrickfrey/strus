@@ -16,9 +16,9 @@
 #include "strus/scalarFunctionInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/index.hpp"
+#include "strus/base/math.hpp"
 #include <vector>
 #include <string>
-#include <cmath>
 
 namespace strus
 {
@@ -62,7 +62,7 @@ public:
 
 		double df() const
 		{
-			if (std::isnan(m_df))
+			if (strus::Math::isnan(m_df))
 			{
 				m_df = m_itr->documentFrequency();
 			}

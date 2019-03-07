@@ -7,9 +7,9 @@
  */
 #include "proximityWeightAccumulator.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/base/math.hpp"
 #include "private/internationalization.hpp"
 #include <limits>
-#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -95,8 +95,8 @@ void ProximityWeightAccumulator::weight_invdist(
 		for (; pi < windowsize; ++pi)
 		{
 			if (!win_pos[ pi]) continue;
-			double dist = std::fabs( win_pos[ pi] - win_pos[ wi]);
-			double weight = 1.0 / sqrt( dist+1);
+			double dist = strus::Math::abs( win_pos[ pi] - win_pos[ wi]);
+			double weight = 1.0 / strus::Math::sqrt( dist+1);
 			double order_weight = window[ pi] > window[ wi] ? (1.0 + 0.5 / (window[ pi] - window[ wi])) : 1.0;
 			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * weight * factor * order_weight;
 			ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * weight * factor * order_weight;
@@ -119,7 +119,7 @@ void ProximityWeightAccumulator::weight_invpos(
 		unsigned int pos = featar[ window[wi]]->posno();
 		if (pos)
 		{
-			double weight = 1.0 / sqrt( pos-firstpos+1);
+			double weight = 1.0 / strus::Math::sqrt( (double)pos-firstpos+1);
 			ar[ window[wi]] += incrar[ window[wi]] * weight * factor;
 		}
 	}
@@ -139,7 +139,7 @@ void ProximityWeightAccumulator::weight_invpos(
 		unsigned int pos = featar[ fi]->posno();
 		if (pos)
 		{
-			double weight = 1.0 / sqrt( pos-firstpos+1);
+			double weight = 1.0 / strus::Math::sqrt( (double)pos-firstpos+1);
 			ar[ fi] += incrar[ fi] * weight * factor;
 		}
 	}

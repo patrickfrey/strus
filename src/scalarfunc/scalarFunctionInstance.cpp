@@ -9,10 +9,10 @@
 /// \file scalarFunctionInstance.cpp
 #include "scalarFunctionInstance.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/math.hpp"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include <cmath>
 
 using namespace strus;
 
@@ -108,11 +108,11 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
-					if (std::fabs( a1) < std::numeric_limits<double>::epsilon())
+					if (strus::Math::abs( a1) < std::numeric_limits<double>::epsilon())
 					{
 						stk.push_back( 0.0);
 					}
-					else if (std::fabs( a2) < std::numeric_limits<double>::epsilon())
+					else if (strus::Math::abs( a2) < std::numeric_limits<double>::epsilon())
 					{
 						throw std::runtime_error( _TXT("division by zero"));
 					}

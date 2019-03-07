@@ -13,6 +13,7 @@
 #include "strus/debugTraceInterface.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/math.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -545,7 +546,7 @@ struct ExecutionState
 	}
 	int compare(const ExecutionState& o) const
 	{
-		if (std::abs( weight - o.weight) <= std::numeric_limits<float>::epsilon())
+		if (strus::Math::abs( weight - o.weight) <= std::numeric_limits<float>::epsilon())
 		{
 			if (ip == o.ip)
 			{

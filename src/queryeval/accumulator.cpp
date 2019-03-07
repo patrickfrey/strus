@@ -17,7 +17,6 @@
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
-#include <cmath>
 #include <iostream>
 
 using namespace strus;

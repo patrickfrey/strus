@@ -12,7 +12,7 @@
 #include "strus/constants.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
-#include <cmath>
+#include "strus/base/math.hpp"
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -65,7 +65,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
 			{
-				idf = std::log10(
+				idf = strus::Math::log10(
 						(m_nofCollectionDocuments - nofMatches + 0.5)
 						/ (nofMatches + 0.5));
 			}

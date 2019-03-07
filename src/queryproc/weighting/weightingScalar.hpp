@@ -18,7 +18,6 @@
 #include "strus/index.hpp"
 #include <vector>
 #include <string>
-#include <cmath>
 
 namespace strus
 {

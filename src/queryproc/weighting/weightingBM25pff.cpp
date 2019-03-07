@@ -14,7 +14,7 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/base/numstring.hpp"
-#include <cmath>
+#include "strus/base/math.hpp"
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -85,7 +85,7 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 			if (m_itrarsize > MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
-			double idf = std::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+			double idf = strus::Math::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
 			if (m_parameter.maxdf * m_nofCollectionDocuments < df)
 			{
 				m_relevantfeat[ m_itrarsize] = false;

@@ -26,7 +26,6 @@
 #include <limits>
 #include <cstring>
 #include <ctime>
-#include <cmath>
 #include <iomanip>
 #include "strus/base/stdint.h"
 #include <stdarg.h>
