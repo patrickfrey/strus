@@ -14,6 +14,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
+#include "strus/base/math.hpp"
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -134,7 +135,7 @@ struct TermCollection
 
 static std::string doubleToString( double val_)
 {
-	unsigned int val = (unsigned int)::floor( val_ * 1000);
+	unsigned int val = (unsigned int)strus::Math::floor( val_ * 1000);
 	unsigned int val_sec = val / 10000;
 	unsigned int val_ms = val % 10000;
 	std::ostringstream val_str;

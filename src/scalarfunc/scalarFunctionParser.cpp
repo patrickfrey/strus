@@ -57,7 +57,7 @@ static double square( double x)
 
 static unsigned int doubleToUint( double x)
 {
-	return (unsigned int)std::floor( std::fabs( x) + std::numeric_limits<float>::epsilon());
+	return (unsigned int)strus::Math::floor( std::fabs( x) + std::numeric_limits<float>::epsilon());
 }
 
 static double bit_xor( double x, double y)
@@ -81,28 +81,28 @@ ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
 	defineUnaryFunction( "fabs", &std::fabs);
-	defineUnaryFunction( "floor", &std::floor);
-	defineUnaryFunction( "ceil", &std::ceil);
-	defineUnaryFunction( "log", &std::log10);
+	defineUnaryFunction( "floor", &strus::Math::floor);
+	defineUnaryFunction( "ceil", &strus::Math::ceil);
+	defineUnaryFunction( "log", &strus::Math::log10);
 	defineBinaryFunction( "log", &log_base);
-	defineUnaryFunction( "ln", &std::log);
-	defineUnaryFunction( "exp", &std::exp);
-	defineUnaryFunction( "sqrt", &std::sqrt);
+	defineUnaryFunction( "ln", &strus::Math::log);
+	defineUnaryFunction( "exp", &strus::Math::exp);
+	defineUnaryFunction( "sqrt", &strus::Math::sqrt);
 	defineUnaryFunction( "sqr", &square);
-	defineBinaryFunction( "pow", &std::pow);
-	defineBinaryFunction( "mod", &std::fmod);
+	defineBinaryFunction( "pow", &strus::Math::pow);
+	defineBinaryFunction( "mod", &strus::Math::fmod);
 	defineBinaryFunction( "xor", &bit_xor);
 	defineBinaryFunction( "and", &bit_and);
 	defineBinaryFunction( "or", &bit_or);
-	defineUnaryFunction( "sin", &std::sin);
-	defineUnaryFunction( "cos", &std::cos);
-	defineUnaryFunction( "tan", &std::tan);
-	defineUnaryFunction( "sinh", &std::sinh);
-	defineUnaryFunction( "cosh", &std::cosh);
-	defineUnaryFunction( "tanh", &std::tanh);
-	defineUnaryFunction( "asin", &std::asin);
-	defineUnaryFunction( "acos", &std::acos);
-	defineUnaryFunction( "atan", &std::atan);
+	defineUnaryFunction( "sin", &strus::Math::sin);
+	defineUnaryFunction( "cos", &strus::Math::cos);
+	defineUnaryFunction( "tan", &strus::Math::tan);
+	defineUnaryFunction( "sinh", &strus::Math::sinh);
+	defineUnaryFunction( "cosh", &strus::Math::cosh);
+	defineUnaryFunction( "tanh", &strus::Math::tanh);
+	defineUnaryFunction( "asin", &strus::Math::asin);
+	defineUnaryFunction( "acos", &strus::Math::acos);
+	defineUnaryFunction( "atan", &strus::Math::atan);
 	defineUnaryFunction( "bcnt", &bit_cnt);
 	defineNaryFunction( "if_gt", &if_greater, 4, 4);
 	defineNaryFunction( "if_ge", &if_greaterequal, 4, 4);

@@ -8,6 +8,7 @@
 #include "ranker.hpp"
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
+#include "strus/base/math.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -37,7 +38,7 @@ static strus::Index g_docnum = 0;
 
 static std::string doubleToString( double val_)
 {
-	unsigned int val = (unsigned int)::floor( val_ * 1000);
+	unsigned int val = (unsigned int)strus::Math::floor( val_ * 1000);
 	unsigned int val_sec = val / 1000;
 	unsigned int val_ms = val % 1000;
 	std::ostringstream val_str;
