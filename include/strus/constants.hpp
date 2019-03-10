@@ -106,16 +106,6 @@ struct Constants
 	{
 		return '#';
 	}
-	/// \brief Get the name of the query expression operator for sentences detected by a sentence analyzer
-	static const char* sentence_seq_joinop()
-	{
-		return "sentence_seq";
-	}
-	/// \brief Get the name of the query expression operator for alternative sentences detected by a sentence analyzer
-	static const char* sentence_alt_joinop()
-	{
-		return "sentence_alt";
-	}
 };
 
 }//namespace
