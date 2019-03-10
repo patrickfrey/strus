@@ -45,7 +45,7 @@ public:
 
 	/// \brief Get a ranked list weighting the probability of alternative sentences forming a query
 	/// \param[in] sentences list of alternative sentences to calculate the ranklist for
-	/// \param[in] maxNofResults maximum number of results to return
+	/// \param[in] maxNofResults maximum number of results to return or -1 if not defined
 	/// \return the ranked list of weighted sentences
 	virtual std::vector<SentenceGuess> rankSentences( const std::vector<SentenceGuess>& sentences, int maxNofResults) const=0;
 };
