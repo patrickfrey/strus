@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <limits>
 #include <iostream>
 
 using namespace strus;
@@ -762,7 +763,7 @@ void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( Execut
 }
 
 
-std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const
+std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults, double minWeight) const
 {
 	try
 	{
@@ -777,6 +778,10 @@ std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const Sent
 			analyzeTermList( exectx, lexerctx.get());
 		}
 		std::vector<SentenceGuess> rt = lexerctx->rankSentences( exectx.results, maxNofResults);
+		std::vector<SentenceGuess>::const_iterator ri = rt.begin(), re = rt.end();
+		int ridx = 0;
+		for (; ri != re && ri->weight() + std::numeric_limits<float>::epsilon() >= minWeight; ++ri,++ridx){}
+		rt.resize( ridx);
 		if (m_errorhnd->hasError())
 		{
 			throw std::runtime_error( m_errorhnd->fetchError());
@@ -784,7 +789,7 @@ std::vector<SentenceGuess> SentenceAnalyzerInstance::analyzeSentence( const Sent
 		if (m_debugtrace)
 		{
 			m_debugtrace->open( "result");
-			std::vector<SentenceGuess>::const_iterator ri = rt.begin(), re = rt.end();
+			ri = rt.begin();
 			for (; ri != re; ++ri)
 			{
 				std::string termliststr = termListString( ri->terms(), ", ");

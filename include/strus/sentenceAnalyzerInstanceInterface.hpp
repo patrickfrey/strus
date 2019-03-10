@@ -61,7 +61,9 @@ public:
 	/// \param[in] lexer lexer instance
 	/// \param[in] source source to parse
 	/// \param[in] maxNofResults maximum number of results to return
-	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const=0;	
+	/// \param[in] minWeight defines cut of results with a lower weight
+	/// \return list of named term lists with weight
+	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults, double minWeight) const=0;	
 };
 
 }//namespace

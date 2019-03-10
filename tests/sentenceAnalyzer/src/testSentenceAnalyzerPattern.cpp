@@ -422,7 +422,7 @@ public:
 	void run() const
 	{
 		TestSentenceLexerInstance lexer;
-		std::vector<strus::SentenceGuess> resultar = m_analyzer->analyzeSentence( &lexer, m_joinsource, MAX_NOF_RESULTS);
+		std::vector<strus::SentenceGuess> resultar = m_analyzer->analyzeSentence( &lexer, m_joinsource, MAX_NOF_RESULTS, 0.0);
 		std::set<strus::SentenceGuess> result( resultar.begin(), resultar.end());
 		std::set<strus::SentenceGuess> expected;
 

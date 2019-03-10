@@ -48,7 +48,7 @@ public:
 
 	virtual bool compile();
 
-	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults) const;
+	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults, double minWeight) const;
 
 public:/*local static functions*/
 	enum OpCode {
