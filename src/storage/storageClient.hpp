@@ -157,6 +157,8 @@ public:
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
 	virtual void close();
+	virtual void compaction();
+
 	virtual std::string config() const;
 
 public:/*QueryEval,AttributeReader,documentTermIterator*/

@@ -244,6 +244,12 @@ public:
 	/// \note the method does not have to be called necessarily
 	/// \note it calls compactDatabase of the underlying database and can therefore last some time (some minutes in case of leveldb after large inserts).
 	virtual void close()=0;
+
+	/// \brief Do compaction of data.
+	/// \remark This method is also called as side effect close
+	/// \note the method does not have to be called necessarily
+	/// \note it calls compactDatabase of the underlying database and can therefore last some time (some minutes in case of leveldb after large inserts).
+	virtual void compaction()=0;
 };
 
 }//namespace
