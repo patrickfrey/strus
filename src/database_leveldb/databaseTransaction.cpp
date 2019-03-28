@@ -23,8 +23,8 @@ using namespace strus;
 
 #define MODULENAME "DatabaseTransaction"
 
-DatabaseTransaction::DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
-	:m_conn(conn_),m_batch(),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
+DatabaseTransaction::DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, bool autocompaction_, ErrorBufferInterface* errorhnd_)
+	:m_conn(conn_),m_batch(),m_commit_called(false),m_rollback_called(false),m_autocompaction(autocompaction_),m_errorhnd(errorhnd_)
 {}
 
 DatabaseTransaction::~DatabaseTransaction()
@@ -114,6 +114,13 @@ bool DatabaseTransaction::commit()
 		}
 		m_batch.Clear();
 		m_commit_called = true;
+		if (m_autocompaction)
+		{
+			// Do implicit compaction:
+			db->CompactRange( NULL, NULL);
+			db->CompactRange( NULL, NULL);
+			// ... has to be called twice, see https://github.com/google/leveldb/issues/227
+		}
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in database transaction commit: %s"), *m_errorhnd, false);

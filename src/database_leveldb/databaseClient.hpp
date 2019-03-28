@@ -32,6 +32,7 @@ public:
 	/// \param[in] compression wheter to use snappy compression (true) or not
 	/// \param[in] writeBufferSize size of write buffer per file
 	/// \param[in] blockSize block size on disk (size of units)
+	/// \param[in] autocompaction_ true if compaction is called on every transaction commit, false else
 	DatabaseClient(
 			const strus::shared_ptr<LevelDbHandleMap>& dbmap_,
 			const std::string& path,
@@ -40,8 +41,10 @@ public:
 			bool compression,
 			unsigned int writeBufferSize,
 			unsigned int blockSize,
+			bool autocompaction_,
 			ErrorBufferInterface* errorhnd_)
 		:m_conn( new LevelDbConnection( dbmap_,dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)))
+		,m_autocompaction(autocompaction_)
 		,m_errorhnd(errorhnd_)
 	{}
 
@@ -77,6 +80,7 @@ public:
 
 private:
 	strus::shared_ptr<LevelDbConnection> m_conn;		///< reference to database connection
+	bool m_autocompaction;					///< true if compaction is called on every transaction commit (configuration autocompact=yes)
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 

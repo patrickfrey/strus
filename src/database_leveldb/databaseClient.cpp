@@ -43,7 +43,7 @@ DatabaseTransactionInterface* DatabaseClient::createTransaction()
 	try
 	{
 		if (!m_conn->db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createTransaction");
-		return new DatabaseTransaction( m_conn, m_errorhnd);
+		return new DatabaseTransaction( m_conn, m_autocompaction, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
 }
@@ -207,6 +207,8 @@ void DatabaseClient::close()
 
 		// Do explicit compaction:
 		db->CompactRange( NULL, NULL);
+		db->CompactRange( NULL, NULL);
+		// ... has to be called twice, see https://github.com/google/leveldb/issues/227
 		m_conn->close();
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' close: %s"), MODULENAME, *m_errorhnd);

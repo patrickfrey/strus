@@ -26,7 +26,7 @@ class DatabaseTransaction
 	:public DatabaseTransactionInterface
 {
 public:
-	DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_);
+	DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, bool autocompaction_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseTransaction();
 
@@ -53,8 +53,9 @@ public:
 private:
 	strus::shared_ptr<LevelDbConnection> m_conn;	///< levelDB connection
 	leveldb::WriteBatch m_batch;			///< batch used for the transaction
-	bool m_commit_called;				///< true, if the transaction has been committed
-	bool m_rollback_called;				///< true, if the transaction has been rolled back
+	bool m_commit_called;				///< true if the transaction has been committed
+	bool m_rollback_called;				///< true if the transaction has been rolled back
+	bool m_autocompaction;				///< true if the storage should be compacted after the commit
 	ErrorBufferInterface* m_errorhnd;		///< buffer for reporting errors
 };
 
