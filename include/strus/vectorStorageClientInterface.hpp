@@ -62,6 +62,14 @@ public:
 	/// \return the list of types assigned to 'featureValue'
 	virtual std::vector<std::string> featureTypes( const std::string& featureValue) const=0;
 
+	/// \brief Get the number of types defined
+	/// \return the number of types
+	virtual int nofTypes() const=0;
+
+	/// \brief Get the number of features defined
+	/// \return the number of features
+	virtual int nofFeatures() const=0;
+
 	/// \brief Get the number of vectors defined for the features of a type
 	/// \param[in] type name of the type
 	/// \return the number of vectors
