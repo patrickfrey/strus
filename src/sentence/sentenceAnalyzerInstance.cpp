@@ -221,10 +221,22 @@ void SentenceAnalyzerInstance::pushTerm( const std::string& type, const std::str
 	try
 	{
 		m_program.addressar.push_back( m_program.instructionar.size());
-		if (!type.empty()) pushInstructionString( OpTestType, type);
-		if (!name.empty()) pushInstructionRegex( OpTestFeat, name);
-		pushInstructionInt( OpJmpIf, m_program.instructionar.size()+2);
-		pushInstruction( OpReject);
+		if (type == "*" || type.empty())
+		{
+			if (!name.empty())
+			{
+				pushInstructionRegex( OpTestFeat, name);
+				pushInstructionInt( OpJmpIf, m_program.instructionar.size()+2);
+				pushInstruction( OpReject);
+			}
+		}
+		else
+		{
+			pushInstructionString( OpTestType, type);
+			if (!name.empty()) pushInstructionRegex( OpTestFeat, name);
+			pushInstructionInt( OpJmpIf, m_program.instructionar.size()+2);
+			pushInstruction( OpReject);
+		}
 		pushInstructionFloat( OpWeight, weight);
 		pushInstruction( OpAccept);
 		pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
