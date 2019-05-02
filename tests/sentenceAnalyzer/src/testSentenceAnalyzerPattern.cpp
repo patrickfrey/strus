@@ -597,11 +597,25 @@ static TestDescr test_subsequence_alt_pattern_3 =
 	{"x","xx","xxx","xxxx","y","yy","yyy","yyyy","yyya","xxb","xa",0}
 };
 
-#define FLOAT_NUMBER_REGEX1 "(1{1,6}(_1{1,6}){0,1})"
-#define OPERATION_REGEX1 "s"
+static TestDescr test_subsequence_alt_pattern_4 =
+{
+	"sub sequence alternative pattern",
+	{{"x{1,4}y{1,2}","x{1,4} followed by y{1,2}"},{0,0}},
+	{"xy","xxy","xxxy","xxxxyy","xxxxyy","xxy","yyx","xxx","xx",0}
+};
+
+static TestDescr test_subsequence_alt_pattern_5 =
+{
+	"sub sequence alternative pattern",
+	{{"[12]{1,4}[34]{1,2}","[12]{1,4} followed by [34]{1,2}"},{0,0}},
+	{"13","123","1214","111134","222244","21213","441","222","11",0}
+};
+
+#define FLOAT_NUMBER_REGEX1 "([01]{1,6}(_[01]{1,6}){0,1})"
+#define OPERATION_REGEX1 "(a|s)"
 #define OPERATION_LIST_REGEX1  "(" FLOAT_NUMBER_REGEX1 OPERATION_REGEX1 ")*" FLOAT_NUMBER_REGEX1
 
-#define FLOAT_NUMBER_REGEX "([0123456789]{1,6}(_[0123456789]{1,6}){0,1}([Ee][0123456789]{1,6}){0,1})"
+#define FLOAT_NUMBER_REGEX "([0123456789]{1,6}(_[0123456789]{0,6}){0,1}([Ee][0123456789]{1,6}){0,1})"
 #define OPERATION_REGEX "(add|sub|mul|div)"
 #define OPERATION_LIST_REGEX  "(" FLOAT_NUMBER_REGEX OPERATION_REGEX ")*" FLOAT_NUMBER_REGEX
 static TestDescr test_complex =
@@ -610,8 +624,10 @@ static TestDescr test_complex =
 	{{OPERATION_LIST_REGEX,"complex"},{0,0}},
 	{"1sub1111","11_01","9_1","3","233452_123456","233_",
 	 "4_4324e78","1_123e1","12e41","12_31245e41add3",
-	 "12_31245e41add3sub11_01div4_4324e78","12346_324e12sub3123_455",
-	 "12346_324e12sub3123_455add3","12346_324e12add3123_455", 0}
+	 "12346_324e12sub3123_455",
+	 "12_31245e41add3sub11_01div4_4324e78",
+	 "12346_324e12sub3123_455add3","12346_324e12add3123_455",
+	 0}
 };
 
 
@@ -720,6 +736,8 @@ int main( int argc, const char** argv)
 		RUN( test_subsequence_alt_pattern);
 		RUN( test_subsequence_alt_pattern_2);
 		RUN( test_subsequence_alt_pattern_3);
+		RUN( test_subsequence_alt_pattern_4);
+		RUN( test_subsequence_alt_pattern_5);
 		RUN( test_complex);
 
 		// Debug output dump:

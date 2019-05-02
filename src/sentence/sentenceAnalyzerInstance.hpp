@@ -57,6 +57,8 @@ public:/*local static functions*/
 		OpJmpIf,		///< Jump to absolute address if the compare flag is set
 		OpJmpIfNot,		///< Jump to absolute address if the compare flag is not set
 		OpJmpDup,		///< Absolute jump to instruction address with a duplicated instance of the program
+		OpJmpDupIf,		///< Jump to absolute address with a duplicated instance of the program if the compare flag is set 
+		OpJmpDupIfNot,		///< Jump to absolute address with a duplicated instance of the program if the compare flag is not set
 		OpStartCount,		///< Push a counter one the counter stack
 		OpEndCount,		///< Pop the top counter from the counter stack
 		OpDecCount,		///< Decrement the top counter of the counter stack and set the compare flag if the decrementation result got 0
@@ -70,7 +72,7 @@ public:/*local static functions*/
 	};
 	static const char* opCodeName( OpCode opcode)
 	{
-		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","CNT","ENDCNT","DEC","TCNT","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
+		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","JDUPIF","JDUPIFNOT","CNT","ENDCNT","DEC","TCNT","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
 		return ar[ opcode];
 	}
 
@@ -103,6 +105,8 @@ public:/*local static functions*/
 		Program()
 			:instructionar(),patternar(),valuear(),weightar(),addressar(),procar(){}
 
+		std::string instructionToString( const Instruction& instr) const;
+
 		std::vector<Instruction> instructionar;
 		std::vector<Pattern> patternar;
 		std::vector<std::string> valuear;
@@ -113,7 +117,6 @@ public:/*local static functions*/
 
 private:
 	void printInstructions( std::ostream& out, int fromAddr, int toAddr) const;
-	std::string instructionToString( const Instruction& instr) const;
 
 	void pushInstructionInt( OpCode opcode, int arg);
 	void insertInstructionInt( int iaddr, OpCode opcode, int arg);

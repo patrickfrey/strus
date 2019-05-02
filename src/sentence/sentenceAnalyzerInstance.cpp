@@ -63,7 +63,7 @@ static std::string termListString( const SentenceTermList& terms, const char* se
 	return rt;
 }
 
-std::string SentenceAnalyzerInstance::instructionToString( const Instruction& instr) const
+std::string SentenceAnalyzerInstance::Program::instructionToString( const Instruction& instr) const
 {
 	std::string rt;
 	const char* opstr = opCodeName( instr.opcode);
@@ -76,6 +76,8 @@ std::string SentenceAnalyzerInstance::instructionToString( const Instruction& in
 		case OpJmpIf:
 		case OpJmpIfNot:
 		case OpJmpDup:
+		case OpJmpDupIf:
+		case OpJmpDupIfNot:
 		case OpStartCount:
 			rt.append( strus::string_format( " %d", instr.arg));
 			break;
@@ -87,21 +89,21 @@ std::string SentenceAnalyzerInstance::instructionToString( const Instruction& in
 			break;
 		case OpTestType:
 			rt.push_back(' ');
-			rt.append( m_program.valuear[ instr.arg]);
+			rt.append( valuear[ instr.arg]);
 			break;
 		case OpTestFeat:
 			rt.push_back(' ');
-			rt.append( m_program.patternar[ instr.arg].str);
+			rt.append( patternar[ instr.arg].str);
 			break;
 		case OpWeight:
-			rt.append( strus::string_format( " %.3f", m_program.weightar[ instr.arg]));
+			rt.append( strus::string_format( " %.3f", weightar[ instr.arg]));
 			break;
 		case OpAccept:
 		case OpReject:
 			break;
 		case OpResult:
 			rt.push_back(' ');
-			rt.append( m_program.valuear[ instr.arg]);
+			rt.append( valuear[ instr.arg]);
 			break;
 	}
 	return rt;
@@ -113,7 +115,7 @@ void SentenceAnalyzerInstance::printInstructions( std::ostream& out, int fromAdd
 	if (fromAddr < 0) fromAddr = 0;
 	for (int ip=fromAddr; ip<toAddr; ++ip)
 	{
-		out << instructionToString( m_program.instructionar[ ip]) << std::endl;
+		out << m_program.instructionToString( m_program.instructionar[ ip]) << std::endl;
 	}
 }
 
@@ -159,7 +161,7 @@ void SentenceAnalyzerInstance::insertInstruction( int iaddr, OpCode opcode)
 
 bool SentenceAnalyzerInstance::isOpCodeJmp( OpCode opcode)
 {
-	return (opcode == OpJmp || opcode == OpJmpIf || opcode == OpJmpIfNot || opcode == OpJmpDup);
+	return (opcode == OpJmp || opcode == OpJmpIf || opcode == OpJmpIfNot || opcode == OpJmpDup || opcode == OpJmpDupIf || opcode == OpJmpDupIfNot);
 }
 
 void SentenceAnalyzerInstance::patchOpCodeJmpAbsolute( int istart, int iend, int addr, int patchaddr)
@@ -305,11 +307,10 @@ void SentenceAnalyzerInstance::pushRepeat( int mintimes, int maxtimes)
 			// [A] Handle case of '*':
 			int loop_addr = m_program.addressar.back();
 
-			insertInstructionInt( loop_addr, OpJmpDup, m_program.instructionar.size()+1);
-			patchOpCodeJmpAbsolute( loop_addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
+			insertInstructionInt( loop_addr, OpJmpDup, ADDRESS_SUCCESS);
+			patchOpCodeJmpAbsolute( loop_addr+1, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
 
 			pushInstructionInt( OpJmp, loop_addr);
-			pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
 			m_program.addressar.back() = loop_addr;
 		}
 		else
@@ -324,23 +325,19 @@ void SentenceAnalyzerInstance::pushRepeat( int mintimes, int maxtimes)
 			int loop_addr = entry_addr+1;
 			int ins_addr = loop_addr;
 
-			if (mintimes >= 0 && mintimes < maxtimes)
+			if (mintimes < maxtimes)
 			{
+				// ... create an instance done if we reached the minimum count
 				insertInstructionInt( ins_addr, OpTestCount, maxtimes-mintimes+1);
 				ins_addr++;
-				insertInstructionInt( ins_addr, OpJmpIf, ADDRESS_TEMPORARY);
+				insertInstructionInt( ins_addr, OpJmpDupIfNot, ADDRESS_TEMPORARY);
 				ins_addr++;
-			}
-			if (mintimes != maxtimes)
-			{
-				insertInstructionInt( ins_addr, OpJmpDup, m_program.instructionar.size()+2);
-				ins_addr++;
-				patchOpCodeJmpAbsolute( loop_addr, m_program.instructionar.size(), ADDRESS_TEMPORARY, ins_addr);
 			}
 			patchOpCodeJmpAbsolute( ins_addr, m_program.instructionar.size(), ADDRESS_SUCCESS, m_program.instructionar.size());
 	
 			pushInstruction( OpDecCount);
 			pushInstructionInt( OpJmpIfNot, loop_addr);
+			patchOpCodeJmpAbsolute( loop_addr, ins_addr, ADDRESS_TEMPORARY, m_program.instructionar.size());
 			pushInstruction( OpEndCount);
 			pushInstructionInt( OpJmp, ADDRESS_SUCCESS);
 			m_program.addressar.back() = entry_addr;
@@ -407,7 +404,7 @@ bool SentenceAnalyzerInstance::compile()
 					prefix = "*";
 					++pi;
 				}
-				std::string instrstr = instructionToString( m_program.instructionar[ ii]);
+				std::string instrstr = m_program.instructionToString( m_program.instructionar[ ii]);
 				m_debugtrace->event( "instr", "%d%s %s", ii, prefix, instrstr.c_str());
 			}
 			m_debugtrace->close();
@@ -578,11 +575,16 @@ struct ExecutionState
 	bool operator == (const ExecutionState& o) const	{return (compare( o) == 0);}
 
 	enum FeedReturn {FeedResult,FeedAccept,FeedReject};
-	FeedReturn feed( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, std::vector<ExecutionState>& states, int termidx, const SentenceTerm& term)
+	FeedReturn feed( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, std::vector<ExecutionState>& states, int termidx, const SentenceTerm& term, DebugTraceContextInterface* debugtrace)
 	{
 		while (ip < (int)program.instructionar.size())
 		{
 			const SentenceAnalyzerInstance::Instruction& instr = program.instructionar[ ip++];
+			if (debugtrace)
+			{
+				std::string instrstr = program.instructionToString( instr);
+				debugtrace->event( "do", "%d %s [%s]", ip-1, instrstr.c_str(), testflag?"T":"F");
+			}
 			switch (instr.opcode)
 			{
 				case SentenceAnalyzerInstance::OpNop:
@@ -603,6 +605,23 @@ struct ExecutionState
 				case SentenceAnalyzerInstance::OpJmpDup:
 					testflag = true;
 					states.push_back( duplicate( data, instr.arg));
+					break;
+				case SentenceAnalyzerInstance::OpJmpDupIf:
+					if (testflag)
+					{
+						states.push_back( duplicate( data, instr.arg));
+					}
+					else
+					{
+						testflag = true;
+					}
+					break;
+				case SentenceAnalyzerInstance::OpJmpDupIfNot:
+					if (!testflag)
+					{
+						testflag = true;
+						states.push_back( duplicate( data, instr.arg));
+					}
 					break;
 				case SentenceAnalyzerInstance::OpStartCount:
 					counters = data.pushCounter( counters, instr.arg);
@@ -643,19 +662,23 @@ struct ExecutionState
 		return FeedReject;
 	}
 
-	SentenceGuess result( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, std::vector<ExecutionState>& states, const SentenceTermList& termlist)
+	SentenceGuess result( const SentenceAnalyzerInstance::Program& program, ExecutionData& data, std::vector<ExecutionState>& states, const SentenceTermList& termlist, DebugTraceContextInterface* debugtrace)
 	{
 		SentenceTerm term;
-		if (FeedResult == feed( program, data, states, -1, term))
+		if (debugtrace) debugtrace->open( "instr");
+
+		if (FeedResult == feed( program, data, states, -1, term, debugtrace))
 		{
 			if (ip == 0 || program.instructionar[ ip-1].opcode != SentenceAnalyzerInstance::OpResult)
 			{
 				throw std::runtime_error(_TXT("logic error: expected result instruction"));
 			}
+			if (debugtrace) debugtrace->close();
 			return SentenceGuess( program.valuear[ program.instructionar[ ip-1].arg], data.elementList( elements, termlist), weight);
 		}
 		else
 		{
+			if (debugtrace) debugtrace->close();
 			return SentenceGuess();
 		}
 	}
@@ -685,6 +708,7 @@ void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( Execut
 		init_states.push_back( ExecutionState( *pi));
 	}
 	ExecutionData execdata;
+	if (m_debugtrace) m_debugtrace->open( "instr");
 
 	int ki = 0, ke = lexerctx->nofTokens();
 	for (; ki != ke; ++ki)
@@ -713,7 +737,7 @@ void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( Execut
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "STATE " << state.tostring( execdata) << std::endl;
 #endif
-				switch (state.feed( m_program, execdata, states, termidx, term))
+				switch (state.feed( m_program, execdata, states, termidx, term, m_debugtrace))
 				{
 					case ExecutionState::FeedResult:
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -765,13 +789,14 @@ void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( Execut
 			{
 				continue;
 			}
-			SentenceGuess result = state.result( m_program, execdata, init_states, exectx.termar);
+			SentenceGuess result = state.result( m_program, execdata, init_states, exectx.termar, m_debugtrace);
 			if (result.valid())
 			{
 				exectx.results.push_back( result);
 			}
 		}
 	}
+	if (m_debugtrace) m_debugtrace->close();
 }
 
 
