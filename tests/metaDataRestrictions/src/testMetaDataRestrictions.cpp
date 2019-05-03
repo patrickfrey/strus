@@ -190,7 +190,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(randuint(0,std::numeric_limits<uint32_t>::max())));
 				break;
 			case strus::MetaDataElement::Float16:
-				val = strus::NumericVariant( (double)randuint(0,0xffffFFFFUL)/(double)randuint(1,0xffffFFFFUL));
+				val = strus::NumericVariant( (double)randuint(0,0x00007fFFUL)/(double)randuint(1,0x00007fFFUL));
 				break;
 			case strus::MetaDataElement::Float32:
 				val = strus::NumericVariant( (double)randuint(0,0xffffFFFFUL)/(double)randuint(1,0xffffFFFFUL));
