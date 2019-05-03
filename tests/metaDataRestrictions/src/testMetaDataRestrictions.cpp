@@ -30,15 +30,22 @@
 
 static strus::Reference<strus::ErrorBufferInterface> g_errorbuf;
 
-static void initRand()
+static void initRand( int randseed)
 {
-	time_t nowtime;
-	struct tm* now;
-
-	::time( &nowtime);
-	now = ::localtime( &nowtime);
-
-	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+	if (randseed == -1)
+	{
+		time_t nowtime;
+		struct tm* now;
+	
+		::time( &nowtime);
+		now = ::localtime( &nowtime);
+	
+		::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+	}
+	else
+	{
+		::srand( randseed);
+	}
 }
 
 static int32_t randint( int32_t mi, int32_t me)
@@ -454,32 +461,67 @@ int main( int argc, const char* argv[])
 {
 	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/));
 
-	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
+	int argi = 1;
+	int randseed = -1;
+	if (argc <= 1)
 	{
 		printUsage( argc, argv);
 		return 0;
 	}
-	else if (argc < 4)
+	for (; argi < argc; ++argi)
 	{
-		std::cerr << "ERROR too few parameters" << std::endl;
+		if (argv[argi][0] != '-')
+		{
+			break;
+		}
+		else if (std::strcmp( argv[argi], "-h") == 0 || std::strcmp( argv[argi], "--help") == 0)
+		{
+			printUsage( argc, argv);
+			return 0;
+		}
+		else if (std::strcmp( argv[argi], "-J") == 0 || std::strcmp( argv[argi], "--randseed") == 0)
+		{
+			if (argi+1 == argc)
+			{
+				std::cerr << "ERROR too few arguments"<< std::endl;
+				printUsage( argc, argv);
+				return 1;
+			}
+			randseed = atoi(argv[++argi]);
+		}
+		else if (std::strcmp( argv[argi], "--"))
+		{
+			++argi;
+			break;
+		}
+		else
+		{
+			std::cerr << "ERROR unknown option " << argv[argi] << std::endl;
+			printUsage( argc, argv);
+			return 1;
+		}
+	}
+	if (argc < argi + 3)
+	{
+		std::cerr << "ERROR too few arguments" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
-	else if (argc > 4)
+	else if (argc > argi + 3)
 	{
-		std::cerr << "ERROR too many parameters" << std::endl;
+		std::cerr << "ERROR too many arguments" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
 	try
 	{
-		unsigned int nofTables = getUintValue( argv[1]);
-		unsigned int nofRecords = getUintValue( argv[2]);
-		unsigned int nofQueries = getUintValue( argv[3]);
+		unsigned int nofTables = getUintValue( argv[argi+0]);
+		unsigned int nofRecords = getUintValue( argv[argi+1]);
+		unsigned int nofQueries = getUintValue( argv[argi+2]);
 		unsigned int failedRandomQueries = 0;
 		unsigned int queryCount = 0;
 
-		initRand();
+		initRand( randseed);
 		std::size_t di=0, de=nofTables;
 		for (; di<de; ++di)
 		{
