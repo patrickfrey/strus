@@ -38,7 +38,7 @@ public:
 	/// \param[in] substchr ascii character code for the replacement in an entity
 	virtual void addLink( int uchr, char substchr)=0;
 
-	/// \brief Define a value between 0.0 and 1.0 for the similarity measure of features for weighting
+	/// \brief Define a value between 0.0 and 1.0 for the similarity measure of features for grouping similar features
 	/// \param[in] value similarity measure
 	/// \note Interpretation depends on implementation, a reasonable default value is set by default.
 	virtual void defineGroupSimilarityDistance( double value)=0;
