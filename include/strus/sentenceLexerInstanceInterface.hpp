@@ -38,6 +38,11 @@ public:
 	/// \param[in] substchr ascii character code for the replacement in an entity
 	virtual void addLink( int uchr, char substchr)=0;
 
+	/// \brief Define a value between 0.0 and 1.0 for the similarity measure of features for weighting
+	/// \param[in] value similarity measure
+	/// \note Interpretation depends on implementation, a reasonable default value is set by default.
+	virtual void defineGroupSimilarityDistance( double value)=0;
+	
 	/// \brief Create an interface for the traversal of a sentence specified
 	/// \param[in] source string to parse with the lexer created
 	/// \return lexer interface for sentence traversal

@@ -234,6 +234,7 @@ public:
 	virtual void addSeparator( int){}
 	virtual void addSpace( int){}
 	virtual void addLink( int, char){}
+	virtual void defineGroupSimilarityDistance( double){}
 
 	virtual strus::SentenceLexerContextInterface* createContext( const std::string& source) const
 	{
