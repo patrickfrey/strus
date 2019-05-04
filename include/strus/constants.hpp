@@ -106,6 +106,11 @@ struct Constants
 	{
 		return '#';
 	}
+	/// \brief Get the default similarity distance for grouping similar elements in the query analyzer
+	static double defaultGroupSimilarityDistance()
+	{
+		return 0.60;
+	}
 };
 
 }//namespace
