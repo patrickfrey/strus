@@ -1,15 +1,15 @@
 language: cpp
-os:
-- linux
-- osx
-dist: trusty
-compiler:
-- clang
-- gcc
 matrix:
-  exclude:
-  - os: osx
-    compiler: gcc
+  include:
+    - os: osx
+      compiler: clang
+    - os: linux
+      dist: xenial
+      compiler: clang
+    - os: linux
+      dist: xenial
+      compiler: gcc
+
 sudo: required
 branches:
   only:
@@ -19,3 +19,4 @@ before_install:
 - dist/travis/before_script.sh
 script:
 - dist/travis/script.sh
+
