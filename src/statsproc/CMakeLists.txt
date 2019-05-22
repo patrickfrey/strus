@@ -7,6 +7,7 @@ set( source_files
 	statisticsProcessor.cpp
 	statisticsBuilder.cpp
 	statisticsViewer.cpp
+	datedFileList.cpp
 )
 
 include_directories(
