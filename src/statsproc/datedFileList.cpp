@@ -27,7 +27,7 @@ static bool onlyDigits( char const* ti)
 	return !!*ti;
 }
 
-static DatedFileList::TimeStamp parseTimeStamp( const char* timestampstr)
+static TimeStamp parseTimeStamp( const char* timestampstr)
 {
 	char const* ti = timestampstr;
 	struct tm date;
@@ -76,19 +76,20 @@ static DatedFileList::TimeStamp parseTimeStamp( const char* timestampstr)
 	}
 	else
 	{
-		return DatedFileList::TimeStamp( unixtime, counter);
+		return TimeStamp( unixtime, counter);
 	}
 }
 
-static std::string fileNameFromTimeStamp( const std::string& prefix, const DatedFileList::TimeStamp& timestamp, const std::string& extension)
+static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeStamp& timestamp, const std::string& extension)
 {
 	char timebuf[ 256];
 	char idxbuf[ 32];
 
-	const struct tm* tm_info = ::localtime( &timestamp.unixtime);
+	time_t tt = timestamp.unixtime();
+	const struct tm* tm_info = ::localtime( &tt);
 
 	std::strftime( timebuf, sizeof(timebuf), "%Y%m%d_%H%M%S", tm_info);
-	std::snprintf( idxbuf, sizeof(idxbuf), "%04d", timestamp.counter);
+	std::snprintf( idxbuf, sizeof(idxbuf), "%04d", timestamp.counter());
 	return strus::string_format( "%s%s_%s.%s.conf", prefix.c_str(), timebuf, idxbuf, extension.c_str());
 }
 
@@ -109,28 +110,27 @@ void DatedFileList::store( const void* binblob, std::size_t binblobsize)
 	if (ec) throw std::runtime_error( ::strerror(ec));
 }
 
-DatedFileList::TimeStamp DatedFileList::allocTimestamp()
+TimeStamp DatedFileList::allocTimestamp()
 {
 	time_t current_time = ::time(NULL);
 	if (current_time == ((time_t)-1)) throw std::runtime_error( _TXT( "failed to get system time"));
 
 	scoped_lock lock( m_mutex);
-	if (current_time == m_timestamp.unixtime)
+	if (current_time == m_timestamp.unixtime())
 	{
-		++m_timestamp.counter;
+		m_timestamp = TimeStamp( current_time, m_timestamp.counter()+1);
 	}
 	else
 	{
-		m_timestamp.unixtime = (unsigned long)current_time;
-		m_timestamp.counter = 0;
+		m_timestamp = TimeStamp( current_time);
 	}
 	return m_timestamp;
 }
 
-DatedFileList::TimeStamp DatedFileList::currentTimestamp()
+TimeStamp DatedFileList::currentTimestamp()
 {
 	strus::scoped_lock lock( m_mutex);
-	if (m_timestamp.unixtime == 0)
+	if (m_timestamp.unixtime() == 0)
 	{
 		time_t current_time = time(NULL);
 		if (current_time == ((time_t)-1)) throw std::runtime_error( _TXT( "failed to get system time"));

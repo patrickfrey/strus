@@ -7,8 +7,8 @@
  */
 /// \brief Exported functions of the strus statsproc library
 /// \file "statsproc.hpp"
-#ifndef _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_STD_STATISTICS_PROCESSOR_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_STD_STATISTICS_PROCESSOR_LIB_HPP_INCLUDED
 
 /// \brief strus toplevel namespace
 namespace strus {

@@ -11,6 +11,7 @@
 #define _STRUS_STORAGE_DATED_FILE_LIST_HPP_INCLUDED
 #include "strus/base/atomic.hpp"
 #include "strus/base/thread.hpp"
+#include "strus/timeStamp.hpp"
 #include <string>
 #include <vector>
 
@@ -20,26 +21,6 @@ namespace strus
 class DatedFileList
 {
 public:
-	struct TimeStamp
-	{
-		time_t unixtime;	//< seconds since 1.1.1970
-		int counter;		//< counter for avoiding same second item clashes
-
-		TimeStamp( time_t unixtime_, int counter_)
-			:unixtime(unixtime_),counter(counter_){}
-		TimeStamp( const TimeStamp& o)
-			:unixtime(o.unixtime),counter(o.counter){}
-
-		bool operator >= (const TimeStamp& o) const
-			{return unixtime == o.unixtime ? counter >= o.counter : unixtime >= o.unixtime;}
-		bool operator > (const TimeStamp& o) const
-			{return unixtime == o.unixtime ? counter > o.counter : unixtime > o.unixtime;}
-		bool operator <= (const TimeStamp& o) const
-			{return unixtime == o.unixtime ? counter <= o.counter : unixtime <= o.unixtime;}
-		bool operator < (const TimeStamp& o) const
-			{return unixtime == o.unixtime ? counter < o.counter : unixtime < o.unixtime;}
-	};
-
 	class Iterator
 	{
 	public:
