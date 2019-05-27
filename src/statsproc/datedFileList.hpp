@@ -24,24 +24,22 @@ public:
 	class Iterator
 	{
 	public:
+		explicit Iterator( const TimeStamp& timestamp_);
 		Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_, const TimeStamp& timestamp_);
-		Iterator( const Iterator& o)
-			:m_timestamp(o.m_timestamp),m_blob(o.m_blob),m_directory(o.m_directory),m_prefixsize(o.m_prefixsize),m_filelist(o.m_filelist)
-		{
-			m_fileiter = m_filelist.begin() + (o.m_fileiter - o.m_filelist.begin());
-		}
+		Iterator( const Iterator& o);
 
 		const TimeStamp& timestamp() const
-		{
-			return m_timestamp;
-		}
-
-		bool next();
+			{return m_timestamp;}
 
 		const void* blob() const
 			{return m_blob.c_str();}
 		std::size_t blobsize() const
 			{return m_blob.size();}
+
+		bool next();
+
+	private:
+		void loadBlob();
 
 	private:
 		TimeStamp m_timestamp;
@@ -53,18 +51,26 @@ public:
 	};
 
 public:
-	DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_)
-		:m_mutex(),m_timestamp(0,0),m_directory(directory_),m_prefix(prefix_),m_extension(extension_){}
+	/// \brief Constructor
+	/// \param[in] directory_ where to store the files
+	/// \param[in] prefix_ filename prefix to use for files stored
+	/// \param[in] extension_ extension to use for files stored
+	DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_);
 
-	// \brief Stores a blob to file
-	// \return errno if failed, 0 on success
-	void store( const void* binblob, std::size_t binblobsize);
+	/// \brief Stores a blobs to files in the context of a transaction (operation either fails entirely or succeeds completely)
+	/// \param[in] blobs data to store
+	/// \param[in] tmpfileext extension to use for temporary files
+	/// \note Transaction completed by file renames, a failed store may lead to files with this extension laying around.
+	void store( const std::vector<std::string>& blobs, const char* tmpfileext);
 
 	TimeStamp currentTimestamp();
 	TimeStamp allocTimestamp();
 
 	Iterator getIterator( const TimeStamp& timestamp);
-	void deleteFilesBefore( TimeStamp& timestamp);
+
+	/// \brief Deletes all files before a certain date/time
+	/// \note Used for cleanup
+	void deleteFilesBefore( const TimeStamp& timestamp);
 
 private:
 	std::string newFileName();

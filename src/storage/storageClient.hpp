@@ -121,7 +121,7 @@ public:
 
 	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign);
 
-	virtual StatisticsIteratorInterface* createChangeStatisticsIterator();
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp);
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
@@ -172,6 +172,8 @@ public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index userId( const std::string& username) const;
 
 public:/*StorageTransaction*/
+	const std::string& statisticsPath() const {return m_statisticsPath;}
+
 	void getVariablesWriteBatch(
 			DatabaseTransactionInterface* transaction,
 			int nof_documents_incr);
@@ -228,8 +230,6 @@ public:/*StorageDocumentChecker,AclIterator*/
 public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
-	///\brief Fetch a message from a storage update transaction
-	bool fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize);
 
 public:/*strusResizeBlocks,StorageDocumentChecker*/
 	Index maxTermTypeNo() const;
@@ -268,10 +268,9 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 
 	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
-	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of statistics messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 	bool m_close_called;					///< true if close was already called
-
+	std::string m_statisticsPath;				///< storage path for statistics, equals storage path if not explicitely defined differently
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 

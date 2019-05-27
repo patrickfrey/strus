@@ -6,8 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Datatype used to mark time for ordering events and specifying snapshots
-#ifndef _STRUS_CORE_TIMESTAMP_HPP_INCLUDED
-#define _STRUS_CORE_TIMESTAMP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_TIMESTAMP_HPP_INCLUDED
+#define _STRUS_STORAGE_TIMESTAMP_HPP_INCLUDED
 #include <ctime>
 
 namespace strus {

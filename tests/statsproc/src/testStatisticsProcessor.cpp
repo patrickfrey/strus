@@ -10,11 +10,15 @@
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
+#include "strus/statisticsIteratorInterface.hpp"
+#include "strus/statisticsMessage.hpp"
 #include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/timeStamp.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/base/math.hpp"
+#include "strus/base/string_format.hpp"
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -133,19 +137,9 @@ struct TermCollection
 };
 
 
-static std::string doubleToString( double val_)
-{
-	unsigned int val = (unsigned int)strus::Math::floor( val_ * 1000);
-	unsigned int val_sec = val / 10000;
-	unsigned int val_ms = val % 10000;
-	std::ostringstream val_str;
-	val_str << val_sec << "." << std::setfill('0') << std::setw(4) << val_ms;
-	return val_str.str();
-}
-
 static void printUsage( int argc, const char* argv[])
 {
-	std::cerr << "usage: " << argv[0] << " <nofterms> <diffrange>" << std::endl;
+	std::cerr << "usage: " << argv[0] << " <nofterms> <diffrange> [<storage>]" << std::endl;
 	std::cerr << "<nofterms>      = number of distinct terms" << std::endl;
 	std::cerr << "<diffrange>     = maximum diff" << std::endl;
 }
@@ -179,7 +173,7 @@ int main( int argc, const char* argv[])
 		printUsage( argc, argv);
 		return 1;
 	}
-	else if (argc > 3)
+	else if (argc > 4)
 	{
 		std::cerr << "ERROR too many parameters" << std::endl;
 		printUsage( argc, argv);
@@ -187,60 +181,84 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
+		// Create random test collection:
 		int nofDocs = (int)g_random.get( 0, 1000000) - 500000;
+		int nofDocsPart = nofDocs / 2;
 		unsigned int nofTerms = getUintValue( argv[1]);
 		unsigned int diffRange = getUintValue( argv[2]);
+		std::string storagePath = (argc > 3) ? argv[3] : "";
 		TermCollection collection( nofTerms, diffRange);
 
-		strus::local_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStatisticsProcessor( g_errorhnd));
-		strus::local_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder());
+		// Build statistics:
+		strus::local_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStandardStatisticsProcessor( strus::StatisticsDefaultNofBlocks, strus::StatisticsDefaultMsgChunkSize, g_errorhnd));
+		strus::local_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder( storagePath));
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		builder->setNofDocumentsInsertedChange( nofDocs);
+		builder->setNofDocumentsInsertedChange( nofDocsPart);
 
 		typedef TermCollection::Term Term;
 		unsigned int termsByteSize = 0;
-		std::clock_t start = std::clock();
 		std::vector<Term>::const_iterator ti = collection.termar.begin(), te = collection.termar.end();
-		for (; ti != te; ++ti)
+		int rr = collection.termar.size() / 3 + 1;
+		for (int tidx=0; ti != te; ++ti,++tidx)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "add df change '" << ti->type << "' '" << ti->value << "' " << ti->diff << std::endl;
 #endif
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
 			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff);
+			if ((int)g_random.get( 0, rr) == 1)
+			{
+				int nn = (nofDocs - nofDocsPart) / 2;
+				builder->setNofDocumentsInsertedChange( nn);
+				nofDocsPart += nn;
+			}
 		}
-		const void* msgblk;
-		std::size_t msgblksize;
+		builder->setNofDocumentsInsertedChange( nofDocs - nofDocsPart);
+
+		// Iterate through messages and accumulate statistics stored:
 		std::size_t blobsize = 0;
 		int nofDocsInserted = 0;
-		if (!builder->fetchMessage( msgblk, msgblksize))
+		std::set<Term> termset;
+
+		strus::local_ptr<strus::StatisticsIteratorInterface> iterator;
+		if (storagePath.empty())
 		{
-			if (g_errorhnd->hasError())
+			iterator.reset( builder->createIteratorAndRollback());
+		}
+		else
+		{
+			strus::TimeStamp timeStampBeforeNow( ::time(NULL)-1);
+			if (!builder->commit())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
+			iterator.reset( builder->createIterator( timeStampBeforeNow));
+			if (!iterator.get())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
+			strus::TimeStamp timeStamp10MinutesBeforeNow( ::time(NULL)-600);
+			builder->releaseStatistics( timeStamp10MinutesBeforeNow);
 		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		int blockcnt = 0;
-		std::cerr << "fetch message " << ++blockcnt << " " << msgblksize << std::endl;
-#endif
-		blobsize += msgblksize;
-		double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << std::endl;
-
-		strus::TermStatisticsChange rec;
-
-		std::set<Term> termset;
-		while (msgblksize)
+		strus::StatisticsMessage msg = iterator->getNext();
+		for (; !msg.empty(); msg = iterator->getNext())
 		{
-			strus::local_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
+			strus::local_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msg.ptr(), msg.size()));
 			if (!viewer.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
+			nofDocsInserted += viewer->nofDocumentsInsertedChange();
+			blobsize += msg.size();
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+			int blockcnt = 0;
+			std::cerr << "fetch message " << ++blockcnt << " " << msg.size() << std::endl;
+#endif
+			strus::TermStatisticsChange rec;
 			while (viewer->nextDfChange( rec))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -248,20 +266,13 @@ int main( int argc, const char* argv[])
 #endif
 				termset.insert( Term( rec.type(), rec.value(), rec.increment()));
 			}
-			nofDocsInserted += viewer->nofDocumentsInsertedChange();
-
-			if (!builder->fetchMessage( msgblk, msgblksize))
-			{
-				if (g_errorhnd->hasError())
-				{
-					throw std::runtime_error( g_errorhnd->fetchError());
-				}
-			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "fetch message " << ++blockcnt << " " << msgblksize << std::endl;
-#endif
-			blobsize += msgblksize;
 		}
+		if (g_errorhnd->hasError())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
+
+		// Compare test output with expected:
 		std::vector<Term> termar;
 		std::set<Term>::const_iterator si = termset.begin(), se = termset.end();
 		for (; si != se; ++si)
@@ -270,7 +281,7 @@ int main( int argc, const char* argv[])
 		}
 		if (nofDocs != nofDocsInserted)
 		{
-			throw std::runtime_error( "statistics number of documents does not match");
+			throw std::runtime_error( strus::string_format( "statistics number of documents %d does not match expected %d", nofDocsInserted, nofDocs));
 		}
 		if (collection.termar.size() != termar.size())
 		{

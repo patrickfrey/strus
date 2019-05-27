@@ -10,14 +10,15 @@
 #include "statisticsProcessor.hpp"
 #include "statisticsBuilder.hpp"
 #include "statisticsViewer.hpp"
+#include "statisticsMap.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
 using namespace strus;
 
-StatisticsProcessor::StatisticsProcessor( ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_){}
+StatisticsProcessor::StatisticsProcessor( int nofBlocks_, int msgChunkSize_, ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_),m_nofBlocks(nofBlocks_),m_msgChunkSize(msgChunkSize_){}
 
 StatisticsProcessor::~StatisticsProcessor(){}
 
@@ -31,13 +32,23 @@ StatisticsViewerInterface* StatisticsProcessor::createViewer(
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message viewer: %s"), *m_errorhnd, 0);
 }
 
-StatisticsBuilderInterface* StatisticsProcessor::createBuilder() const
+StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const std::string& path) const
 {
 	try
 	{
-		return new StatisticsBuilder( DefaultMaxBlockSize, m_errorhnd);
+		return new StatisticsBuilder( path, m_msgChunkSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
+}
+
+
+StatisticsMapInterface* StatisticsProcessor::createMap() const
+{
+	try
+	{
+		return new StatisticsMap( m_nofBlocks, this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics map: %s"), *m_errorhnd, 0);
 }
 
 

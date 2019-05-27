@@ -12,20 +12,22 @@
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/base/stdint.h"
 #include "statisticsHeader.hpp"
+#include "datedFileList.hpp"
 #include <string>
 #include <vector>
-#include <list>
 
 namespace strus
 {
 ///\brief Forward declaration
 class ErrorBufferInterface;
+///\brief Forward declaration
+class StatisticsIteratorInterface;
 
 class StatisticsBuilder
 	:public StatisticsBuilderInterface
 {
 public:
-	StatisticsBuilder( std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
+	StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -36,28 +38,29 @@ public:
 			const char* termvalue,
 			int increment);
 
-	virtual bool fetchMessage( const void*& blk, std::size_t& blksize);
-
-	virtual void start();
+	virtual bool commit();
 
 	virtual void rollback();
 
+	virtual StatisticsIteratorInterface* createIteratorAndRollback();
+
+	virtual void releaseStatistics( const TimeStamp& timestamp);
+
+	virtual StatisticsIteratorInterface* createIterator( const TimeStamp& timestamp);
+
 private:
-	void initHeader( StatisticsHeader* hdr);
-	void getBlock( const void*& blk, std::size_t& blksize);
+	void moveNofDocumentsInsertedChange();
 	void newContent();
 	void clear();
 
 private:
+	TimeStamp m_timestamp;
 	std::string m_lastkey;
-	StatisticsHeader m_hdr;
-	int m_cnt;
-	std::list<std::string> m_content;
-	bool m_content_consumed;
+	std::vector<std::string> m_content;
 	int32_t m_nofDocumentsInsertedChange;
-	int32_t m_nofDocumentsInsertedChange_bk;
 	std::size_t m_blocksize;
-	std::size_t m_maxblocksize;
+	std::size_t m_maxchunksize;
+	DatedFileList m_datedFileList;
 	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace

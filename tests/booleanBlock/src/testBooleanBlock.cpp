@@ -157,7 +157,7 @@ int main( int, const char**)
 	try
 	{
 		initRand();
-		testBooleanBlock( 300, 3000, 10000);
+		testBooleanBlock( 30, 3000, 10000);
 		return 0;
 	}
 	catch (const std::exception& err)

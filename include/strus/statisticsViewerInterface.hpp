@@ -26,7 +26,7 @@ public:
 	virtual int nofDocumentsInsertedChange()=0;
 
 	/// \brief Fetch the next message propagating a change in the df (document frequency)
-	/// \param[out] the record describing the document frequency change
+	/// \param[out] rec the record describing the document frequency change
 	/// \return false, if there is no record left and wqe are at the end of the message
 	virtual bool nextDfChange( TermStatisticsChange& rec)=0;
 };

@@ -19,20 +19,20 @@ class ErrorBufferInterface;
 class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
-private:
-	enum {DefaultMaxBlockSize=32000};
-
 public:
-	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
+	StatisticsProcessor( int nofBlocks_, int msgChunkSize_, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsProcessor();
 
-	virtual StatisticsViewerInterface* createViewer(
-			const void* msgptr, std::size_t msgsize) const;
+	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
 
-	virtual StatisticsBuilderInterface* createBuilder() const;
+	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
+
+	virtual StatisticsMapInterface* createMap() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;
+	int m_nofBlocks;
+	int m_msgChunkSize;
 };
 
 }//namespace

@@ -9,11 +9,15 @@
 /// \file statisticsBuilderInterface.hpp
 #ifndef _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
+#include "strus/timeStamp.hpp"
+#include "strus/statisticsMessage.hpp"
 #include <cstdlib>
 #include <string>
 
 namespace strus
 {
+///\brief Forward declaration
+class StatisticsIteratorInterface;
 
 /// \brief Interface for a builder for a statistics message (distributed index)
 class StatisticsBuilderInterface
@@ -24,30 +28,34 @@ public:
 
 	/// \brief Define the change of the number of document inserted
 	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
-	virtual void setNofDocumentsInsertedChange(
-			int increment)=0;
+	virtual void setNofDocumentsInsertedChange( int increment)=0;
 
 	/// \brief Add a message propagating a change in the df (document frequency)
 	/// \param[in] termtype type of the term
 	/// \param[in] termvalue value of the term
 	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
 	/// \return true on success, false in case of an error (memory allocation error)
-	virtual void addDfChange(
-			const char* termtype,
-			const char* termvalue,
-			int increment)=0;
+	virtual void addDfChange( const char* termtype, const char* termvalue, int increment)=0;
 
-	/// \brief Mark the current state that can be restored with a rollback
-	virtual void start()=0;
+	/// \brief Create an iterator on the elements of the elements of this before a commit or rollback
+	/// \return the iterator or NULL if the operation failed
+	/// \note the elements are moved with ownership to the created iterator, commit has no effect after this call and the iterator can be created only once
+	virtual StatisticsIteratorInterface* createIteratorAndRollback()=0;
+
+	/// \brief Transaction commit
+	virtual bool commit()=0;
 
 	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
 
-	/// \brief Get the packed statistics message
-	/// \param[out] blk pointer to the message 
-	/// \param[out] blksize size of message blk in bytes
-	/// \return true, if there is a message returned to be sent, false if not or an error occurred
-	virtual bool fetchMessage( const void*& blk, std::size_t& blksize)=0;
+	/// \brief Release statistics that are older than a defined timestamp
+	/// \param[in] timestamp minimum data a surviving (not deleted) statistics message should have
+	virtual void releaseStatistics( const TimeStamp& timestamp)=0;
+
+	/// \brief Get an iterator on the stored statistics messages after a timestamp from the storage (after commit)
+	/// \param[in] timestamp minimum data iterated statistics message should have
+	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
+	virtual StatisticsIteratorInterface* createIterator( const TimeStamp& timestamp)=0;
 };
 }//namespace
 #endif

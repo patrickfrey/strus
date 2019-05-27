@@ -11,9 +11,11 @@
 #include "statisticsBuilder.hpp"
 #include "statisticsHeader.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/statisticsIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/base/utf8.hpp"
+#include "strus/base/hton.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -25,29 +27,69 @@
 
 using namespace strus;
 
-StatisticsBuilder::StatisticsBuilder( std::size_t maxblocksize_, ErrorBufferInterface* errorhnd)
-	:m_lastkey()
-	,m_hdr()
-	,m_cnt(0)
+namespace {
+class StatisticsIteratorImpl
+	:public StatisticsIteratorInterface
+{
+public:
+	StatisticsIteratorImpl( std::vector<std::string>& ar_, const TimeStamp& timestamp_)
+	{
+		while (!ar_.empty())
+		{
+			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), timestamp_));
+			ar_.pop_back();
+		}
+		m_iter = m_ar.begin();
+	}
+	StatisticsIteratorImpl( DatedFileList& filelist, const TimeStamp& timestamp_)
+	{
+		DatedFileList::Iterator iterator = filelist.getIterator( timestamp_);
+		if (iterator.blob())
+		{
+			do
+			{
+				m_ar.push_back( StatisticsMessage( iterator.blob(), iterator.blobsize(), iterator.timestamp()));
+			} while (iterator.next());
+		}
+		m_iter = m_ar.begin();
+	}
+
+	virtual StatisticsMessage getNext()
+	{
+		if (m_iter == m_ar.end()) return StatisticsMessage( NULL, 0, TimeStamp(0));
+		return *m_iter++;
+	}
+
+private:
+	std::vector<StatisticsMessage> m_ar;
+	std::vector<StatisticsMessage>::const_iterator m_iter;
+};
+}
+
+
+StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_)
+	:m_timestamp(0)
+	,m_lastkey()
 	,m_content()
-	,m_content_consumed(false)
 	,m_nofDocumentsInsertedChange(0)
-	,m_nofDocumentsInsertedChange_bk(0)
 	,m_blocksize(0)
-	,m_maxblocksize(maxblocksize_)
-	,m_errorhnd(errorhnd)
-{}
+	,m_maxchunksize(maxchunksize_)
+	,m_datedFileList( path_/*directory*/, "stats_"/*prefix*/, ".bin"/*extension*/)
+	,m_errorhnd(errorhnd_)
+{
+	if (m_maxchunksize <= sizeof(StatisticsHeader)) throw std::runtime_error(_TXT("Maximum block size for statistics builder too small"));
+	m_timestamp = m_datedFileList.currentTimestamp();
+}
 
 StatisticsBuilder::~StatisticsBuilder()
 {}
 
-void StatisticsBuilder::setNofDocumentsInsertedChange(
-			int increment)
+void StatisticsBuilder::setNofDocumentsInsertedChange( int increment)
 {
 	try
 	{
-		int sum = m_nofDocumentsInsertedChange + increment;
-		if (sum < std::numeric_limits<int32_t>::min() || sum > std::numeric_limits<int32_t>::max())
+		long sum = m_nofDocumentsInsertedChange + increment;
+		if (sum < (long)std::numeric_limits<int32_t>::min() || sum > (long)std::numeric_limits<int32_t>::max())
 		{
 			m_errorhnd->report( ErrorCodeMaxNofItemsExceeded, _TXT( "number of documents inserted change value is out of range"));
 		}
@@ -57,6 +99,20 @@ void StatisticsBuilder::setNofDocumentsInsertedChange(
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error statistics message builder set number of documents inserted change: %s"), *m_errorhnd);
+}
+
+void StatisticsBuilder::moveNofDocumentsInsertedChange()
+{
+	if (m_content.empty()) newContent();
+	StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( m_content.back().c_str()));
+	long sum = ByteOrder<int32_t>::ntoh( hdr->nofDocumentsInsertedChange);
+	sum += m_nofDocumentsInsertedChange;
+	if (sum < (long)std::numeric_limits<int32_t>::min() || sum > (long)std::numeric_limits<int32_t>::max())
+	{
+		throw std::runtime_error( _TXT( "number of documents inserted change value is out of range"));
+	}
+	hdr->nofDocumentsInsertedChange = ByteOrder<int32_t>::hton( sum);
+	m_nofDocumentsInsertedChange = 0;
 }
 
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -104,9 +160,19 @@ void StatisticsBuilder::addDfChange(
 		else
 		{
 			m_blocksize += termtypesize + termvaluesize;
-			if (m_content.empty() || m_blocksize > m_maxblocksize)
+			if (m_content.empty())
 			{
 				newContent();
+				moveNofDocumentsInsertedChange();
+			}
+			else if (m_blocksize > m_maxchunksize)
+			{
+				moveNofDocumentsInsertedChange();
+				newContent();
+			}
+			else if (m_nofDocumentsInsertedChange)
+			{
+				moveNofDocumentsInsertedChange();
 			}
 			if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 			{
@@ -160,65 +226,11 @@ void StatisticsBuilder::addDfChange(
 	CATCH_ERROR_MAP( _TXT("error statistics message builder add df change: %s"), *m_errorhnd);
 }
 
-void StatisticsBuilder::initHeader( StatisticsHeader* hdr)
-{
-	hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)m_nofDocumentsInsertedChange);
-	m_nofDocumentsInsertedChange = 0;
-	m_nofDocumentsInsertedChange_bk = 0;
-}
-
-void StatisticsBuilder::getBlock( const void*& blk, std::size_t& blksize)
-{
-	m_content_consumed = true;
-	blk = m_content.front().c_str();
-	blksize = m_content.front().size();
-}
-
-bool StatisticsBuilder::fetchMessage( const void*& blk, std::size_t& blksize)
-{
-	if (m_content.empty())
-	{
-		clear();
-		return false;
-	}
-	try
-	{
-		if (m_content_consumed)
-		{
-			m_content.pop_front();
-			m_content_consumed = false;
-		}
-		while (!m_content.empty())
-		{
-			const std::string& rt = m_content.front();
-			StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( rt.c_str()));
-			initHeader( hdr);
-			getBlock( blk, blksize);
-			return true;
-		}
-		if (m_nofDocumentsInsertedChange)
-		{
-			initHeader( &m_hdr);
-			blk = (void*)&m_hdr;
-			blksize = sizeof( m_hdr);
-			return true;
-		}
-		clear();
-		blk = 0;
-		blksize = 0;
-		return false;
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message builder fetch message: %s"), *m_errorhnd, false);
-}
-
 void StatisticsBuilder::clear()
 {
 	m_lastkey.clear();
-	m_cnt = 0;
 	m_content.clear();
-	m_content_consumed = false;
 	m_nofDocumentsInsertedChange = 0;
-	m_nofDocumentsInsertedChange_bk = 0;
 	m_blocksize = 0;
 }
 
@@ -227,35 +239,61 @@ void StatisticsBuilder::newContent()
 	StatisticsHeader hdr;
 	m_content.push_back( std::string());
 	std::string& blk = m_content.back();
-	blk.reserve( m_maxblocksize);
+	blk.reserve( m_maxchunksize);
 	blk.append( (char*)&hdr, sizeof(hdr));
 	m_blocksize = 0;
 	m_lastkey.clear();
-	m_cnt += 1;
 }
 
-void StatisticsBuilder::start()
+bool StatisticsBuilder::commit()
 {
 	try
 	{
-		m_cnt = 0;
-		m_nofDocumentsInsertedChange_bk = m_nofDocumentsInsertedChange;
+		moveNofDocumentsInsertedChange();
+		m_datedFileList.store( m_content, ".tmp");
+		return true;
 	}
-	CATCH_ERROR_MAP( _TXT("error statistics message builder start: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP_RETURN( _TXT("unexpected exception in statistic builder commit: %s"), *m_errorhnd, false);
 }
 
 void StatisticsBuilder::rollback()
 {
 	try
 	{
-		for (; m_cnt > 0; --m_cnt)
-		{
-			m_content.pop_back();
-		}
-		m_nofDocumentsInsertedChange = m_nofDocumentsInsertedChange_bk;
-		m_nofDocumentsInsertedChange_bk = 0;
+		m_content.clear();
+		m_nofDocumentsInsertedChange = 0;
 	}
 	CATCH_ERROR_MAP( _TXT("error statistics message builder rollback: %s"), *m_errorhnd);
 }
+
+StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
+{
+	try
+	{
+		moveNofDocumentsInsertedChange();
+		return new StatisticsIteratorImpl( m_content, m_timestamp);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message builder create iterator: %s"), *m_errorhnd, NULL);
+}
+
+void StatisticsBuilder::releaseStatistics( const TimeStamp& timestamp_)
+{
+	try
+	{
+		m_datedFileList.deleteFilesBefore( timestamp_);
+	}
+	CATCH_ERROR_MAP( _TXT("error release statistics: %s"), *m_errorhnd);
+}
+
+StatisticsIteratorInterface* StatisticsBuilder::createIterator( const TimeStamp& timestamp_)
+{
+	try
+	{
+		return new StatisticsIteratorImpl( m_datedFileList, timestamp_);
+		
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
+}
+
 
 

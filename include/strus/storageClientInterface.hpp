@@ -11,6 +11,7 @@
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/termStatistics.hpp"
+#include "strus/timeStamp.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -218,9 +219,10 @@ public:
 	/// \return the iterator on the statistics message blobs
 	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign=true)=0;
 
-	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage
-	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createChangeStatisticsIterator()=0;
+	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage starting from a given date/time
+	/// \param[in] timestamp time of last change statistics fetched
+	/// \return the iterator on the statistics message blobs from a certain snapshot defined by a timestamp
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp)=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface

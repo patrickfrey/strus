@@ -14,6 +14,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/reference.hpp"
 #include "databaseAdapter.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -21,24 +22,25 @@
 
 using namespace strus;
 
-StatisticsInitIterator::StatisticsInitIterator(
-		StorageClientInterface* storage_,
+StatisticsIteratorInterface*
+	strus::createStatisticsInitIterator(
+		StorageClientInterface* storage,
 		DatabaseClientInterface* database,
 		bool sign,
-		ErrorBufferInterface* errorhnd_)
-	:m_storage(storage_)
-	,m_proc(storage_->getStatisticsProcessor())
-	,m_statisticsBuilder()
-	,m_errorhnd(errorhnd_)
+		ErrorBufferInterface* errorhnd)
 {
-	m_statisticsBuilder.reset( m_proc->createBuilder());
-	if (!m_statisticsBuilder.get())
+	const StatisticsProcessorInterface* proc = storage->getStatisticsProcessor();
+	if (!proc)
 	{
-		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
+		throw strus::runtime_error(_TXT("error no statistics processor defined"));
 	}
-	int nofdocs = m_storage->nofDocumentsInserted();
-	m_statisticsBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
-	m_statisticsBuilder->start();
+	strus::Reference<StatisticsBuilderInterface> builder( proc->createBuilder( ""/*path*/));
+	if (!builder.get())
+	{
+		throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), errorhnd->fetchError());
+	}
+	int nofdocs = storage->nofDocumentsInserted();
+	builder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
 
 	std::map<Index,std::size_t> typenomap;
 	std::map<Index,std::size_t> termnomap;
@@ -49,8 +51,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 		DatabaseAdapter_TermType::Cursor typecursor( database);
 		Index typeno;
 		std::string typestr;
-		for (bool more=typecursor.loadFirst( typestr, typeno); more;
-			more=typecursor.loadNext( typestr, typeno))
+		for (bool more=typecursor.loadFirst( typestr, typeno); more; more=typecursor.loadNext( typestr, typeno))
 		{
 			typenomap[ typeno] = strings.size();
 			strings.append( typestr);
@@ -62,23 +63,21 @@ StatisticsInitIterator::StatisticsInitIterator(
 		DatabaseAdapter_TermValue::Cursor termcursor( database);
 		Index termno;
 		std::string termstr;
-		for (bool more=termcursor.loadFirst( termstr, termno); more;
-			more=termcursor.loadNext( termstr, termno))
+		for (bool more=termcursor.loadFirst( termstr, termno); more; more=termcursor.loadNext( termstr, termno))
 		{
 			termnomap[ termno] = strings.size();
 			strings.append( termstr);
 			strings.push_back( '\0');
 		}
 	}
-	// Feed all df changes to the peer message builder:
+	// Feed all df changes to the statistics message builder:
 	{
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( database);
 		Index typeno;
 		Index termno;
 		Index df;
 
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( database);
-		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
-			more=dfcursor.loadNext( typeno, termno, df))
+		for (bool more=dfcursor.loadFirst( typeno, termno, df); more; more=dfcursor.loadNext( typeno, termno, df))
 		{
 			std::map<Index,std::size_t>::const_iterator ti;
 			ti = typenomap.find( typeno);
@@ -89,42 +88,11 @@ StatisticsInitIterator::StatisticsInitIterator(
 			if (ti == termnomap.end()) throw strus::runtime_error( "%s",  _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
-			m_statisticsBuilder->addDfChange( typenam, termnam, sign?df:-df);
+			builder->addDfChange( typenam, termnam, sign?df:-df);
 		}
 	}
+	return builder->createIteratorAndRollback();
 }
 
-bool StatisticsInitIterator::getNext( const void*& msg, std::size_t& msgsize)
-{
-	if (m_errorhnd->hasError())
-	{
-		m_errorhnd->explain( _TXT("calling peer message queue fetch with pending error: %s"));
-		return false;
-	}
-	try
-	{
-		bool rt = true;
-		do
-		{
-			rt = m_statisticsBuilder->fetchMessage( msg, msgsize);
-		}
-		while (rt && msgsize == 0);
-		if (rt)
-		{
-			return true;
-		}
-		else if (m_errorhnd->hasError())
-		{
-			m_errorhnd->explain( _TXT("error fetching initialization peer message from storage: %s"));
-			return false;
-		}
-		else
-		{
-			m_statisticsBuilder.reset();
-			return false;
-		}
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
-}
 
 

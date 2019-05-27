@@ -23,11 +23,11 @@
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/base/unordered_map.hpp"
+#include "strus/base/configParser.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
-#include "statisticsUpdateIterator.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "extractKeyValueData.hpp"
@@ -89,6 +89,14 @@ StorageClient::StorageClient(
 {
 	try
 	{
+		if (statisticsProc_)
+		{
+			std::string databaseConfigCopy = databaseConfig;
+			if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
+			{
+				throw strus::runtime_error(_TXT("variable '%s' not defined in configuration"), "path");
+			}
+		}
 		if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
 		m_metadescr.load( m_database.get());
 		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
@@ -446,14 +454,6 @@ StorageTransactionInterface*
 {
 	try
 	{
-		if (m_statisticsProc)
-		{
-			TransactionLock lock( this);
-			if (!m_statisticsBuilder.get())
-			{
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
-			}
-		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
@@ -469,11 +469,6 @@ StorageDocumentInterface*
 		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
-}
-
-StatisticsBuilderInterface* StorageClient::getStatisticsBuilder()
-{
-	return m_statisticsBuilder.get();
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
@@ -961,12 +956,6 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-bool StorageClient::fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize)
-{
-	TransactionLock lock( this);
-	return m_statisticsBuilder->fetchMessage( msg, msgsize);
-}
-
 StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool sign)
 {
 	try
@@ -975,19 +964,12 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool si
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
-		{
-			TransactionLock lock( this);
-			if (!m_statisticsBuilder.get())
-			{
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
-			}
-		}
-		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
+		return createStatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
-StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
+StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( const TimeStamp& timestamp)
 {
 	try
 	{
@@ -995,14 +977,12 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
+		strus::Reference<StatisticsBuilderInterface> builder( m_statisticsProc->createBuilder( m_statisticsPath));
+		if (!builder.get())
 		{
-			TransactionLock lock( this);
-			if (!m_statisticsBuilder.get())
-			{
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
-			}
+			throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), m_errorhnd->fetchError());
 		}
-		return new StatisticsUpdateIterator( this, m_errorhnd);
+		return builder->createIterator( timestamp);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }

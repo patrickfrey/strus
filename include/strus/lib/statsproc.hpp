@@ -9,6 +9,7 @@
 /// \file "statsproc.hpp"
 #ifndef _STRUS_STORAGE_STD_STATISTICS_PROCESSOR_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_STD_STATISTICS_PROCESSOR_LIB_HPP_INCLUDED
+#include <string>
 
 /// \brief strus toplevel namespace
 namespace strus {
@@ -18,7 +19,17 @@ class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-StatisticsProcessorInterface* createStatisticsProcessor( ErrorBufferInterface* errorhnd);
+/// \brief Reasonable constants for defaults
+enum {
+	StatisticsDefaultNofBlocks=100000,	//< reasonable number of blocks for a collection of some million entries
+	StatisticsDefaultMsgChunkSize=100000	//< size of a chunk for transmitting statistics
+};
+
+/// \brief Create an interface for processing global statistics
+/// \param[in] nofBlocks number of blocks in the map
+/// \param[in] msgChunkSize size of a message blob for transmitting statistics
+/// \param[in] errorhnd error buffer interface
+StatisticsProcessorInterface* createStandardStatisticsProcessor( int nofBlocks, int msgChunkSize, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

@@ -18,6 +18,8 @@ namespace strus
 class StatisticsViewerInterface;
 /// \brief Forward declaration
 class StatisticsBuilderInterface;
+/// \brief Forward declaration
+class StatisticsMapInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation
 /// \note this interface is used for distributing a search index
@@ -31,13 +33,17 @@ public:
 	/// \param[in] msgptr pointer to the packed statistics message blob (not necessarily copied by the viewer, lifetime assumed longer than that of viewer)
 	/// \param[in] msgsize size of the packed statistics message blob in bytes
 	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
-	virtual StatisticsViewerInterface* createViewer(
-			const void* msgptr, std::size_t msgsize) const=0;
+	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const=0;
 
 	/// \brief Creates a builder for a statistics message
-	/// \param[in] options_ options for the message builder
+	/// \param[in] path file path to use for storing files with the statistics
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
-	virtual StatisticsBuilderInterface* createBuilder() const=0;
+	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const=0;
+
+	/// \brief Creates a map for global statistics
+	/// \note You can implement the map in your own way, this is just an example implementation provided by the statistics processor
+	/// \return the map object (with ownership returned) or NULL in case of a memory allocation error
+	virtual StatisticsMapInterface* createMap() const=0;
 };
 
 }//namespace

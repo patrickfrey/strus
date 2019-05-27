@@ -294,26 +294,6 @@ void StorageTransaction::updateDocumentFrequency( const std::string& type, const
 
 bool StorageTransaction::commit()
 {
-	// Structure to make the rollback method be called in case of an exeption
-	struct StatisticsBuilderScope
-	{
-		StatisticsBuilderScope( StatisticsBuilderInterface* obj_)
-			:m_obj(obj_)
-		{
-			if (m_obj) m_obj->start();
-		}
-		void done()
-		{
-			m_obj = 0;
-		}
-		~StatisticsBuilderScope()
-		{
-			if (m_obj) m_obj->rollback();
-		}
-
-	private:
-		 StatisticsBuilderInterface* m_obj;
-	};
 	if (m_errorhnd->hasError())
 	{
 		return false;
@@ -338,7 +318,12 @@ bool StorageTransaction::commit()
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
-		StatisticsBuilderInterface* statisticsBuilder = m_storage->getStatisticsBuilder();
+		const StatisticsProcessorInterface* statsproc = m_storage->getStatisticsProcessor();
+		Reference<StatisticsBuilderInterface> statisticsBuilder;
+		if (statsproc)
+		{
+			statisticsBuilder.reset( statsproc->createBuilder( m_storage->statisticsPath()));
+		}
 		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
 
 		strus::local_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
@@ -363,16 +348,15 @@ bool StorageTransaction::commit()
 		m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
 		m_structIndexMap.renameNewNumbers( docnoUnknownMap);
 
-		StatisticsBuilderScope statisticsBuilderScope( statisticsBuilder);
 		DocumentFrequencyCache::Batch dfbatch;
 
 		m_invertedIndexMap.getWriteBatch(
 				transaction.get(),
-				statisticsBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
+				statisticsBuilder.get(), dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
 		m_structIndexMap.getWriteBatch( transaction.get());
 
-		if (statisticsBuilder)
+		if (statsproc)
 		{
 			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents_incr);
 		}
@@ -380,7 +364,7 @@ bool StorageTransaction::commit()
 		m_forwardIndexMap.getWriteBatch( transaction.get());
 
 		m_explicit_dfmap.renameNewTermNumbers( termnoUnknownMap);
-		m_explicit_dfmap.getWriteBatch( transaction.get(), statisticsBuilder,
+		m_explicit_dfmap.getWriteBatch( transaction.get(), statisticsBuilder.get(),
 						dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 						m_termTypeMapInv, m_termValueMapInv);
 
@@ -388,6 +372,19 @@ bool StorageTransaction::commit()
 		m_userAclMap.getWriteBatch( transaction.get());
 
 		m_storage->getVariablesWriteBatch( transaction.get(), nof_documents_incr);
+		if (m_errorhnd->hasError())
+		{
+			m_errorhnd->explain(_TXT("error in transaction commit gathering data: %s"));
+			return false;
+		}
+		if (statsproc)
+		{
+			if (!statisticsBuilder->commit())
+			{
+				m_errorhnd->explain( _TXT("error in statistics message builder commit: %s"));
+				return false;
+			}
+		}
 		if (!transaction->commit())
 		{
 			m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
@@ -399,7 +396,6 @@ bool StorageTransaction::commit()
 		}
 		m_storage->declareNofDocumentsInserted( nof_documents_incr);
 		m_storage->releaseTransaction( refreshList);
-		statisticsBuilderScope.done();
 
 		m_commit = true;
 		m_nof_documents_affected = nof_new_documents + nof_chg_documents + m_nof_deleted_documents;
