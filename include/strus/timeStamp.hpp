@@ -22,7 +22,7 @@ public:
 	int counter() const	{return m_counter;}
 
 	/// \brief Constructor
-	explicit TimeStamp( time_t unixtime_, int counter_=0)
+	explicit TimeStamp( time_t unixtime_=0, int counter_=0)
 		:m_unixtime(unixtime_),m_counter(counter_){}
 	/// \brief Copy constructor
 	TimeStamp( const TimeStamp& o)
