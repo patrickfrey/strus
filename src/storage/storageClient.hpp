@@ -119,7 +119,7 @@ public:
 	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign);
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator();
 
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp);
 

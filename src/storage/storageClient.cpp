@@ -956,7 +956,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator()
 {
 	try
 	{
@@ -964,7 +964,7 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool si
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
-		return createStatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
+		return createStatisticsInitIterator( this, m_database.get(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }

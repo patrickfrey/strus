@@ -26,7 +26,6 @@ StatisticsIteratorInterface*
 	strus::createStatisticsInitIterator(
 		StorageClientInterface* storage,
 		DatabaseClientInterface* database,
-		bool sign,
 		ErrorBufferInterface* errorhnd)
 {
 	const StatisticsProcessorInterface* proc = storage->getStatisticsProcessor();
@@ -40,7 +39,7 @@ StatisticsIteratorInterface*
 		throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), errorhnd->fetchError());
 	}
 	int nofdocs = storage->nofDocumentsInserted();
-	builder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
+	builder->setNofDocumentsInsertedChange( nofdocs);
 
 	std::map<Index,std::size_t> typenomap;
 	std::map<Index,std::size_t> termnomap;
@@ -88,7 +87,7 @@ StatisticsIteratorInterface*
 			if (ti == termnomap.end()) throw strus::runtime_error( "%s",  _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
-			builder->addDfChange( typenam, termnam, sign?df:-df);
+			builder->addDfChange( typenam, termnam, df);
 		}
 	}
 	return builder->createIteratorAndRollback();

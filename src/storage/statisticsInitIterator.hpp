@@ -25,7 +25,6 @@ StatisticsIteratorInterface*
 	createStatisticsInitIterator(
 		StorageClientInterface* storage,
 		DatabaseClientInterface* database,
-		bool sign,
 		ErrorBufferInterface* errorhnd);
 
 }//namespace

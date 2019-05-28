@@ -214,14 +214,13 @@ public:
 	/// \note this function is thread safe, multiple concurrent transactions are allowed 
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates an iterator on storage statistics messages for initialization/deregistration
-	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration)
+	/// \brief Creates an iterator on all storage term occurrence statistics
 	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign=true)=0;
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator()=0;
 
-	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage starting from a given date/time
+	/// \brief Creates an iterator on the incremental changes of the storage statistics starting from a given date/time
 	/// \param[in] timestamp time of last change statistics fetched
-	/// \return the iterator on the statistics message blobs from a certain snapshot defined by a timestamp
+	/// \return the iterator on the incremental changes of the statistics from a certain snapshot defined by the timestamp passed as argument
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp)=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
