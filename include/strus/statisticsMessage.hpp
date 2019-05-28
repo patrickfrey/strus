@@ -29,6 +29,9 @@ public:
 	/// \brief Find out if a message is valid or invalid (resp. empty meaning no message left or an error occurred)
 	/// \return true if the message is empty
 	bool empty() const		{return 0==m_blob.size();}
+	/// \brief Get the content blob as std string
+	/// \return the blob
+	const std::string& blob() const	{return m_blob;}
 
 	/// \brief Constructor
 	StatisticsMessage()
