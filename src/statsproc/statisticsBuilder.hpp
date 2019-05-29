@@ -49,16 +49,14 @@ public:
 	virtual StatisticsIteratorInterface* createIterator( const TimeStamp& timestamp);
 
 private:
-	void moveNofDocumentsInsertedChange();
-	void newContent();
+	std::string newContent();
 	void clear();
+	std::vector<std::string> getDfChangeMapBlocks();
 
 private:
 	TimeStamp m_timestamp;
-	std::string m_lastkey;
-	std::vector<std::string> m_content;
+	std::map<std::string,int> m_dfChangeMap;
 	int32_t m_nofDocumentsInsertedChange;
-	std::size_t m_blocksize;
 	std::size_t m_maxchunksize;
 	DatedFileList m_datedFileList;
 	ErrorBufferInterface* m_errorhnd;
