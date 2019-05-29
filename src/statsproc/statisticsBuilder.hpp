@@ -15,6 +15,7 @@
 #include "datedFileList.hpp"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace strus
 {
