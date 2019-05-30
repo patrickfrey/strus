@@ -90,6 +90,9 @@ public:
 	/// \note Used for cleanup
 	void deleteFilesBefore( const TimeStamp& timestamp);
 
+	static std::string timeStampToString( const TimeStamp& timestamp);
+	static TimeStamp stringToTimeStamp( const std::string& timestampstr);
+
 private:
 	std::string newFileName();
 	void createWorkingDirectoryIfNotExist();

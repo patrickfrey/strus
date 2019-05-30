@@ -83,15 +83,8 @@ static TimeStamp parseTimeStamp( const char* timestampstr)
 
 static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeStamp& timestamp, const std::string& extension)
 {
-	char timebuf[ 256];
-	char idxbuf[ 32];
-
-	time_t tt = timestamp.unixtime();
-	const struct tm* tm_info = ::localtime( &tt);
-
-	std::strftime( timebuf, sizeof(timebuf), "%Y%m%d_%H%M%S", tm_info);
-	std::snprintf( idxbuf, sizeof(idxbuf), "%04d", timestamp.counter());
-	return strus::string_format( "%s%s_%s%s", prefix.c_str(), timebuf, idxbuf, extension.c_str());
+	std::string timestampstr( DatedFileList::timeStampToString( timestamp));
+	return prefix + timestampstr + extension;
 }
 
 DatedFileList::DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_)
@@ -350,5 +343,23 @@ void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)
 			strus::removeFile( strus::joinFilePath( m_directory, *fi));
 		}
 	}
+}
+
+std::string DatedFileList::timeStampToString( const TimeStamp& timestamp)
+{
+	char timebuf[ 256];
+	char timestampbuf[ 256];
+
+	time_t tt = timestamp.unixtime();
+	const struct tm* tm_info = ::localtime( &tt);
+
+	std::strftime( timebuf, sizeof(timebuf), "%Y%m%d_%H%M%S", tm_info);
+	std::snprintf( timestampbuf, sizeof(timestampbuf), "%s_%04d", timebuf, timestamp.counter());
+	return std::string(timestampbuf);
+}
+
+TimeStamp DatedFileList::stringToTimeStamp( const std::string& timestampstr)
+{
+	return parseTimeStamp( timestampstr.c_str());
 }
 
