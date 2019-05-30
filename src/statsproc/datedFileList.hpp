@@ -80,18 +80,12 @@ public:
 	/// \note Transaction completed by file renames, a failed store may lead to files with this extension laying around.
 	void store( const std::vector<std::string>& blobs, const char* tmpfileext);
 
-	static TimeStamp currentTimestamp();
-	static TimeStamp allocTimestamp();
-
 	Iterator getIterator( const TimeStamp& timestamp) const;
 	TimeStampIterator getTimeStampIterator( const TimeStamp& timestamp) const;
 
 	/// \brief Deletes all files before a certain date/time
 	/// \note Used for cleanup
 	void deleteFilesBefore( const TimeStamp& timestamp);
-
-	static std::string timeStampToString( const TimeStamp& timestamp);
-	static TimeStamp stringToTimeStamp( const std::string& timestampstr);
 
 private:
 	std::string newFileName();

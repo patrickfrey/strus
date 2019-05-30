@@ -8,11 +8,13 @@
 /// \brief List of files with datetime stamp suitable to store and retrieve data dump snapshots from a certain date
 /// \file datedFileList.cpp
 #include "datedFileList.hpp"
+#include "strus/lib/error.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/fileio.hpp"
 #include "strus/base/atomic.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
+#include "strus/timeStamp.hpp"
 #include "private/internationalization.hpp"
 #include <string>
 #include <cstring>
@@ -21,69 +23,11 @@
 
 using namespace strus;
 
-static bool onlyDigits( char const* ti)
-{
-	for (;*ti >= '0' && *ti <= '9'; ++ti){}
-	return !*ti;
-}
-
-static TimeStamp parseTimeStamp( const char* timestampstr)
-{
-	char const* ti = timestampstr;
-	struct tm date;
-
-	char YY_buf[ 5];
-	std::memcpy( YY_buf, ti, 4); YY_buf[4] = 0; ti += 4;
-	char mm_buf[ 3];
-	std::memcpy( mm_buf, ti, 2); mm_buf[2] = 0; ti += 2;
-	char dd_buf[ 3];
-	std::memcpy( dd_buf, ti, 2); dd_buf[2] = 0; ti += 2;
-	if (*ti != '_') throw std::runtime_error( _TXT("timestamp parse error"));
-	ti += 1;
-	char HH_buf[ 3];
-	std::memcpy( HH_buf, ti, 2); HH_buf[2] = 0; ti += 2;
-	char MM_buf[ 3];
-	std::memcpy( MM_buf, ti, 2); MM_buf[2] = 0; ti += 2;
-	char SS_buf[ 3];
-	std::memcpy( SS_buf, ti, 2); SS_buf[2] = 0; ti += 2;
-	if (*ti != '_') throw std::runtime_error( _TXT("timestamp parse error"));
-	ti += 1;
-	char ii_buf[ 5];
-	std::memcpy( ii_buf, ti, 4); ii_buf[4] = 0; ti += 4;
-
-	if (!onlyDigits( YY_buf)
-	||  !onlyDigits( mm_buf)
-	||  !onlyDigits( dd_buf)
-	||  !onlyDigits( HH_buf)
-	||  !onlyDigits( MM_buf)
-	||  !onlyDigits( SS_buf)
-	||  !onlyDigits( ii_buf)) throw std::runtime_error( _TXT("timestamp parse error"));
-
-	std::memset( &date, 0, sizeof(date));
-	date.tm_sec  = ::atoi(SS_buf);
-	date.tm_min  = ::atoi(MM_buf);
-	date.tm_hour = ::atoi(HH_buf);
-	date.tm_mday = ::atoi(dd_buf);
-	date.tm_mon  = ::atoi(mm_buf)-1;
-	date.tm_year = ::atoi(YY_buf) - 1900;
-	date.tm_isdst = 0;
-
-	int counter = ::atoi( ii_buf);
-	time_t unixtime = ::mktime( &date);
-
-	if (unixtime == ((time_t)-1))
-	{
-		throw std::runtime_error( _TXT("timestamp syntax error"));
-	}
-	else
-	{
-		return TimeStamp( unixtime, counter);
-	}
-}
-
 static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeStamp& timestamp, const std::string& extension)
 {
-	std::string timestampstr( DatedFileList::timeStampToString( timestamp));
+	ErrorCode errcode = (ErrorCode)0;
+	std::string timestampstr( TimeStamp::tostring( timestamp, errcode));
+	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
 	return prefix + timestampstr + extension;
 }
 
@@ -99,7 +43,11 @@ DatedFileList::DatedFileList( const DatedFileList& o)
 
 std::string DatedFileList::newFileName()
 {
-	return strus::joinFilePath( m_directory, fileNameFromTimeStamp( m_prefix, allocTimestamp(), m_extension));
+	ErrorCode errcode = (ErrorCode)0;
+	TimeStamp newTimeStamp = TimeStamp::alloc( errcode);
+	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+
+	return strus::joinFilePath( m_directory, fileNameFromTimeStamp( m_prefix, newTimeStamp, m_extension));
 }
 
 void DatedFileList::createWorkingDirectoryIfNotExist()
@@ -180,54 +128,16 @@ void DatedFileList::store( const std::vector<std::string>& blobs, const char* tm
 	}
 }
 
-static AtomicCounter<time_t> g_currentTime(0);
-static AtomicCounter<int> g_currentTimeCounter(0);
-
-
-TimeStamp DatedFileList::allocTimestamp()
-{
-AGAIN:
-{
-	// Get Value of current time and set the global variable with the current time if needed:
-	time_t current_time = ::time(NULL);
-	if (current_time == ((time_t)-1)) throw std::runtime_error( _TXT( "failed to get system time"));
-
-	int counter = g_currentTimeCounter.value();
-	time_t ct = g_currentTime.value();
-	if (current_time > ct)
-	{
-		if (!g_currentTime.test_and_set( ct, current_time)) goto AGAIN;
-		if (!g_currentTimeCounter.test_and_set( counter, 0)) goto AGAIN;
-		return TimeStamp( current_time, 0);
-	}
-	else
-	{
-		counter = g_currentTimeCounter.allocIncrement();
-		return TimeStamp( ct, counter);
-	}
-}}
-
-TimeStamp DatedFileList::currentTimestamp()
-{
-AGAIN:
-{
-	int counter = g_currentTimeCounter.value();
-	time_t ct = g_currentTime.value();
-	if (ct == 0)
-	{
-		time_t current_time = ::time(NULL);
-		if (!g_currentTime.test_and_set( ct, current_time)) goto AGAIN;
-	}
-	if (counter != g_currentTimeCounter.value()) goto AGAIN;
-	return TimeStamp( ct, counter);
-}}
-
 DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_)
 {
 	std::vector<std::string>::const_iterator fi = filelist_.begin(), fe = filelist_.end();
 	for (; fi != fe; ++fi)
 	{
-		m_ar.push_back( parseTimeStamp( fi->c_str() + prefixsize_));
+		ErrorCode errcode = (ErrorCode)0;
+		TimeStamp fileTimeStamp = TimeStamp::fromstring( fi->c_str() + prefixsize_, errcode);
+		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+
+		m_ar.push_back( fileTimeStamp);
 	}
 	m_itr = m_ar.begin();
 }
@@ -253,8 +163,11 @@ void DatedFileList::Iterator::loadBlob()
 	else
 	{
 		int ec = strus::readFile( strus::joinFilePath( m_directory, *m_fileiter), m_blob);
-		m_timestamp = parseTimeStamp( m_fileiter->c_str() + m_prefixsize);
 		if (ec != 0) throw std::runtime_error(::strerror(ec));
+
+		ErrorCode errcode = (ErrorCode)0;
+		m_timestamp = TimeStamp::fromstring( m_fileiter->c_str() + m_prefixsize, errcode);
+		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
 	}
 }
 
@@ -294,7 +207,11 @@ std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp
 	}
 	std::vector<std::string> rt;
 	std::vector<std::string> files;
-	TimeStamp timestamp_current = currentTimestamp();
+
+	ErrorCode errcode = (ErrorCode)0;
+	TimeStamp timestamp_current = TimeStamp::current( errcode);
+	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+	
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
 
@@ -343,23 +260,5 @@ void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)
 			strus::removeFile( strus::joinFilePath( m_directory, *fi));
 		}
 	}
-}
-
-std::string DatedFileList::timeStampToString( const TimeStamp& timestamp)
-{
-	char timebuf[ 256];
-	char timestampbuf[ 256];
-
-	time_t tt = timestamp.unixtime();
-	const struct tm* tm_info = ::localtime( &tt);
-
-	std::strftime( timebuf, sizeof(timebuf), "%Y%m%d_%H%M%S", tm_info);
-	std::snprintf( timestampbuf, sizeof(timestampbuf), "%s_%04d", timebuf, timestamp.counter());
-	return std::string(timestampbuf);
-}
-
-TimeStamp DatedFileList::stringToTimeStamp( const std::string& timestampstr)
-{
-	return parseTimeStamp( timestampstr.c_str());
 }
 

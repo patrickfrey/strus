@@ -10,8 +10,11 @@
 
 #include "statisticsBuilder.hpp"
 #include "statisticsHeader.hpp"
+#include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/statisticsIteratorInterface.hpp"
+#include "strus/timeStamp.hpp"
+#include "strus/errorCodes.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/base/utf8.hpp"
@@ -92,7 +95,9 @@ StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxc
 	,m_errorhnd(errorhnd_)
 {
 	if (m_maxchunksize <= sizeof(StatisticsHeader)) throw std::runtime_error(_TXT("Maximum block size for statistics builder too small"));
-	m_timestamp = m_datedFileList.currentTimestamp();
+	ErrorCode errcode = (ErrorCode)0;
+	m_timestamp = TimeStamp::current( errcode);
+	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
 }
 
 StatisticsBuilder::~StatisticsBuilder()
@@ -271,7 +276,11 @@ StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
 	try
 	{
 		std::vector<std::string> blocks = getDfChangeMapBlocks();
-		StatisticsIteratorInterface* rt = new InPlaceStatisticsIterator( blocks, DatedFileList::currentTimestamp());
+		ErrorCode errcode = (ErrorCode)0;
+		TimeStamp currentTimestamp = TimeStamp::current( errcode);
+		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+
+		StatisticsIteratorInterface* rt = new InPlaceStatisticsIterator( blocks, currentTimestamp);
 		clear();
 		return rt;
 	}
