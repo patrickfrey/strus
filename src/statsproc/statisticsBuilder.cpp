@@ -20,6 +20,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <algorithm>
 #include <limits>
 #include <arpa/inet.h>
 #include "strus/base/stdint.h"
@@ -29,41 +30,55 @@
 using namespace strus;
 
 namespace {
-class StatisticsIteratorImpl
+class InPlaceStatisticsIterator
 	:public StatisticsIteratorInterface
 {
 public:
-	StatisticsIteratorImpl( std::vector<std::string>& ar_, const TimeStamp& timestamp_)
+	explicit InPlaceStatisticsIterator( std::vector<std::string>& ar_, const TimeStamp& timestamp = TimeStamp())
 	{
 		while (!ar_.empty())
 		{
-			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), timestamp_));
+			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), TimeStamp()));
 			ar_.pop_back();
 		}
-		m_iter = m_ar.begin();
-	}
-	StatisticsIteratorImpl( DatedFileList& filelist, const TimeStamp& timestamp_)
-	{
-		DatedFileList::Iterator iterator = filelist.getIterator( timestamp_);
-		if (iterator.blob())
-		{
-			do
-			{
-				m_ar.push_back( StatisticsMessage( iterator.blob(), iterator.blobsize(), iterator.timestamp()));
-			} while (iterator.next());
-		}
-		m_iter = m_ar.begin();
+		std::reverse( m_ar.begin(), m_ar.end());
+		m_itr = m_ar.begin();
 	}
 
 	virtual StatisticsMessage getNext()
 	{
-		if (m_iter == m_ar.end()) return StatisticsMessage( NULL, 0, TimeStamp(0));
-		return *m_iter++;
+		if (m_itr == m_ar.end()) return StatisticsMessage( NULL, 0, TimeStamp(0));
+		return *m_itr++;
 	}
 
 private:
 	std::vector<StatisticsMessage> m_ar;
-	std::vector<StatisticsMessage>::const_iterator m_iter;
+	std::vector<StatisticsMessage>::const_iterator m_itr;
+};
+
+class StoredStatisticsIterator
+	:public StatisticsIteratorInterface
+{
+public:
+	StoredStatisticsIterator( DatedFileList& filelist, const TimeStamp& timestamp_)
+		:m_itr(filelist.getIterator( timestamp_)){}
+
+	virtual StatisticsMessage getNext()
+	{
+		if (m_itr.blob())
+		{
+			StatisticsMessage rt( m_itr.blob(), m_itr.blobsize(), m_itr.timestamp());
+			(void)m_itr.next();
+			return rt;
+		}
+		else
+		{
+			return StatisticsMessage();
+		}
+	}
+
+private:
+	DatedFileList::Iterator m_itr;
 };
 }
 
@@ -256,7 +271,7 @@ StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
 	try
 	{
 		std::vector<std::string> blocks = getDfChangeMapBlocks();
-		StatisticsIteratorInterface* rt = new StatisticsIteratorImpl( blocks, m_timestamp);
+		StatisticsIteratorInterface* rt = new InPlaceStatisticsIterator( blocks, DatedFileList::currentTimestamp());
 		clear();
 		return rt;
 	}
@@ -276,7 +291,7 @@ StatisticsIteratorInterface* StatisticsBuilder::createIterator( const TimeStamp&
 {
 	try
 	{
-		return new StatisticsIteratorImpl( m_datedFileList, timestamp_);
+		return new StoredStatisticsIterator( m_datedFileList, timestamp_);
 		
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);

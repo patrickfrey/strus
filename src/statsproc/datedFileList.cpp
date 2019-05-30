@@ -95,10 +95,14 @@ static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeS
 }
 
 DatedFileList::DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_)
-	:m_mutex(),m_timestamp(0,0),m_directory(directory_),m_prefix(prefix_),m_extension(extension_)
+	:m_directory(directory_),m_prefix(prefix_),m_extension(extension_)
 {
 	if (!m_directory.empty()) createWorkingDirectoryIfNotExist();
 }
+
+DatedFileList::DatedFileList( const DatedFileList& o)
+	:m_directory(o.m_directory),m_prefix(o.m_prefix),m_extension(o.m_extension)
+{}
 
 std::string DatedFileList::newFileName()
 {
@@ -183,36 +187,68 @@ void DatedFileList::store( const std::vector<std::string>& blobs, const char* tm
 	}
 }
 
+static AtomicCounter<time_t> g_currentTime(0);
+static AtomicCounter<int> g_currentTimeCounter(0);
+
+
 TimeStamp DatedFileList::allocTimestamp()
 {
+AGAIN:
+{
+	// Get Value of current time and set the global variable with the current time if needed:
 	time_t current_time = ::time(NULL);
 	if (current_time == ((time_t)-1)) throw std::runtime_error( _TXT( "failed to get system time"));
 
-	scoped_lock lock( m_mutex);
-	if (current_time == m_timestamp.unixtime())
+	int counter = g_currentTimeCounter.value();
+	time_t ct = g_currentTime.value();
+	if (current_time > ct)
 	{
-		m_timestamp = TimeStamp( current_time, m_timestamp.counter()+1);
+		if (!g_currentTime.test_and_set( ct, current_time)) goto AGAIN;
+		if (!g_currentTimeCounter.test_and_set( counter, 0)) goto AGAIN;
+		return TimeStamp( current_time, 0);
 	}
 	else
 	{
-		m_timestamp = TimeStamp( current_time);
+		counter = g_currentTimeCounter.allocIncrement();
+		return TimeStamp( ct, counter);
 	}
-	return m_timestamp;
-}
+}}
 
 TimeStamp DatedFileList::currentTimestamp()
 {
-	strus::scoped_lock lock( m_mutex);
-	if (m_timestamp.unixtime() == 0)
+AGAIN:
+{
+	int counter = g_currentTimeCounter.value();
+	time_t ct = g_currentTime.value();
+	if (ct == 0)
 	{
 		time_t current_time = ::time(NULL);
-		if (current_time == ((time_t)-1)) throw std::runtime_error( _TXT( "failed to get system time"));
-		return TimeStamp( current_time-1, 0);
+		if (!g_currentTime.test_and_set( ct, current_time)) goto AGAIN;
 	}
-	else
+	if (counter != g_currentTimeCounter.value()) goto AGAIN;
+	return TimeStamp( ct, counter);
+}}
+
+DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_)
+{
+	std::vector<std::string>::const_iterator fi = filelist_.begin(), fe = filelist_.end();
+	for (; fi != fe; ++fi)
 	{
-		return m_timestamp;
+		m_ar.push_back( parseTimeStamp( fi->c_str() + prefixsize_));
 	}
+	m_itr = m_ar.begin();
+}
+
+DatedFileList::TimeStampIterator::TimeStampIterator()
+	:m_ar()
+{
+	m_itr = m_ar.begin();
+}
+
+DatedFileList::TimeStampIterator::TimeStampIterator( const TimeStampIterator& o)
+	:m_ar(o.m_ar)
+{
+	m_itr = m_ar.begin();
 }
 
 void DatedFileList::Iterator::loadBlob()
@@ -229,15 +265,15 @@ void DatedFileList::Iterator::loadBlob()
 	}
 }
 
-DatedFileList::Iterator::Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_, const TimeStamp& timestamp_)
-	:m_timestamp(timestamp_),m_blob(),m_directory(directory_),m_prefixsize(prefixsize_),m_filelist(filelist_)
+DatedFileList::Iterator::Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_)
+	:m_timestamp(),m_blob(),m_directory(directory_),m_prefixsize(prefixsize_),m_filelist(filelist_)
 {
 	m_fileiter = m_filelist.begin();
 	loadBlob();
 }
 
-DatedFileList::Iterator::Iterator( const TimeStamp& timestamp_)
-	:m_timestamp(timestamp_),m_blob(),m_directory(),m_prefixsize(0),m_filelist()
+DatedFileList::Iterator::Iterator()
+	:m_timestamp(),m_blob(),m_directory(),m_prefixsize(0),m_filelist()
 {
 	m_fileiter = m_filelist.begin();
 }
@@ -257,29 +293,42 @@ bool DatedFileList::Iterator::next()
 	return true;
 }
 
-DatedFileList::Iterator DatedFileList::getIterator( const TimeStamp& timestamp_)
+std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp) const
 {
 	if (m_directory.empty())
 	{
-		return Iterator( timestamp_);
+		return std::vector<std::string>();
 	}
-	std::vector<std::string> filtered_files;
+	std::vector<std::string> rt;
 	std::vector<std::string> files;
 	TimeStamp timestamp_current = currentTimestamp();
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
 
-	std::string filterfilename_start = fileNameFromTimeStamp( m_prefix, timestamp_, m_extension);
+	std::string filterfilename_start = fileNameFromTimeStamp( m_prefix, timestamp, m_extension);
 	std::string filterfilename_end = fileNameFromTimeStamp( m_prefix, timestamp_current, m_extension);
 	std::vector<std::string>::const_iterator fi = files.begin(), fe = files.end();
 	for (; fi != fe; ++fi)
 	{
 		if (strus::stringStartsWith( *fi, m_prefix) && *fi > filterfilename_start && *fi <= filterfilename_end)
 		{
-			filtered_files.push_back( *fi);
+			rt.push_back( *fi);
 		}
 	}
-	return Iterator( m_directory, m_prefix.size(), filtered_files, timestamp_);
+	std::sort( rt.begin(), rt.end());
+	return rt;
+}
+
+DatedFileList::Iterator DatedFileList::getIterator( const TimeStamp& timestamp) const
+{
+	std::vector<std::string> files = getFileNames( timestamp);
+	return Iterator( m_directory, m_prefix.size(), files);
+}
+
+DatedFileList::TimeStampIterator DatedFileList::getTimeStampIterator( const TimeStamp& timestamp) const
+{
+	std::vector<std::string> files = getFileNames( timestamp);
+	return TimeStampIterator( m_prefix.size(), files);
 }
 
 void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)

@@ -24,8 +24,8 @@ public:
 	class Iterator
 	{
 	public:
-		explicit Iterator( const TimeStamp& timestamp_);
-		Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_, const TimeStamp& timestamp_);
+		Iterator();
+		Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_);
 		Iterator( const Iterator& o);
 
 		const TimeStamp& timestamp() const
@@ -50,6 +50,20 @@ public:
 		std::vector<std::string>::const_iterator m_fileiter;
 	};
 
+	class TimeStampIterator
+	{
+	public:
+		TimeStampIterator(); 
+		TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_); 
+		TimeStampIterator( const TimeStampIterator& o); 
+
+		const TimeStamp* next();
+		
+	private:
+		std::vector<TimeStamp> m_ar;
+		std::vector<TimeStamp>::const_iterator m_itr;
+	};
+
 public:
 	/// \brief Constructor
 	/// \param[in] directory_ where to store the files
@@ -57,16 +71,20 @@ public:
 	/// \param[in] extension_ extension to use for files stored
 	DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_);
 
+	/// \brief Copy constructor
+	DatedFileList( const DatedFileList& o);
+
 	/// \brief Stores a blobs to files in the context of a transaction (operation either fails entirely or succeeds completely)
 	/// \param[in] blobs data to store
 	/// \param[in] tmpfileext extension to use for temporary files
 	/// \note Transaction completed by file renames, a failed store may lead to files with this extension laying around.
 	void store( const std::vector<std::string>& blobs, const char* tmpfileext);
 
-	TimeStamp currentTimestamp();
-	TimeStamp allocTimestamp();
+	static TimeStamp currentTimestamp();
+	static TimeStamp allocTimestamp();
 
-	Iterator getIterator( const TimeStamp& timestamp);
+	Iterator getIterator( const TimeStamp& timestamp) const;
+	TimeStampIterator getTimeStampIterator( const TimeStamp& timestamp) const;
 
 	/// \brief Deletes all files before a certain date/time
 	/// \note Used for cleanup
@@ -75,10 +93,9 @@ public:
 private:
 	std::string newFileName();
 	void createWorkingDirectoryIfNotExist();
+	std::vector<std::string> getFileNames( const TimeStamp& timestamp) const;
 
 private:
-	strus::mutex m_mutex;
-	TimeStamp m_timestamp;
 	std::string m_directory;
 	std::string m_prefix;
 	std::string m_extension;
