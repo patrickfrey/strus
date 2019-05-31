@@ -108,5 +108,16 @@ std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::stri
 	CATCH_ERROR_MAP_RETURN( _TXT("error getting incremental statistic changes timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
 }
 
+StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const
+{
+	try
+	{
+		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		std::string blob = filelist.loadBlob( timestamp);
+		return StatisticsMessage( blob, timestamp);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error loading a change message blob: %s"), *m_errorhnd, StatisticsMessage());
+}
+
 
 

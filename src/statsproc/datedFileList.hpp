@@ -87,6 +87,9 @@ public:
 	Iterator getIterator( const TimeStamp& timestamp) const;
 	TimeStampIterator getTimeStampIterator( const TimeStamp& timestamp) const;
 
+	/// \brief Load the blob associated with the timestamp specified
+	std::string loadBlob( const TimeStamp& timestamp) const;
+
 	/// \brief Deletes all files before a certain date/time
 	/// \note Used for cleanup
 	void deleteFilesBefore( const TimeStamp& timestamp);

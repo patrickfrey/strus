@@ -10,6 +10,7 @@
 #ifndef _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
 #include "strus/timeStamp.hpp"
+#include "strus/statisticsMessage.hpp"
 #include <string>
 #include <vector>
 
@@ -50,7 +51,13 @@ public:
 	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
 	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const=0;
 
-	/// \brief Creates a builder for a statistics message
+	/// \brief Load the one incremental statistics change message associated with a timestamp
+	/// \param[in] path file path used for storing files with the statistics
+	/// \param[in] timestamp timestamp associated with the statistics change message
+	/// \return the statistics change message structure
+	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const=0;
+	
+	/// \brief Creates a builder for statistics messages
 	/// \param[in] path file path to use for storing files with the statistics
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const=0;

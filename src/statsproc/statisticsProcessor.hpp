@@ -29,6 +29,8 @@ public:
 
 	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const;
 
+	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const;
+
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
 	virtual StatisticsMapInterface* createMap() const;

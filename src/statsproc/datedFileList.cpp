@@ -48,7 +48,10 @@ std::string DatedFileList::newFileName()
 	TimeStamp newTimeStamp = TimeStamp::alloc( errcode);
 	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
 
-	return strus::joinFilePath( m_directory, fileNameFromTimeStamp( m_prefix, newTimeStamp, m_extension));
+	std::string filename = fileNameFromTimeStamp( m_prefix, newTimeStamp, m_extension);
+	std::string rt = strus::joinFilePath( m_directory, filename);
+	if (rt.empty()) throw std::bad_alloc();
+	return rt;
 }
 
 void DatedFileList::createWorkingDirectoryIfNotExist()
@@ -168,7 +171,9 @@ void DatedFileList::Iterator::loadBlob()
 	}
 	else
 	{
-		int ec = strus::readFile( strus::joinFilePath( m_directory, *m_fileiter), m_blob);
+		std::string path = strus::joinFilePath( m_directory, *m_fileiter);
+		if (path.empty()) throw std::bad_alloc();
+		int ec = strus::readFile( path, m_blob);
 		if (ec != 0) throw std::runtime_error(::strerror(ec));
 
 		ErrorCode errcode = (ErrorCode)0;
@@ -270,8 +275,22 @@ void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)
 	{
 		if (strus::stringStartsWith( *fi, m_prefix) && *fi <= filterfilename)
 		{
-			strus::removeFile( strus::joinFilePath( m_directory, *fi));
+			std::string filepath = strus::joinFilePath( m_directory, *fi);
+			if (filepath.empty()) throw std::bad_alloc();
+			(void)strus::removeFile( filepath);
 		}
 	}
+}
+
+std::string DatedFileList::loadBlob( const TimeStamp& timestamp) const
+{
+	if (!timestamp.defined()) return std::string();
+	std::string filename = fileNameFromTimeStamp( m_prefix, timestamp, m_extension);
+	std::string filepath = strus::joinFilePath( m_directory, filename);
+	if (filepath.empty()) throw std::bad_alloc();
+	std::string blob;
+	int ec = strus::readFile( filepath, blob);
+	if (ec != 0) throw std::runtime_error(::strerror(ec));
+	return blob;
 }
 
