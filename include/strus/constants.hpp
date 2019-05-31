@@ -111,7 +111,26 @@ struct Constants
 	{
 		return 0.60;
 	}
+	/// \brief Default prefix used for filenames containing the incremental changes of statistics
+	static const char* defaultStatisticsFilePrefix()
+	{
+		return "stats_";
+	}
+	/// \brief Default extension used used for filenames containing the incremental changes of statistics
+	static const char* defaultStatisticsFileExtension()
+	{
+		return ".bin";
+	}
+	///\brief Number of blocks used by default by a statistics map
+	static int defaultStatisticsNofBlocks()
+	{
+		return 100000;
+	}
+	///\brief Size of a chunk used by default for statistics
+	static int defaultStatisticsMsgChunkSize()
+	{
+		return 100000;
+	}
 };
-
 }//namespace
 #endif

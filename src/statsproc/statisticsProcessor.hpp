@@ -29,6 +29,8 @@ public:
 
 	virtual StatisticsMapInterface* createMap() const;
 
+	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const;
+
 private:
 	ErrorBufferInterface* m_errorhnd;
 	int m_nofBlocks;

@@ -49,7 +49,7 @@ public:
 		:m_queryProcessor( strus::createQueryProcessor(filelocator_,errorhnd_))
 		,m_storage(strus::createStorageType_std( filelocator_->getWorkingDirectory(), errorhnd_))
 		,m_db( strus::createDatabaseType_leveldb( filelocator_->getWorkingDirectory(), errorhnd_))
-		,m_statsproc( strus::createStandardStatisticsProcessor( StatisticsDefaultNofBlocks, StatisticsDefaultMsgChunkSize, errorhnd_))
+		,m_statsproc( strus::createStandardStatisticsProcessor( Constants::defaultStatisticsNofBlocks(), Constants::defaultStatisticsMsgChunkSize(), errorhnd_))
 		,m_errorhnd(errorhnd_)
 		,m_filelocator(filelocator_)
 	{

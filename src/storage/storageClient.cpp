@@ -977,12 +977,7 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( cons
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
-		strus::Reference<StatisticsBuilderInterface> builder( m_statisticsProc->createBuilder( m_statisticsPath));
-		if (!builder.get())
-		{
-			throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), m_errorhnd->fetchError());
-		}
-		return builder->createIterator( timestamp);
+		return m_statisticsProc->createIterator( m_statisticsPath, timestamp);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }

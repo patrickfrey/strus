@@ -15,6 +15,7 @@
 #include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/timeStamp.hpp"
+#include "strus/constants.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/base/math.hpp"
@@ -190,8 +191,8 @@ int main( int argc, const char* argv[])
 		TermCollection collection( nofTerms, diffRange);
 
 		// Build statistics:
-		strus::local_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStandardStatisticsProcessor( strus::StatisticsDefaultNofBlocks, strus::StatisticsDefaultMsgChunkSize, g_errorhnd));
-		strus::local_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder( storagePath));
+		strus::local_ptr<strus::StatisticsProcessorInterface> statsproc( strus::createStandardStatisticsProcessor( strus::Constants::defaultStatisticsNofBlocks(), strus::Constants::defaultStatisticsMsgChunkSize(), g_errorhnd));
+		strus::local_ptr<strus::StatisticsBuilderInterface> builder( statsproc->createBuilder( storagePath));
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -235,7 +236,7 @@ int main( int argc, const char* argv[])
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
-			iterator.reset( builder->createIterator( timeStampBeforeNow));
+			iterator.reset( statsproc->createIterator( storagePath, timeStampBeforeNow));
 			if (!iterator.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
@@ -246,7 +247,7 @@ int main( int argc, const char* argv[])
 		strus::StatisticsMessage msg = iterator->getNext();
 		for (; !msg.empty(); msg = iterator->getNext())
 		{
-			strus::local_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msg.ptr(), msg.size()));
+			strus::local_ptr<strus::StatisticsViewerInterface> viewer( statsproc->createViewer( msg.ptr(), msg.size()));
 			if (!viewer.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());

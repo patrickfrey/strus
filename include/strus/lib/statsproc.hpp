@@ -19,12 +19,6 @@ class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Reasonable constants for defaults
-enum {
-	StatisticsDefaultNofBlocks=100000,	//< reasonable number of blocks for a collection of some million entries
-	StatisticsDefaultMsgChunkSize=100000	//< size of a chunk for transmitting statistics
-};
-
 /// \brief Create an interface for processing global statistics
 /// \param[in] nofBlocks number of blocks in the map
 /// \param[in] msgChunkSize size of a message blob for transmitting statistics

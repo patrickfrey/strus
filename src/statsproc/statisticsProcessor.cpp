@@ -11,7 +11,10 @@
 #include "statisticsBuilder.hpp"
 #include "statisticsViewer.hpp"
 #include "statisticsMap.hpp"
+#include "datedFileList.hpp"
+#include "strus/statisticsIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/constants.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
@@ -51,4 +54,40 @@ StatisticsMapInterface* StatisticsProcessor::createMap() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics map: %s"), *m_errorhnd, 0);
 }
 
+namespace {
+class StoredStatisticsIterator
+	:public StatisticsIteratorInterface
+{
+public:
+	StoredStatisticsIterator( DatedFileList& filelist, const TimeStamp& timestamp_)
+		:m_itr(filelist.getIterator( timestamp_)){}
+
+	virtual StatisticsMessage getNext()
+	{
+		if (m_itr.blob())
+		{
+			StatisticsMessage rt( m_itr.blob(), m_itr.blobsize(), m_itr.timestamp());
+			(void)m_itr.next();
+			return rt;
+		}
+		else
+		{
+			return StatisticsMessage();
+		}
+	}
+
+private:
+	DatedFileList::Iterator m_itr;
+};
+}
+StatisticsIteratorInterface* StatisticsProcessor::createIterator( const std::string& path, const TimeStamp& timestamp) const
+{
+	try
+	{
+		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		return new StoredStatisticsIterator( filelist, timestamp);
+		
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
+}
 

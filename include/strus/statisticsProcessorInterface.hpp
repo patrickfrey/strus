@@ -9,6 +9,7 @@
 /// \file statisticsProcessorInterface.hpp
 #ifndef _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
+#include "strus/timeStamp.hpp"
 #include <string>
 
 namespace strus
@@ -20,6 +21,8 @@ class StatisticsViewerInterface;
 class StatisticsBuilderInterface;
 /// \brief Forward declaration
 class StatisticsMapInterface;
+/// \brief Forward declaration
+class StatisticsIteratorInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation
 /// \note this interface is used for distributing a search index
@@ -34,6 +37,11 @@ public:
 	/// \param[in] msgsize size of the packed statistics message blob in bytes
 	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const=0;
+
+	/// \brief Get an iterator on the stored statistics messages after a timestamp from the storage (after commit)
+	/// \param[in] timestamp minimum data iterated statistics message should have
+	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
+	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const=0;
 
 	/// \brief Creates a builder for a statistics message
 	/// \param[in] path file path to use for storing files with the statistics

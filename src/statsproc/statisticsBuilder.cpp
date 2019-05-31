@@ -58,31 +58,6 @@ private:
 	std::vector<StatisticsMessage> m_ar;
 	std::vector<StatisticsMessage>::const_iterator m_itr;
 };
-
-class StoredStatisticsIterator
-	:public StatisticsIteratorInterface
-{
-public:
-	StoredStatisticsIterator( DatedFileList& filelist, const TimeStamp& timestamp_)
-		:m_itr(filelist.getIterator( timestamp_)){}
-
-	virtual StatisticsMessage getNext()
-	{
-		if (m_itr.blob())
-		{
-			StatisticsMessage rt( m_itr.blob(), m_itr.blobsize(), m_itr.timestamp());
-			(void)m_itr.next();
-			return rt;
-		}
-		else
-		{
-			return StatisticsMessage();
-		}
-	}
-
-private:
-	DatedFileList::Iterator m_itr;
-};
 }
 
 
@@ -296,15 +271,6 @@ void StatisticsBuilder::releaseStatistics( const TimeStamp& timestamp_)
 	CATCH_ERROR_MAP( _TXT("error release statistics: %s"), *m_errorhnd);
 }
 
-StatisticsIteratorInterface* StatisticsBuilder::createIterator( const TimeStamp& timestamp_)
-{
-	try
-	{
-		return new StoredStatisticsIterator( m_datedFileList, timestamp_);
-		
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
-}
 
 
 

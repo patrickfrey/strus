@@ -51,11 +51,6 @@ public:
 	/// \brief Release statistics that are older than a defined timestamp
 	/// \param[in] timestamp minimum data a surviving (not deleted) statistics message should have
 	virtual void releaseStatistics( const TimeStamp& timestamp)=0;
-
-	/// \brief Get an iterator on the stored statistics messages after a timestamp from the storage (after commit)
-	/// \param[in] timestamp minimum data iterated statistics message should have
-	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
-	virtual StatisticsIteratorInterface* createIterator( const TimeStamp& timestamp)=0;
 };
 }//namespace
 #endif

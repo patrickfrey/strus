@@ -47,8 +47,6 @@ public:
 
 	virtual void releaseStatistics( const TimeStamp& timestamp);
 
-	virtual StatisticsIteratorInterface* createIterator( const TimeStamp& timestamp);
-
 private:
 	std::string newContent();
 	void clear();
