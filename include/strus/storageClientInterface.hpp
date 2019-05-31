@@ -215,13 +215,22 @@ public:
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Creates an iterator on all storage term occurrence statistics
+	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
 	/// \return the iterator on the statistics message blobs
 	virtual StatisticsIteratorInterface* createAllStatisticsIterator()=0;
 
 	/// \brief Creates an iterator on the incremental changes of the storage statistics starting from a given date/time
+	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
+	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
 	/// \param[in] timestamp time of last change statistics fetched
 	/// \return the iterator on the incremental changes of the statistics from a certain snapshot defined by the timestamp passed as argument
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp)=0;
+
+	/// \brief Get the list of all timestamps identifying when a change of statistics occurred
+	/// \note Returns and empty list with error if no statistics processor instance defined for this storage client
+	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
+	/// \return the list of timestamps
+	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface

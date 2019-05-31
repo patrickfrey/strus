@@ -982,6 +982,19 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( cons
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
+std::vector<TimeStamp> StorageClient::getChangeStatisticTimeStamps() const
+{
+	try
+	{
+		if (!m_statisticsProc)
+		{
+			throw std::runtime_error( _TXT( "no statistics message processor defined"));
+		}
+		return m_statisticsProc->getChangeTimeStamps( m_statisticsPath);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating list of statistics message timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
+}
+
 const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
 {
 	return m_statisticsProc;

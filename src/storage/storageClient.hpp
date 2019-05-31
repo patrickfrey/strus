@@ -123,6 +123,8 @@ public:
 
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp);
 
+	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const;
+
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
 	virtual Index nofDocumentsInserted() const;

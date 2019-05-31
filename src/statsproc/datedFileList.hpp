@@ -57,9 +57,13 @@ public:
 		TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_); 
 		TimeStampIterator( const TimeStampIterator& o); 
 
-		const TimeStamp* next();
+		const TimeStamp& timestamp() const
+			{return m_timestamp;}
+
+		bool next();
 		
 	private:
+		TimeStamp m_timestamp;
 		std::vector<TimeStamp> m_ar;
 		std::vector<TimeStamp>::const_iterator m_itr;
 	};

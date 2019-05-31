@@ -25,12 +25,14 @@ public:
 
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
 
+	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const;
+
+	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const;
+
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
 	virtual StatisticsMapInterface* createMap() const;
-
-	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const;
-
+	
 private:
 	ErrorBufferInterface* m_errorhnd;
 	int m_nofBlocks;

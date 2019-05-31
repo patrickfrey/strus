@@ -141,16 +141,20 @@ DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, co
 		m_ar.push_back( fileTimeStamp);
 	}
 	m_itr = m_ar.begin();
+	if (m_itr != m_ar.end())
+	{
+		m_timestamp = *m_itr;
+	}
 }
 
 DatedFileList::TimeStampIterator::TimeStampIterator()
-	:m_ar()
+	:m_timestamp(),m_ar()
 {
 	m_itr = m_ar.begin();
 }
 
 DatedFileList::TimeStampIterator::TimeStampIterator( const TimeStampIterator& o)
-	:m_ar(o.m_ar)
+	:m_timestamp(o.m_timestamp),m_ar(o.m_ar)
 {
 	m_itr = m_ar.begin();
 }
@@ -160,6 +164,7 @@ void DatedFileList::Iterator::loadBlob()
 	if (m_fileiter == m_filelist.end())
 	{
 		m_blob.clear();
+		m_timestamp = TimeStamp();
 	}
 	else
 	{
@@ -193,10 +198,17 @@ DatedFileList::Iterator::Iterator( const Iterator& o)
 
 bool DatedFileList::Iterator::next()
 {
-	if (m_directory.empty()) return false;
 	if (m_fileiter == m_filelist.end()) return false;
 	++m_fileiter;
 	loadBlob();
+	return true;
+}
+
+bool DatedFileList::TimeStampIterator::next()
+{
+	if (m_itr == m_ar.end()) return false;
+	++m_itr;
+	m_timestamp = m_itr == m_ar.end() ? TimeStamp() : *m_itr;
 	return true;
 }
 
@@ -216,7 +228,7 @@ std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
 
-	std::string filterfilename_start = fileNameFromTimeStamp( m_prefix, timestamp, m_extension);
+	std::string filterfilename_start = timestamp.defined() ? fileNameFromTimeStamp( m_prefix, timestamp, m_extension) : std::string();
 	std::string filterfilename_end = fileNameFromTimeStamp( m_prefix, timestamp_current, m_extension);
 	std::vector<std::string>::const_iterator fi = files.begin(), fe = files.end();
 	for (; fi != fe; ++fi)

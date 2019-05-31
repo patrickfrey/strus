@@ -91,3 +91,22 @@ StatisticsIteratorInterface* StatisticsProcessor::createIterator( const std::str
 	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
 }
 
+std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::string& path) const
+{
+	try
+	{
+		std::vector<TimeStamp> rt;
+		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp());
+		TimeStamp tp = itr.timestamp();
+		for (; tp.defined(); (void)itr.next())
+		{
+			rt.push_back( tp);
+		}
+		return rt;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting incremental statistic changes timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
+}
+
+
+

@@ -11,6 +11,7 @@
 #define _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
 #include "strus/timeStamp.hpp"
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -39,9 +40,15 @@ public:
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const=0;
 
 	/// \brief Get an iterator on the stored statistics messages after a timestamp from the storage (after commit)
+	/// \param[in] path file path used for storing files with the statistics
 	/// \param[in] timestamp minimum data iterated statistics message should have
 	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
 	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const=0;
+
+	/// \brief Get the list of timestamps of all stored and still available statistics messages
+	/// \param[in] path file path used for storing files with the statistics
+	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
+	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const=0;
 
 	/// \brief Creates a builder for a statistics message
 	/// \param[in] path file path to use for storing files with the statistics
