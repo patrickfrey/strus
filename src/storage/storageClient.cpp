@@ -995,6 +995,19 @@ std::vector<TimeStamp> StorageClient::getChangeStatisticTimeStamps() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating list of statistics message timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
 }
 
+StatisticsMessage StorageClient::loadChangeStatisticsMessage( const TimeStamp& timestamp) const
+{
+	try
+	{
+		if (!m_statisticsProc)
+		{
+			throw std::runtime_error( _TXT( "no statistics message processor defined"));
+		}
+		return m_statisticsProc->loadChangeMessage( m_statisticsPath, timestamp);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error loading a change statistics message: %s"), *m_errorhnd, StatisticsMessage());
+}
+
 const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
 {
 	return m_statisticsProc;

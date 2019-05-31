@@ -125,6 +125,8 @@ public:
 
 	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const;
 
+	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const;
+
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
 	virtual Index nofDocumentsInserted() const;

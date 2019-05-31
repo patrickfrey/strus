@@ -12,6 +12,7 @@
 #include "strus/index.hpp"
 #include "strus/termStatistics.hpp"
 #include "strus/timeStamp.hpp"
+#include "strus/statisticsMessage.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -227,10 +228,16 @@ public:
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp)=0;
 
 	/// \brief Get the list of all timestamps identifying when a change of statistics occurred
-	/// \note Returns and empty list with error if no statistics processor instance defined for this storage client
+	/// \note Returns an empty list with error if no statistics processor instance defined for this storage client
 	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
 	/// \return the list of timestamps
 	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const=0;
+
+	/// \brief Load the one incremental statistics change message associated with a timestamp
+	/// \note Returns an empty message with error if no statistics processor instance defined for this storage client
+	/// \param[in] timestamp timestamp associated with the statistics change message
+	/// \return the statistics change message structure
+	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface
