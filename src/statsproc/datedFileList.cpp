@@ -20,6 +20,7 @@
 #include <cstring>
 #include <vector>
 #include <ctime>
+#include <algorithm>
 
 using namespace strus;
 
