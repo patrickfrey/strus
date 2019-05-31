@@ -36,9 +36,9 @@ public:
 
 	virtual bool processStatisticsMessage( const void* msgptr, std::size_t msgsize);
 	
-	virtual GlobalCounter nofDocuments();
+	virtual GlobalCounter nofDocuments() const;
 
-	virtual GlobalCounter df( const std::string& termtype, const std::string& termvalue);
+	virtual GlobalCounter df( const std::string& termtype, const std::string& termvalue) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

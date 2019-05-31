@@ -76,7 +76,7 @@ bool StatisticsMap::processStatisticsMessage( const void* msgptr, std::size_t ms
 	CATCH_ERROR_MAP_RETURN( _TXT("error processing a statistics message: %s"), *m_errorhnd, false);
 }
 
-GlobalCounter StatisticsMap::nofDocuments()
+GlobalCounter StatisticsMap::nofDocuments() const
 {
 	try
 	{
@@ -85,7 +85,7 @@ GlobalCounter StatisticsMap::nofDocuments()
 	CATCH_ERROR_MAP_RETURN( _TXT("error getting total number of documents in statistics map: %s"), *m_errorhnd, 0);
 }
 
-GlobalCounter StatisticsMap::df( const std::string& termtype, const std::string& termvalue)
+GlobalCounter StatisticsMap::df( const std::string& termtype, const std::string& termvalue) const
 {
 	try
 	{
