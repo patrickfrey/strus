@@ -24,8 +24,8 @@ using namespace strus;
 
 StatisticsIteratorInterface*
 	strus::createStatisticsInitIterator(
-		StorageClientInterface* storage,
-		DatabaseClientInterface* database,
+		const StorageClientInterface* storage,
+		const DatabaseClientInterface* database,
 		ErrorBufferInterface* errorhnd)
 {
 	const StatisticsProcessorInterface* proc = storage->getStatisticsProcessor();

@@ -23,8 +23,8 @@ class StatisticsIteratorInterface;
 
 StatisticsIteratorInterface*
 	createStatisticsInitIterator(
-		StorageClientInterface* storage,
-		DatabaseClientInterface* database,
+		const StorageClientInterface* storage,
+		const DatabaseClientInterface* database,
 		ErrorBufferInterface* errorhnd);
 
 }//namespace

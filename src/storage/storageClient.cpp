@@ -956,7 +956,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator()
+StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator() const
 {
 	try
 	{
@@ -969,7 +969,7 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator()
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
-StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( const TimeStamp& timestamp)
+StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( const TimeStamp& timestamp) const
 {
 	try
 	{

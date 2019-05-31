@@ -119,9 +119,9 @@ public:
 	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createAllStatisticsIterator();
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator() const;
 
-	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp);
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp) const;
 
 	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const;
 
