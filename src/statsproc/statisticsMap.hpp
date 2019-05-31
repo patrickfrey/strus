@@ -30,7 +30,7 @@ public:
 	StatisticsMap( int nofBlocks_, const StatisticsProcessorInterface* proc_, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsMap();
 
-	virtual void setNofDocumentsInsertedChange( int increment);
+	virtual void addNofDocumentsInsertedChange( int increment);
 
 	virtual void addDfChange( const char* termtype, const char* termvalue, int increment);
 

@@ -24,7 +24,7 @@ StatisticsMap::StatisticsMap( int nofBlocks_, const StatisticsProcessorInterface
 
 StatisticsMap::~StatisticsMap(){}
 
-void StatisticsMap::setNofDocumentsInsertedChange( int increment)
+void StatisticsMap::addNofDocumentsInsertedChange( int increment)
 {
 	m_nofDocuments.increment( increment);
 }

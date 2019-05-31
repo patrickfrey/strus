@@ -358,7 +358,7 @@ bool StorageTransaction::commit()
 
 		if (statsproc)
 		{
-			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents_incr);
+			statisticsBuilder->addNofDocumentsInsertedChange( nof_documents_incr);
 		}
 		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());

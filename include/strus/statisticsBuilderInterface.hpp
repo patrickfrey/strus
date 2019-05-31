@@ -26,9 +26,9 @@ public:
 	/// \brief Destructor
 	virtual ~StatisticsBuilderInterface(){}
 
-	/// \brief Define the change of the number of document inserted
+	/// \brief Add a change of the number of document inserted
 	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
-	virtual void setNofDocumentsInsertedChange( int increment)=0;
+	virtual void addNofDocumentsInsertedChange( int increment)=0;
 
 	/// \brief Add a message propagating a change in the df (document frequency)
 	/// \param[in] termtype type of the term

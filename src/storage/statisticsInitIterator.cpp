@@ -39,7 +39,7 @@ StatisticsIteratorInterface*
 		throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), errorhnd->fetchError());
 	}
 	int nofdocs = storage->nofDocumentsInserted();
-	builder->setNofDocumentsInsertedChange( nofdocs);
+	builder->addNofDocumentsInsertedChange( nofdocs);
 
 	std::map<Index,std::size_t> typenomap;
 	std::map<Index,std::size_t> termnomap;

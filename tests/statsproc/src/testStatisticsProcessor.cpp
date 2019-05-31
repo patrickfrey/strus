@@ -197,7 +197,7 @@ int main( int argc, const char* argv[])
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		builder->setNofDocumentsInsertedChange( nofDocsPart);
+		builder->addNofDocumentsInsertedChange( nofDocsPart);
 
 		typedef TermCollection::Term Term;
 		unsigned int termsByteSize = 0;
@@ -213,11 +213,11 @@ int main( int argc, const char* argv[])
 			if ((int)g_random.get( 0, rr) == 1)
 			{
 				int nn = (nofDocs - nofDocsPart) / 2;
-				builder->setNofDocumentsInsertedChange( nn);
+				builder->addNofDocumentsInsertedChange( nn);
 				nofDocsPart += nn;
 			}
 		}
-		builder->setNofDocumentsInsertedChange( nofDocs - nofDocsPart);
+		builder->addNofDocumentsInsertedChange( nofDocs - nofDocsPart);
 
 		// Iterate through messages and accumulate statistics stored:
 		std::size_t blobsize = 0;

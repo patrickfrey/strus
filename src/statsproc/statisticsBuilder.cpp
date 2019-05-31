@@ -78,7 +78,7 @@ StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxc
 StatisticsBuilder::~StatisticsBuilder()
 {}
 
-void StatisticsBuilder::setNofDocumentsInsertedChange( int increment)
+void StatisticsBuilder::addNofDocumentsInsertedChange( int increment)
 {
 	try
 	{

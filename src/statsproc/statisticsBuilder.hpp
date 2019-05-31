@@ -31,7 +31,7 @@ public:
 	StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsBuilder();
 
-	virtual void setNofDocumentsInsertedChange(
+	virtual void addNofDocumentsInsertedChange(
 			int increment);
 
 	virtual void addDfChange(
