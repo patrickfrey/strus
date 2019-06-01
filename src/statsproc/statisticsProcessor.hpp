@@ -20,7 +20,7 @@ class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
 public:
-	StatisticsProcessor( int nofBlocks_, int msgChunkSize_, ErrorBufferInterface* errorhnd_);
+	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsProcessor();
 
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
@@ -33,12 +33,10 @@ public:
 
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
-	virtual StatisticsMapInterface* createMap() const;
+	virtual StatisticsMapInterface* createMap( const std::string& config) const;
 	
 private:
 	ErrorBufferInterface* m_errorhnd;
-	int m_nofBlocks;
-	int m_msgChunkSize;
 };
 
 }//namespace

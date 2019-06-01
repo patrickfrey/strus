@@ -16,7 +16,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC StatisticsProcessorInterface* strus::createStandardStatisticsProcessor( int nofBlocks, int msgChunkSize, ErrorBufferInterface* errorhnd)
+DLL_PUBLIC StatisticsProcessorInterface* strus::createStandardStatisticsProcessor( ErrorBufferInterface* errorhnd)
 {
 	try
 	{
@@ -26,7 +26,7 @@ DLL_PUBLIC StatisticsProcessorInterface* strus::createStandardStatisticsProcesso
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new StatisticsProcessor( nofBlocks, msgChunkSize, errorhnd);
+		return new StatisticsProcessor( errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message processor: %s"), *errorhnd, 0);
 }

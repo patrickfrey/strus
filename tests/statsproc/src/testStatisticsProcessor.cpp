@@ -191,7 +191,7 @@ int main( int argc, const char* argv[])
 		TermCollection collection( nofTerms, diffRange);
 
 		// Build statistics:
-		strus::local_ptr<strus::StatisticsProcessorInterface> statsproc( strus::createStandardStatisticsProcessor( strus::Constants::defaultStatisticsNofBlocks(), strus::Constants::defaultStatisticsMsgChunkSize(), g_errorhnd));
+		strus::local_ptr<strus::StatisticsProcessorInterface> statsproc( strus::createStandardStatisticsProcessor( g_errorhnd));
 		strus::local_ptr<strus::StatisticsBuilderInterface> builder( statsproc->createBuilder( storagePath));
 		if (!builder.get())
 		{

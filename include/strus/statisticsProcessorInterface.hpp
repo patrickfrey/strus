@@ -64,8 +64,9 @@ public:
 
 	/// \brief Creates a map for global statistics
 	/// \note You can implement the map in your own way, this is just an example implementation provided by the statistics processor
+	/// \param[in] config configuration string of the map instance created
 	/// \return the map object (with ownership returned) or NULL in case of a memory allocation error
-	virtual StatisticsMapInterface* createMap() const=0;
+	virtual StatisticsMapInterface* createMap( const std::string& config) const=0;
 };
 
 }//namespace

@@ -20,10 +20,8 @@ class StatisticsProcessorInterface;
 class ErrorBufferInterface;
 
 /// \brief Create an interface for processing global statistics
-/// \param[in] nofBlocks number of blocks in the map
-/// \param[in] msgChunkSize size of a message blob for transmitting statistics
 /// \param[in] errorhnd error buffer interface
-StatisticsProcessorInterface* createStandardStatisticsProcessor( int nofBlocks, int msgChunkSize, ErrorBufferInterface* errorhnd);
+StatisticsProcessorInterface* createStandardStatisticsProcessor( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
