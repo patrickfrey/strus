@@ -161,11 +161,17 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::creat
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceListMatches::tostring() const
+StructView SummarizerFunctionInstanceListMatches::view() const
 {
-	return std::string();
+	try
+	{
+		StructView rt;
+		rt( "nof", m_maxNofMatches);
+		rt( "resultname", m_resultname);
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionListMatches::createInstance(
 		const QueryProcessorInterface*) const

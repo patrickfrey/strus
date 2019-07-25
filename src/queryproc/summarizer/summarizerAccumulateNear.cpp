@@ -479,31 +479,29 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::cr
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceAccumulateNear::tostring() const
+StructView SummarizerFunctionInstanceAccumulateNear::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << std::fixed << std::setprecision(5);
-
-		rt << "type='" << m_data->type << "'";
-		rt << ", result='" << m_data->resultname << "'";
-		rt << ", cofactor=" << m_data->cofactor;
-		rt << ", nofranks=" << m_data->nofranks;
-		if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
+		StructView rt;
+		rt( "type", m_data->type);
+		rt( "result", m_data->resultname);
+		rt( "cofactor", m_data->cofactor);
+		rt( "nofranks", m_data->nofranks);
+		if (m_data->cardinality_frac > std::numeric_limits<float>::epsilon())
 		{
-			rt << ", cardinality='" << (unsigned int)(m_data->cardinality_frac * 100 + 0.5) << "%'";
+			rt( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_data->cardinality_frac * 100 + 0.5)));
 		}
 		else
 		{
-			rt << ", cardinality=" << m_data->cardinality;
+			rt( "cardinality", m_data->cardinality);
 		}
-		rt << ", range=" << m_data->range;
-		rt << ", norm=" << m_data->norm;
-		rt << ", cprop=" << m_data->cprop;
-		return rt.str();
+		rt( "range", m_data->range);
+		rt( "norm", m_data->norm);
+		rt( "cprop", m_data->cprop);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createInstance(

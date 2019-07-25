@@ -10,6 +10,7 @@
 #ifndef _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #include "strus/globalStatistics.hpp"
+#include "strus/structView.hpp"
 #include <string>
 
 namespace strus
@@ -56,9 +57,9 @@ public:
 	/// \return the list of variables
 	virtual std::vector<std::string> getVariables() const=0;
 
-	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)
-	/// \return the parameter list as string
-	virtual std::string tostring() const=0;
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }//namespace

@@ -155,7 +155,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	Reference<AccumulateNearData> m_data;

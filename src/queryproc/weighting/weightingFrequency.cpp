@@ -122,9 +122,13 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::creat
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string WeightingFunctionInstanceTermFrequency::tostring() const
+StructView WeightingFunctionInstanceTermFrequency::view() const
 {
-	return std::string();
+	try
+	{
+		return StructView();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 

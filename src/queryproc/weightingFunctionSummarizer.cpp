@@ -157,14 +157,14 @@ public:
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer context: %s"), m_name, *m_errorhnd, 0);
 	}
 
-	virtual std::string tostring() const
+	virtual StructView view() const	
 	{
 		try
 		{
-			std::ostringstream out;
-			out << "summarizer weighting '" << m_name << "':" << std::endl;
-			out << m_func->tostring();
-			return out.str();
+			StructView rt;
+			rt( "name", strus::string_format( "summarizer %s", m_name));
+			rt( "weighting", m_func->view());
+			return rt;
 		}
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), m_name, *m_errorhnd, std::string());
 	}

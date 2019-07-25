@@ -188,7 +188,7 @@ public:
 			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	WeightingFunctionParameterBM25pff m_parameter;	///< weighting function parameters

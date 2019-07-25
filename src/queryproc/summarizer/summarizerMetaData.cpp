@@ -150,17 +150,17 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFu
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceMetaData::tostring() const
+StructView SummarizerFunctionInstanceMetaData::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << "metaname='" << m_metaname << "', resultname='" << m_resultname << "'";
-		return rt.str();
+		StructView rt;
+		rt( "metaname", m_metaname);
+		rt( "resultname", m_resultname);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
 		const QueryProcessorInterface*) const

@@ -348,22 +348,21 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
+StructView SummarizerFunctionInstanceAccumulateVariable::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << "type='" << m_data->type << "'";
-		rt << ", nof=" << m_data->maxNofElements;
-		rt << ", norm=" << m_data->norm;
-		rt << ", cofactor=" << m_data->cofactor;
-		rt << ", var=" << m_data->var;
-		rt << ", result=" << m_data->resultname;
-		return rt.str();
+		StructView rt;
+		rt( "type", m_data->type);
+		rt( "nof", m_data->maxNofElements);
+		rt( "norm", m_data->norm);
+		rt( "cofactor", m_data->cofactor);
+		rt( "var", m_data->var);
+		rt( "resultname", m_data->resultname);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateVariable::createInstance(
 		const QueryProcessorInterface* processor) const

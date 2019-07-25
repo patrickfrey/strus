@@ -924,34 +924,41 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
+static StructView getStructViewMark( const std::pair<std::string,std::string>& mark)
+{
+	return StructView()( "start", mark.first)( "end", mark.second);
+}
+
+StructView SummarizerFunctionInstanceMatchPhrase::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << "type='" << m_parameter->m_type << "'"
-			<< ", matchmark=(" << m_parameter->m_matchmark.first << "," << m_parameter->m_matchmark.second << ")"
-			<< ", floatingmark=(" << m_parameter->m_floatingmark.first << "," << m_parameter->m_floatingmark.second << ")"
-			<< ", name para=" << m_parameter->m_name_para
-			<< ", name phrase=" << m_parameter->m_name_phrase
-			<< ", name docstart=" << m_parameter->m_name_docstart
-			<< ", paragraphsize=" << m_parameter->m_paragraphsize
-			<< ", sentencesize=" << m_parameter->m_sentencesize
-			<< ", windowsize=" << m_parameter->m_windowsize;
-			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
-			{
-				rt << ", cardinality='" << (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5) << "%'";
-			}
-			else
-			{
-				rt << ", cardinality='" << m_parameter->m_cardinality << "'";
-			}
-			rt << ", maxdf='" << m_parameter->m_maxdf << "'";
-		return rt.str();
+		StructView rt;
+		rt( "type", m_parameter->m_type);
+		rt( "matchmark", getStructViewMark( m_parameter->m_matchmark));
+		rt( "floatingmark", getStructViewMark( m_parameter->m_floatingmark));
+		rt( "features", 
+		    StructView()
+			( "para", m_parameter->m_name_para)
+			( "phrase", m_parameter->m_name_phrase)
+			( "docstart", m_parameter->m_name_docstart)
+		);
+		rt( "paragraphsize", m_parameter->m_paragraphsize);
+		rt( "sentencesize", m_parameter->m_sentencesize);
+		rt( "windowsize", m_parameter->m_windowsize);
+		if (m_parameter->m_cardinality_frac > std::numeric_limits<float>::epsilon())
+		{
+			rt( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5)));
+		}
+		else
+		{
+			rt( "cardinality", m_parameter->m_cardinality);
+		}
+		rt( "maxdf", m_parameter->m_maxdf);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionMatchPhrase::createInstance(
 		const QueryProcessorInterface* processor) const

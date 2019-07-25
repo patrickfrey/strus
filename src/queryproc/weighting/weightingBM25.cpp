@@ -223,21 +223,19 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string WeightingFunctionInstanceBM25::tostring() const
+StructView WeightingFunctionInstanceBM25::view() const
 {
-	
 	try
 	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_parameter.b << ", k1=" << m_parameter.k1 << ", avgdoclen=" << m_parameter.avgDocLength
-			<< ", metadata_doclen=" << m_metadata_doclen
-		;
-		return rt.str();
+		StructView rt;
+		rt( "b", m_parameter.b);
+		rt( "k1", m_parameter.k1);
+		rt( "avgdoclen", m_parameter.avgDocLength);
+		rt( "metadata_doclen", m_metadata_doclen);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
 		const QueryProcessorInterface*) const

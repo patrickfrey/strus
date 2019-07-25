@@ -637,38 +637,35 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25pff::createFunct
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string WeightingFunctionInstanceBM25pff::tostring() const
+StructView WeightingFunctionInstanceBM25pff::view() const
 {
-	
 	try
 	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_parameter.b
-			<< ", k1=" << m_parameter.k1
-			<< ", avgdoclen=" << m_parameter.avgDocLength
-			<< ", paragraphsize=" << m_parameter.paragraphsize
-			<< ", sentencesize=" << m_parameter.sentencesize
-			<< ", windowsize=" << m_parameter.windowsize;
-		if (m_parameter.cardinality_frac > std::numeric_limits<double>::epsilon())
+		StructView rt;
+		rt( "b", m_parameter.b);
+		rt( "k1", m_parameter.k1);
+		rt( "avgdoclen", m_parameter.avgDocLength);
+		rt( "metadata_doclen", m_metadata_doclen);
+		
+		rt( "paragraphsize", m_parameter.paragraphsize);
+		rt( "sentencesize", m_parameter.sentencesize);
+		rt( "windowsize", m_parameter.windowsize);
+		if (m_parameter.cardinality_frac > std::numeric_limits<float>::epsilon())
 		{
-			rt << ", cardinality='" << (unsigned int)(m_parameter.cardinality_frac * 100 + 0.5) << "%'";
+			rt( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_parameter.cardinality_frac * 100 + 0.5)));
 		}
 		else
 		{
-			rt << ", cardinality=" << m_parameter.cardinality;
+			rt( "cardinality", m_parameter.cardinality);
 		}
-		rt << ", ffbase=" << m_parameter.ffbase
-			<< ", maxdf=" << m_parameter.maxdf
-			<< ", titleinc=" << m_parameter.titleinc
-			<< ", cprop=" << m_parameter.prop_weight_const
-			<< ", metadata_doclen=" << m_metadata_doclen
-			;
-		return rt.str();
+		rt( "ffbase", m_parameter.ffbase);
+		rt( "maxdf", m_parameter.maxdf);
+		rt( "titleinc", m_parameter.titleinc);
+		rt( "cprop", m_parameter.prop_weight_const);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 WeightingFunctionInstanceInterface* WeightingFunctionBM25pff::createInstance(
 		const QueryProcessorInterface* ) const

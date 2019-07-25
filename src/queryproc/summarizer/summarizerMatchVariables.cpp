@@ -197,22 +197,24 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::cr
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceMatchVariables::tostring() const
+StructView SummarizerFunctionInstanceMatchVariables::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << "type='" << m_data->type << "'";
+		StructView rt;
+		StructView namemapview;
 		MatchVariablesData::NameMap::const_iterator ni = m_data->namemap.begin(), ne = m_data->namemap.end();
 		for (; ni != ne; ++ni)
 		{
-			rt << ", var " << ni->first << "=" << ni->second;
+			namemapview( ni->first, ni->second);
 		}
-		return rt.str();
+		
+		rt( "type", m_data->type);
+		rt( "variables", namemapview);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createInstance(
 		const QueryProcessorInterface* processor) const

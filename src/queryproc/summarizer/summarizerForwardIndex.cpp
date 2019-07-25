@@ -162,15 +162,19 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::crea
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceForwardIndex::tostring() const
+StructView SummarizerFunctionInstanceForwardIndex::view() const
 {
-	std::ostringstream rt;
-	rt << "type='" << m_type << "'"
-		<< " resultname='" << m_resultname << "'";
-	if (m_maxNofMatches) rt << " N=" << m_maxNofMatches;
-	
-	return rt.str();
+	try
+	{
+		StructView rt;
+		rt( "type", m_type);
+		rt( "resultname", m_resultname);
+		rt( "N", m_maxNofMatches);
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
+
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionForwardIndex::createInstance(
 		const QueryProcessorInterface*) const

@@ -124,7 +124,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	Reference<MatchVariablesData> m_data;

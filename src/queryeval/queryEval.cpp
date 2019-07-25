@@ -212,7 +212,7 @@ void QueryEval::print( std::ostream& out) const
 			for (; fi != fe; ++fi)
 			{
 				out << "EVAL ";
-				std::string params = fi->function()->tostring();
+				std::string params = fi->function()->view().tostring();
 				out << " " << fi->functionName() << "( " << params;
 				std::vector<FeatureParameter>::const_iterator
 					pi = fi->featureParameters().begin(), pe = fi->featureParameters().end();
@@ -231,7 +231,7 @@ void QueryEval::print( std::ostream& out) const
 		{
 			out << "SUMMARIZE ";
 			out << si->functionName();
-			std::string params = si->function()->tostring();
+			std::string params = si->function()->view().tostring();
 			out << "( " << params;
 	
 			std::vector<FeatureParameter>::const_iterator
@@ -283,4 +283,133 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, 0);
 }
+
+static StructView getStructView( const std::vector<QueryEvalInterface::FeatureParameter>& o)
+{
+	StructView rt;
+	std::vector<QueryEvalInterface::FeatureParameter>::const_iterator oi = o.begin(), oe = o.end();
+	for (; oi != oe; ++oi)
+	{
+		rt( oi->parameterName(), oi->featureSet() );
+	}
+	return rt;
+}
+
+static StructView getStructView( const WeightingDef& o)
+{
+	StructView rt;
+	rt( "function", o.functionName());
+	if (o.function())
+	{
+		rt( "def", o.function()->view());
+	}
+	if (!o.featureParameters().empty())
+	{
+		rt( "parameter", getStructView( o.featureParameters()));
+	}
+	if (!o.debugAttributeName().empty())
+	{
+		rt( "debugattr", o.debugAttributeName());
+	}
+	return rt;
+}
+
+static StructView getStructView( const std::vector<WeightingDef>& o)
+{
+	StructView rt;
+	std::vector<WeightingDef>::const_iterator oi = o.begin(), oe = o.end();
+	for (; oi != oe; ++oi)
+	{
+		rt( getStructView( *oi));
+	}
+	return rt;
+}
+
+static StructView getStructView( const SummarizerDef& o)
+{
+	StructView rt;
+	rt( "function", o.functionName());
+	if (o.function())
+	{
+		rt( "def", o.function()->view());
+	}
+	if (!o.featureParameters().empty())
+	{
+		rt( "parameter", getStructView( o.featureParameters()));
+	}
+	if (!o.debugAttributeName().empty())
+	{
+		rt( "debugattr", o.debugAttributeName());
+	}
+	return rt;
+}
+
+static StructView getStructView( const std::vector<SummarizerDef>& o)
+{
+	StructView rt;
+	std::vector<SummarizerDef>::const_iterator oi = o.begin(), oe = o.end();
+	for (; oi != oe; ++oi)
+	{
+		rt( getStructView( *oi));
+	}
+	return rt;
+}
+
+static StructView getStructView( const TermConfig& o)
+{
+	return StructView()
+		( "set", o.set)
+		( "type", o.type)
+		( "value", o.value);
+}
+
+static StructView getStructView( const std::vector<TermConfig>& o)
+{
+	StructView rt;
+	std::vector<TermConfig>::const_iterator oi = o.begin(), oe = o.end();
+	for (; oi != oe; ++oi)
+	{
+		rt( getStructView( *oi));
+	}
+	return rt;
+}
+
+StructView QueryEval::view() const
+{
+	StructView rt;
+	if (!m_weightingFunctions.empty())
+	{
+		rt( "weighting", getStructView( m_weightingFunctions));
+	}
+	if (!m_summarizers.empty())
+	{
+		rt( "summarizers", getStructView( m_summarizers));
+	}
+	if (!m_terms.empty())
+	{
+		rt( "weighting_sets", getStructView( m_terms));
+	}
+	if (!m_weightingSets.empty())
+	{
+		rt( "weighting_sets", m_weightingSets);
+	}
+	if (!m_selectionSets.empty())
+	{
+		rt( "selection_sets", m_selectionSets);
+	}
+	if (!m_restrictionSets.empty())
+	{
+		rt( "restriction_sets", m_restrictionSets);
+	}
+	if (!m_exclusionSets.empty())
+	{
+		rt( "exclusion_sets", m_exclusionSets);
+	}
+	if (m_weightingFormula.get())
+	{
+		rt( "formula", m_weightingFormula->tostring() );
+	}
+	return rt;
+}
+
 

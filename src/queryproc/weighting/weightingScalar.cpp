@@ -226,31 +226,30 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceScalar::createFuncti
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string WeightingFunctionInstanceScalar::tostring() const
+StructView WeightingFunctionInstanceScalar::view() const
 {
 	try
 	{
-		std::ostringstream msg;
+		StructView rt;
 		if (m_func.get())
 		{
-			msg << m_func->tostring() << std::endl;
-			msg << "--" << std::endl;
+			rt( "function", m_func->tostring());
 		}
 		std::vector<std::pair<std::string,double> >::const_iterator
 			pi = m_paramar.begin(), pe = m_paramar.end();
 		for (; pi != pe; ++pi)
 		{
-			msg << "\t" << pi->first << " = " << pi->second << std::endl;
+			rt( pi->first, pi->second);
 		}
-		std::vector<std::string>::const_iterator mi = m_metadataar.begin(), me = m_metadataar.end();
-		for (; mi != me; ++mi)
+		if (!m_metadataar.empty())
 		{
-			msg << "\t" << *mi << " = <metadata>" << std::endl;
+			rt( "metadata", m_metadataar);
 		}
-		return msg.str();
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
+
 
 WeightingFunctionInstanceInterface* WeightingFunctionScalar::createInstance(
 		const QueryProcessorInterface* processor) const

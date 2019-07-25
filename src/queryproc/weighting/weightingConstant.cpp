@@ -166,18 +166,17 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceConstant::createFunc
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string WeightingFunctionInstanceConstant::tostring() const
+StructView WeightingFunctionInstanceConstant::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "weight=" << m_weight << ", " << "precalc=" << (m_precalc?"1":"0");
-		return rt.str();
+		StructView rt;
+		rt( "weight", m_weight);
+		rt( "precalc", m_precalc);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 WeightingFunctionInstanceInterface* WeightingFunctionConstant::createInstance(
 		const QueryProcessorInterface*) const

@@ -142,17 +142,17 @@ void SummarizerFunctionInstanceAttribute::defineResultName(
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "metadata", *m_errorhnd);
 }
 
-std::string SummarizerFunctionInstanceAttribute::tostring() const
+StructView SummarizerFunctionInstanceAttribute::view() const
 {
 	try
 	{
-		std::ostringstream rt;
-		rt << "metaname='" << m_attribname << "', resultname='" << m_resultname << "'";
-		return rt.str();
+		StructView rt;
+		rt( "attribute", m_attribname);
+		rt( "resultname", m_resultname);
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createFunctionContext(
 		const StorageClientInterface* storage,

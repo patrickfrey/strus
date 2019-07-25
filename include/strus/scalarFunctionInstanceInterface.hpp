@@ -9,6 +9,7 @@
 /// \file scalarFunctionInstanceInterface.hpp
 #ifndef _STRUS_SCALAR_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SCALAR_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
+#include "strus/structView.hpp"
 #include <string>
 
 namespace strus

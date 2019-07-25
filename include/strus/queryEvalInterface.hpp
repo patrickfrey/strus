@@ -9,6 +9,7 @@
 /// \file "queryEvalInterface.hpp"
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
+#include "strus/structView.hpp"
 #include <iostream>
 #include <vector>
 
@@ -127,6 +128,10 @@ public:
 	/// \return a query instance for this query evaluation type
 	virtual QueryInterface* createQuery(
 			const StorageClientInterface* storage) const=0;
+
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }//namespace

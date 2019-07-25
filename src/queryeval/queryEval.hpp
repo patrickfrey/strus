@@ -74,8 +74,7 @@ public:
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc);
 
-	void print( std::ostream& out) const;
-
+	virtual StructView view() const;
 
 public:/*Query*/
 	const std::vector<TermConfig>& terms() const			{return m_terms;}
@@ -85,6 +84,7 @@ public:/*Query*/
 	const std::vector<std::string>& exclusionSets() const		{return m_exclusionSets;}
 	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
 	const ScalarFunctionInterface* weightingFormula() const		{return m_weightingFormula.get();}
+	void print( std::ostream& out) const;
 
 public:/*Query*/
 	struct VariableAssignment

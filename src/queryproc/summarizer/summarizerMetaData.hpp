@@ -93,7 +93,7 @@ public:
 			MetaDataReaderInterface* metadata,
 			const GlobalStatistics&) const;
 
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	std::string m_resultname;
