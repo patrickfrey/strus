@@ -15,6 +15,7 @@
 #include "strus/numericVariant.hpp"
 #include "strus/termStatistics.hpp"
 #include "strus/globalStatistics.hpp"
+#include "strus/structView.hpp"
 #include <string>
 #include <vector>
 #include <utility>
@@ -127,9 +128,9 @@ public:
 	/// \return result of query evaluation
 	virtual QueryResult evaluate() const=0;
 
-	/// \brief Map query to readable string
-	/// \return query with query evaluation scheme in readable form
-	virtual std::string tostring() const=0;
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }//namespace

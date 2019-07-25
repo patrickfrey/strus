@@ -9,6 +9,7 @@
 /// \file scalarFunctionInterface.hpp
 #ifndef _STRUS_SCALAR_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_SCALAR_FUNCTION_INTERFACE_HPP_INCLUDED
+#include "strus/structView.hpp"
 #include <string>
 #include <vector>
 
@@ -45,8 +46,9 @@ public:
 	/// \return the created scalar function instance
 	virtual ScalarFunctionInstanceInterface* createInstance() const=0;
 
-	/// \brief Return the representation (VM code or whatever it is) of the function as string
-	virtual std::string tostring() const=0;
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }// namespace

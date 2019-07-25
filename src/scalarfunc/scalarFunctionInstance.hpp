@@ -31,7 +31,7 @@ public:
 
 	virtual double call( const double* args, unsigned int nofargs) const;
 
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

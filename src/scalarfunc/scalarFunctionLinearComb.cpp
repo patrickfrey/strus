@@ -19,20 +19,6 @@
 
 using namespace strus;
 
-static std::string ScalarFunctionInstance_tostring( const std::vector<double>& factors)
-{
-	std::ostringstream out;
-	out << std::setprecision(6) << std::fixed;
-	std::vector<double>::const_iterator fi = factors.begin(), fe = factors.end();
-	unsigned int ai = 0;
-	for (; fi != fe; ++fi,++ai)
-	{
-		if (ai) out << " + ";
-		out << *fi << " * _" << ai;
-	}
-	return out.str();
-}
-
 class ScalarFunctionInstance_linearcomb
 	:public ScalarFunctionInstanceInterface
 {
@@ -63,11 +49,11 @@ public:
 		return rt;
 	}
 
-	virtual std::string tostring() const
+	virtual StructView view() const
 	{
 		try
 		{
-			return ScalarFunctionInstance_tostring( m_factors);
+			return StructView()("name", "linearcomb")("factors",StructView::getArray(m_factors));
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
 	}
@@ -110,11 +96,11 @@ public:
 		CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of linear combination scalar function: %s"), *m_errorhnd, 0);
 	}
 
-	virtual std::string tostring() const
+	virtual StructView view() const
 	{
 		try
 		{
-			return ScalarFunctionInstance_tostring( m_factors);
+			return StructView()("name", "linearcomb")("factors",StructView::getArray(m_factors));
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
 	}

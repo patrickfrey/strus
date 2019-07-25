@@ -92,7 +92,7 @@ public:
 	virtual void setDebugMode( bool debug);
 
 	virtual QueryResult evaluate() const;
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 public:
 	typedef unsigned int NodeAddress;
@@ -195,8 +195,6 @@ public:
 	///\brief Get the joined features defined in the query
 	const std::vector<Feature>& features() const	{return m_features;}
 
-	void print( std::ostream& out) const;
-
 private:
 	const TermStatistics& getTermStatistics( const std::string& type_, const std::string& value_) const;
 
@@ -235,8 +233,9 @@ private:
 				const NodeStorageDataMap& nodeStorageDataMap) const;
 	const NodeStorageData& nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
 
-	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
-	void printVariables( std::ostream& out, NodeAddress adr) const;
+	StructView nodeView( NodeAddress adr) const;
+	StructView variableView( NodeAddress adr) const;
+	StructView featuresView() const;
 	NodeAddress duplicateNode( NodeAddress adr);
 	std::string printStack() const;
 

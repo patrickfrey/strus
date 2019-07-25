@@ -115,8 +115,7 @@ std::string Query::printStack() const
 	out << "Stack" << std::endl;
 	for (--sidx; si != se; ++si,--sidx)
 	{
-		out << "STK [" << sidx << "] ";
-		printNode( out, *si, 1);
+		out << "STK [" << sidx << "] " << nodeView( *si).tostring() << std::endl;
 	}
 	return out.str();
 }
@@ -226,115 +225,94 @@ void Query::addDocumentEvaluationSet(
 	CATCH_ERROR_MAP( _TXT("error define document evaluation set of query: %s"), *m_errorhnd);
 }
 
-void Query::print( std::ostream& out) const
+StructView Query::view() const
 {
-	out << _TXT("query evaluation program:") << std::endl;
-	m_queryEval->print( out);
+	StructView rt;
+	rt( "eval", m_queryEval->view());
+	rt( "feature", featuresView());
+	rt( "debug", m_debugMode ? "true":"false");
+	rt( "maxNofRanks", (unsigned int)m_nofRanks);
+	rt( "minRank", (unsigned int)m_minRank);
+	rt( "docs", StructView::getArray( m_evalset_docnolist));
+	rt( "user", m_usernames);
+	return rt;
+}
 
+StructView Query::featuresView() const
+{
+	StructView rt;
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
-		char buf[ 128];
-		strus_snprintf( buf, sizeof(buf), "%.5f", fi->weight);
-		out << _TXT("feature '") << fi->set << "' " << buf << ": " << std::endl;
-		printNode( out, fi->node, 1);
-		out << std::endl;
+		rt( StructView()( "weight", fi->weight)( "set", fi->set)( "struct", nodeView( fi->node)));
 	}
-	if (m_debugMode) out << _TXT("debug mode enabled") << std::endl;
-	out << "maxNofRanks = " << m_nofRanks << std::endl;
-	out << "minRank = " << m_minRank << std::endl;
-	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
-	if (di != de)
-	{
-		out << _TXT("document evaluation set : ");
-		for (std::size_t didx=0; di != de; ++di)
-		{
-			if (didx != 0) out << ", ";
-			out << *di;
-		}
-		out << std::endl;
-	}
-	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
-	if (ui != ue)
-	{
-		out << _TXT("user access one of : ");
-		for (std::size_t uidx=0; ui != ue; ++uidx,++ui)
-		{
-			if (uidx) out << ", ";
-			out << *ui;
-		}
-		out << std::endl;
-	}
+	return rt;
 }
 
-std::string Query::tostring() const
+StructView Query::variableView( NodeAddress adr) const
 {
-	std::ostringstream out;
-	print( out);
-	return out.str();
-}
-
-void Query::printVariables( std::ostream& out, NodeAddress adr) const
-{
+	StructView rt;
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> variables = m_variableAssignments.equal_range( adr);
 
 	if (variables.first != variables.second)
 	{
-		out << " [";
 		Itr vi = variables.first, ve = variables.second;
 		for (std::size_t vidx=0; vi != ve; ++vi,++vidx)
 		{
-			if (vidx) out << ",";
-			out << vi->second;
+			rt( vi->second);
 		}
-		out << "]";
 	}
+	return rt;
 }
 
-void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const
+StructView Query::nodeView( NodeAddress adr) const
 {
-	std::string indentstr( indent*2, ' ');
 	switch (nodeType( adr))
 	{
 		case NullNode:
-			out << indentstr << "NULL";
-			printVariables( out, adr);
-			out << std::endl;
-			break;
+			return StructView()( "node", "NULL")( "var", variableView( adr));
 		case TermNode:
 		{
 			const Term& term = m_terms[ nodeIndex( adr)];
-			out << indentstr << "term " << term.type << " '" << term.value << "'";
-			printVariables( out, adr);
-			out << std::endl;
-			break;
+			return StructView()
+				("node", "term")
+				("type", term.type)
+				("value", term.value)
+				("var", variableView( adr));
 		}
 		case DocFieldNode:
 		{
 			const DocField& docfield = m_docfields[ nodeIndex( adr)];
-			out << indentstr << "docfield " << docfield.metadataRangeStart << " : " << docfield.metadataRangeEnd;
-			printVariables( out, adr);
-			out << std::endl;
-			break;
+			return StructView()
+				("node", "docfield")
+				("start", docfield.metadataRangeStart)
+				("end", docfield.metadataRangeEnd)
+				("var", variableView( adr));
 		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
 			PostingJoinOperatorInterface::Description opdescr = expr.operation->getDescription();
-			out << indentstr << opdescr.name() << " range=" << expr.range << " cardinality=" << expr.cardinality << ":";
-			printVariables( out, adr);
-			out << std::endl;
+			StructView rt;
+			rt("node", "expression");
+			rt("op", opdescr.name());
+			rt("range", expr.range);
+			rt("cardinality", expr.cardinality);
+			rt("var", variableView( adr));
 			std::vector<NodeAddress>::const_iterator
 				ni = expr.subnodes.begin(),
 				ne = expr.subnodes.end();
+			StructView arg;
 			for (; ni != ne; ++ni)
 			{
-				printNode( out, *ni, indent+1);
+				arg( nodeView( *ni));
 			}
-			break;
+			rt("arg", arg);
+			return rt;
 		}
 	}
+	return StructView();
 }
 
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
@@ -594,7 +572,7 @@ QueryResult Query::evaluate() const
 	try
 	{
 		DEBUG_OPEN("eval")
-		DEBUG_EVENT1_STR( "query", "%s", tostring())
+		DEBUG_EVENT1_STR( "query", "%s", view().tostring())
 		// [1] Check initial conditions:
 		if (m_nofRanks == 0)
 		{

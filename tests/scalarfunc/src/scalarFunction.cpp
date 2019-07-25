@@ -93,7 +93,7 @@ static bool run( const ScalarFunctionParserInterface* parser, unsigned int testi
 	{
 		std::cerr << "[" << testidx << "] test '" << test.name << "'" << std::endl;
 		std::cerr << "function:" << std::endl;
-		std::cerr << func->tostring() << std::endl;
+		std::cerr << func->view().tostring() << std::endl;
 
 		std::cerr << std::setprecision(11) << "result=" << result << " expected=" << test.result << " diff=" << xx << std::endl;
 	}

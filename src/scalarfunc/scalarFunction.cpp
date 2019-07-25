@@ -187,21 +187,21 @@ ScalarFunctionInstanceInterface* ScalarFunction::createInstance() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of scalar function: %s"), *m_errorhnd, 0);
 }
 
-std::string ScalarFunction::tostring() const
+StructView ScalarFunction::view() const
 {
 	try
 	{
-		std::ostringstream dmp;
-		dmp << std::fixed << std::setprecision( 6);
-	
+		StructView rt;
 		for (std::size_t ip=0; ip<m_instructionar.size(); ++ip)
 		{
-			dmp << "[" << ip << "] " << opCodeName( opCode(ip));
-			switch (opCode(ip))
+			StructView op;
+			ScalarFunction::OpCode oc = opCode(ip);
+			op( "ip", (int)ip)( "opcode", ScalarFunction::opCodeName( oc));
+			switch (oc)
 			{
 				case ScalarFunction::OpLdCnt:
 				{
-					dmp << " " << getIndexOperand( ip);
+					op( "arg", (int)getIndexOperand( ip));
 					break;
 				}
 				case ScalarFunction::OpPush:
@@ -213,23 +213,23 @@ std::string ScalarFunction::tostring() const
 						const char* varname = reverseLookupVariableName( validx);
 						if (varname)
 						{
-							dmp << " " << varname;
+							op( "argvar", varname);
 						}
 						else
 						{
-							dmp << " " << value;
+							op( "arg", value);
 						}
 					}
 					else
 					{
-						dmp << " " << value;
+						op( "arg", value);
 					}
 					break;
 				}
 				case ScalarFunction::OpArg:
 				{
 					std::size_t validx = getIndexOperand( ip, m_nofargs);
-					dmp << " " << validx;
+					op( "arg", (int)validx);
 					break;
 				}
 				case ScalarFunction::OpNeg:
@@ -244,10 +244,10 @@ std::string ScalarFunction::tostring() const
 					break;
 				}
 			}
-			dmp << std::endl;
+			rt( op);
 		}
-		return dmp.str();
+		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error building string representation of scalar function: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_MAP_RETURN( _TXT("error building introspection structure of scalar function: %s"), *m_errorhnd, StructView());
 }
 

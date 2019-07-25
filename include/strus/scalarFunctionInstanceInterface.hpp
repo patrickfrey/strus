@@ -35,8 +35,9 @@ public:
 	/// \param[in] nofargs number of elements in args
 	virtual double call( const double* args, unsigned int nofargs) const=0;
 
-	/// \brief Return the representation (VM code or whatever it is) of the function with variables substituted as string
-	virtual std::string tostring() const=0;
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 } //namespace

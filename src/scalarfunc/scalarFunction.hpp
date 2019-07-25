@@ -156,7 +156,7 @@ public:
 	virtual void setDefaultVariableValue( const std::string& name, double value);
 
 	virtual ScalarFunctionInstanceInterface* createInstance() const;
-	virtual std::string tostring() const;
+	virtual StructView view() const;
 
 private:
 	void pushInstruction( const OpCode& op, unsigned int operand);

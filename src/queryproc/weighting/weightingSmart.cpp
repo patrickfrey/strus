@@ -273,7 +273,7 @@ StructView WeightingFunctionInstanceSmart::view() const
 		StructView rt;
 		if (m_func.get())
 		{
-			rt( "function", m_func->tostring());
+			rt( "function", m_func->view());
 		}
 		std::vector<std::pair<std::string,double> >::const_iterator
 			pi = m_paramar.begin(), pe = m_paramar.end();

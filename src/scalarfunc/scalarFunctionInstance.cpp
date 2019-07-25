@@ -185,35 +185,34 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 	CATCH_ERROR_MAP_RETURN( _TXT("error executing scalar function: %s"), *m_errorhnd, 0.0);
 }
 
-std::string ScalarFunctionInstance::tostring() const
+
+StructView ScalarFunctionInstance::view() const
 {
 	try
 	{
-		std::ostringstream dmp;
-		dmp << std::fixed << std::setprecision( 6);
-	
+		StructView rt;
 		for (std::size_t ip=0; m_func->hasInstruction(ip); ++ip)
 		{
+			StructView op;
 			ScalarFunction::OpCode opCode = m_func->opCode(ip);
-			dmp << "[" << ip << "] " << ScalarFunction::opCodeName( opCode);
+			op( "ip", (int)ip)( "opcode", ScalarFunction::opCodeName( opCode));
 			switch (opCode)
 			{
 				case ScalarFunction::OpLdCnt:
 				{
-					dmp << " " << m_func->getIndexOperand( ip);
+					op( "arg", (int)m_func->getIndexOperand( ip));
 					break;
 				}
 				case ScalarFunction::OpPush:
 				{
 					std::size_t validx = m_func->getIndexOperand( ip, m_valuear.size());
 					double value = m_valuear[ validx];
-					dmp << " " << value;
+					op( "arg", value);
 					break;
 				}
 				case ScalarFunction::OpArg:
 				{
-					std::size_t validx = m_func->getIndexOperand( ip);
-					dmp << " " << validx;
+					op( "arg", (int)m_func->getIndexOperand( ip));
 					break;
 				}
 				case ScalarFunction::OpNeg:
@@ -228,9 +227,9 @@ std::string ScalarFunctionInstance::tostring() const
 					break;
 				}
 			}
-			dmp << std::endl;
+			rt( op);
 		}
-		return dmp.str();
+		return rt;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error building string representation of scalar function: %s"), *m_errorhnd, std::string());
 }
