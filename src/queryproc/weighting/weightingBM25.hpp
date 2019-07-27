@@ -13,6 +13,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
+#include "strus/constants.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
@@ -99,7 +100,7 @@ class WeightingFunctionInstanceBM25
 {
 public:
 	explicit WeightingFunctionInstanceBM25( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
 

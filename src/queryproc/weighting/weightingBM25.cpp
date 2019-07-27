@@ -37,10 +37,10 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 {
 	if (m_parameter.b)
 	{
-		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_);
+		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_);
 		if (m_metadata_doclen<0)
 		{
-			throw strus::runtime_error( "%s",  _TXT("parameter 'b' set, but no meta data element for the document length defined"));
+			throw strus::runtime_error( _TXT("parameter 'b' set, but no meta data element '%s' for the document length defined"), attribute_doclen_.c_str());
 		}
 	}
 }
@@ -168,8 +168,8 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		}
 		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
-			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_metadata_doclen = value;
 		}
 		else if (strus::caseInsensitiveEquals( name, "k1")
 		||  strus::caseInsensitiveEquals( name, "b")

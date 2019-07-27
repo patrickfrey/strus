@@ -71,6 +71,11 @@ struct Constants
 	{
 		return "leveldb";
 	}
+	/// \brief Get the name of the standard (default) document length metadata element for weighting and summarizer functions relying on a notion of document length
+	static const char* standard_metadata_document_length()
+	{
+		return "doclen";
+	}
 	/// \brief Get the name of the standard (default) vector storage (naming the storage type in the storage configuration)
 	static const char* standard_vector_storage()
 	{

@@ -40,13 +40,13 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_nof_maxdf_features(0)
 	,m_initialized(false)
 	,m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( metadata_doclen_.empty()?std::string("doclen"):metadata_doclen_))
+	,m_metadata_doclen( metadata_->elementHandle( metadata_doclen_))
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
 	if (m_metadata_doclen<0)
 	{
-		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+		throw strus::runtime_error( _TXT("no meta data element '%s' for the document lenght defined"), metadata_doclen_.c_str());
 	}
 }
 
@@ -504,8 +504,8 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		}
 		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
-			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_metadata_doclen = value;
 		}
 		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{

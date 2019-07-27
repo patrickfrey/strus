@@ -14,6 +14,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
+#include "strus/constants.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "proximityWeightAccumulator.hpp"
@@ -171,7 +172,7 @@ class WeightingFunctionInstanceBM25pff
 {
 public:
 	explicit WeightingFunctionInstanceBM25pff( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
 
