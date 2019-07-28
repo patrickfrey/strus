@@ -306,7 +306,7 @@ StructView WeightingFunctionSmart::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt(_TXT("Calculate the document weight with a weighting scheme given by a scalar function defined as expression with ff (feature frequency), df (document frequency), N (total number of documents in the collection) and some specified metadata elements as arguments. The name of this method has been inspired by the traditional SMART weighting schemes in IR"));
+		FunctionDescription rt( name(), _TXT("Calculate the document weight with a weighting scheme given by a scalar function defined as expression with ff (feature frequency), df (document frequency), N (total number of documents in the collection) and some specified metadata elements as arguments. The name of this method has been inspired by the traditional SMART weighting schemes in IR"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");
 		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides ff,df,qf and N. The parameter is addressed by the name of the metadata element in the expression"));

@@ -976,7 +976,7 @@ StructView SummarizerFunctionMatchPhrase::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Get best matching phrases delimited by the structure postings"));
+		FunctionDescription rt( name(), _TXT("Get best matching phrases delimited by the structure postings"));
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
 		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");

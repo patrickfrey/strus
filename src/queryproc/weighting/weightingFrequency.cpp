@@ -148,7 +148,7 @@ StructView WeightingFunctionTermFrequency::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
+		FunctionDescription rt( name(), _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");
 		return rt;

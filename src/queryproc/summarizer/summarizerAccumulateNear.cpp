@@ -522,7 +522,7 @@ StructView SummarizerFunctionAccumulateNear::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Extract and weight all elements in the forward index of a given type that are within a window with features specified."));
+		FunctionDescription rt( name(), _TXT("Extract and weight all elements in the forward index of a given type that are within a window with features specified."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for near matches"), "");
 		rt( P::Feature, "struct", _TXT( "defines a structural delimiter for interaction of features on the same result"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");

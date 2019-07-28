@@ -234,7 +234,7 @@ StructView SummarizerFunctionMatchVariables::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Extract all variables assigned to subexpressions of features specified."));
+		FunctionDescription rt( name(), _TXT("Extract all variables assigned to subexpressions of features specified."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		return rt;

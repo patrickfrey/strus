@@ -253,7 +253,7 @@ StructView WeightingFunctionBM25::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
+		FunctionDescription rt( name(), _TXT("Calculate the document weight with the weighting scheme \"BM25\""));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");
 		rt( P::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");

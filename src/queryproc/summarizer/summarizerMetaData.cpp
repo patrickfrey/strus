@@ -180,7 +180,7 @@ StructView SummarizerFunctionMetaData::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Get the value of a document meta data element."));
+		FunctionDescription rt( name(), _TXT("Get the value of a document meta data element."));
 		rt( P::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
 		return rt;
 	}

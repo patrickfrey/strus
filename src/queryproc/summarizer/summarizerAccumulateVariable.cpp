@@ -381,7 +381,7 @@ StructView SummarizerFunctionAccumulateVariable::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
+		FunctionDescription rt( name(), _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		rt( P::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");

@@ -190,7 +190,7 @@ StructView SummarizerFunctionAttribute::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Get the value of a document attribute."));
+		FunctionDescription rt( name(), _TXT("Get the value of a document attribute."));
 		rt( P::Attribute, "name", _TXT( "the name of the attribute to get"), "");
 		return rt;
 	}

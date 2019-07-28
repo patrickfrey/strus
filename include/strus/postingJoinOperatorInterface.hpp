@@ -44,7 +44,7 @@ public:
 		/// \brief Constructor
 		Description( const std::string& name_, const std::string& text_)
 		{
-			((StructView)(*this))("name", name_)("text", text_);
+			StructView::operator()("name", name_)("text", text_);
 		}
 	};
 

@@ -194,7 +194,7 @@ StructView WeightingFunctionConstant::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt(_TXT("Calculate the weight of a document as sum of the the feature weights of the occurring features"));
+		FunctionDescription rt( name(), _TXT("Calculate the weight of a document as sum of the the feature weights of the occurring features"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		return rt;
 	}

@@ -160,7 +160,7 @@ StructView WeightingFunctionMetadata::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Calculate the weight of a document as value of a meta data element."));
+		FunctionDescription rt( name(), _TXT("Calculate the weight of a document as value of a meta data element."));
 		rt( P::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
 		return rt;
 	}

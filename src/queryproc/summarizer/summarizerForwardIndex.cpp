@@ -193,7 +193,7 @@ StructView SummarizerFunctionForwardIndex::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Get the complete forward index"));
+		FunctionDescription rt( name(), _TXT("Get the complete forward index"));
 		rt( P::String, "type", _TXT( "the forward index type to fetch the summary elements"), "");
 		rt( P::String, "name", _TXT( "the name of the result attribute (default is the value of 'type'')"), "");
 		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");

@@ -190,7 +190,7 @@ StructView SummarizerFunctionListMatches::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( _TXT("Get the feature occurencies printed"));
+		FunctionDescription rt( name(), _TXT("Get the feature occurencies printed"));
 		rt( P::Feature, "match", _TXT( "defines the query features"), "");
 		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");
 		return rt;

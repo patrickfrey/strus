@@ -57,9 +57,9 @@ public:
 	FunctionDescription(){}
 
 	/// \brief Constructor
-	explicit FunctionDescription( const std::string& text_)
+	explicit FunctionDescription( const char* name_, const char* text_)
 	{
-		StructView::operator()( "text", text_);
+		StructView::operator()( "name", name_)( "text", text_);
 	}
 
 	/// \brief Derived constructor

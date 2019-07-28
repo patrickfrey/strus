@@ -267,7 +267,7 @@ StructView WeightingFunctionScalar::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt(_TXT("Calculate the document weight with a weighting scheme defined by a scalar function on metadata elements,constants and variables as arguments."));
+		FunctionDescription rt( name(), _TXT("Calculate the document weight with a weighting scheme defined by a scalar function on metadata elements,constants and variables as arguments."));
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");
 		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides N (collection size). The parameter is addressed by the name of the metadata element in the expression"));
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
