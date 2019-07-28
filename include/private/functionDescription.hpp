@@ -46,7 +46,7 @@ public:
 		StructView* paramlist = this->get( "parameter");
 		if (!paramlist)
 		{
-			((StructView)(*this))( "parameter", StructView());
+			StructView::operator()( "parameter", StructView());
 			paramlist = this->get( "parameter");
 		}
 		(*paramlist)( paramdef);
@@ -59,14 +59,14 @@ public:
 	/// \brief Constructor
 	explicit FunctionDescription( const std::string& text_)
 	{
-		((StructView)(*this))( "text", text_);
+		StructView::operator()( "text", text_);
 	}
 
 	/// \brief Derived constructor
 	FunctionDescription( const StructView& o, const std::string& text_)
 	{
 		const StructView* old_textview = o.get( "text");
-		((StructView)(*this))( "text", text_ + ": " + old_textview->tostring());
+		StructView::operator()( "text", text_ + ": " + old_textview->tostring());
 	}
 };
 
