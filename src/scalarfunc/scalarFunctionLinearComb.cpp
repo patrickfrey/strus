@@ -28,7 +28,7 @@ public:
 
 	virtual ~ScalarFunctionInstance_linearcomb(){}
 
-	virtual void setVariableValue( const std::string& name, double value)
+	virtual void setVariableValue( const std::string& name_, double value)
 	{
 		m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables defined in plain linear combination"));
 	}
@@ -48,6 +48,8 @@ public:
 		}
 		return rt;
 	}
+
+	virtual const char* name() const {return "linearcomb";}
 
 	virtual StructView view() const
 	{
@@ -95,6 +97,8 @@ public:
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of linear combination scalar function: %s"), *m_errorhnd, 0);
 	}
+
+	virtual const char* name() const {return "linearcomb";}
 
 	virtual StructView view() const
 	{

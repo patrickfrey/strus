@@ -124,6 +124,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
+	virtual const char* name() const {return "matchvar";}
 	virtual StructView view() const;
 
 private:
@@ -144,7 +145,8 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const {return "matchvar";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

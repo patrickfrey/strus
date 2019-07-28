@@ -18,6 +18,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
+#include "private/functionDescription.hpp"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -65,9 +66,9 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionContextSmart::setVariableValue( const std::string& name, double value)
+void WeightingFunctionContextSmart::setVariableValue( const std::string& name_, double value)
 {
-	m_func->setVariableValue( name, value);
+	m_func->setVariableValue( name_, value);
 }
 
 void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff, double df, double* param) const
@@ -152,13 +153,13 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 	return out.str();
 }
 
-void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name, const std::string& value)
+void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
 		if (m_func.get()) m_func.reset();
 
-		if (strus::caseInsensitiveEquals( name, "function"))
+		if (strus::caseInsensitiveEquals( name_, "function"))
 		{
 			if (!m_expression.empty())
 			{
@@ -166,7 +167,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 			}
 			m_expression = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "metadata"))
+		else if (strus::caseInsensitiveEquals( name_, "metadata"))
 		{
 			if (m_metadataar.size() > WeightingFunctionContextSmart::MaxNofParameter)
 			{
@@ -176,24 +177,24 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 		}
 		else
 		{
-			throw strus::runtime_error(_TXT( "unknown string type parameter: %s"), name.c_str());
+			throw strus::runtime_error(_TXT( "unknown string type parameter: %s"), name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& name, const NumericVariant& value)
+void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "metadata"))
+		if (strus::caseInsensitiveEquals( name_, "metadata"))
 		{
-			throw strus::runtime_error(_TXT( "parameter '%s' not expected as numeric"), name.c_str());
+			throw strus::runtime_error(_TXT( "parameter '%s' not expected as numeric"), name_.c_str());
 		}
 		else
 		{
-			m_paramar.push_back( std::pair<std::string,double>( name, value));
-			if (m_func.get()) m_func->setDefaultVariableValue( name, value);
+			m_paramar.push_back( std::pair<std::string,double>( name_, value));
+			if (m_func.get()) m_func->setDefaultVariableValue( name_, value);
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -300,11 +301,11 @@ WeightingFunctionInstanceInterface* WeightingFunctionSmart::createInstance(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-FunctionDescription WeightingFunctionSmart::getDescription() const
+StructView WeightingFunctionSmart::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt(_TXT("Calculate the document weight with a weighting scheme given by a scalar function defined as expression with ff (feature frequency), df (document frequency), N (total number of documents in the collection) and some specified metadata elements as arguments. The name of this method has been inspired by the traditional SMART weighting schemes in IR"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");

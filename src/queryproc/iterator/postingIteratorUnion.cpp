@@ -200,12 +200,12 @@ PostingIteratorInterface* PostingJoinUnion::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "union", *m_errorhnd, 0);
 }
 
-PostingJoinOperatorInterface::Description PostingJoinUnion::getDescription() const
+StructView PostingJoinUnion::view() const
 {
 	try
 	{
 		return Description( "union", _TXT("Get the set of postings that are occurring in any argument set"));
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "union", *m_errorhnd, Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "union", *m_errorhnd, StructView());
 }
 

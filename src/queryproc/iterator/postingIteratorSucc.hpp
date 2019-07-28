@@ -88,17 +88,14 @@ public:
 		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinSucc(){}
 
-	virtual const char* name()
-	{
-		return "succ";
-	}
+	virtual const char* name() const {return "succ";}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range,
 			unsigned int cardinality) const;
 
-	virtual Description getDescription() const;
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

@@ -293,10 +293,9 @@ StructView Query::nodeView( NodeAddress adr) const
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			PostingJoinOperatorInterface::Description opdescr = expr.operation->getDescription();
 			StructView rt;
 			rt("node", "expression");
-			rt("op", opdescr.name());
+			rt("op", expr.operation->name());
 			rt("range", expr.range);
 			rt("cardinality", expr.cardinality);
 			rt("var", variableView( adr));

@@ -13,6 +13,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -37,7 +38,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 	}
 }
 
-void WeightingFunctionContextMetadata::setVariableValue( const std::string& name, double)
+void WeightingFunctionContextMetadata::setVariableValue( const std::string& name_, double)
 {
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
@@ -72,44 +73,44 @@ std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
 }
 
 
-static NumericVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
 	NumericVariant rt;
-	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
 }
 
-void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& name, const std::string& value)
+void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name_, "name"))
 		{
 			m_elementName = value;
 		}
 		else
 		{
-			addNumericParameter( name, parameterValue( name, value));
+			addNumericParameter( name_, parameterValue( name_, value));
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const NumericVariant& value)
+void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "weight"))
+		if (strus::caseInsensitiveEquals( name_, "weight"))
 		{
 			m_weight = (double)value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "name"))
+		else if (strus::caseInsensitiveEquals( name_, "name"))
 		{
-			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -154,11 +155,11 @@ WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance(
 }
 
 
-FunctionDescription WeightingFunctionMetadata::getDescription() const
+StructView WeightingFunctionMetadata::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Calculate the weight of a document as value of a meta data element."));
 		rt( P::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
 		return rt;

@@ -12,6 +12,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <string>
 #include <iomanip>
 #include <iostream>
@@ -82,31 +83,31 @@ std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno
 	return out.str();
 }
 
-static NumericVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
 	NumericVariant rt;
-	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
 }
 
-void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::string& name, const std::string& value)
+void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		addNumericParameter( name, parameterValue( name, value));
+		addNumericParameter( name_, parameterValue( name_, value));
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name, const NumericVariant&)
+void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name_, const NumericVariant&)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -142,11 +143,11 @@ WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstan
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-FunctionDescription WeightingFunctionTermFrequency::getDescription() const
+StructView WeightingFunctionTermFrequency::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");

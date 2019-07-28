@@ -15,6 +15,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <set>
 #include <cstdlib>
 #include <iomanip>
@@ -30,7 +31,7 @@ void SummarizerFunctionContextListMatches::setVariableValue( const std::string&,
 }
 
 void SummarizerFunctionContextListMatches::addSummarizationFeature(
-		const std::string& name,
+		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>&,
 		double /*weight*/,
@@ -38,13 +39,13 @@ void SummarizerFunctionContextListMatches::addSummarizationFeature(
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			m_itrs.push_back( itr);
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding summarization feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -94,39 +95,39 @@ std::string SummarizerFunctionContextListMatches::debugCall( const Index& docno)
 }
 
 
-void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name_, const std::string& value)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "name"))
+	else if (strus::caseInsensitiveEquals( name_, "name"))
 	{
 		m_resultname = value;
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
-void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const NumericVariant& val)
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name_, const NumericVariant& val)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "name"))
+	else if (strus::caseInsensitiveEquals( name_, "name"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "N"))
+	else if (strus::caseInsensitiveEquals( name_, "N"))
 	{
 		m_maxNofMatches = val.touint();
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -184,11 +185,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionListMatches::createInstan
 }
 
 
-FunctionDescription SummarizerFunctionListMatches::getDescription() const
+StructView SummarizerFunctionListMatches::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Get the feature occurencies printed"));
 		rt( P::Feature, "match", _TXT( "defines the query features"), "");
 		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");

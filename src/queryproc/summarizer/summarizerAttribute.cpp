@@ -13,6 +13,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -87,40 +88,40 @@ std::string SummarizerFunctionContextAttribute::debugCall( const Index& docno)
 	return out.str();
 }
 
-void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name_, "name"))
 		{
 			m_resultname = value;
 			m_attribname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "attribute"))
+		else if (strus::caseInsensitiveEquals( name_, "attribute"))
 		{
 			m_attribname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name_, "result"))
 		{
 			m_resultname = value;
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -184,11 +185,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance
 }
 
 
-FunctionDescription SummarizerFunctionAttribute::getDescription() const
+StructView SummarizerFunctionAttribute::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Get the value of a document attribute."));
 		rt( P::Attribute, "name", _TXT( "the name of the attribute to get"), "");
 		return rt;

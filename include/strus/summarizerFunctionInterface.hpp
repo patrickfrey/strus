@@ -9,7 +9,7 @@
 /// \file summarizerFunctionInterface.hpp
 #ifndef _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
-#include "strus/functionDescription.hpp"
+#include "strus/structView.hpp"
 #include <string>
 #include <vector>
 
@@ -34,9 +34,13 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const=0;
 
-	/// \brief Get a description of the function for user help and introspection
-	/// \return the description structure
-	virtual FunctionDescription getDescription() const=0;
+	/// \brief Get the name of the function
+	/// \return the identifier
+	virtual const char* name() const=0;
+
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }//namespace

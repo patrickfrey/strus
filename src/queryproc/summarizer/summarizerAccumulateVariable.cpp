@@ -20,6 +20,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -52,7 +53,7 @@ void SummarizerFunctionContextAccumulateVariable::setVariableValue( const std::s
 }
 
 void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
-		const std::string& name,
+		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
 		double weight,
@@ -60,7 +61,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			std::vector<const PostingIteratorInterface*> varitr;
 			std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
@@ -86,7 +87,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -255,19 +256,19 @@ std::string SummarizerFunctionContextAccumulateVariable::debugCall( const Index&
 }
 
 
-void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name_, "type"))
 		{
 			m_data->type = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "var"))
+		else if (strus::caseInsensitiveEquals( name_, "var"))
 		{
 			m_data->var = value;
 			if (m_data->resultname.empty())
@@ -275,55 +276,55 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 				m_data->resultname = value;
 			}
 		}
-		else if (strus::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name_, "result"))
 		{
 			m_data->resultname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "cofactor"))
+		else if (strus::caseInsensitiveEquals( name_, "cofactor"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "norm"))
+		else if (strus::caseInsensitiveEquals( name_, "norm"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "nof"))
+		else if (strus::caseInsensitiveEquals( name_, "nof"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "var"))
+	else if (strus::caseInsensitiveEquals( name_, "var"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "nof"))
+	else if (strus::caseInsensitiveEquals( name_, "nof"))
 	{
 		m_data->maxNofElements = value.touint();
 	}
-	else if (strus::caseInsensitiveEquals( name, "norm"))
+	else if (strus::caseInsensitiveEquals( name_, "norm"))
 	{
 		m_data->norm = value.tofloat();
 	}
-	else if (strus::caseInsensitiveEquals( name, "cofactor"))
+	else if (strus::caseInsensitiveEquals( name_, "cofactor"))
 	{
 		m_data->cofactor = value.tofloat();
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -375,11 +376,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateVariable::creat
 }
 
 
-FunctionDescription SummarizerFunctionAccumulateVariable::getDescription() const
+StructView SummarizerFunctionAccumulateVariable::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");

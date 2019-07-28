@@ -123,12 +123,12 @@ PostingIteratorInterface* PostingJoinSequenceImm::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence_imm", *m_errorhnd, 0);
 }
 
-PostingJoinOperatorInterface::Description PostingJoinSequenceImm::getDescription() const
+StructView PostingJoinSequenceImm::view() const
 {
 	try
 	{
 		return Description( "sequence_imm", _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri|+1 == |rj| for i<j"));
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence_imm", *m_errorhnd, Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence_imm", *m_errorhnd, StructView());
 }
 

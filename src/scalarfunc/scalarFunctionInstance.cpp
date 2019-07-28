@@ -18,11 +18,11 @@ using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-void ScalarFunctionInstance::setVariableValue( const std::string& name, double value)
+void ScalarFunctionInstance::setVariableValue( const std::string& name_, double value)
 {
 	try
 	{
-		m_valuear[ m_func->getVariableIndex( name)] = value;
+		m_valuear[ m_func->getVariableIndex( name_)] = value;
 	}
 	CATCH_ERROR_MAP( _TXT("error setting scalar function variable value: %s"), *m_errorhnd);
 }

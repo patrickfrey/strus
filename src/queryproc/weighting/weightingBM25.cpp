@@ -9,6 +9,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
@@ -151,61 +152,61 @@ std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 	return out.str();
 }
 
-static NumericVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
 	NumericVariant rt;
-	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
 }
 
-void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name, const std::string& value)
+void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
+		else if (strus::caseInsensitiveEquals( name_, "metadata_doclen"))
 		{
-			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 			m_metadata_doclen = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "k1")
-		||  strus::caseInsensitiveEquals( name, "b")
-		||  strus::caseInsensitiveEquals( name, "avgdoclen"))
+		else if (strus::caseInsensitiveEquals( name_, "k1")
+		||  strus::caseInsensitiveEquals( name_, "b")
+		||  strus::caseInsensitiveEquals( name_, "avgdoclen"))
 		{
-			addNumericParameter( name, parameterValue( name, value));
+			addNumericParameter( name_, parameterValue( name_, value));
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const NumericVariant& value)
+void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "k1"))
+	else if (strus::caseInsensitiveEquals( name_, "k1"))
 	{
 		m_parameter.k1 = (double)value;
 	}
-	else if (strus::caseInsensitiveEquals( name, "b"))
+	else if (strus::caseInsensitiveEquals( name_, "b"))
 	{
 		m_parameter.b = (double)value;
 	}
-	else if (strus::caseInsensitiveEquals( name, "avgdoclen"))
+	else if (strus::caseInsensitiveEquals( name_, "avgdoclen"))
 	{
 		m_parameter.avgDocLength = (double)value;
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -247,11 +248,11 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-FunctionDescription WeightingFunctionBM25::getDescription() const
+StructView WeightingFunctionBM25::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");

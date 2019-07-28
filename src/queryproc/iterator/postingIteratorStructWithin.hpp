@@ -92,7 +92,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "within_struct";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -112,7 +113,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "within";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -132,7 +134,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "inrange_struct";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -152,7 +155,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "inrange";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

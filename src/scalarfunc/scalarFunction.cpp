@@ -77,13 +77,12 @@ void ScalarFunction::pushInstruction( const OpCode& op, unsigned int operand)
 
 void ScalarFunction::addOpPushVariable( const std::string& name_)
 {
-	std::string name( name_);
-	VariableMap::const_iterator vi = m_variablemap.find( name);
+	VariableMap::const_iterator vi = m_variablemap.find( name_);
 	unsigned int validx;
 	if (vi == m_variablemap.end())
 	{
 		validx = m_valuear.size();
-		m_variablemap[ name] = validx;
+		m_variablemap[ name_] = validx;
 		m_valuear.push_back(0.0);
 	}
 	else
@@ -146,10 +145,10 @@ const char* ScalarFunction::reverseLookupVariableName( std::size_t validx) const
 	return 0;
 }
 
-std::size_t ScalarFunction::getVariableIndex( const std::string& name) const
+std::size_t ScalarFunction::getVariableIndex( const std::string& name_) const
 {
-	VariableMap::const_iterator vi = m_variablemap.find( name);
-	if (vi == m_variablemap.end()) throw strus::runtime_error("variable '%s' is not defined in scalar function", name.c_str());
+	VariableMap::const_iterator vi = m_variablemap.find( name_);
+	if (vi == m_variablemap.end()) throw strus::runtime_error("variable '%s' is not defined in scalar function", name_.c_str());
 	return vi->second;
 }
 
@@ -169,11 +168,11 @@ unsigned int ScalarFunction::getNofArguments() const
 	return m_nofargs;
 }
 
-void ScalarFunction::setDefaultVariableValue( const std::string& name, double value)
+void ScalarFunction::setDefaultVariableValue( const std::string& name_, double value)
 {
 	try
 	{
-		m_valuear[ getVariableIndex( name)] = value;
+		m_valuear[ getVariableIndex( name_)] = value;
 	}
 	CATCH_ERROR_MAP( _TXT("error setting default variable value of scalar function: %s"), *m_errorhnd);
 }

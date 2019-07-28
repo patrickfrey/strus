@@ -15,6 +15,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <set>
 #include <cstdlib>
 #include <iomanip>
@@ -89,13 +90,13 @@ std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno
 }
 
 
-void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::string& name_, const std::string& value)
 {
-	if (strus::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
 		m_resultname = value;
 	}
-	else if (strus::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name_, "type"))
 	{
 		m_type = value;
 		if (m_resultname.empty())
@@ -105,21 +106,21 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
-void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::string& name, const NumericVariant& val)
+void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::string& name_, const NumericVariant& val)
 {
-	if (strus::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name_, "type"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "N"))
+	else if (strus::caseInsensitiveEquals( name_, "N"))
 	{
 		m_maxNofMatches = std::min(
 			val.touint(),
@@ -127,7 +128,7 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -187,11 +188,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionForwardIndex::createInsta
 }
 
 
-FunctionDescription SummarizerFunctionForwardIndex::getDescription() const
+StructView SummarizerFunctionForwardIndex::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Get the complete forward index"));
 		rt( P::String, "type", _TXT( "the forward index type to fetch the summary elements"), "");
 		rt( P::String, "name", _TXT( "the name of the result attribute (default is the value of 'type'')"), "");

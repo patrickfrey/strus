@@ -23,6 +23,7 @@
 #include "strus/base/math.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <limits>
 #include <cstdlib>
 #include <iomanip>
@@ -62,7 +63,7 @@ void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::strin
 }
 
 void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
-		const std::string& name,
+		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
 		double weight,
@@ -70,12 +71,12 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "struct"))
+		if (strus::caseInsensitiveEquals( name_, "struct"))
 		{
 			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize++] = itr;
 		}
-		else if (strus::caseInsensitiveEquals( name, "match"))
+		else if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
@@ -90,7 +91,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -364,15 +365,15 @@ std::string SummarizerFunctionContextAccumulateNear::debugCall( const Index& doc
 	return out.str();
 }
 
-void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
+		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name_, "type"))
 		{
 			m_data->type = value;
 			if (m_data->resultname.empty())
@@ -380,74 +381,74 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 				m_data->resultname = value;
 			}
 		}
-		else if (strus::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name_, "result"))
 		{
 			m_data->resultname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		else if (strus::caseInsensitiveEquals( name_, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
 			m_data->cardinality = 0;
 			m_data->cardinality_frac = numstring_conv::todouble( value);
 		}
-		else if (strus::caseInsensitiveEquals( name, "cofactor")
-			|| strus::caseInsensitiveEquals( name, "norm")
-			|| strus::caseInsensitiveEquals( name, "cprop")
-			|| strus::caseInsensitiveEquals( name, "nofranks")
-			|| strus::caseInsensitiveEquals( name, "range"))
+		else if (strus::caseInsensitiveEquals( name_, "cofactor")
+			|| strus::caseInsensitiveEquals( name_, "norm")
+			|| strus::caseInsensitiveEquals( name_, "cprop")
+			|| strus::caseInsensitiveEquals( name_, "nofranks")
+			|| strus::caseInsensitiveEquals( name_, "range"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
+	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "type")
-		|| strus::caseInsensitiveEquals( name, "result"))
+	else if (strus::caseInsensitiveEquals( name_, "type")
+		|| strus::caseInsensitiveEquals( name_, "result"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "cofactor"))
-	{
-		m_data->cofactor = value.tofloat();
-	}
-	else if (strus::caseInsensitiveEquals( name, "norm"))
+	else if (strus::caseInsensitiveEquals( name_, "cofactor"))
 	{
 		m_data->cofactor = value.tofloat();
 	}
-	else if (strus::caseInsensitiveEquals( name, "cprop"))
+	else if (strus::caseInsensitiveEquals( name_, "norm"))
+	{
+		m_data->cofactor = value.tofloat();
+	}
+	else if (strus::caseInsensitiveEquals( name_, "cprop"))
 	{
 		m_data->cprop = value.tofloat();
 		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name_.c_str(), THIS_METHOD_NAME);
 		}
 	}
-	else if (strus::caseInsensitiveEquals( name, "range"))
+	else if (strus::caseInsensitiveEquals( name_, "range"))
 	{
 		m_data->range = value.touint();
 	}
-	else if (strus::caseInsensitiveEquals( name, "nofranks"))
+	else if (strus::caseInsensitiveEquals( name_, "nofranks"))
 	{
 		m_data->nofranks = value.touint();
 	}
-	else if (strus::caseInsensitiveEquals( name, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name_, "cardinality"))
 	{
 		m_data->cardinality = value.touint();
 		m_data->cardinality_frac = 0.0;
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -516,11 +517,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createIns
 
 
 
-FunctionDescription SummarizerFunctionAccumulateNear::getDescription() const
+StructView SummarizerFunctionAccumulateNear::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Extract and weight all elements in the forward index of a given type that are within a window with features specified."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for near matches"), "");
 		rt( P::Feature, "struct", _TXT( "defines a structural delimiter for interaction of features on the same result"), "");

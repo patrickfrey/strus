@@ -11,6 +11,7 @@
 #define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/structView.hpp"
 #include <vector>
 #include <string>
 
@@ -38,30 +39,22 @@ public:
 
 	/// \brief Structure that describes the join operator
 	struct Description
+		:public StructView
 	{
-		/// \brief Default constructor
-		Description()
-			:m_name(),m_text(){}
 		/// \brief Constructor
 		Description( const std::string& name_, const std::string& text_)
-			:m_name(name_),m_text(text_){}
-		/// \brief Copy constructor
-		Description( const Description& o)
-			:m_name(o.m_name),m_text(o.m_text){}
-
-		/// \brief Get description text
-		const std::string& name() const			{return m_name;}
-		/// \brief Get description text
-		const std::string& text() const			{return m_text;}
-
-	private:
-		std::string m_name;		///< name of the operator
-		std::string m_text;		///< description text
+		{
+			((StructView)(*this))("name", name_)("text", text_);
+		}
 	};
 
-	/// \brief Get a description of the function for user help and introspection
-	/// \return the description structure
-	virtual Description getDescription() const=0;
+	/// \brief Get the name of the function
+	/// \return the identifier
+	virtual const char* name() const=0;
+
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }//namespace

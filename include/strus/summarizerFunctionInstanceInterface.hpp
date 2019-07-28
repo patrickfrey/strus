@@ -70,6 +70,10 @@ public:
 			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const=0;
 
+	/// \brief Get the name of the function
+	/// \return the identifier
+	virtual const char* name() const=0;
+
 	/// \brief Return a structure with all definitions for introspection
 	/// \return the structure with all definitions for introspection
 	virtual StructView view() const=0;

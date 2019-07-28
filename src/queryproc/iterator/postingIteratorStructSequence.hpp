@@ -92,7 +92,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "sequence_struct";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -111,7 +112,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "sequence";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -130,7 +132,8 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "chain_struct";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -149,7 +152,9 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "chain";}
+
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

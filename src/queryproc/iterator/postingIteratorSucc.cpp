@@ -46,13 +46,13 @@ PostingIteratorInterface* PostingJoinSucc::createResultIterator(
 }
 
 
-PostingJoinOperatorInterface::Description PostingJoinSucc::getDescription() const
+StructView PostingJoinSucc::view() const
 {
 	try
 	{
 		return Description( "succ", _TXT("Get the set of postings (d,p+1) for all (d,p) in the argument set"));
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "succ", *m_errorhnd, Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "succ", *m_errorhnd, StructView());
 }
 
 

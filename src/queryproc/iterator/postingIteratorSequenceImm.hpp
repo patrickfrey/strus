@@ -81,7 +81,9 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "sequence_imm";}
+
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

@@ -128,7 +128,9 @@ public:
 			int range,
 			unsigned int cardinality) const;
 
-	virtual Description getDescription() const;
+	virtual const char* name() const {return "contains";}
+
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

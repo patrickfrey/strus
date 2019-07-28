@@ -137,12 +137,12 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "contains", *m_errorhnd, 0);
 }
 
-PostingJoinOperatorInterface::Description PostingJoinContains::getDescription() const
+StructView PostingJoinContains::view() const
 {
 	try
 	{
 		return Description( "contains", _TXT("Get the set of postings (d,1) for documents d that contain all of the argument features"));
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "contains", *m_errorhnd, Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "contains", *m_errorhnd, StructView());
 }
 

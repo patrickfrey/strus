@@ -31,6 +31,7 @@ public:
 
 	virtual double call( const double* args, unsigned int nofargs) const;
 
+	virtual const char* name() const {return "scalar";}
 	virtual StructView view() const;
 
 private:

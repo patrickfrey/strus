@@ -35,6 +35,10 @@ public:
 	/// \param[in] nofargs number of elements in args
 	virtual double call( const double* args, unsigned int nofargs) const=0;
 
+	/// \brief Get the name of the function
+	/// \return the identifier
+	virtual const char* name() const=0;
+
 	/// \brief Return a structure with all definitions for introspection
 	/// \return the structure with all definitions for introspection
 	virtual StructView view() const=0;

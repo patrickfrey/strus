@@ -74,8 +74,8 @@ public:
 
 	virtual ~SummarizerFunctionInstanceAttribute(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value);
-	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+	virtual void addStringParameter( const std::string& name_, const std::string& value);
+	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
 	virtual void defineResultName( const std::string& resultname, const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
@@ -88,6 +88,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
+	virtual const char* name() const {return "attribute";}
 	virtual StructView view() const;
 
 private:
@@ -109,7 +110,8 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const {return "attribute";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

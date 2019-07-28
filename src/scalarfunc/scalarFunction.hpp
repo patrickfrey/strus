@@ -27,7 +27,7 @@ class ScalarFunctionInstanceInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Implementation for building the virtual machine of a scalar function as virtual machine
+/// \brief Implementation for building the virtual machine of a scalar function
 class ScalarFunction
 	:public ScalarFunctionInterface
 {
@@ -156,6 +156,7 @@ public:
 	virtual void setDefaultVariableValue( const std::string& name, double value);
 
 	virtual ScalarFunctionInstanceInterface* createInstance() const;
+	virtual const char* name() const {return "scalar";}
 	virtual StructView view() const;
 
 private:

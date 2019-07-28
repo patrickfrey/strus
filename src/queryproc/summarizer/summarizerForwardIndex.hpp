@@ -38,13 +38,13 @@ public:
 	virtual ~SummarizerFunctionContextForwardIndex(){}
 
 	virtual void addSummarizationFeature(
-			const std::string& name,
+			const std::string& name_,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>&,
 			double /*weight*/,
 			const TermStatistics&);
 
-	virtual void setVariableValue( const std::string& name, double value);
+	virtual void setVariableValue( const std::string& name_, double value);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
@@ -87,6 +87,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
+	virtual const char* name() const {return "forwardindex";}
 	virtual StructView view() const;
 
 private:
@@ -110,7 +111,8 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const {return "forwardindex";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

@@ -41,7 +41,7 @@ public:
 			:itr(o.itr),weight(o.weight){}
 	};
 
-	virtual void setVariableValue( const std::string& name, double value);
+	virtual void setVariableValue( const std::string& name_, double value);
 
 	virtual void addWeightingFeature(
 			const std::string& name_,
@@ -70,9 +70,9 @@ public:
 
 	virtual ~WeightingFunctionInstanceTermFrequency(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value);
+	virtual void addStringParameter( const std::string& name_, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const NumericVariant&);
+	virtual void addNumericParameter( const std::string& name_, const NumericVariant&);
 
 	virtual std::vector<std::string> getVariables() const
 	{
@@ -84,6 +84,7 @@ public:
 			MetaDataReaderInterface*,
 			const GlobalStatistics& stats_) const;
 
+	virtual const char* name() const {return "tf";}
 	virtual StructView view() const;
 
 private:
@@ -105,7 +106,8 @@ public:
 	virtual WeightingFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const {return "tf";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

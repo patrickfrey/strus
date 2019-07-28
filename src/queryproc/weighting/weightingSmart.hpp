@@ -94,7 +94,7 @@ public:
 			double weight_,
 			const TermStatistics& stats_);
 
-	virtual void setVariableValue( const std::string& name, double value);
+	virtual void setVariableValue( const std::string& name_, double value);
 
 	virtual double call( const Index& docno);
 
@@ -132,8 +132,8 @@ public:
 
 	virtual ~WeightingFunctionInstanceSmart(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value);
-	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+	virtual void addStringParameter( const std::string& name_, const std::string& value);
+	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
 
 	virtual std::vector<std::string> getVariables() const;
 
@@ -142,6 +142,7 @@ public:
 			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
+	virtual const char* name() const	{return "smart";}
 	virtual StructView view() const;
 
 private:
@@ -172,7 +173,8 @@ public:
 	virtual WeightingFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const	{return "smart";}
+	virtual StructView view() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages

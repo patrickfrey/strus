@@ -18,6 +18,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -48,7 +49,7 @@ void SummarizerFunctionContextMatchVariables::setVariableValue( const std::strin
 }
 
 void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
-		const std::string& name,
+		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
 		double weight,
@@ -56,13 +57,13 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			m_features.push_back( SummarizationFeature( itr, variables, weight));
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization feature '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -134,39 +135,39 @@ std::string SummarizerFunctionContextMatchVariables::debugCall( const Index& doc
 }
 
 
-void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name_, "type"))
 		{
 			m_data->type = value;
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name_, "type"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -228,11 +229,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createIns
 
 
 
-FunctionDescription SummarizerFunctionMatchVariables::getDescription() const
+StructView SummarizerFunctionMatchVariables::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Extract all variables assigned to subexpressions of features specified."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");

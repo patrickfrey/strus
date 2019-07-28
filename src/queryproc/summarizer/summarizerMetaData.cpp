@@ -15,6 +15,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -83,26 +84,26 @@ std::string SummarizerFunctionContextMetaData::debugCall( const Index& docno)
 	return out.str();
 }
 
-void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name_, "name"))
 		{
 			m_metaname = value;
 			m_resultname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "element"))
+		else if (strus::caseInsensitiveEquals( name_, "element"))
 		{
 			m_metaname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name_, "result"))
 		{
 			m_resultname = value;
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -126,15 +127,15 @@ void SummarizerFunctionInstanceMetaData::defineResultName(
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -174,11 +175,11 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
 
 
 
-FunctionDescription SummarizerFunctionMetaData::getDescription() const
+StructView SummarizerFunctionMetaData::view() const
 {
 	try
 	{
-		typedef FunctionDescription::Parameter P;
+		typedef FunctionDescription P;
 		FunctionDescription rt( _TXT("Get the value of a document meta data element."));
 		rt( P::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
 		return rt;

@@ -49,7 +49,7 @@ public:
 			double /*weight*/,
 			const TermStatistics&);
 
-	virtual void setVariableValue( const std::string& name, double value);
+	virtual void setVariableValue( const std::string& name_, double value);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
@@ -75,9 +75,9 @@ public:
 
 	virtual ~SummarizerFunctionInstanceMetaData(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value);
+	virtual void addStringParameter( const std::string& name_, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
 
 	virtual void defineResultName(
 			const std::string& resultname,
@@ -93,6 +93,7 @@ public:
 			MetaDataReaderInterface* metadata,
 			const GlobalStatistics&) const;
 
+	virtual const char* name() const {return "metadata";}
 	virtual StructView view() const;
 
 private:
@@ -114,7 +115,8 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual FunctionDescription getDescription() const;
+	virtual const char* name() const {return "metadata";}
+	virtual StructView view() const;
 	
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

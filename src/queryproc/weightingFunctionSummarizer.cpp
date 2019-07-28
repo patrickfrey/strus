@@ -19,6 +19,7 @@
 #include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/functionDescription.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -48,9 +49,9 @@ public:
 		m_func->addWeightingFeature( name_, postingIterator_, weight_, stats_);
 	}
 
-	virtual void setVariableValue( const std::string& name, double value)
+	virtual void setVariableValue( const std::string& name_, double value)
 	{
-		m_func->setVariableValue( name, value);
+		m_func->setVariableValue( name_, value);
 	}
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno)
@@ -104,17 +105,17 @@ public:
 	}
 
 	virtual void addStringParameter(
-			const std::string& name,
+			const std::string& name_,
 			const std::string& value)
 	{
-		m_func->addStringParameter( name, value);
+		m_func->addStringParameter( name_, value);
 	}
 
 	virtual void addNumericParameter(
-			const std::string& name,
+			const std::string& name_,
 			const NumericVariant& value)
 	{
-		m_func->addNumericParameter( name, value);
+		m_func->addNumericParameter( name_, value);
 	}
 
 	virtual void defineResultName(
@@ -157,12 +158,14 @@ public:
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer context: %s"), m_name, *m_errorhnd, 0);
 	}
 
+	virtual const char* name() const	{return m_name;}
+
 	virtual StructView view() const	
 	{
 		try
 		{
 			StructView rt;
-			rt( "name", strus::string_format( "summarizer %s", m_name));
+			rt( "name", m_name);
 			rt( "weighting", m_func->view());
 			return rt;
 		}
@@ -202,11 +205,13 @@ public:
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer instance: %s"), m_name.c_str(), *m_errorhnd, 0);
 	}
 
-	virtual FunctionDescription getDescription() const
+	virtual const char* name() const	{return m_name.c_str();}
+
+	virtual StructView view() const
 	{
 		try
 		{
-			return FunctionDescription( m_func->getDescription(), string_format( _TXT("summarizer derived from weighting function %s: "), m_name.c_str()));
+			return FunctionDescription( m_func->view(), string_format( _TXT("summarizer derived from weighting function %s: "), m_name.c_str()));
 		}
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer description: %s"), m_name.c_str(), *m_errorhnd, FunctionDescription());
 	}
