@@ -571,10 +571,11 @@ ScalarFunctionInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error parsing and creating scalar function: %s"), *m_errorhnd, 0);
 }
 
-const char* ScalarFunctionParser::getDescription() const
+StructView ScalarFunctionParser::view() const
 {
-	return _TXT("parser for arithmetic expressions on double precision floating point values with operators *,-,*,/ "
-			"and unary and binary functions as defined in the C math library. "
-			"External arguments are adressed with decimal numbers with a preceding '_', e.g. _0 for the first argument");
+	return StructView()
+		("name", "scalar")
+		("description", "parser for arithmetic expressions on double precision floating point values with operators *,-,*,/ and unary and binary functions as defined in the C math library. External arguments are adressed with decimal numbers with a preceding '_', e.g. _0 for the first argument")
+	;
 }
 

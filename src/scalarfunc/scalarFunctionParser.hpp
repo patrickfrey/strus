@@ -60,7 +60,7 @@ public:
 			const std::string& src,
 			const std::vector<std::string>& argumentNames) const;
 
-	virtual const char* getDescription() const;
+	virtual StructView view() const;
 
 private:
 	typedef std::map<std::string,std::size_t> ArgumentNameMap;

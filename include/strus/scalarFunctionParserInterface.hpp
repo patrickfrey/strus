@@ -9,6 +9,7 @@
 /// \file scalarFunctionParserInterface.hpp
 #ifndef _STRUS_SCALAR_FUNCTION_PARSER_INTERFACE_HPP_INCLUDED
 #define _STRUS_SCALAR_FUNCTION_PARSER_INTERFACE_HPP_INCLUDED
+#include "strus/structView.hpp"
 #include <string>
 #include <vector>
 
@@ -32,9 +33,9 @@ public:
 			const std::string& src,
 			const std::vector<std::string>& argumentNames) const=0;
 
-	/// \brief Get a description of the parser syntax
-	/// \return the description
-	virtual const char* getDescription() const=0;
+	/// \brief Return a structure with all definitions for introspection
+	/// \return the structure with all definitions for introspection
+	virtual StructView view() const=0;
 };
 
 }// namespace
