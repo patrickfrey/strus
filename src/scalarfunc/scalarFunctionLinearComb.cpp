@@ -9,6 +9,7 @@
 /// \file "scalarFunctionLinearComb.cpp"
 #include "scalarFunctionLinearComb.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/structView.hpp"
 #include "scalarFunction.hpp"
 #include "scalarFunctionInstance.hpp"
 #include "private/internationalization.hpp"
@@ -55,7 +56,8 @@ public:
 	{
 		try
 		{
-			return StructView()("name", "linearcomb")("factors",StructView::getArray(m_factors));
+			std::vector<int> ar;
+			return StructView()("name","linearcomb")("bla",ar)("factors",m_factors);
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
 	}
@@ -104,7 +106,7 @@ public:
 	{
 		try
 		{
-			return StructView()("name", "linearcomb")("factors",StructView::getArray(m_factors));
+			return StructView()("name","linearcomb")("factors",m_factors);
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
 	}
