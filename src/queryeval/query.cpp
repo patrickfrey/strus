@@ -233,8 +233,8 @@ StructView Query::view() const
 	rt( "debug", m_debugMode ? "true":"false");
 	rt( "maxNofRanks", (unsigned int)m_nofRanks);
 	rt( "minRank", (unsigned int)m_minRank);
-	rt( "docs", m_evalset_docnolist);
-	rt( "user", m_usernames);
+	if (!m_evalset_docnolist.empty()) rt( "docs", m_evalset_docnolist);
+	if (!m_usernames.empty()) rt( "user", m_usernames);
 	return rt;
 }
 
