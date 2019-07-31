@@ -24,6 +24,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
+#include "viewUtils.hpp"
 #include <limits>
 #include <cstdlib>
 #include <iomanip>
@@ -485,21 +486,21 @@ StructView SummarizerFunctionInstanceAccumulateNear::view() const
 	try
 	{
 		StructView rt;
-		rt( "type", m_data->type);
-		if (!m_data->resultname.empty()) rt( "result", m_data->resultname);
-		rt( "cofactor", m_data->cofactor);
-		rt( "nofranks", m_data->nofranks);
+		rt( paramView("type", m_data->type));
+		if (!m_data->resultname.empty()) rt( paramView("result",m_data->resultname));
+		rt( paramView( "cofactor", m_data->cofactor));
+		rt( paramView( "nofranks", m_data->nofranks));
 		if (m_data->cardinality_frac > std::numeric_limits<float>::epsilon())
 		{
-			rt( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_data->cardinality_frac * 100 + 0.5)));
+			rt( paramView( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_data->cardinality_frac * 100 + 0.5))));
 		}
 		else
 		{
-			rt( "cardinality", m_data->cardinality);
+			rt( paramView( "cardinality", m_data->cardinality));
 		}
-		rt( "range", m_data->range);
-		rt( "norm", m_data->norm);
-		rt( "cprop", m_data->cprop);
+		rt( paramView( "range", m_data->range));
+		rt( paramView( "norm", m_data->norm));
+		rt( paramView( "cprop", m_data->cprop));
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

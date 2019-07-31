@@ -15,6 +15,7 @@
 #include "summarizerMatchVariables.hpp"
 #include "summarizerAccumulateVariable.hpp"
 #include "summarizerAccumulateNear.hpp"
+#include "viewUtils.hpp"
 
 using namespace strus;
 

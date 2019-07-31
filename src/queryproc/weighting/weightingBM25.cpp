@@ -14,6 +14,7 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/base/math.hpp"
+#include "viewUtils.hpp"
 #include <ctime>
 #include <iomanip>
 #include <iostream>

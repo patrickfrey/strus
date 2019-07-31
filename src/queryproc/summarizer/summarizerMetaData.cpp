@@ -16,6 +16,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
+#include "viewUtils.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
