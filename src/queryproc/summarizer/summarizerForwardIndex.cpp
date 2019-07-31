@@ -169,7 +169,7 @@ StructView SummarizerFunctionInstanceForwardIndex::view() const
 	{
 		StructView rt;
 		rt( "type", m_type);
-		rt( "resultname", m_resultname);
+		if (!m_resultname.empty()) rt( "result", m_resultname);
 		rt( "N", m_maxNofMatches);
 		return rt;
 	}

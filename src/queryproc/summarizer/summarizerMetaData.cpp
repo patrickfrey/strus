@@ -157,7 +157,7 @@ StructView SummarizerFunctionInstanceMetaData::view() const
 	{
 		StructView rt;
 		rt( "metaname", m_metaname);
-		rt( "resultname", m_resultname);
+		if (!m_resultname.empty()) rt( "result", m_resultname);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

@@ -359,7 +359,7 @@ StructView SummarizerFunctionInstanceAccumulateVariable::view() const
 		rt( "norm", m_data->norm);
 		rt( "cofactor", m_data->cofactor);
 		rt( "var", m_data->var);
-		rt( "resultname", m_data->resultname);
+		if (!m_data->resultname.empty()) rt( "result", m_data->resultname);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

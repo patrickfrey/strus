@@ -486,7 +486,7 @@ StructView SummarizerFunctionInstanceAccumulateNear::view() const
 	{
 		StructView rt;
 		rt( "type", m_data->type);
-		rt( "result", m_data->resultname);
+		if (!m_data->resultname.empty()) rt( "result", m_data->resultname);
 		rt( "cofactor", m_data->cofactor);
 		rt( "nofranks", m_data->nofranks);
 		if (m_data->cardinality_frac > std::numeric_limits<float>::epsilon())
