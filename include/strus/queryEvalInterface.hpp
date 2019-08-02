@@ -80,18 +80,26 @@ public:
 	{
 	public:
 		FeatureParameter(
-				const std::string& parameterName_,
+				const std::string& featureRole_,
 				const std::string& featureSet_)
-			:m_parameterName(parameterName_),m_featureSet(featureSet_){}
+			:m_featureRole(featureRole_),m_featureSet(featureSet_){}
 		FeatureParameter(
 				const FeatureParameter& o)
-			:m_parameterName(o.m_parameterName),m_featureSet(o.m_featureSet){}
+			:m_featureRole(o.m_featureRole),m_featureSet(o.m_featureSet){}
+#if __cplusplus >= 201103L
+		FeatureParameter( std::string&& featureRole_, std::string&& featureSet_)
+			:m_featureRole(std::move(featureRole_)),m_featureSet(std::move(featureSet_)){}
+		FeatureParameter( FeatureParameter&& o)
+			:m_featureRole(std::move(o.m_featureRole)),m_featureSet(std::move(o.m_featureSet)){}
+		FeatureParameter& operator=( FeatureParameter&& o)
+			{m_featureRole=std::move(o.m_featureRole); m_featureSet=std::move(o.m_featureSet); return *this;}
+#endif
 
-		const std::string& parameterName() const	{return m_parameterName;}
+		const std::string& featureRole() const		{return m_featureRole;}
 		const std::string& featureSet() const		{return m_featureSet;}
 
 	private:
-		std::string m_parameterName;
+		std::string m_featureRole;
 		std::string m_featureSet;
 	};
 

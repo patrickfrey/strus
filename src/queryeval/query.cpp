@@ -670,8 +670,8 @@ QueryResult Query::evaluate() const
 						{
 							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							execContext->addWeightingFeature(
-								si->parameterName(), nd.itr, fi->weight, nd.stats);
-							DEBUG_EVENT3( "parameter", "%s= feature %s weight=%f", si->parameterName().c_str(), fi->set.c_str(), fi->weight)
+								si->featureRole(), nd.itr, fi->weight, nd.stats);
+							DEBUG_EVENT3( "parameter", "%s= feature %s weight=%f", si->featureRole().c_str(), fi->set.c_str(), fi->weight)
 						}
 					}
 				}
@@ -801,7 +801,7 @@ QueryResult Query::evaluate() const
 
 							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							closure->addSummarizationFeature(
-								si->parameterName(), nd.itr,
+								si->featureRole(), nd.itr,
 								variables, fi->weight, nd.stats);
 						}
 					}

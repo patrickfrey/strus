@@ -169,7 +169,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 			m_errorhnd->explain( _TXT("error creating context of 'attribute' summarizer: %s"));
 			return 0;
 		}
-		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_resultname, m_errorhnd);
+		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_resultname.empty()? m_attribname : m_resultname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

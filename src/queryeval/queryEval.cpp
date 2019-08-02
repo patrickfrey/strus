@@ -215,7 +215,7 @@ static StructView getStructView( const std::vector<QueryEvalInterface::FeaturePa
 	std::vector<QueryEvalInterface::FeatureParameter>::const_iterator oi = o.begin(), oe = o.end();
 	for (; oi != oe; ++oi)
 	{
-		rt( oi->parameterName(), oi->featureSet() );
+		rt( oi->featureRole(), oi->featureSet() );
 	}
 	return rt;
 }
@@ -226,15 +226,13 @@ static StructView getStructView( const WeightingDef& o)
 	rt( "function", o.functionName());
 	if (o.function())
 	{
-		rt( "def", o.function()->view());
+		StructView param( o.function()->view());
+		if (!o.debugAttributeName().empty()) param( "debug", o.debugAttributeName());
+		rt( "param", param);
 	}
 	if (!o.featureParameters().empty())
 	{
-		rt( "parameter", getStructView( o.featureParameters()));
-	}
-	if (!o.debugAttributeName().empty())
-	{
-		rt( "debugattr", o.debugAttributeName());
+		rt( "feature", getStructView( o.featureParameters()));
 	}
 	return rt;
 }
@@ -256,15 +254,13 @@ static StructView getStructView( const SummarizerDef& o)
 	rt( "function", o.functionName());
 	if (o.function())
 	{
-		rt( "def", o.function()->view());
+		StructView param( o.function()->view());
+		if (!o.debugAttributeName().empty()) param( "debug", o.debugAttributeName());
+		rt( "param", param);
 	}
 	if (!o.featureParameters().empty())
 	{
-		rt( "parameter", getStructView( o.featureParameters()));
-	}
-	if (!o.debugAttributeName().empty())
-	{
-		rt( "debugattr", o.debugAttributeName());
+		rt( "feature", getStructView( o.featureParameters()));
 	}
 	return rt;
 }

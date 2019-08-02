@@ -147,7 +147,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFu
 {
 	try
 	{
-		return new SummarizerFunctionContextMetaData( metadata, m_metaname, m_resultname, m_errorhnd);
+		return new SummarizerFunctionContextMetaData( metadata, m_metaname, m_resultname.empty() ? m_metaname : m_resultname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

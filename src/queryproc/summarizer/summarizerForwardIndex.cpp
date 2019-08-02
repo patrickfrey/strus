@@ -96,6 +96,11 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
 		m_resultname = value;
+		m_type = value;
+	}
+	else if (strus::caseInsensitiveEquals( name_, "result"))
+	{
+		m_resultname = value;
 	}
 	else if (strus::caseInsensitiveEquals( name_, "type"))
 	{
@@ -139,7 +144,7 @@ void SummarizerFunctionInstanceForwardIndex::defineResultName(
 {
 	try
 	{
-		if (itemname.empty() || strus::caseInsensitiveEquals( itemname, "name"))
+		if (itemname.empty() || strus::caseInsensitiveEquals( itemname, "result"))
 		{
 			m_resultname = resultname;
 		}
