@@ -12,7 +12,10 @@
 #include "strus/statisticsMapInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/base/lockfreeStringMap.hpp"
+#include "strus/base/shared_ptr.hpp"
+#include "strus/base/thread.hpp"
 #include "strus/base/atomic.hpp"
+#include <set>
 
 namespace strus
 {
@@ -40,12 +43,19 @@ public:
 
 	virtual GlobalCounter df( const std::string& termtype, const std::string& termvalue) const;
 
+	virtual std::vector<std::string> types() const;
+	
+private:
+	void mergeTypes( const std::set<std::string>& types_);
+	void addType( const std::string& type);
+
 private:
 	ErrorBufferInterface* m_errorhnd;
 	const StatisticsProcessorInterface* m_proc;
 	strus::LockfreeStringMap<GlobalCounter> m_map;
 	AtomicCounter<GlobalCounter> m_nofDocuments;
-	
+	strus::shared_ptr<std::set<std::string> > m_types;
+	strus::mutex m_mutex_types;
 	
 };
 }//namespace

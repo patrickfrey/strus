@@ -12,6 +12,7 @@
 #include "strus/index.hpp"
 #include "strus/termStatisticsChange.hpp"
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -50,6 +51,10 @@ public:
 	/// \param[in] termvalue value of the term
 	/// \return the document frequency
 	virtual GlobalCounter df( const std::string& termtype, const std::string& termvalue) const=0;
+
+	/// \brief Get the list of types known
+	/// \return the list of types
+	virtual std::vector<std::string> types() const=0;
 };
 }//namespace
 #endif

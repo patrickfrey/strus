@@ -49,6 +49,7 @@ void StatisticsMap::addDfChange( const char* termtype, const char* termvalue, in
 	{
 		std::string key( termKey( termtype, termvalue));
 		m_map.set( key.c_str(), increment, MapIncrement());
+		addType( termtype);
 	}
 	CATCH_ERROR_MAP( _TXT("error updating df in statistics map: %s"), *m_errorhnd);
 }
@@ -60,6 +61,7 @@ bool StatisticsMap::processStatisticsMessage( const void* msgptr, std::size_t ms
 		typedef std::pair<std::string,GlobalCounter> KeyValuePair;
 		strus::local_ptr<StatisticsViewerInterface> viewer( m_proc->createViewer( msgptr, msgsize));
 		if (!viewer.get()) throw std::runtime_error( m_errorhnd->fetchError());
+		std::set<std::string> typelist;
 
 		m_nofDocuments.increment( viewer->nofDocumentsInsertedChange());
 
@@ -69,8 +71,10 @@ bool StatisticsMap::processStatisticsMessage( const void* msgptr, std::size_t ms
 		{
 			std::string key( termKey( rec.type(), rec.value()));
 			elements.push_back( KeyValuePair( key, rec.increment()));
+			typelist.insert( rec.type());
 		}
 		m_map.set( elements, MapIncrement());
+		mergeTypes( typelist);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error processing a statistics message: %s"), *m_errorhnd, false);
@@ -97,6 +101,30 @@ GlobalCounter StatisticsMap::df( const std::string& termtype, const std::string&
 		return rt;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error getting df in statistics map: %s"), *m_errorhnd, 0);
+}
+
+std::vector<std::string> StatisticsMap::types() const
+{
+	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
+	return std::vector<std::string>( types_ownership->begin(), types_ownership->end());
+}
+
+void StatisticsMap::mergeTypes( const std::set<std::string>& types_)
+{
+	strus::unique_lock lock( m_mutex_types);
+	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
+	strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
+	types_new->insert( types_.begin(), types_.end());
+	m_types = types_new;
+}
+
+void StatisticsMap::addType( const std::string& type)
+{
+	strus::unique_lock lock( m_mutex_types);
+	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
+	strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
+	types_new->insert( type);
+	m_types = types_new;
 }
 
 
