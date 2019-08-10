@@ -106,6 +106,7 @@ GlobalCounter StatisticsMap::df( const std::string& termtype, const std::string&
 std::vector<std::string> StatisticsMap::types() const
 {
 	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
+	if (!types_ownership.get()) return std::vector<std::string>();
 	return std::vector<std::string>( types_ownership->begin(), types_ownership->end());
 }
 
@@ -113,18 +114,34 @@ void StatisticsMap::mergeTypes( const std::set<std::string>& types_)
 {
 	strus::unique_lock lock( m_mutex_types);
 	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
-	strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
-	types_new->insert( types_.begin(), types_.end());
-	m_types = types_new;
+	if (!types_ownership.get())
+	{
+		m_types.reset( new std::set<std::string>( types_));
+	}
+	else
+	{
+		strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
+		types_new->insert( types_.begin(), types_.end());
+		m_types = types_new;
+	}
 }
 
 void StatisticsMap::addType( const std::string& type)
 {
 	strus::unique_lock lock( m_mutex_types);
 	strus::shared_ptr<std::set<std::string> > types_ownership( m_types);
-	strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
-	types_new->insert( type);
-	m_types = types_new;
+	if (!types_ownership.get())
+	{
+		strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>());
+		types_new->insert( type);
+		m_types = types_new;
+	}
+	else
+	{
+		strus::shared_ptr<std::set<std::string> > types_new( new std::set<std::string>( *types_ownership));
+		types_new->insert( type);
+		m_types = types_new;
+	}
 }
 
 
