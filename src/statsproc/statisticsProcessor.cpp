@@ -37,6 +37,7 @@ std::string StatisticsProcessor::getFullPath( const std::string& path) const
 		}
 		std::string rt = strus::joinFilePath( m_workdir, path);
 		if (rt.empty()) throw std::bad_alloc();
+		return rt;
 	}
 	return path;
 }
