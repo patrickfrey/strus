@@ -20,7 +20,7 @@ class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
 public:
-	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
+	explicit StatisticsProcessor( const std::string& workdir_, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsProcessor();
 
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
@@ -36,7 +36,11 @@ public:
 	virtual StatisticsMapInterface* createMap( const std::string& config) const;
 	
 private:
+	std::string getFullPath( const std::string& path) const;
+
+private:
 	ErrorBufferInterface* m_errorhnd;
+	std::string m_workdir;
 };
 
 }//namespace

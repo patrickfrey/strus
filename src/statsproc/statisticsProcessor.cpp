@@ -16,15 +16,30 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/fileio.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
 using namespace strus;
 
-StatisticsProcessor::StatisticsProcessor( ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_){}
+StatisticsProcessor::StatisticsProcessor( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_),m_workdir(workdir_){}
 
 StatisticsProcessor::~StatisticsProcessor(){}
+
+std::string StatisticsProcessor::getFullPath( const std::string& path) const
+{
+	if (!m_workdir.empty())
+	{
+		if (strus::hasUpdirReference( path))
+		{
+			throw std::runtime_error( _TXT( "path for statistics processor must not contain up-directory references ('..') if workdir is specified"));
+		}
+		std::string rt = strus::joinFilePath( m_workdir, path);
+		if (rt.empty()) throw std::bad_alloc();
+	}
+	return path;
+}
 
 StatisticsViewerInterface* StatisticsProcessor::createViewer(
 			const void* msgptr, std::size_t msgsize) const
@@ -41,7 +56,7 @@ StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const std::strin
 	try
 	{
 		int msgChunkSize = Constants::defaultStatisticsMsgChunkSize(); 
-		return new StatisticsBuilder( path, msgChunkSize, m_errorhnd);
+		return new StatisticsBuilder( getFullPath( path), msgChunkSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
 }
@@ -92,7 +107,7 @@ StatisticsIteratorInterface* StatisticsProcessor::createIterator( const std::str
 {
 	try
 	{
-		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		return new StoredStatisticsIterator( filelist, timestamp);
 		
 	}
@@ -104,7 +119,7 @@ std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::stri
 	try
 	{
 		std::vector<TimeStamp> rt;
-		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp());
 		TimeStamp tp = itr.timestamp();
 		for (; tp.defined(); (void)itr.next())
@@ -120,7 +135,7 @@ StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& pat
 {
 	try
 	{
-		DatedFileList filelist( path, Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
+		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		std::string blob = filelist.loadBlob( timestamp);
 		return StatisticsMessage( blob, timestamp);
 	}

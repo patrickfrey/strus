@@ -19,6 +19,9 @@ class ErrorBufferInterface;
 /// \brief Forward declaration
 class StorageInterface;
 
+/// \brief Create an interface for a strus storage, standard implementation
+/// \param[in] workdir working directory where storage files are stored relatively to
+/// \param[in] errorhnd error buffer interface
 StorageInterface* createStorageType_std( const std::string& workdir, ErrorBufferInterface* errorhnd);
 
 }//namespace

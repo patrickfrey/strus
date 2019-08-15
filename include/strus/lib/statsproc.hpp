@@ -20,8 +20,9 @@ class StatisticsProcessorInterface;
 class ErrorBufferInterface;
 
 /// \brief Create an interface for processing global statistics
+/// \param[in] workdir working directory where statistics files are stored relatively to
 /// \param[in] errorhnd error buffer interface
-StatisticsProcessorInterface* createStandardStatisticsProcessor( ErrorBufferInterface* errorhnd);
+StatisticsProcessorInterface* createStatisticsProcessor_std( const std::string& workdir, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
