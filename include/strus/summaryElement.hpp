@@ -10,6 +10,7 @@
 #ifndef _STRUS_SUMMARY_ELEMENT_HPP_INCLUDED
 #define _STRUS_SUMMARY_ELEMENT_HPP_INCLUDED
 #include <string>
+#include <utility>
 
 namespace strus
 {
@@ -24,6 +25,15 @@ public:
 	/// \brief Copy constructor
 	SummaryElement( const SummaryElement& o)
 		:m_name(o.m_name),m_value(o.m_value),m_weight(o.m_weight),m_index(o.m_index){}
+	SummaryElement& operator=( const SummaryElement& o)
+		{m_name=o.m_name; m_value=o.m_value; m_weight=o.m_weight; m_index=o.m_index; return *this;}
+
+#if __cplusplus >= 201103L
+	SummaryElement( SummaryElement&& o)
+		:m_name(std::move(o.m_name)),m_value(std::move(o.m_value)),m_weight(o.m_weight),m_index(o.m_index){}
+	SummaryElement& operator=( SummaryElement&& o)
+		{m_name=std::move(o.m_name); m_value=std::move(o.m_value); m_weight=o.m_weight; m_index=o.m_index; return *this;}
+#endif
 
 	/// \brief Get the name of the element
 	const std::string& name() const		{return m_name;}

@@ -36,7 +36,15 @@ public:
 	/// \brief Constructor from a composition its basic parts
 	ResultDocument( const Index& docno_, double weight_, const std::vector<SummaryElement>& summaryElements_)
 		:WeightedDocument(docno_,weight_),m_summaryElements(summaryElements_){}
+	ResultDocument& operator=( const ResultDocument& o)
+		{WeightedDocument::operator=(o); m_summaryElements=o.m_summaryElements; return *this;}
 
+#if __cplusplus >= 201103L
+	ResultDocument( ResultDocument&& o)
+		:WeightedDocument(o),m_summaryElements(std::move(o.m_summaryElements)){}
+	ResultDocument& operator=( ResultDocument&& o)
+		{WeightedDocument::operator=(o); m_summaryElements=std::move(o.m_summaryElements); return *this;}
+#endif
 	/// \brief Get the list of summary elements of this result
 	const std::vector<SummaryElement>& summaryElements() const	{return m_summaryElements;}
 

@@ -35,6 +35,17 @@ public:
 		,m_nofVisited(o.m_nofVisited)
 		,m_ranks(o.m_ranks){}
 
+	QueryResult& operator=( const QueryResult& o)
+		{m_evaluationPass=o.m_evaluationPass;m_nofRanked=o.m_nofRanked;m_nofVisited=o.m_nofVisited;m_ranks=o.m_ranks; return *this;}
+
+#if __cplusplus >= 201103L
+	QueryResult( QueryResult&& o)
+		:m_evaluationPass(o.m_evaluationPass),m_nofRanked(o.m_nofRanked),m_nofVisited(o.m_nofVisited)
+		,m_ranks(std::move(o.m_ranks)){}
+	QueryResult& operator=( QueryResult&& o)
+		{m_evaluationPass=o.m_evaluationPass;m_nofRanked=o.m_nofRanked;m_nofVisited=o.m_nofVisited;m_ranks=std::move(o.m_ranks); return *this;}
+#endif
+
 	/// \brief Constructor
 	/// \param[in] evaluationPass_ query evaluation passes used (level of selection features used)
 	/// \param[in] nofRanked_ total number of matches for a query with applying restrictions (might be an estimate)

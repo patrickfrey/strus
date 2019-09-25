@@ -30,6 +30,8 @@ public:
 	/// \brief Constructor
 	WeightedDocument( const Index& docno_, double weight_)
 		:m_docno(docno_),m_weight(weight_){}
+	WeightedDocument& operator=( const WeightedDocument& o)
+		{m_docno=o.m_docno; m_weight=o.m_weight; return *this;}
 
 	/// \brief Get the document number of the result
 	Index docno() const					{return m_docno;}
