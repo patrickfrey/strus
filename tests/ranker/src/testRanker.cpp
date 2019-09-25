@@ -9,6 +9,7 @@
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
 #include "strus/base/math.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -17,24 +18,11 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <ctime>
 #include <iomanip>
 #include <ctime>
 
-static void initRand()
-{
-	time_t nowtime;
-	struct tm* now;
-
-	::time( &nowtime);
-	now = ::localtime( &nowtime);
-
-	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
-}
-#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
+static strus::PseudoRandom g_random;
 static strus::Index g_docnum = 0;
-
-#undef STRUS_LOWLEVEL_DEBUG
 
 static std::string doubleToString( double val_)
 {
@@ -48,16 +36,21 @@ static std::string doubleToString( double val_)
 
 static strus::WeightedDocument randomWeightedDocument()
 {
-	float weight = (float)RANDINT(0,10000) / RANDINT(1,10000);
+	float weight = (float)g_random.get(0,10000) / g_random.get(1,10000);
 	return strus::WeightedDocument( ++g_docnum, weight);
+}
+
+static int compareWeight( double w1, double w2)
+{
+	if (w1 > w2 + std::numeric_limits<double>::epsilon()) return +1;
+	if (w1 < w2 - std::numeric_limits<double>::epsilon()) return -1;
+	return 0;
 }
 
 int main( int , const char** )
 {
 	try
 	{
-		initRand();
-
 		enum {MaxNofRanks=10,NofWeightedDocs=1000000};
 		strus::Ranker ranker( MaxNofRanks);
 		typedef std::multiset<
@@ -112,29 +105,10 @@ int main( int , const char** )
 		std::vector<strus::WeightedDocument>::const_iterator ti = testlist.begin(), te = testlist.end();
 
 		int ridx=0;
-
-#ifdef STRUS_LOWLEVEL_DEBUG
-		int tidx=0;
-
-		for (ridx=0,ri=ranklist.begin(); ri != re; ++ri,++ridx)
-		{
-			std::cerr << "result [" << ridx << "] "
-					<< " docno " << ri->docno()
-					<< " weight "<< ri->weight()
-					<< std::endl;
-		}
-		for (tidx=0,ti=testlist.begin(); ti != te; ++ti,++tidx)
-		{
-			std::cerr << "expect [" << tidx << "] "
-					<< " docno " << ti->docno()
-					<< " weight "<< ti->weight()
-					<< std::endl;
-		}
-#endif
 		int rt = 0;
 		for (ridx=0,ri=ranklist.begin(),ti=testlist.begin(); ri != re && ti != te; ++ri,++ti,++ridx)
 		{
-			if (ti->weight() != ri->weight() || ti->docno() != ri->docno())
+			if (compareWeight( ti->weight(), ri->weight()) != 0 || ti->docno() != ri->docno())
 			{
 				std::cerr << "rank does not match [" << ridx << "] "
 						<< " docno " << ti->docno() << "/" << ri->docno()
@@ -143,6 +117,7 @@ int main( int , const char** )
 				rt = 1;
 			}
 		}
+		if (rt == 0) std::cerr << "OK" << std::endl;
 		return rt;
 	}
 	catch (const std::exception& err)
