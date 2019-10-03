@@ -88,7 +88,7 @@ public:
 
 	virtual StatisticsMessage getNext()
 	{
-		if (m_itr.blob())
+		if (m_itr.defined())
 		{
 			StatisticsMessage rt( m_itr.blob(), m_itr.blobsize(), m_itr.timestamp());
 			(void)m_itr.next();
@@ -123,7 +123,7 @@ std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::stri
 		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp());
 		TimeStamp tp = itr.timestamp();
-		for (; tp.defined(); (void)itr.next())
+		for (; tp.defined(); tp = itr.next())
 		{
 			rt.push_back( tp);
 		}

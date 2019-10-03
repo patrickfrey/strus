@@ -133,6 +133,7 @@ void DatedFileList::store( const std::vector<std::string>& blobs, const char* tm
 }
 
 DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_)
+	:m_timestamp()
 {
 	std::vector<std::string>::const_iterator fi = filelist_.begin(), fe = filelist_.end();
 	for (; fi != fe; ++fi)
@@ -159,7 +160,7 @@ DatedFileList::TimeStampIterator::TimeStampIterator()
 DatedFileList::TimeStampIterator::TimeStampIterator( const TimeStampIterator& o)
 	:m_timestamp(o.m_timestamp),m_ar(o.m_ar)
 {
-	m_itr = m_ar.begin();
+	m_itr = m_ar.begin() + (o.m_itr - o.m_ar.begin());
 }
 
 void DatedFileList::Iterator::loadBlob()
@@ -203,18 +204,30 @@ DatedFileList::Iterator::Iterator( const Iterator& o)
 
 bool DatedFileList::Iterator::next()
 {
-	if (m_fileiter == m_filelist.end()) return false;
+	if (m_fileiter == m_filelist.end())
+	{
+		m_timestamp.clear();
+		return false;
+	}
 	++m_fileiter;
 	loadBlob();
-	return true;
+	return defined();
 }
 
-bool DatedFileList::TimeStampIterator::next()
+TimeStamp DatedFileList::TimeStampIterator::next()
 {
-	if (m_itr == m_ar.end()) return false;
+	if (m_itr == m_ar.end())
+	{
+		m_timestamp.clear();
+		return m_timestamp;
+	}
 	++m_itr;
-	m_timestamp = m_itr == m_ar.end() ? TimeStamp() : *m_itr;
-	return true;
+	if (m_itr == m_ar.end())
+	{
+		m_timestamp.clear();
+		return m_timestamp;
+	}
+	return m_timestamp = *m_itr;
 }
 
 std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp) const

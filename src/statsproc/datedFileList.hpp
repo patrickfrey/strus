@@ -30,6 +30,8 @@ public:
 
 		const TimeStamp& timestamp() const
 			{return m_timestamp;}
+		bool defined() const
+			{return m_timestamp.defined();}
 
 		const void* blob() const
 			{return m_blob.c_str();}
@@ -60,7 +62,7 @@ public:
 		const TimeStamp& timestamp() const
 			{return m_timestamp;}
 
-		bool next();
+		TimeStamp next();
 		
 	private:
 		TimeStamp m_timestamp;
