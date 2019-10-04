@@ -14,6 +14,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <limits>
 
 namespace strus {
 
@@ -64,14 +65,18 @@ public:
 	/// \brief Merging of a list of ranklists to one ranklist with an optional maximum size limit
 	/// \remark This function assumes that the input lists are ordered in descending order, higher weight first
 	/// \param[in] results list of results to merge to one
-	/// \param[in] maxNofResults optional size limit of the resulting ranklist
+	/// \param[in] minRank start index of the resulting ranklist, counted from 0
+	/// \param[in] maxNofRanks size limit of the resulting ranklist
 	/// \return the merged result
-	static QueryResult merge( const std::vector<QueryResult>& results, int maxNofResults=-1)
+	static QueryResult merge( const std::vector<QueryResult>& results, int minRank, int maxNofRanks)
 	{
 		std::vector<ResultDocument> ranks_;
 		int evaluationPass_ = 0;
 		int nofRanked_ = 0;
 		int nofVisited_ = 0;
+		if (maxNofRanks < 0) maxNofRanks = std::numeric_limits<int>::max();
+		if (minRank == 0) minRank = 0; 
+		int maxNofResults = minRank + maxNofRanks;
 
 		typedef std::vector<ResultDocument>::const_iterator ResultIter;
 		typedef std::pair<ResultIter,ResultIter> ResultIterRange;
@@ -87,12 +92,13 @@ public:
 			nofRanked_ += ri->nofRanked();
 			nofVisited_ += ri->nofVisited();
 		}
-		while (!rankiters.empty() && (maxNofResults < 0 || (int)ranks_.size() < maxNofResults))
+		int ni = 0;
+		for (; !rankiters.empty() && ni < maxNofResults; ++ni)
 		{
 			std::vector<ResultIterRange>::iterator ii = rankiters.begin(), ie = rankiters.end(), im = rankiters.begin();
 			for (++ii; ii!=ie; ++ii) if (ii->first->weight() > im->first->weight()) im = ii;
 
-			ranks_.push_back( *im->first++);
+			if (minRank <= ni) ranks_.push_back( *im->first++);
 			if (im->first == im->second) rankiters.erase( im);
 		}
 		return QueryResult( evaluationPass_, nofRanked_, nofVisited_, ranks_);

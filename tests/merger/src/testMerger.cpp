@@ -101,7 +101,7 @@ int main( int , const char** )
 			test_input.push_back( strus::QueryResult( evaluationPass, test_docs[ai].size()*2/*nofRanked*/, test_docs[ai].size()*3/*nofVisited*/, test_docs[ai]/*ranks*/));
 		}
 		
-		strus::QueryResult RES = strus::QueryResult::merge( test_input);
+		strus::QueryResult RES = strus::QueryResult::merge( test_input, 0, -1);
 		std::vector<strus::ResultDocument> RES_ranks( RES.ranks());
 		reorderSameWeightRanks( RES_ranks);
 		strus::QueryResult EXP( expectedEvaluationPass, EXP_ranks.size()*2/*nofRanked*/, EXP_ranks.size()*3/*nofVisited*/, EXP_ranks/*ranks*/);
