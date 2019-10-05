@@ -108,13 +108,6 @@ public:
 	/// \param[in] username_ name of user role that is allowed to see the result documents
 	virtual void addAccess( const std::string& username_)=0;
 
-	/// \brief Set the maximum number of ranks to evaluate starting with the minimum rank
-	/// \param[in] maxNofRanks_ maximum number of ranks
-	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;
-	/// \brief Set the minimum rank number to return
-	/// \param[in] minRank_ the minimum rank number
-	virtual void setMinRank( std::size_t minRank_)=0;
-
 	/// \brief Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc) or in a weighting function or a summarizer
 	/// \param[in] name name of the variable
 	/// \param[in] value value of the variable
@@ -124,9 +117,15 @@ public:
 	/// \param[in] debug true for enabling debug mode on and false for disabling debug mode (diabled by default)
 	virtual void setDebugMode( bool debug)=0;
 
+	/// \brief Default value for the maximum number of ranked results returned by a query evaluation
+	enum {DefaultMinNofRanks=20};
+
 	/// \brief Evaluate the query
+	/// \param[in] minRank index of first rank returned, counted starting from 0
+	/// \param[in] maxNofRanks maximum number of ranks returned
+	/// \note Choose this value as small as possible because the performance of sorting the results depends on the number of results returned
 	/// \return result of query evaluation
-	virtual QueryResult evaluate() const=0;
+	virtual QueryResult evaluate( int minRank=0, int maxNofRanks=DefaultMinNofRanks) const=0;
 
 	/// \brief Return a structure with all definitions for introspection
 	/// \return the structure with all definitions for introspection

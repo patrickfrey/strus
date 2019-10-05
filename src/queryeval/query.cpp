@@ -61,8 +61,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_features()
 	,m_stack()
 	,m_variableAssignments()
-	,m_nofRanks(20)
-	,m_minRank(0)
 	,m_usernames()
 	,m_evalset_docnolist()
 	,m_evalset_defined(false)
@@ -231,8 +229,6 @@ StructView Query::view() const
 	rt( "eval", m_queryEval->view());
 	rt( "feature", featuresView());
 	rt( "debug", m_debugMode ? "true":"false");
-	rt( "maxNofRanks", (unsigned int)m_nofRanks);
-	rt( "minRank", (unsigned int)m_minRank);
 	if (!m_evalset_docnolist.empty()) rt( "docs", m_evalset_docnolist);
 	if (!m_usernames.empty()) rt( "user", m_usernames);
 	return rt;
@@ -361,16 +357,6 @@ Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 	return rtadr;
 }
 
-void Query::setMaxNofRanks( std::size_t nofRanks_)
-{
-	m_nofRanks = nofRanks_;
-}
-
-void Query::setMinRank( std::size_t minRank_)
-{
-	m_minRank = minRank_;
-}
-
 void Query::addAccess( const std::string& username_)
 {
 	try
@@ -382,7 +368,6 @@ void Query::addAccess( const std::string& username_)
 
 PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const
 {
-	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
 		throw strus::runtime_error( "%s",  _TXT( "number of arguments of feature join expression in query out of range"));
@@ -565,7 +550,7 @@ void Query::setDebugMode( bool debug)
 	m_debugMode = debug;
 }
 
-QueryResult Query::evaluate() const
+QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 {
 	const char* evaluationPhase = "query feature postings initialization";
 	try
@@ -573,7 +558,7 @@ QueryResult Query::evaluate() const
 		DEBUG_OPEN("eval")
 		DEBUG_EVENT1_STR( "query", "%s", view().tostring())
 		// [1] Check initial conditions:
-		if (m_nofRanks == 0)
+		if (maxNofRanks == 0)
 		{
 			DEBUG_CLOSE()
 			return QueryResult();
@@ -614,7 +599,7 @@ QueryResult Query::evaluate() const
 		Accumulator accumulator(
 			m_storage,
 			m_metaDataReader.get(), m_metaDataRestriction.get(), m_weightingFormula.get(),
-			m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
+			minRank + maxNofRanks, m_storage->maxDocumentNumber());
 
 		// [4.1] Define document subset to evaluate query on:
 		if (m_evalset_defined)
@@ -748,7 +733,7 @@ QueryResult Query::evaluate() const
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> ranks;
-		Ranker ranker( m_nofRanks + m_minRank);
+		Ranker ranker( maxNofRanks + minRank);
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
@@ -757,14 +742,14 @@ QueryResult Query::evaluate() const
 		while (accumulator.nextRank( docno, state, weight))
 		{
 			ranker.insert( WeightedDocument( docno, weight));
-			if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
+			if (state > prev_state && ranker.nofRanks() >= maxNofRanks + minRank)
 			{
 				state = prev_state;
 				break;
 			}
 			prev_state = state;
 		}
-		std::vector<WeightedDocument> resultlist = ranker.result( m_minRank);
+		std::vector<WeightedDocument> resultlist = ranker.result( minRank);
 	
 		// [6] Summarization:
 		evaluationPhase = "summarization";

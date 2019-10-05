@@ -76,9 +76,6 @@ public:
 
 	virtual void addAccess( const std::string& username_);
 
-	virtual void setMaxNofRanks( std::size_t nofRanks_);
-	virtual void setMinRank( std::size_t minRank_);
-
 	virtual void defineTermStatistics(
 			const std::string& type_,
 			const std::string& value_,
@@ -91,7 +88,7 @@ public:
 
 	virtual void setDebugMode( bool debug);
 
-	virtual QueryResult evaluate() const;
+	virtual QueryResult evaluate( int minRank, int maxNofRanks) const;
 	virtual StructView view() const;
 
 public:
@@ -225,6 +222,7 @@ private:
 			:varname(o.varname),index(o.index),value(o.value){}
 	};
 
+	enum {MaxNofJoinopArguments=256};
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const;
 	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const;
 	void collectSummarizationVariables(
@@ -251,8 +249,6 @@ private:
 	std::vector<Feature> m_features;				///< query features
 	std::vector<NodeAddress> m_stack;				///< expression build stack
 	std::multimap<NodeAddress,std::string> m_variableAssignments;	///< maps node addresses to names of variables attached to
-	std::size_t m_nofRanks;						///< number of ranks to evaluate
-	std::size_t m_minRank;						///< smallest rank to return (start of result ranklist -- browsing)
 	std::vector<std::string> m_usernames;				///< users allowed to see the query result
 	std::vector<Index> m_evalset_docnolist;				///< set of document numbers to restrict the query to
 	bool m_evalset_defined;						///< true, if the set of document numbers to restrict the query to is defined
