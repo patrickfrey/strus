@@ -742,7 +742,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		while (accumulator.nextRank( docno, state, weight))
 		{
 			ranker.insert( WeightedDocument( docno, weight));
-			if (state > prev_state && ranker.nofRanks() >= maxNofRanks + minRank)
+			if (state > prev_state && (int)ranker.nofRanks() >= maxNofRanks + minRank)
 			{
 				state = prev_state;
 				break;

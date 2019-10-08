@@ -118,14 +118,14 @@ public:
 	virtual void setDebugMode( bool debug)=0;
 
 	/// \brief Default value for the maximum number of ranked results returned by a query evaluation
-	enum {DefaultMinNofRanks=20};
+	enum {DefaultMaxNofRanks=20};
 
 	/// \brief Evaluate the query
 	/// \param[in] minRank index of first rank returned, counted starting from 0
 	/// \param[in] maxNofRanks maximum number of ranks returned
 	/// \note Choose this value as small as possible because the performance of sorting the results depends on the number of results returned
 	/// \return result of query evaluation
-	virtual QueryResult evaluate( int minRank=0, int maxNofRanks=DefaultMinNofRanks) const=0;
+	virtual QueryResult evaluate( int minRank=0, int maxNofRanks=DefaultMaxNofRanks) const=0;
 
 	/// \brief Return a structure with all definitions for introspection
 	/// \return the structure with all definitions for introspection
