@@ -10,6 +10,7 @@
 #include "private/internationalization.hpp"
 #include "strus/base/crc32.hpp"
 #include "strus/base/unordered_map.hpp"
+#include "strus/base/symbolTable.hpp"
 #include <map>
 #include <list>
 #include <vector>
@@ -18,80 +19,6 @@
 
 namespace strus
 {
-
-class StringMapKeyBlock
-{
-public:
-	enum {DefaultSize = 16300};
-
-public:
-	explicit StringMapKeyBlock( std::size_t blksize_=DefaultSize);
-	StringMapKeyBlock( const StringMapKeyBlock& o);
-	~StringMapKeyBlock();
-
-	const char* allocateKey( const std::string& key);
-	const char* allocateKey( const char* key, std::size_t keylen);
-
-private:
-	char* m_blk;
-	std::size_t m_blksize;
-	std::size_t m_blkpos;
-};
-
-class StringMapKeyBlockList
-{
-public:
-	StringMapKeyBlockList(){}
-	StringMapKeyBlockList( const StringMapKeyBlockList& o)
-		:m_ar(o.m_ar){}
-
-	const char* allocateKey( const char* key, std::size_t keylen);
-	void clear();
-
-private:
-	std::list<StringMapKeyBlock> m_ar;
-};
-
-
-class StringVector
-{
-public:
-	void push_back( const char* value)
-	{
-		const char* valuedup = m_blkar.allocateKey( value, std::strlen( value));
-		return m_ar.push_back( valuedup);
-	}
-	void push_back( const char* value, std::size_t valuesize)
-	{
-		const char* valuedup = m_blkar.allocateKey( value, valuesize);
-		return m_ar.push_back( valuedup);
-	}
-	void push_back( const std::string& value)
-	{
-		const char* valuedup = m_blkar.allocateKey( value.c_str(), value.size());
-		return m_ar.push_back( valuedup);
-	}
-
-	typedef std::vector<const char*>::const_iterator const_iterator;
-	typedef std::vector<const char*>::iterator iterator;
-
-	std::vector<const char*>::const_iterator begin() const		{return m_ar.begin();}
-	std::vector<const char*>::const_iterator end() const		{return m_ar.end();}
-
-	const char* operator[]( std::size_t i) const			{return m_ar[i];}
-	const char* back() const					{return m_ar.back();}
-	std::size_t size() const					{return m_ar.size();}
-
-	void clear()
-	{
-		m_ar.clear();
-		m_blkar.clear();
-	}
-private:
-	std::vector<const char*> m_ar;
-	StringMapKeyBlockList m_blkar;
-};
-
 
 template <typename ValueType>
 class StringMap
@@ -145,7 +72,7 @@ public:
 		{
 			return itr->second;
 		}
-		const char* keydup = m_keystring_blocks.allocateKey( key, std::strlen( key));
+		const char* keydup = m_keystring_blocks.allocStringCopy( key, std::strlen( key));
 		return m_map[ keydup];
 	}
 
@@ -156,7 +83,7 @@ public:
 		{
 			return itr->second;
 		}
-		const char* keydup = m_keystring_blocks.allocateKey( key.c_str(), key.size());
+		const char* keydup = m_keystring_blocks.allocStringCopy( key.c_str(), key.size());
 		return m_map[ keydup];
 	}
 
@@ -197,7 +124,7 @@ private:
 
 private:
 	Map m_map;
-	StringMapKeyBlockList m_keystring_blocks;
+	BlockAllocator m_keystring_blocks;
 };
 
 }//namespace

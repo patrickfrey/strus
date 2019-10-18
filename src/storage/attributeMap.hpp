@@ -11,6 +11,7 @@
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/stringMap.hpp"
+#include "strus/base/symbolTable.hpp"
 #include <vector>
 #include <map>
 
@@ -47,7 +48,7 @@ private:
 private:
 	DatabaseClientInterface* m_database;
 	Map m_map;
-	StringVector m_strings;
+	SymbolVector m_strings;
 	DeleteList m_deletes;
 };
 

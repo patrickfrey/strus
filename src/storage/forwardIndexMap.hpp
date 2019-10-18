@@ -12,6 +12,7 @@
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/stringMap.hpp"
+#include "strus/base/symbolTable.hpp"
 #include <vector>
 #include <map>
 #include <set>
@@ -84,7 +85,7 @@ private:
 	Map m_map;
 	BlockList m_blocklist;
 	CurblockMap m_curblockmap;
-	StringVector m_strings;
+	SymbolVector m_strings;
 	Index m_docno;
 	Index m_maxtype;
 	unsigned int m_maxblocksize;

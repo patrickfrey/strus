@@ -88,7 +88,7 @@ Index KeyMap::getOrCreate( const std::string& name)
 
 void KeyMap::deleteAllFromDeletedList( DatabaseTransactionInterface* transaction)
 {
-	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
+	SymbolVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
 	for (; di != de; ++di)
 	{
 		if (m_dbadapterinv.defined())

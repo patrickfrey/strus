@@ -11,6 +11,7 @@
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "private/stringMap.hpp"
+#include "strus/base/symbolTable.hpp"
 #include <cstdlib>
 #include <string>
 #include <cstring>
@@ -86,7 +87,7 @@ private:
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;
-	StringVector m_deletedlist;
+	SymbolVector m_deletedlist;
 };
 
 }//namespace

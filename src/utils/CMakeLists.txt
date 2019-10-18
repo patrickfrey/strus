@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set( source_files
-	stringMap.cpp
 	${UTILS_GENSOURCE_DIR}/internationalization.cpp
 	cstring.c
 )

@@ -9,6 +9,7 @@
 #define _STRUS_STORAGE_KEY_MAP_INV_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/stringMap.hpp"
+#include "strus/base/symbolTable.hpp"
 #include "strus/base/unordered_map.hpp"
 #include <cstdlib>
 #include <string>
@@ -20,8 +21,6 @@ class KeyMapInv
 {
 public:
 	KeyMapInv(){}
-	KeyMapInv( const KeyMapInv& o)
-		:m_map(o.m_map),m_strings(o.m_strings){}
 
 	void set( const Index& idx, const std::string& value)
 	{
@@ -46,9 +45,13 @@ public:
 	}
 
 private:
+	KeyMapInv( const KeyMapInv&){}		///... non copyable
+	void operator=( const KeyMapInv&){}	///... non copyable
+
+private:
 	typedef strus::unordered_map<Index,const char*> Map;
 	Map m_map;
-	StringVector m_strings;
+	SymbolVector m_strings;
 };
 
 }//namespace
