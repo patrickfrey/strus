@@ -118,6 +118,13 @@ bool Database::createDatabase( const std::string& configsource) const
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
+		std::string dirCreated;
+		int ec = strus::mkdirp( path, dirCreated);
+		if (ec != 0)
+		{
+			m_errorhnd->report( ErrorCodeIOError, _TXT( "failed to create directory '%s' for database"), path.c_str());
+			return false;
+		}
 		leveldb::DB* db = 0;
 		leveldb::Options options;
 		// Compression reduces size of index by 25% and has about 10% better performance
@@ -135,6 +142,7 @@ bool Database::createDatabase( const std::string& configsource) const
 			std::string err = status.ToString();
 			if (db) delete db;
 			m_errorhnd->report( leveldbErrorCode(status), _TXT( "failed to create LevelDB key value store database: %s"), err.c_str());
+			if (!dirCreated.empty()) (void)strus::removeDirRecursive( dirCreated);
 			return false;
 		}
 		if (db) delete db;
