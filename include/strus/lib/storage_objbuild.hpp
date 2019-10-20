@@ -17,8 +17,6 @@ namespace strus {
 /// \brief Forward declaration
 class StorageObjectBuilderInterface;
 /// \brief Forward declaration
-class StorageAlterMetaDataTableInterface;
-/// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
 class VectorStorageClientInterface;

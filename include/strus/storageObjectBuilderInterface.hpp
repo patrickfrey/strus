@@ -25,8 +25,6 @@ class QueryEvalInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
-class StorageAlterMetaDataTableInterface;
-/// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class VectorStorageInterface;

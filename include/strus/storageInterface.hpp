@@ -18,8 +18,6 @@ class DatabaseInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
-class StorageAlterMetaDataTableInterface;
-/// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
