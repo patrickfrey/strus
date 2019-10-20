@@ -9,6 +9,7 @@
 #define _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/reference.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataMap.hpp"
@@ -45,11 +46,11 @@ class StorageTransaction
 	:public StorageTransactionInterface
 {
 public:
+	///\param[in] storage_ storage to call refresh after commit or rollback
+	///\param[in] database_ database handle
 	///\param[in] maxtypeno_ biggest type number to use in this transaction in the forward index map when deleting elements there
 	StorageTransaction( 
 		StorageClient* storage_,
-		DatabaseClientInterface* database_,
-		const MetaDataDescription* metadescr_,
 		const Index& maxtypeno_,
 		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_);
@@ -129,9 +130,7 @@ private:
 	void clearMaps();
 
 private:
-	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback
-	DatabaseClientInterface* m_database;			///< database handle
-	const MetaDataDescription* m_metadescr;			///< description of metadata
+	StorageClient* m_storage;				///< storage to call refresh after commit or rollback
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
 	MetaDataMap m_metaDataMap;				///< map of meta data blocks for writing

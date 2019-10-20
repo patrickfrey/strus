@@ -17,8 +17,6 @@ class DatabaseInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
-class StorageAlterMetaDataTableInterface;
-/// \brief Forward declaration
 class ErrorBufferInterface;
 
 
@@ -38,19 +36,10 @@ public:
 	virtual bool createStorage(
 			const std::string& configsource,
 			const DatabaseInterface* database) const;
-	
-	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
-			const std::string& configsource,
-			const DatabaseInterface* database) const;
 
 	virtual const char* getConfigDescription( const ConfigType& type) const;
 
 	virtual const char** getConfigParameters( const ConfigType& type) const;
-
-	virtual StorageDumpInterface* createDump(
-			const std::string& configsource,
-			const DatabaseInterface* database,
-			const std::string& keyprefix) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

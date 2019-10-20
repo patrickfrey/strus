@@ -32,6 +32,8 @@ class StructIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
+class StorageMetaDataTransactionInterface;
+/// \brief Forward declaration
 class StorageDocumentInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
@@ -108,6 +110,9 @@ public:
 	virtual StorageTransactionInterface*
 			createTransaction();
 
+	virtual StorageMetaDataTransactionInterface*
+			createMetaDataTransaction();
+
 	virtual StorageDocumentInterface*
 			createDocumentChecker(
 				const std::string& docid,
@@ -158,6 +163,9 @@ public:
 			const DocumentStatisticsType& stat,
 			const std::string& type) const;
 
+	virtual StorageDumpInterface* createDump(
+			const std::string& keyprefix) const;
+
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
 	virtual void close();
@@ -206,6 +214,7 @@ public:/*StorageTransaction*/
 
 	StatisticsBuilderInterface* getStatisticsBuilder();
 
+public:/*StorageTransaction,StorageMetaDataTransaction*/
 	friend class TransactionLock;
 	class TransactionLock
 	{
@@ -223,6 +232,13 @@ public:/*StorageTransaction*/
 	private:
 		strus::mutex* m_mutex;
 	};
+	strus::shared_ptr<MetaDataBlockCache> getMetaDataBlockCacheRef() const
+	{
+		return m_metaDataBlockCache;
+	}
+
+public:/*StorageMetaDataTransaction*/
+	void resetMetaDataBlockCache( const strus::shared_ptr<MetaDataBlockCache>& mdcache);
 
 public:/*StatisticsBuilder*/
 	Index documentFrequency( const Index& typeno, const Index& termno) const;
@@ -239,6 +255,10 @@ public:/*strusResizeBlocks,StorageDocumentChecker*/
 	Index maxTermTypeNo() const;
 	Index maxStructTypeNo() const;
 	DatabaseClientInterface* databaseClient()
+	{
+		return m_database.get();
+	}
+	const DatabaseClientInterface* databaseClient() const
 	{
 		return m_database.get();
 	}
@@ -268,8 +288,7 @@ private:
 	strus::mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno
 	strus::mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno
 
-	MetaDataDescription m_metadescr;			///< description of the meta data
-	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
+	strus::shared_ptr<MetaDataBlockCache> m_metaDataBlockCache;///< read cache for meta data blocks
 
 	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache

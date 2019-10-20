@@ -9,6 +9,7 @@
 #define _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "metaDataBlockCache.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"
@@ -25,8 +26,7 @@ class MetaDataReader
 	:public MetaDataReaderInterface
 {
 public:
-	MetaDataReader( MetaDataBlockCache* cache_,
-			const MetaDataDescription* description_,
+	MetaDataReader( const strus::shared_ptr<MetaDataBlockCache>& cache_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~MetaDataReader(){}
 
@@ -39,7 +39,7 @@ public:
 	virtual std::vector<std::string> getNames() const;
 
 private:
-	MetaDataBlockCache* m_cache;
+	strus::shared_ptr<MetaDataBlockCache> m_cache;
 	const MetaDataDescription* m_description;
 	MetaDataRecord m_current;
 	Index m_docno;						///< current document number

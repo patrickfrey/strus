@@ -7,7 +7,6 @@
  */
 #include "storage.hpp"
 #include "storageClient.hpp"
-#include "storageDump.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
@@ -20,7 +19,6 @@
 #include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "storageAlterMetaDataTable.hpp"
 #include "databaseAdapter.hpp"
 #include "storage.hpp"
 #include "byteOrderMark.hpp"
@@ -157,17 +155,6 @@ bool Storage::createStorage(
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
 }
 
-StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable(
-		const std::string& configsource,
-		const DatabaseInterface* database) const
-{
-	try
-	{
-		return new StorageAlterMetaDataTable( database, configsource, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage alter meta data table: %s"), *m_errorhnd, 0);
-}
-
 const char* Storage::getConfigDescription( const ConfigType& type) const
 {
 	switch (type)
@@ -191,18 +178,6 @@ const char** Storage::getConfigParameters( const ConfigType& type) const
 		case CmdCreate:		return keys_CreateStorage;
 	}
 	return 0;
-}
-
-StorageDumpInterface* Storage::createDump(
-		const std::string& configsource,
-		const DatabaseInterface* database,
-		const std::string& keyprefix) const
-{
-	try
-	{
-		return new StorageDump( database, configsource, keyprefix, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
 

@@ -30,29 +30,25 @@ using namespace strus;
 
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
-		DatabaseClientInterface* database_,
-		const MetaDataDescription* metadescr_,
 		const Index& maxtypeno_,
 		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
-	,m_database(database_)
-	,m_metadescr(metadescr_)
-	,m_attributeMap(database_)
-	,m_metaDataMap(database_,metadescr_)
-	,m_invertedIndexMap(database_)
-	,m_structIndexMap(database_,maxstructno_)
-	,m_forwardIndexMap(database_,maxtypeno_)
-	,m_userAclMap(database_)
-	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())
-	,m_structTypeMap(database_,DatabaseKey::StructTypePrefix,DatabaseKey::StructTypeInvPrefix,storage_->createStructnoAllocator())
-	,m_termValueMap(database_,DatabaseKey::TermValuePrefix,DatabaseKey::TermValueInvPrefix,storage_->createTermnoAllocator())
-	,m_docIdMap(database_,DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
-	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
-	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
+	,m_attributeMap(storage_->databaseClient())
+	,m_metaDataMap(storage_->databaseClient(),storage_->getMetaDataBlockCacheRef())
+	,m_invertedIndexMap(storage_->databaseClient())
+	,m_structIndexMap(storage_->databaseClient(),maxstructno_)
+	,m_forwardIndexMap(storage_->databaseClient(),maxtypeno_)
+	,m_userAclMap(storage_->databaseClient())
+	,m_termTypeMap(storage_->databaseClient(),DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())
+	,m_structTypeMap(storage_->databaseClient(),DatabaseKey::StructTypePrefix,DatabaseKey::StructTypeInvPrefix,storage_->createStructnoAllocator())
+	,m_termValueMap(storage_->databaseClient(),DatabaseKey::TermValuePrefix,DatabaseKey::TermValueInvPrefix,storage_->createTermnoAllocator())
+	,m_docIdMap(storage_->databaseClient(),DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
+	,m_userIdMap(storage_->databaseClient(),DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
+	,m_attributeNameMap(storage_->databaseClient(),DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
 	,m_termTypeMapInv()
 	,m_termValueMapInv()
-	,m_explicit_dfmap(database_)
+	,m_explicit_dfmap(storage_->databaseClient())
 	,m_nof_deleted_documents(0)
 	,m_nof_documents_affected(0)
 	,m_commit(false)
@@ -318,6 +314,10 @@ bool StorageTransaction::commit()
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
+		if (m_storage->getMetaDataBlockCacheRef().get() != m_metaDataMap.metaDataBlockCache().get())
+		{
+			throw std::runtime_error(_TXT("transaction rollback because meta data structure changed during lifetime of transaction"));
+		}
 		const StatisticsProcessorInterface* statsproc = m_storage->getStatisticsProcessor();
 		Reference<StatisticsBuilderInterface> statisticsBuilder;
 		if (statsproc)
@@ -326,7 +326,7 @@ bool StorageTransaction::commit()
 		}
 		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
 
-		strus::local_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+		strus::local_ptr<DatabaseTransactionInterface> transaction( m_storage->databaseClient()->createTransaction());
 		if (!transaction.get())
 		{
 			m_errorhnd->explain( _TXT( "error creating transaction: %s"));

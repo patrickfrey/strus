@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "storageAlterMetaDataTable.hpp"
+#include "storageMetaDataTransaction.hpp"
 #include "storage.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -20,26 +20,25 @@
 
 using namespace strus;
 
-StorageAlterMetaDataTable::StorageAlterMetaDataTable(
-		const DatabaseInterface* dbi,
-		const std::string& databaseConfig,
+StorageMetaDataTransaction::StorageMetaDataTransaction(
+		StorageClient* storage_,
 		ErrorBufferInterface* errorhnd_)
-	:m_database(dbi->createClient( databaseConfig))
+	:m_storage(storage_)
+	,m_metadescr_old(),m_metadescr_new(),m_metadescr_resets()
 	,m_commit(false)
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
-	m_metadescr_old.load( m_database.get());
+	m_metadescr_old.load( m_storage->databaseClient());
 	m_metadescr_new  = m_metadescr_old;
 }
 
-StorageAlterMetaDataTable::~StorageAlterMetaDataTable()
+StorageMetaDataTransaction::~StorageMetaDataTransaction()
 {
 	if (!m_rollback && !m_commit) rollback();
 }
 
-bool StorageAlterMetaDataTable::commit()
+bool StorageMetaDataTransaction::commit()
 {
 	if (m_errorhnd->hasError())
 	{
@@ -56,27 +55,29 @@ bool StorageAlterMetaDataTable::commit()
 		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit after rollback"));
 		return false;
 	}
-	strus::local_ptr<DatabaseTransactionInterface>
-		transaction( m_database->createTransaction());
+	StorageClient::TransactionLock lock( m_storage);
+
+	strus::shared_ptr<MetaDataBlockCache> new_mdcache;
+	strus::local_ptr<DatabaseTransactionInterface> transaction( m_storage->databaseClient()->createTransaction());
 	if (!transaction.get()) return false;
 	try
 	{
-		MetaDataDescription::TranslationMap 
-			trmap = m_metadescr_new.getTranslationMap(
-					m_metadescr_old, m_metadescr_resets);
-	
-		MetaDataMap blockmap( m_database.get(), &m_metadescr_old);
-		
+		MetaDataDescription::TranslationMap trmap
+			= m_metadescr_new.getTranslationMap( m_metadescr_old, m_metadescr_resets);
+
+		MetaDataMap blockmap( m_storage->databaseClient(), m_storage->getMetaDataBlockCacheRef());
 		blockmap.rewriteMetaData( trmap, m_metadescr_new, transaction.get());
 		m_metadescr_new.store( transaction.get());
+		new_mdcache.reset( new MetaDataBlockCache( m_storage->databaseClient(), m_metadescr_new));
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in commit alter meta data transaction: %s"), *m_errorhnd, false);
 
 	if (!transaction->commit()) return false;
+	m_storage->resetMetaDataBlockCache( new_mdcache);
 	return m_commit = true;
 }
 
-void StorageAlterMetaDataTable::rollback()
+void StorageMetaDataTransaction::rollback()
 {
 	if (m_rollback)
 	{
@@ -89,7 +90,7 @@ void StorageAlterMetaDataTable::rollback()
 	m_rollback = true;
 }
 
-void StorageAlterMetaDataTable::renameElementReset(
+void StorageMetaDataTransaction::renameElementReset(
 		const std::string& oldname,
 		const std::string& name)
 {
@@ -104,7 +105,7 @@ void StorageAlterMetaDataTable::renameElementReset(
 	}
 }
 
-void StorageAlterMetaDataTable::changeElementType(
+void StorageMetaDataTransaction::changeElementType(
 		const std::string& name,
 		MetaDataElement::Type type)
 {
@@ -125,7 +126,7 @@ void StorageAlterMetaDataTable::changeElementType(
 }
 
 
-void StorageAlterMetaDataTable::alterElement(
+void StorageMetaDataTransaction::alterElement(
 		const std::string& oldname,
 		const std::string& name,
 		const std::string& datatype)
@@ -147,7 +148,7 @@ void StorageAlterMetaDataTable::alterElement(
 	CATCH_ERROR_MAP( _TXT("error altering meta data element: %s"), *m_errorhnd);
 }
 
-void StorageAlterMetaDataTable::renameElement(
+void StorageMetaDataTransaction::renameElement(
 		const std::string& oldname,
 		const std::string& name)
 {
@@ -165,7 +166,7 @@ void StorageAlterMetaDataTable::renameElement(
 	CATCH_ERROR_MAP( _TXT("error renaming meta data element: %s"), *m_errorhnd);
 }
 
-void StorageAlterMetaDataTable::deleteElement(
+void StorageMetaDataTransaction::deleteElement(
 		const std::string& name)
 {
 	try
@@ -193,7 +194,7 @@ void StorageAlterMetaDataTable::deleteElement(
 	CATCH_ERROR_MAP( _TXT("error deleting meta data element: %s"), *m_errorhnd);
 }
 
-void StorageAlterMetaDataTable::clearElement(
+void StorageMetaDataTransaction::clearElement(
 		const std::string& name)
 {
 	try
@@ -203,7 +204,7 @@ void StorageAlterMetaDataTable::clearElement(
 	CATCH_ERROR_MAP( _TXT("error clearing meta data element value: %s"), *m_errorhnd);
 }
 
-void StorageAlterMetaDataTable::addElement(
+void StorageMetaDataTransaction::addElement(
 		const std::string& name,
 		const std::string& datatype)
 {

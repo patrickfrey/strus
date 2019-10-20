@@ -28,7 +28,7 @@ class AclReader
 	:public AclReaderInterface
 {
 public:
-	AclReader( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_);
+	AclReader( const StorageClient* storage_, ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
 	virtual ~AclReader(){}
@@ -43,7 +43,6 @@ public:
 
 private:
 	const StorageClient* m_storage;				///< storage handle
-	const DatabaseClientInterface* m_database;		///< database handle
 	std::map<Index,std::string> m_usermap;			///< map internal userno to user name
 	Index m_docno;						///< current document number
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface

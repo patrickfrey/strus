@@ -16,10 +16,10 @@
 
 using namespace strus;
 
-AclReader::AclReader( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
-	:m_storage(storage_),m_database(database_),m_usermap(),m_docno(0),m_errorhnd(errorhnd_)
+AclReader::AclReader( const StorageClient* storage_, ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_),m_usermap(),m_docno(0),m_errorhnd(errorhnd_)
 {
-	DatabaseAdapter_UserName::Cursor unameCursor( m_database);
+	DatabaseAdapter_UserName::Cursor unameCursor( m_storage->databaseClient());
 	std::string username;
 	Index userno;
 	if (unameCursor.loadFirst( username, userno))

@@ -5,14 +5,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
-#define _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
-#include "strus/storageAlterMetaDataTableInterface.hpp"
+#ifndef _STRUS_STORAGE_METADATA_TRANSACTION_HPP_INCLUDED
+#define _STRUS_STORAGE_METADATA_TRANSACTION_HPP_INCLUDED
+#include "strus/storageMetaDataTransactionInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/reference.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataMap.hpp"
 #include "metaDataReader.hpp"
+#include "storageClient.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -20,25 +22,22 @@
 
 namespace strus {
 /// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
 class ErrorBufferInterface;
 
 /// \class StorageTransaction
-class StorageAlterMetaDataTable
-	:public StorageAlterMetaDataTableInterface
+class StorageMetaDataTransaction
+	:public StorageMetaDataTransactionInterface
 {
 private:
-	StorageAlterMetaDataTable( const StorageAlterMetaDataTable&){}	//... non copyable
-	void operator=( const StorageAlterMetaDataTable&){}		//... non copyable
+	StorageMetaDataTransaction( const StorageMetaDataTransaction&){}	//... non copyable
+	void operator=( const StorageMetaDataTransaction&){}		//... non copyable
 
 public:
-	StorageAlterMetaDataTable(
-			const DatabaseInterface* dbi,
-			const std::string& databaseConfig,
+	StorageMetaDataTransaction(
+			StorageClient* storage_,
 			ErrorBufferInterface* errorhnd_);
 
-	~StorageAlterMetaDataTable();
+	~StorageMetaDataTransaction();
 
 	virtual void alterElement(
 			const std::string& oldname,
@@ -74,7 +73,7 @@ private:
 			MetaDataElement::Type type);
 
 private:
-	Reference<DatabaseClientInterface> m_database;		///< database interface
+	StorageClient* m_storage;				///< storage to call refresh after commit or rollback
 
 	MetaDataDescription m_metadescr_old;			///< meta data structure changes
 	MetaDataDescription m_metadescr_new;			///< meta data structure changes

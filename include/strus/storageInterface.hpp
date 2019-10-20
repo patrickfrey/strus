@@ -50,14 +50,6 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 
-	/// \brief Create an interface to alter the meta data table structure
-	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
-	/// \param[in] database key value store database type used by this storage
-	/// \return the created reference to be disposed with delete by the caller
-	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
-			const std::string& configsource,
-			const DatabaseInterface* database) const=0;
-
 	/// \brief Enumeration of different type of configurations
 	///	Needed for getting the correct description of the configuration
 	enum ConfigType
@@ -74,16 +66,6 @@ public:
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this storage implementation.
 	virtual const char** getConfigParameters( const ConfigType& type) const=0;
-
-	/// \brief Create a dump of a storage
-	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
-	/// \param[in] database key value store database type used by the storage
-	/// \param[in] keyprefix prefix for keys to resrict the dump to
-	/// \return the object to fetch the dump from
-	virtual StorageDumpInterface* createDump(
-			const std::string& configsource,
-			const DatabaseInterface* database,
-			const std::string& keyprefix) const=0;
 };
 
 }//namespace

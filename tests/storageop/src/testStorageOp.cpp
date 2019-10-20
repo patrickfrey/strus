@@ -62,6 +62,7 @@ public:
 		sti.reset();
 		dbi.reset();
 	}
+	void dump();
 };
 
 
@@ -144,18 +145,14 @@ static std::string featureString( const std::string& prefix, unsigned int num)
 	return strus::string_format( "%s%u", prefix.c_str(), num);
 }
 
-static void dumpStorage( const std::string& config)
+void Storage::dump()
 {
-	strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( "", g_errorhnd));
-	if (!dbi.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( "", g_errorhnd));
-	if (!sti.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	strus::local_ptr<strus::StorageDumpInterface> dump( sti->createDump( config, dbi.get(), ""));
+	strus::local_ptr<strus::StorageDumpInterface> chunkitr( sci->createDump( ""));
 
 	const char* chunk;
 	std::size_t chunksize;
 	std::string dumpcontent;
-	while (dump->nextChunk( chunk, chunksize))
+	while (chunkitr->nextChunk( chunk, chunksize))
 	{
 		dumpcontent.append( chunk, chunksize);
 	}
@@ -189,13 +186,13 @@ static void testSimpleDocumentUpdate()
 		update->addSearchIndexTerm( "a", featureString("a", 2), 1);
 		update->done();
 		transaction->commit();
+		storage.dump();
 	}
 	storage.close();
 	if (g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	dumpStorage( "path=storage");
 }
 
 struct OccurrenceDef
@@ -425,9 +422,8 @@ static void testDocumentUpdate()
 		}
 		transaction->commit();
 		rt &= check_storage_df( storage.sci.get(), occurrence_searchindex, "before update", NofFeats, NofTypes);
+		storage.dump();
 		storage.close();
-
-		dumpStorage( "path=storage");
 	}
 	storage.open( "path=storage", false);
 	{
@@ -495,12 +491,12 @@ static void testDocumentUpdate()
 				occurrence_searchindex, occurrence_update_searchindex, clear_searchindex);
 		rt &= check_storage_df( storage.sci.get(), occurrence_searchindex, "after update", NofFeats, NofTypes);
 	}
+	storage.dump();
 	storage.close();
 	if (g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	dumpStorage( "path=storage");
 	if (!rt)
 	{
 		throw std::runtime_error( "got errors, see std error output");

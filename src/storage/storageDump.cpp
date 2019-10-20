@@ -17,8 +17,8 @@
 
 using namespace strus;
 
-StorageDump::StorageDump( const DatabaseInterface* database_, const std::string& configsrc, const std::string& keyprefix, ErrorBufferInterface* errorhnd_)
-	:m_database(database_->createClient( configsrc))
+StorageDump::StorageDump( const Reference<DatabaseClientInterface>& database_, const std::string& keyprefix, ErrorBufferInterface* errorhnd_)
+	:m_database(database_)
 	,m_cursor()
 	,m_errorhnd(errorhnd_)
 {

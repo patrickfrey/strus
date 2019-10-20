@@ -23,7 +23,7 @@ class StorageDump
 	:public StorageDumpInterface
 {
 public:
-	StorageDump( const DatabaseInterface* database_, const std::string& configsrc, const std::string& keyprefix, ErrorBufferInterface* errorhnd_);
+	StorageDump( const Reference<DatabaseClientInterface>& databaseClient_, const std::string& keyprefix, ErrorBufferInterface* errorhnd_);
 	virtual ~StorageDump(){}
 
 	virtual bool nextChunk( const char*& chunk, std::size_t& chunksize);

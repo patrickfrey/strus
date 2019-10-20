@@ -151,49 +151,6 @@ DLL_PUBLIC StorageObjectBuilderInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating default storage object builder: %s"), *errorhnd, 0);
 }
 
-
-DLL_PUBLIC StorageAlterMetaDataTableInterface*
-	strus::createAlterMetaDataTable(
-		const StorageObjectBuilderInterface* objbuilder,
-		ErrorBufferInterface* errorhnd,
-		const std::string& config)
-{
-	try
-	{
-		if (!g_intl_initialized)
-		{
-			strus::initMessageTextDomain();
-			g_intl_initialized = true;
-		}
-
-		std::string configstr( config);
-		std::string dbname;
-		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
-		if (errorhnd->hasError())
-		{
-			errorhnd->explain(_TXT("cannot evaluate database: %s"));
-			return 0;
-		}
-		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
-		const StorageInterface* sti = objbuilder->getStorage();
-		if (!dbi || !sti)
-		{
-			errorhnd->explain(_TXT("could not get storage and database interfaces: %s"));
-			return 0;
-		}
-		strus::local_ptr<StorageAlterMetaDataTableInterface>
-				altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
-		if (!altermetatable.get())
-		{
-			errorhnd->explain( _TXT("error creating alter metadata table client: %s"));
-			return 0;
-		}
-		return altermetatable.release(); //... ownership returned
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage alter metadata table interface: %s"), *errorhnd, 0);
-}
-
-
 DLL_PUBLIC StorageClientInterface*
 	strus::createStorageClient(
 		const StorageObjectBuilderInterface* objbuilder,

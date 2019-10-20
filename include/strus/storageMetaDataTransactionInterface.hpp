@@ -6,21 +6,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Interface to declare changes in the meta data table structure of the storage
-/// \file "storageAlterMetaDataTableInterface.hpp"
-#ifndef _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
+/// \file "StorageMetaDataTransactionInterface.hpp"
+#ifndef _STRUS_STORAGE_META_DATA_TRANSACTION_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_META_DATA_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>
 
 namespace strus
 {
 
-/// \class StorageAlterMetaDataTableInterface
+/// \class StorageMetaDataTransactionInterface
 /// \brief Interface to declare changes in the meta data table structure of the storage
-class StorageAlterMetaDataTableInterface
+class StorageMetaDataTransactionInterface
 {
 public:
 	/// \brief Destructor that is the doing the rollback too, if commit() was not called before
-	virtual ~StorageAlterMetaDataTableInterface(){}
+	virtual ~StorageMetaDataTransactionInterface(){}
 
 	/// \brief Declare a new meta data element
 	/// \param[in] name name of the element to add

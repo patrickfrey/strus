@@ -40,7 +40,6 @@ void MetaDataBlockCache::resetBlock( const Index& blockno)
 	m_ar[ blkidx].reset();
 }
 
-
 const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 {
 	if (docno > MaxDocno || docno <= 0) throw strus::runtime_error( _TXT( "document number out of range (%s)"), "meta data block cache");

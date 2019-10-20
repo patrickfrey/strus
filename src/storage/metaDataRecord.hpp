@@ -21,8 +21,14 @@ namespace strus {
 class MetaDataRecord
 {
 public:
+	MetaDataRecord()
+		:m_descr(0),m_ptr(0){}
 	MetaDataRecord( const MetaDataDescription* description_, void* ptr_)
 		:m_descr(description_),m_ptr(ptr_){}
+	MetaDataRecord( const MetaDataRecord& o)
+		:m_descr(o.m_descr),m_ptr(o.m_ptr){}
+	MetaDataRecord& operator = ( const MetaDataRecord& o)
+		{m_descr=o.m_descr; m_ptr=o.m_ptr; return *this;}
 
 	void setValueInt( const MetaDataElement* elem, int64_t value_);
 	void setValueUInt( const MetaDataElement* elem, uint64_t value_);

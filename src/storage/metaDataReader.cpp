@@ -14,10 +14,14 @@
 
 using namespace strus;
 
-MetaDataReader::MetaDataReader( MetaDataBlockCache* cache_,
-		const MetaDataDescription* description_,
+MetaDataReader::MetaDataReader(
+		const strus::shared_ptr<MetaDataBlockCache>& cache_,
 		ErrorBufferInterface* errorhnd_)
-	:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0),m_errorhnd(errorhnd_){}
+	:m_cache(cache_),m_docno(0),m_errorhnd(errorhnd_)
+{
+	m_description = &m_cache->descr();
+	m_current = MetaDataRecord( &m_cache->descr(), 0);
+}
 
 Index MetaDataReader::elementHandle( const std::string& name) const
 {

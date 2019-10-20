@@ -29,6 +29,7 @@
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "storageTransaction.hpp"
+#include "storageMetaDataTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "extractKeyValueData.hpp"
 #include "documentFrequencyCache.hpp"
@@ -48,6 +49,7 @@
 #include "keyAllocatorInterface.hpp"
 #include "valueIterator.hpp"
 #include "aclReader.hpp"
+#include "storageDump.hpp"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -58,15 +60,6 @@
 using namespace strus;
 
 #define MODULENAME "storageClient"
-
-void StorageClient::cleanup()
-{
-	if (m_metaDataBlockCache)
-	{
-		delete m_metaDataBlockCache; 
-		m_metaDataBlockCache = 0;
-	}
-}
 
 StorageClient::StorageClient(
 		const DatabaseInterface* database_,
@@ -82,38 +75,26 @@ StorageClient::StorageClient(
 	,m_next_userno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
-	,m_metaDataBlockCache(0)
+	,m_metaDataBlockCache()
 	,m_statisticsProc(statisticsProc_)
 	,m_close_called(false)
 	,m_errorhnd(errorhnd_)
 {
-	try
+	if (statisticsProc_)
 	{
-		if (statisticsProc_)
+		std::string databaseConfigCopy = databaseConfig;
+		if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
 		{
-			std::string databaseConfigCopy = databaseConfig;
-			if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
-			{
-				throw strus::runtime_error(_TXT("variable '%s' not defined in configuration"), "path");
-			}
+			throw strus::runtime_error(_TXT("variable '%s' not defined in configuration"), "path");
 		}
-		if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
-		m_metadescr.load( m_database.get());
-		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
+	}
+	if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
+	MetaDataDescription metadescr;
+	metadescr.load( m_database.get());
+	m_metaDataBlockCache.reset( new MetaDataBlockCache( m_database.get(), metadescr));
 
-		loadVariables( m_database.get());
-		if (termnomap_source) loadTermnoMap( termnomap_source);
-	}
-	catch (const std::bad_alloc& err)
-	{
-		cleanup();
-		throw std::runtime_error( _TXT("out of memory creating storage client"));
-	}
-	catch (const std::runtime_error& err)
-	{
-		cleanup();
-		throw strus::runtime_error(_TXT("error in constructor: %s"), err.what());
-	}
+	loadVariables( m_database.get());
+	if (termnomap_source) loadTermnoMap( termnomap_source);
 }
 
 std::string StorageClient::config() const
@@ -121,7 +102,9 @@ std::string StorageClient::config() const
 	try
 	{
 		std::string rt( m_database->config());
-		std::string mdstr( m_metadescr.tostring());
+		strus::shared_ptr<MetaDataBlockCache> mt = m_metaDataBlockCache;
+
+		std::string mdstr( mt->descr().tostring());
 		if (!mdstr.empty())
 		{
 			if (!rt.empty()) rt.push_back(';');
@@ -140,16 +123,19 @@ std::string StorageClient::config() const
 
 void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 {
-	if (m_metaDataBlockCache)
+	strus::shared_ptr<MetaDataBlockCache> mt = m_metaDataBlockCache;
+	// Refresh all entries touched by the inserts/updates written
+	std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
+	for (; ri != re; ++ri)
 	{
-		// Refresh all entries touched by the inserts/updates written
-		std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
-		for (; ri != re; ++ri)
-		{
-			m_metaDataBlockCache->declareVoid( *ri);
-		}
-		m_metaDataBlockCache->refresh();
+		mt->declareVoid( *ri);
 	}
+	mt->refresh();
+}
+
+void StorageClient::resetMetaDataBlockCache( const strus::shared_ptr<MetaDataBlockCache>& mdcache)
+{
+	m_metaDataBlockCache = mdcache;
 }
 
 static Index versionNo( Index major, Index minor)
@@ -252,7 +238,6 @@ StorageClient::~StorageClient()
 		storeVariables();
 	}
 	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
-	cleanup();
 }
 
 Index StorageClient::getTermValue( const std::string& name) const
@@ -339,8 +324,9 @@ PostingIteratorInterface*
 {
 	try
 	{
+		strus::shared_ptr<MetaDataBlockCache> mc = m_metaDataBlockCache;
 		return new MetaDataRangePostingIterator(
-				new MetaDataReader( m_metaDataBlockCache, &m_metadescr, m_errorhnd),
+				new MetaDataReader( mc, m_errorhnd),
 				m_nof_documents.value(), meta_fieldStart, meta_fieldEnd, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating field posting iterator defined by meta data: %s"), *m_errorhnd, 0);
@@ -444,7 +430,7 @@ AclReaderInterface* StorageClient::createAclReader() const
 {
 	try
 	{
-		return new AclReader( this, m_database.get(), m_errorhnd);
+		return new AclReader( this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating ACL reader: %s"), *m_errorhnd, 0);
 }
@@ -454,9 +440,18 @@ StorageTransactionInterface*
 {
 	try
 	{
-		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
+}
+
+StorageMetaDataTransactionInterface* StorageClient::createMetaDataTransaction()
+{
+	try
+	{
+		return new StorageMetaDataTransaction( this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client metadata transaction: %s"), *m_errorhnd, 0);
 }
 
 StorageDocumentInterface* 
@@ -466,7 +461,7 @@ StorageDocumentInterface*
 {
 	try
 	{
-		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename, m_errorhnd);
+		return new StorageDocumentChecker( this, docid, logfilename, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
 }
@@ -877,7 +872,7 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 {
 	try
 	{
-		return new MetaDataReader( m_metaDataBlockCache, &m_metadescr, m_errorhnd);
+		return new MetaDataReader( m_metaDataBlockCache, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data reader: %s"), *m_errorhnd, 0);
 }
@@ -1124,6 +1119,17 @@ static void checkKeyValue(
 		errorlog << buf << err.what() << std::endl;
 	}
 }
+
+StorageDumpInterface* StorageClient::createDump(
+		const std::string& keyprefix) const
+{
+	try
+	{
+		return new StorageDump( m_database, keyprefix, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
+}
+
 
 bool StorageClient::checkStorage( std::ostream& errorlog) const
 {

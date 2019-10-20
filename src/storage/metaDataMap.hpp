@@ -8,8 +8,10 @@
 #ifndef _STRUS_STORAGE_METADATA_BLOCK_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
+#include "metaDataBlockCache.hpp"
 #include "private/localStructAllocator.hpp"
 #include "strus/numericVariant.hpp"
 #include <cstdlib>
@@ -27,8 +29,11 @@ class DatabaseTransactionInterface;
 class MetaDataMap
 {
 public:
-	MetaDataMap( DatabaseClientInterface* database_, const MetaDataDescription* descr_)
-		:m_database(database_),m_descr(descr_){}
+	MetaDataMap( DatabaseClientInterface* database_, const strus::shared_ptr<MetaDataBlockCache>& mdcache_)
+		:m_database(database_),m_metaDataBlockCache(mdcache_),m_map()
+	{
+		m_descr = &m_metaDataBlockCache->descr();
+	}
 	~MetaDataMap();
 
 	void defineMetaData( Index docno, const std::string& varname, const NumericVariant& value);
@@ -43,6 +48,14 @@ public:
 			DatabaseTransactionInterface* transaction);
 
 	void clear();
+	const MetaDataDescription* description() const
+	{
+		return m_descr;
+	}
+	strus::shared_ptr<MetaDataBlockCache> metaDataBlockCache() const
+	{
+		return m_metaDataBlockCache;
+	}
 
 private:
 	MetaDataRecord getRecord( Index docno);
@@ -55,6 +68,7 @@ private:
 
 private:
 	DatabaseClientInterface* m_database;
+	strus::shared_ptr<MetaDataBlockCache> m_metaDataBlockCache;
 	const MetaDataDescription* m_descr;
 	Map m_map;
 };

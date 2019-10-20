@@ -56,7 +56,7 @@ public:
 private:
 	enum {
 		BlockMask=((int)BlockSize-1),
-		BlockShift=8
+		BlockShift=8		///< number of bits in BlockSize
 	};
 
 private:

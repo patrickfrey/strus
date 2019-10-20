@@ -34,6 +34,11 @@ public:
 	void declareVoid( const Index& blockno);
 	void refresh();
 
+	const MetaDataDescription& descr() const
+	{
+		return m_descr;
+	}
+
 private:
 	void resetBlock( const Index& blockno);
 

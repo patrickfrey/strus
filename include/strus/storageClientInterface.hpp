@@ -35,7 +35,11 @@ class ValueIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
+class StorageMetaDataTransactionInterface;
+/// \brief Forward declaration
 class StorageDocumentInterface;
+/// \brief Forward declaration
+class StorageDumpInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
@@ -215,6 +219,11 @@ public:
 	/// \note this function is thread safe, multiple concurrent transactions are allowed 
 	virtual StorageTransactionInterface* createTransaction()=0;
 
+	/// \brief Create a transaction object for altering the metadata table structure
+	/// \return the created transaction interface (with ownership)
+	/// \note this function is thread safe, multiple concurrent transactions are allowed (but not recommended :-)
+	virtual StorageMetaDataTransactionInterface* createMetaDataTransaction()=0;
+
 	/// \brief Creates an iterator on all storage term occurrence statistics
 	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
 	/// \return the iterator on the statistics message blobs
@@ -250,6 +259,12 @@ public:
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
 			const std::string& logfilename) const=0;
+
+	/// \brief Create a dump of a storage to iterate on
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
+	/// \return the object to fetch the dump from
+	virtual StorageDumpInterface* createDump(
+			const std::string& keyprefix) const=0;
 
 	/// \brief Iterate through all key/value pairs and check their data for validity
 	/// \param[out] errorlog stream for reporting errors
