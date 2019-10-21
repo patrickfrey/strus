@@ -140,15 +140,17 @@ public:
 	LevelDbIterator( const leveldb::ReadOptions& opt_, const strus::shared_ptr<LevelDbConnection>& conn_);
 	~LevelDbIterator();
 
-	leveldb::Iterator* itr()		{return m_itr;}
-	leveldb::DB* db() const			{return m_conn->db();}
-	const leveldb::ReadOptions opt()	{return m_opt;}
+	leveldb::Iterator* itr()			{return m_itr;}
+	const leveldb::Iterator* itr() const		{return m_itr;}
+	leveldb::DB* db()				{return m_conn->db();}
+	const leveldb::DB* db() const			{return m_conn->db();}
+	const leveldb::ReadOptions& opt() const		{return m_opt;}
 
 	void done();
 
 private:
-	LevelDbIterator( const LevelDbIterator&){}		///... non copyable
-	void operator=( const LevelDbIterator&){}		///... non copyable
+	LevelDbIterator( const LevelDbIterator&){}	///... non copyable
+	void operator=( const LevelDbIterator&){}	///... non copyable
 
 private:
 	leveldb::Iterator* m_itr;

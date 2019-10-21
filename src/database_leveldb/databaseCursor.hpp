@@ -65,7 +65,6 @@ private:
 
 private:
 	LevelDbIterator m_itrhnd;				///< handle for iterator on levelDB blocks
-	leveldb::Iterator* m_itr;				///< iterator on levelDB blocks
 	enum {MaxDomainKeySize=32};
 	unsigned char m_domainkey[ MaxDomainKeySize];		///< key prefix defining the current domain to scan
 	std::size_t m_domainkeysize;				///< size of domain key in bytes

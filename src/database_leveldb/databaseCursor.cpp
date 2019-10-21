@@ -30,10 +30,8 @@ static leveldb::ReadOptions getOptions( const strus::shared_ptr<LevelDbConnectio
 }
 
 DatabaseCursor::DatabaseCursor( strus::shared_ptr<LevelDbConnection> conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
-	:m_itrhnd(getOptions(conn_,useCache,useSnapshot),conn_),m_itr(0),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
-{
-	m_itr = m_itrhnd.itr();
-}
+	:m_itrhnd(getOptions(conn_,useCache,useSnapshot),conn_),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
+{}
 
 DatabaseCursor::~DatabaseCursor()
 {
@@ -47,9 +45,9 @@ DatabaseCursor::~DatabaseCursor()
 
 bool DatabaseCursor::checkDomain() const
 {
-	if (m_itr->Valid()
-	&&  m_domainkeysize <= m_itr->key().size()
-	&&  0==std::memcmp( m_domainkey, m_itr->key().data(), m_domainkeysize))
+	if (m_itrhnd.itr()->Valid()
+	&&  m_domainkeysize <= m_itrhnd.itr()->key().size()
+	&&  0==std::memcmp( m_domainkey, m_itrhnd.itr()->key().data(), m_domainkeysize))
 	{
 		return true;
 	}
@@ -73,7 +71,7 @@ DatabaseCursorInterface::Slice DatabaseCursor::getCurrentKey() const
 {
 	if (checkDomain())
 	{
-		return Slice( m_itr->key().data(), m_itr->key().size());
+		return Slice( m_itrhnd.itr()->key().data(), m_itrhnd.itr()->key().size());
 	}
 	else
 	{
@@ -88,11 +86,10 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
 		initDomain( keystr, domainkeysize);
-		m_itr->Seek( leveldb::Slice( keystr, keysize));
+		m_itrhnd.itr()->Seek( leveldb::Slice( keystr, keysize));
 		return getCurrentKey();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek upper bound: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
@@ -106,17 +103,16 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBoundRestricted(
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-		m_itr->Seek( leveldb::Slice( keystr,keysize));
-		if (m_itr->Valid())
+		m_itrhnd.itr()->Seek( leveldb::Slice( keystr,keysize));
+		if (m_itrhnd.itr()->Valid())
 		{
 			std::size_t kk = upkeysize < keysize ? upkeysize : keysize;
-			int res = std::memcmp( m_itr->key().data(), upkey, kk);
+			int res = std::memcmp( m_itrhnd.itr()->key().data(), upkey, kk);
 			if (res < 0 || (res == 0 && upkeysize < keysize))
 			{
-				return Slice( m_itr->key().data(), m_itr->key().size());
+				return Slice( m_itrhnd.itr()->key().data(), m_itrhnd.itr()->key().size());
 			}
 		}
 		return Slice();
@@ -130,11 +126,10 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekFirst(
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
 		initDomain( domainkey, domainkeysize);
-		m_itr->Seek( leveldb::Slice( domainkey,domainkeysize));
+		m_itrhnd.itr()->Seek( leveldb::Slice( domainkey,domainkeysize));
 		return getCurrentKey();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek first: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
@@ -146,20 +141,19 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekLast(
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
 		initDomain( domainkey, domainkeysize);
 		if (m_domainkeysize == 0)
 		{
-			m_itr->SeekToLast();
+			m_itrhnd.itr()->SeekToLast();
 		}
 		else
 		{
-			m_itr->Seek( leveldb::Slice( (char*)m_domainkey, m_domainkeysize+1));
-			if (m_itr->Valid())
+			m_itrhnd.itr()->Seek( leveldb::Slice( (char*)m_domainkey, m_domainkeysize+1));
+			if (m_itrhnd.itr()->Valid())
 			{
-				m_itr->Prev();
+				m_itrhnd.itr()->Prev();
 			}
 			else
 			{
@@ -175,12 +169,11 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekNext()
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-		if (m_itr->Valid())
+		if (m_itrhnd.itr()->Valid())
 		{
-			m_itr->Next();
+			m_itrhnd.itr()->Next();
 			return getCurrentKey();
 		}
 		return Slice();
@@ -192,12 +185,11 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekPrev()
 {
 	try
 	{
-		leveldb::DB* db = m_itrhnd.db();
-		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+		if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-		if (m_itr->Valid())
+		if (m_itrhnd.itr()->Valid())
 		{
-			m_itr->Prev();
+			m_itrhnd.itr()->Prev();
 			return getCurrentKey();
 		}
 		return Slice();
@@ -207,12 +199,11 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekPrev()
 
 DatabaseCursorInterface::Slice DatabaseCursor::key() const
 {
-	leveldb::DB* db = m_itrhnd.db();
-	if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+	if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-	if (m_itr->Valid())
+	if (m_itrhnd.itr()->Valid())
 	{
-		return Slice( (const char*)m_itr->key().data(), m_itr->key().size());
+		return Slice( (const char*)m_itrhnd.itr()->key().data(), m_itrhnd.itr()->key().size());
 	}
 	else
 	{
@@ -222,12 +213,11 @@ DatabaseCursorInterface::Slice DatabaseCursor::key() const
 
 DatabaseCursorInterface::Slice DatabaseCursor::value() const
 {
-	leveldb::DB* db = m_itrhnd.db();
-	if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
+	if (!m_itrhnd.db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "seekUpperBound");
 
-	if (m_itr->Valid())
+	if (m_itrhnd.itr()->Valid())
 	{
-		return Slice( (const char*)m_itr->value().data(), m_itr->value().size());
+		return Slice( (const char*)m_itrhnd.itr()->value().data(), m_itrhnd.itr()->value().size());
 	}
 	else
 	{
