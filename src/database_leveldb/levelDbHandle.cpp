@@ -80,7 +80,6 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 		cleanup();
 		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
 	}
-	std::cerr << "++++ OPEN DB " << m_path << std::endl;
 	// Do compaction, if state of db was closed previously without:
 	m_db->CompactRange( NULL, NULL);
 	m_db->CompactRange( NULL, NULL);
@@ -103,7 +102,6 @@ void LevelDbHandle::cleanup()
 {
 	if (m_db)
 	{
-		std::cerr << "++++ CLOSE DB " << m_path << std::endl;
 		delete m_db;
 		m_db = 0;
 	}
