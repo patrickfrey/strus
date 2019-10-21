@@ -61,6 +61,7 @@ private:
 	unsigned int m_blockSize;			///< block unit size (default 4K)
 };
 
+
 /// \brief Map of shared Level DB handles
 class LevelDbHandleMap
 {
@@ -95,6 +96,7 @@ private:
 	std::vector<LevelDbHandleRef> m_map;
 };
 
+
 /// \brief DB Connection handle (another indirection to handle explicit close properly)
 class LevelDbConnection
 {
@@ -119,24 +121,39 @@ public:
 		return hnd->db();
 	}
 
-	typedef std::list<leveldb::Iterator*>::iterator IteratorHandle;
-
-	IteratorHandle newIterator( const leveldb::ReadOptions& opt);
-	void deleteIterator( IteratorHandle& ihnd);
-
 	std::string config() const
 	{
 		return (m_db.get())?m_db->config():std::string();
 	}
 
 private:
-	void delete_iterators();
-
-private:
 	strus::shared_ptr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
 	strus::shared_ptr<LevelDbHandle> m_db;			///< shared levelDB handle
-	strus::mutex m_mutex;					///< mutex for access of iterators
-	std::list<leveldb::Iterator*> m_itrlist;		///< list of allocated iterators
+};
+
+
+/// \brief DB Iterator handle also holding a connection reference
+class LevelDbIterator
+{
+public:
+	LevelDbIterator() :m_itr(0),m_conn(),m_opt(){}
+	LevelDbIterator( const leveldb::ReadOptions& opt_, const strus::shared_ptr<LevelDbConnection>& conn_);
+	~LevelDbIterator();
+
+	leveldb::Iterator* itr()		{return m_itr;}
+	leveldb::DB* db() const			{return m_conn->db();}
+	const leveldb::ReadOptions opt()	{return m_opt;}
+
+	void done();
+
+private:
+	LevelDbIterator( const LevelDbIterator&){}		///... non copyable
+	void operator=( const LevelDbIterator&){}		///... non copyable
+
+private:
+	leveldb::Iterator* m_itr;
+	strus::shared_ptr<LevelDbConnection> m_conn;
+	leveldb::ReadOptions m_opt;
 };
 
 }//namespace

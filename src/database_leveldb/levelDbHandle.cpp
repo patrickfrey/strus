@@ -171,8 +171,6 @@ void LevelDbConnection::close()
 {
 	if (m_db.get())
 	{
-		delete_iterators();
-
 		// Dereference if this connection is the last one:
 		const char* path = m_db->path().c_str();
 		m_db.reset();
@@ -180,42 +178,22 @@ void LevelDbConnection::close()
 	}
 }
 
-void LevelDbConnection::delete_iterators()
+LevelDbIterator::LevelDbIterator( const leveldb::ReadOptions& opt_, const strus::shared_ptr<LevelDbConnection>& db_)
+	:m_itr(0),m_conn(db_),m_opt(opt_)
 {
-	strus::scoped_lock lock( m_mutex);
-	std::list<leveldb::Iterator*>::iterator ii = m_itrlist.begin(), ie = m_itrlist.end();
-	for (; ii != ie; ++ii)
-	{
-		if (*ii)
-		{
-			delete *ii;
-			*ii = 0;
-		}
-	}
-}
-
-LevelDbConnection::IteratorHandle LevelDbConnection::newIterator( const leveldb::ReadOptions& opt)
-{
-	strus::scoped_lock lock( m_mutex);
-	m_itrlist.push_back((leveldb::Iterator*)0);
-
-	leveldb::DB* dbh = db();
+	leveldb::DB* dbh = m_conn->db();
 	if (!dbh) throw std::runtime_error( _TXT("cannot create a levelDB iterator on a connection closed"));
-	leveldb::Iterator* itr = dbh->NewIterator( opt);
-	if (!itr) throw std::runtime_error( _TXT("failed to create a levelDB iterator"));
-
-	m_itrlist.back() = itr;
-	IteratorHandle last = m_itrlist.end();
-	return --last;
+	m_itr = dbh->NewIterator( m_opt);
+	if (!m_itr) throw std::runtime_error( _TXT("failed to create a levelDB iterator"));
 }
 
-void LevelDbConnection::deleteIterator( IteratorHandle& ihnd)
+LevelDbIterator::~LevelDbIterator()
 {
-	if (*ihnd)
-	{
-		delete *ihnd;
-	}
-	strus::scoped_lock lock( m_mutex);
-	m_itrlist.erase( ihnd);
+	if (m_itr) delete m_itr;
+}
+
+void LevelDbIterator::done()
+{
+	if (m_itr) {delete m_itr; m_itr=0;}
 }
 

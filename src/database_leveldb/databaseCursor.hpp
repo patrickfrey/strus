@@ -23,7 +23,7 @@ class DatabaseCursor
 	:public DatabaseCursorInterface
 {
 public:
-	DatabaseCursor( const strus::shared_ptr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
+	DatabaseCursor( strus::shared_ptr<LevelDbConnection> conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseCursor();
 
@@ -64,9 +64,7 @@ private:
 	Slice getCurrentKey() const;
 
 private:
-	strus::shared_ptr<LevelDbConnection> m_conn;		///< levelDB connection
-	leveldb::ReadOptions m_dboptions;			///< options for levelDB
-	LevelDbConnection::IteratorHandle m_itrhnd;		///< handle for iterator on levelDB blocks
+	LevelDbIterator m_itrhnd;				///< handle for iterator on levelDB blocks
 	leveldb::Iterator* m_itr;				///< iterator on levelDB blocks
 	enum {MaxDomainKeySize=32};
 	unsigned char m_domainkey[ MaxDomainKeySize];		///< key prefix defining the current domain to scan
