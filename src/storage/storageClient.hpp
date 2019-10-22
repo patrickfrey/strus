@@ -62,16 +62,16 @@ class StorageClient
 public:
 	/// \param[in] database key value store database type used by this storage
 	/// \param[in] databaseConfig configuration string (not a filename!) of the database interface to create for this storage
-	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
 	/// \param[in] statisticsProc_ statistics message processor interface
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
 			const DatabaseInterface* database_,
-			const std::string& databaseConfig,
-			const char* termnomap_source,
 			const StatisticsProcessorInterface* statisticsProc_,
+			const std::string& databaseConfig,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~StorageClient();
+
+	virtual bool reload( const std::string& config);
 
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
@@ -173,6 +173,10 @@ public:
 
 	virtual std::string config() const;
 
+public:/*Storage (constructor)*/
+	/// \param[in] termnomap_source end of line separated list of terms to define first
+	void loadTermnoMap( const char* termnomap_source);
+
 public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
@@ -264,8 +268,7 @@ public:/*strusResizeBlocks,StorageDocumentChecker*/
 	}
 
 private:
-	void cleanup();
-	void loadTermnoMap( const char* termnomap_source);
+	void init( const std::string& databaseConfig);
 	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();
 	// \brief Filling document frequency cache
@@ -273,6 +276,7 @@ private:
 	void fillDocumentFrequencyCache();
 
 private:
+	const DatabaseInterface* m_dbtype;			///< type of key value store database interface
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
 	strus::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
 	strus::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
@@ -289,10 +293,10 @@ private:
 	strus::mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno
 
 	strus::shared_ptr<MetaDataBlockCache> m_metaDataBlockCache;///< read cache for meta data blocks
-
-	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
+
 	bool m_close_called;					///< true if close was already called
+	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
 	std::string m_statisticsPath;				///< storage path for statistics, equals storage path if not explicitely defined differently
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };

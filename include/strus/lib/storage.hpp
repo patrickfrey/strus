@@ -15,14 +15,16 @@
 namespace strus {
 
 /// \brief Forward declaration
+class FileLocatorInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 /// \brief Forward declaration
 class StorageInterface;
 
 /// \brief Create an interface for a strus storage, standard implementation
-/// \param[in] workdir working directory where storage files are stored relatively to
-/// \param[in] errorhnd error buffer interface
-StorageInterface* createStorageType_std( const std::string& workdir, ErrorBufferInterface* errorhnd);
+/// \param[in] filelocator interface to locate files to read or the working directory where to write files to
+/// \param[in] errorhnd reference to error buffer (ownership hold by caller)
+StorageInterface* createStorageType_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

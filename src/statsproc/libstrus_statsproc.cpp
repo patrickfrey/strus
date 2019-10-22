@@ -9,6 +9,7 @@
 /// \file libstrus_statsproc.cpp
 #include "strus/lib/statsproc.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "statisticsProcessor.hpp"
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
@@ -16,7 +17,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC StatisticsProcessorInterface* strus::createStatisticsProcessor_std( const std::string& workdir, ErrorBufferInterface* errorhnd)
+DLL_PUBLIC StatisticsProcessorInterface* strus::createStatisticsProcessor_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd)
 {
 	try
 	{
@@ -26,7 +27,7 @@ DLL_PUBLIC StatisticsProcessorInterface* strus::createStatisticsProcessor_std( c
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new StatisticsProcessor( workdir, errorhnd);
+		return new StatisticsProcessor( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message processor: %s"), *errorhnd, 0);
 }

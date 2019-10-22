@@ -20,12 +20,14 @@
 #include "strus/storageInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/lib/error.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/base/unordered_map.hpp"
 #include "strus/base/configParser.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/databaseClientUndefinedStub.hpp"
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "storageTransaction.hpp"
@@ -63,11 +65,11 @@ using namespace strus;
 
 StorageClient::StorageClient(
 		const DatabaseInterface* database_,
-		const std::string& databaseConfig,
-		const char* termnomap_source,
 		const StatisticsProcessorInterface* statisticsProc_,
+		const std::string& databaseConfig,
 		ErrorBufferInterface* errorhnd_)
-	:m_database(database_->createClient( databaseConfig))
+	:m_dbtype(database_)
+	,m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_structno(0)
@@ -76,11 +78,19 @@ StorageClient::StorageClient(
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_metaDataBlockCache()
-	,m_statisticsProc(statisticsProc_)
+	,m_documentFrequencyCache()
 	,m_close_called(false)
+	,m_statisticsProc(statisticsProc_)
+	,m_statisticsPath()
 	,m_errorhnd(errorhnd_)
 {
-	if (statisticsProc_)
+	init( databaseConfig);
+}
+
+void StorageClient::init( const std::string& databaseConfig)
+{
+	m_database.reset( m_dbtype->createClient( databaseConfig));
+	if (m_statisticsProc)
 	{
 		std::string databaseConfigCopy = databaseConfig;
 		if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
@@ -94,7 +104,43 @@ StorageClient::StorageClient(
 	m_metaDataBlockCache.reset( new MetaDataBlockCache( m_database.get(), metadescr));
 
 	loadVariables( m_database.get());
-	if (termnomap_source) loadTermnoMap( termnomap_source);
+}
+
+
+bool StorageClient::reload( const std::string& databaseConfig)
+{
+	try
+	{
+		if (!m_close_called) try
+		{
+			storeVariables();
+		}
+		CATCH_ERROR_MAP( _TXT("error reloading storage client: %s"), *m_errorhnd);
+
+		m_next_typeno.set(0);
+		m_next_termno.set(0);
+		m_next_structno.set(0);
+		m_next_docno.set(0);
+		m_next_userno.set(0);
+		m_next_attribno.set(0);
+		m_nof_documents.set(0);
+
+		m_database.reset( new DatabaseClientUndefinedStub( m_errorhnd));
+		//... the assignment of DatabaseClientUndefinedStub guarantees that m_database is initialized, event if 'init' throws
+		MetaDataDescription metadescr;
+		m_metaDataBlockCache.reset( new MetaDataBlockCache( m_database.get(), metadescr));
+		//... this assignment guarantees that m_metaDataBlockCache is initialized, event if 'init' throws
+
+		bool fillDfCache = (0!=m_documentFrequencyCache.get());
+		m_documentFrequencyCache.reset();
+		m_close_called = false;
+		m_statisticsPath.clear();
+
+		init( databaseConfig);
+		if (fillDfCache) fillDocumentFrequencyCache();
+		return true;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' reloading configuration: %s"), MODULENAME, *m_errorhnd, false);
 }
 
 std::string StorageClient::config() const

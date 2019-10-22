@@ -13,8 +13,10 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/base/configParser.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/fileio.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"
@@ -34,51 +36,6 @@
 
 using namespace strus;
 
-static std::string loadFile( const std::string& filename)
-{
-	std::string rt;
-	int errcode = 0;
-
-	FILE* fh = ::fopen( filename.c_str(), "rb");
-	if (!fh)
-	{
-		errcode = errno;
-		goto FILEERROR;
-	}
-	unsigned int nn;
-	enum {bufsize=(1<<12)};
-	char buf[ bufsize];
-
-	while (!!(nn=::fread( buf, 1, bufsize, fh)))
-	{
-		try
-		{
-			rt.append( buf, nn);
-		}
-		catch (const std::bad_alloc&)
-		{
-			errcode = 12/*ENOMEM*/;
-			goto FILEERROR;
-		}
-	}
-	if (!feof( fh))
-	{
-		errcode = ::ferror( fh);
-		goto FILEERROR;
-	}
-	else
-	{
-		::fclose( fh);
-	}
-	return rt;
-FILEERROR:
-	{
-		if (fh) ::fclose( fh);
-		throw strus::runtime_error( _TXT( "could not read file '%s': (errno %d)"), filename.c_str(), errcode);
-	}
-}
-
-
 StorageClientInterface* Storage::createClient(
 		const std::string& configsource,
 		const DatabaseInterface* database,
@@ -86,21 +43,25 @@ StorageClientInterface* Storage::createClient(
 {
 	try
 	{
-		std::string cachedterms;
+		if (m_errorhnd->hasError()) return 0;
+		std::string cachedtermspath;
 		std::string databaseConfig = configsource;
-		if (extractStringFromConfigString( cachedterms, databaseConfig, "cachedterms", m_errorhnd))
+		bool hasCachedTerms = strus::extractStringFromConfigString( cachedtermspath, databaseConfig, "cachedterms", m_errorhnd);
+
+		Reference<StorageClient> client( new StorageClient( database, statisticsProc, databaseConfig, m_errorhnd));
+
+		if (hasCachedTerms)
 		{
-			std::string cachedtermsrc = loadFile( cachedterms);
-			return new StorageClient( database, databaseConfig, cachedtermsrc.c_str(), statisticsProc, m_errorhnd);
+			std::string cachedtermsfile = m_filelocator->getResourceFilePath( cachedtermspath);
+			if (m_errorhnd->hasError()) {m_errorhnd->explain( _TXT( "could not locate cached terms file")); return 0;}
+
+			std::string cachedtermsrc;
+			int ec = strus::readFile( cachedtermsfile, cachedtermsrc);
+			if (ec) throw strus::runtime_error( _TXT( "could not read file '%s': %s"), cachedtermsfile.c_str(), ::strerror(ec));
+
+			client->loadTermnoMap( cachedtermsrc.c_str());
 		}
-		else
-		{
-			if (m_errorhnd->hasError())
-			{
-				return 0;
-			}
-			return new StorageClient( database, databaseConfig, 0, statisticsProc, m_errorhnd);
-		}
+		return client.release();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }

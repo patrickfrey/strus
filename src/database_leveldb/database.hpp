@@ -19,6 +19,8 @@ class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseBackupCursorInterface;
 /// \brief Forward declaration
+class FileLocatorInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 /// \brief Interface to the create,destroy the key value store database
@@ -26,8 +28,11 @@ class Database
 	:public DatabaseInterface
 {
 public:
-	explicit Database( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
-		:m_dbhandle_map( new LevelDbHandleMap()),m_workdir(workdir_),m_errorhnd(errorhnd_){}
+	/// \brief Constructor
+	/// \param[in] filelocator_ interface to locate files to read or the working directory where to write files to
+	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
+	explicit Database( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
+		:m_dbhandle_map( new LevelDbHandleMap()),m_filelocator(filelocator_),m_errorhnd(errorhnd_){}
 
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
@@ -47,9 +52,9 @@ private:
 	bool expandDatabaseFullPath( std::string& path) const;
 
 private:
-	strus::shared_ptr<LevelDbHandleMap> m_dbhandle_map;
-	std::string m_workdir;
-	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
+	strus::shared_ptr<LevelDbHandleMap> m_dbhandle_map;	///< map of database handles
+	const FileLocatorInterface* m_filelocator;		///< interface to locate files to read or the working directory where to write files to
+	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
 }//namespace

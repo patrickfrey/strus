@@ -17,12 +17,14 @@ namespace strus {
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
+class FileLocatorInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 /// \brief Create an interface for processing global statistics
-/// \param[in] workdir working directory where statistics files are stored relatively to
+/// \param[in] filelocator interface to locate files to read or the working directory where to write files to
 /// \param[in] errorhnd error buffer interface
-StatisticsProcessorInterface* createStatisticsProcessor_std( const std::string& workdir, ErrorBufferInterface* errorhnd);
+StatisticsProcessorInterface* createStatisticsProcessor_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

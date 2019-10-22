@@ -17,6 +17,8 @@ class DatabaseInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
+class FileLocatorInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 
@@ -25,8 +27,11 @@ class Storage
 	:public StorageInterface
 {
 public:
-	Storage( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_),m_workdir(workdir_){}
+	/// \brief Constructor
+	/// \param[in] filelocator_ interface to locate files to read or the working directory where to write files to
+	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
+	Storage( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_),m_filelocator(filelocator_){}
 
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
@@ -43,7 +48,7 @@ public:
 
 private:
 	ErrorBufferInterface* m_errorhnd;
-	std::string m_workdir;
+	const FileLocatorInterface* m_filelocator;
 };
 
 }//namespace

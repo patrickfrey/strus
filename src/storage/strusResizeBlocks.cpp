@@ -7,6 +7,7 @@
  */
 #include "strus/lib/error.hpp"
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/local_ptr.hpp"
@@ -32,7 +33,9 @@
 static void printUsage()
 {
 	std::cout << "strusResizeBlocks [options] <config> <blocktype> <newsize>" << std::endl;
-	std::cout << "options:" << std::endl;
+	std::cout << "Description: Patches a storage index (currently forward index)," << std::endl;
+	std::cout << "  resizeing the size of blocks." << std::endl;
+	std::cout << "Options:" << std::endl;
 	std::cout << "-h|--help" << std::endl;
 	std::cout << "    " << _TXT("Print this usage and do nothing else") << std::endl;
 	std::cout << "-v|--version" << std::endl;
@@ -114,7 +117,7 @@ static void resizeBlocks(
 		unsigned int transactionsize,
 		const std::pair<unsigned int,unsigned int>& docnorange)
 {
-	strus::StorageClient storage( dbi, configsource, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
+	strus::StorageClient storage( dbi, 0/*statisticsProc*/, configsource, g_errorBuffer);
 	strus::local_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
@@ -197,16 +200,21 @@ static void resizeBlocks(
 
 int main( int argc, const char* argv[])
 {
-	strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2, NULL/*debug trace interface*/));
-	if (!errorBuffer.get())
-	{
-		std::cerr << _TXT("failed to create error buffer") << std::endl;
-		return -1;
-	}
-	g_errorBuffer = errorBuffer.get();
-
 	try
 	{
+		strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2, NULL/*debug trace interface*/));
+		if (!errorBuffer.get())
+		{
+			std::cerr << _TXT("failed to create error buffer") << std::endl;
+			return -1;
+		}
+		g_errorBuffer = errorBuffer.get();
+		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorBuffer));
+		if (!filelocator.get())
+		{
+			std::cerr << _TXT("failed to create file locator") << std::endl;
+			return -1;
+		}
 		bool doExit = false;
 		int argi = 1;
 		unsigned int transactionsize = 1000;
@@ -270,11 +278,11 @@ int main( int argc, const char* argv[])
 		std::string blocktype( argv[ argi+1]);
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
-		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( "", g_errorBuffer);
-		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
+		strus::Reference<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( filelocator.get(), g_errorBuffer));
+		if (!dbi.get()) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
 		if (g_errorBuffer->hasError()) throw std::runtime_error( _TXT("error in initialization"));
 
-		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
+		resizeBlocks( dbi.get(), dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 
 		// Check for reported error an terminate regularly:
 		if (g_errorBuffer->hasError())

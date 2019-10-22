@@ -10,6 +10,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/configParser.hpp"
 #include "strus/base/fileio.hpp"
@@ -89,14 +90,15 @@ bool Database::exists( const std::string& configsource) const
 
 bool Database::expandDatabaseFullPath( std::string& path) const
 {
-	if (!m_workdir.empty())
+	std::string workdir = m_filelocator->getWorkingDirectory();
+	if (!workdir.empty())
 	{
 		if (strus::hasUpdirReference( path))
 		{
 			m_errorhnd->report( ErrorCodeInvalidFilePath, _TXT( "path in database configuration must not contain up-directory references ('..') if workdir is specified"));
 			return false;
 		}
-		path = strus::joinFilePath( m_workdir, path);
+		path = strus::joinFilePath( workdir, path);
 	}
 	return true;
 }

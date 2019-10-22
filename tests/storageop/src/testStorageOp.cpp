@@ -13,12 +13,14 @@
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -41,6 +43,7 @@
 #include <set>
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
+static strus::FileLocatorInterface* g_fileLocator = 0;
 static strus::PseudoRandom g_random;
 
 class Storage
@@ -68,12 +71,12 @@ public:
 
 void Storage::open( const char* config, bool reset)
 {
-	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	sti.reset( strus::createStorageType_std( "", g_errorhnd));
+	sti.reset( strus::createStorageType_std( g_fileLocator, g_errorhnd));
 	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -99,7 +102,7 @@ void Storage::open( const char* config, bool reset)
 static void destroyStorage( const char* config)
 {
 	strus::shared_ptr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -147,7 +150,7 @@ static std::string featureString( const std::string& prefix, unsigned int num)
 
 void Storage::dump()
 {
-	strus::local_ptr<strus::StorageDumpInterface> chunkitr( sci->createDump( ""));
+	strus::local_ptr<strus::StorageDumpInterface> chunkitr( sci->createDump( ""/*keyprefix*/));
 
 	const char* chunk;
 	std::size_t chunksize;
@@ -917,7 +920,9 @@ int main( int argc, const char* argv[])
 		}
 	}
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
-	if (!g_errorhnd) return -1;
+	if (!g_errorhnd) {std::cerr << "FAILED " << "strus::createErrorBuffer_standard" << std::endl; return -1;}
+	g_fileLocator = strus::createFileLocator_std( g_errorhnd);
+	if (!g_fileLocator) {std::cerr << "FAILED " << "strus::createFileLocator_std" << std::endl; return -1;}
 
 	unsigned int ti=test_index?test_index:1;
 	for (;;++ti)
@@ -939,6 +944,8 @@ TESTS_DONE:
 	{
 		destroyStorage( "path=storage");
 	}
+	delete g_fileLocator;
+	delete g_errorhnd;
 	return 0;
 }
 

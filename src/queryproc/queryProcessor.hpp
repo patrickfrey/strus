@@ -29,6 +29,7 @@ class QueryProcessor
 {
 public:
 	/// \brief Constructor
+	/// \param[in] filelocator_ interface to locate files to read or the working directory where to write files to
 	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
 	QueryProcessor( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_);
 

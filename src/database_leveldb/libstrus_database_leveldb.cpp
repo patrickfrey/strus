@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "database.hpp"
 #include "strus/base/dll_tags.hpp"
@@ -14,7 +15,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( const std::string& workdir, ErrorBufferInterface* errorhnd)
+DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd)
 {
 	try
 	{
@@ -24,7 +25,7 @@ DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( const std::stri
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new Database( workdir, errorhnd);
+		return new Database( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database based on leveldb: %s"), *errorhnd, 0);
 }

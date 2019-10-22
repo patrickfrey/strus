@@ -14,6 +14,7 @@
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -47,6 +48,7 @@
 
 static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
+static strus::FileLocatorInterface* g_fileLocator = 0;
 
 class StlRandomGen
 {
@@ -979,6 +981,13 @@ int main( int argc, const char* argv[])
 		std::cerr << "construction of error buffer failed" << std::endl;
 		return -1;
 	}
+	g_fileLocator = strus::createFileLocator_std( g_errorhnd);
+	if (!g_fileLocator)
+	{
+		std::cerr << "construction of file locator failed" << std::endl;
+		return -1;
+	}
+
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);
@@ -998,21 +1007,18 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
-		strus::Reference<strus::FileLocatorInterface> filelocator( strus::createFileLocator_std( g_errorhnd));
-		if (!filelocator.get()) throw std::runtime_error("error creating file locator");
-
 		const char* config = argv[1];
 		unsigned int nofDocuments = getUintValue( argv[2]);
 		unsigned int maxDocumentSize = getUintValue( argv[3]);
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( "", g_errorhnd));
+		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 		if (!dbi.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( "", g_errorhnd));
+		strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_fileLocator, g_errorhnd));
 		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -1096,7 +1102,7 @@ int main( int argc, const char* argv[])
 #endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			strus::local_ptr<strus::QueryProcessorInterface> 
-				queryproc( strus::createQueryProcessor( filelocator.get(), g_errorhnd));
+				queryproc( strus::createQueryProcessor( g_fileLocator, g_errorhnd));
 			if (!queryproc.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
@@ -1193,6 +1199,8 @@ int main( int argc, const char* argv[])
 				return (nofQueriesFailed?2:0);
 			}
 		}
+		if (g_fileLocator) delete g_fileLocator;
+		if (g_errorhnd) delete g_errorhnd;
 		return 0;
 	}
 	catch (const std::runtime_error& e)
@@ -1203,6 +1211,8 @@ int main( int argc, const char* argv[])
 	{
 		std::cerr << "EXCEPTION " << e.what() << std::endl;
 	}
+	delete g_fileLocator;
+	delete g_errorhnd;
 	return 4;
 }
 

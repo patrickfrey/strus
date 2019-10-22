@@ -15,13 +15,16 @@
 namespace strus {
 
 /// \brief Forward declaration
+class FileLocatorInterface;
+/// \brief Forward declaration
 class DatabaseInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Get the database interface implemented with leveldb with the functions for accessing the key/value store database.
-/// \return the database interface
-DatabaseInterface* createDatabaseType_leveldb( const std::string& workdir, ErrorBufferInterface* errorhnd);
+/// \brief Create a database interface implemented with leveldb with the functions for accessing the key/value store database.
+/// \param[in] filelocator interface to locate files to read or the working directory where to write files to
+/// \param[in] errorhnd reference to error buffer (ownership hold by caller)
+DatabaseInterface* createDatabaseType_leveldb( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

@@ -7,6 +7,7 @@
  */
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/lib/filelocator.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
@@ -14,6 +15,7 @@
 #include "strus/statisticsMessage.hpp"
 #include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/timeStamp.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/local_ptr.hpp"
@@ -40,6 +42,7 @@
 
 static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
+static strus::FileLocatorInterface* g_fileLocator = 0;
 
 class StlRandomGen
 {
@@ -161,7 +164,9 @@ static unsigned int getUintValue( const char* arg)
 int main( int argc, const char* argv[])
 {
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
-	if (!g_errorhnd) return -1;
+	if (!g_errorhnd) {std::cerr << "FAILED " << "strus::createErrorBuffer_standard" << std::endl; return -1;}
+	g_fileLocator = strus::createFileLocator_std( g_errorhnd);
+	if (!g_fileLocator) {std::cerr << "FAILED " << "strus::createFileLocator_std" << std::endl; return -1;}
 
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
@@ -191,7 +196,7 @@ int main( int argc, const char* argv[])
 		TermCollection collection( nofTerms, diffRange);
 
 		// Build statistics:
-		strus::local_ptr<strus::StatisticsProcessorInterface> statsproc( strus::createStatisticsProcessor_std( "", g_errorhnd));
+		strus::local_ptr<strus::StatisticsProcessorInterface> statsproc( strus::createStatisticsProcessor_std( g_fileLocator, g_errorhnd));
 		strus::local_ptr<strus::StatisticsBuilderInterface> builder( statsproc->createBuilder( storagePath));
 		if (!builder.get())
 		{
@@ -316,6 +321,9 @@ int main( int argc, const char* argv[])
 		}
 		std::cerr << "processed blob of " << blobsize << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
 		std::cerr << "Ok [" << collection.termar.size() << "]" << std::endl;
+
+		delete g_fileLocator;
+		delete g_errorhnd;
 		return 0;
 	}
 	catch (const std::runtime_error& e)
@@ -326,6 +334,8 @@ int main( int argc, const char* argv[])
 	{
 		std::cerr << "EXCEPTION " << e.what() << std::endl;
 	}
+	delete g_fileLocator;
+	delete g_errorhnd;
 	return 4;
 }
 

@@ -13,6 +13,7 @@
 #include "statisticsMap.hpp"
 #include "datedFileList.hpp"
 #include "strus/statisticsIteratorInterface.hpp"
+#include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/configParser.hpp"
@@ -22,20 +23,21 @@
 
 using namespace strus;
 
-StatisticsProcessor::StatisticsProcessor( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_),m_workdir(workdir_){}
+StatisticsProcessor::StatisticsProcessor( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_),m_filelocator(filelocator_){}
 
 StatisticsProcessor::~StatisticsProcessor(){}
 
 std::string StatisticsProcessor::getFullPath( const std::string& path) const
 {
-	if (!m_workdir.empty())
+	std::string workdir = m_filelocator->getWorkingDirectory();
+	if (!workdir.empty())
 	{
 		if (strus::hasUpdirReference( path))
 		{
 			throw std::runtime_error( _TXT( "path for statistics processor must not contain up-directory references ('..') if workdir is specified"));
 		}
-		std::string rt = strus::joinFilePath( m_workdir, path);
+		std::string rt = strus::joinFilePath( workdir, path);
 		if (rt.empty()) throw std::bad_alloc();
 		return rt;
 	}

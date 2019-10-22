@@ -14,7 +14,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC StorageInterface* strus::createStorageType_std( const std::string& workdir, ErrorBufferInterface* errorhnd)
+DLL_PUBLIC StorageInterface* strus::createStorageType_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd)
 {
 	try
 	{
@@ -24,7 +24,7 @@ DLL_PUBLIC StorageInterface* strus::createStorageType_std( const std::string& wo
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new Storage( workdir, errorhnd);
+		return new Storage( filelocator, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage: %s"), *errorhnd, 0);
 }

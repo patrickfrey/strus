@@ -14,13 +14,19 @@
 namespace strus
 {
 ///\brief Forward declaration
+class FileLocatorInterface;
+///\brief Forward declaration
 class ErrorBufferInterface;
 
 class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
 public:
-	explicit StatisticsProcessor( const std::string& workdir_, ErrorBufferInterface* errorhnd_);
+	/// \brief Constructor
+	/// \param[in] filelocator_ interface to locate files to read or the working directory where to write files to
+	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
+	explicit StatisticsProcessor( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_);
+
 	virtual ~StatisticsProcessor();
 
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
@@ -40,7 +46,7 @@ private:
 
 private:
 	ErrorBufferInterface* m_errorhnd;
-	std::string m_workdir;
+	const FileLocatorInterface* m_filelocator;
 };
 
 }//namespace

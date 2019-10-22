@@ -62,6 +62,9 @@ public:
 	/// \remark Should call call 'close()' but ignore errors there silently
 	virtual ~StorageClientInterface(){}
 
+	/// \brief Reload storage client with altered configuration
+	virtual bool reload( const std::string& config)=0;
+
 	/// \brief Get the interpreted configuration this storage client was created with
 	/// \return the configuration as string
 	virtual std::string config() const=0;
