@@ -30,7 +30,7 @@ static leveldb::ReadOptions getOptions( const strus::shared_ptr<LevelDbConnectio
 }
 
 DatabaseCursor::DatabaseCursor( strus::shared_ptr<LevelDbConnection> conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
-	:m_itrhnd(getOptions(conn_,useCache,useSnapshot),conn_),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
+	:m_itrhnd(getOptions(conn_,useCache,useSnapshot),*conn_),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
 {}
 
 DatabaseCursor::~DatabaseCursor()

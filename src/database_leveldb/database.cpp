@@ -61,7 +61,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size", m_errorhnd);
 		(void)extractUIntFromConfigString( blockSize, src, "block_size", m_errorhnd);
 		if (m_errorhnd->hasError()) return 0;
-		return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize, autocompaction, m_errorhnd);
+		return new DatabaseClient( &m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize, autocompaction, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database client: %s"), *m_errorhnd, 0);
 }

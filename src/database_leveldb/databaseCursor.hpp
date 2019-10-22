@@ -55,8 +55,10 @@ public:
 	virtual Slice value() const;
 
 private:
-	DatabaseCursor( DatabaseCursor&){}			///... uncopyable
-	void operator=( DatabaseCursor&){}			///... uncopyable
+#if __cplusplus >= 201103L
+	DatabaseCursor( DatabaseCursor&) = delete;
+	void operator=( DatabaseCursor&) = delete;
+#endif
 
 private:
 	bool checkDomain() const;

@@ -25,7 +25,7 @@ class DatabaseClient
 {
 public:
 	/// \brief Constructor
-	/// \param[in] dbmap_ reference to map of shared levelDB handles
+	/// \param[in] dbmap pointer to map of levelDB handles (singleton)
 	/// \param[in] path path of the storage
 	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
 	/// \param[in] cachesize_k number of K LRU cache for nodes
@@ -34,7 +34,7 @@ public:
 	/// \param[in] blockSize block size on disk (size of units)
 	/// \param[in] autocompaction_ true if compaction is called on every transaction commit, false else
 	DatabaseClient(
-			const strus::shared_ptr<LevelDbHandleMap>& dbmap_,
+			LevelDbHandleMap* dbmap,
 			const std::string& path,
 			unsigned int maxOpenFiles,
 			unsigned int cachesize_k,
@@ -43,7 +43,7 @@ public:
 			unsigned int blockSize,
 			bool autocompaction_,
 			ErrorBufferInterface* errorhnd_)
-		:m_conn( new LevelDbConnection( dbmap_,dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)))
+		:m_conn( new LevelDbConnection( dbmap, dbmap->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)))
 		,m_autocompaction(autocompaction_)
 		,m_errorhnd(errorhnd_)
 	{}

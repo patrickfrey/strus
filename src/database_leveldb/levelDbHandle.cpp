@@ -77,7 +77,7 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	if (!status.ok())
 	{
 		std::string err = status.ToString();
-		cleanup();
+		if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
 	}
 	// Do compaction, if state of db was closed previously without:
@@ -96,20 +96,6 @@ std::string LevelDbHandle::config() const
 	if (m_writeBufferSize) out << ";write_buffer_size=" << m_writeBufferSize;
 	if (m_blockSize) out << ";block_size=" << m_blockSize;
 	return out.str();
-}
-
-void LevelDbHandle::cleanup()
-{
-	if (m_db)
-	{
-		delete m_db;
-		m_db = 0;
-	}
-	if (m_dboptions.block_cache)
-	{
-		delete m_dboptions.block_cache;
-		m_dboptions.block_cache = 0;
-	}
 }
 
 strus::shared_ptr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
@@ -164,7 +150,8 @@ void LevelDbHandleMap::dereference( const char* path)
 
 LevelDbHandle::~LevelDbHandle()
 {
-	cleanup();
+	if (m_db) delete m_db;
+	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
 void LevelDbConnection::close()
@@ -173,15 +160,22 @@ void LevelDbConnection::close()
 	{
 		// Dereference if this connection is the last one:
 		const char* path = m_db->path().c_str();
-		m_db.reset();
-		m_dbmap->dereference( path);
+		if (m_db.use_count() == 2)
+		{
+			m_db.reset();
+			m_dbmap->dereference( path);
+		}
+		else
+		{
+			m_db.reset();
+		}
 	}
 }
 
-LevelDbIterator::LevelDbIterator( const leveldb::ReadOptions& opt_, const strus::shared_ptr<LevelDbConnection>& db_)
-	:m_itr(0),m_conn(db_),m_opt(opt_)
+LevelDbIterator::LevelDbIterator( const leveldb::ReadOptions& opt_, const LevelDbConnection& conn)
+	:LevelDbConnection(conn),m_opt(opt_)
 {
-	leveldb::DB* dbh = m_conn->db();
+	leveldb::DB* dbh = conn.db();
 	if (!dbh) throw std::runtime_error( _TXT("cannot create a levelDB iterator on a connection closed"));
 	m_itr = dbh->NewIterator( m_opt);
 	if (!m_itr) throw std::runtime_error( _TXT("failed to create a levelDB iterator"));
