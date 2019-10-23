@@ -63,6 +63,7 @@ public:
 	virtual ~StorageClientInterface(){}
 
 	/// \brief Reload storage client with altered configuration
+	/// \param[in] config configuration string
 	virtual bool reload( const std::string& config)=0;
 
 	/// \brief Get the interpreted configuration this storage client was created with
