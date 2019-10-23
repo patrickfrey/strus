@@ -56,8 +56,8 @@ public:
 
 private:
 #if __cplusplus >= 201103L
-	DatabaseCursor( DatabaseCursor&) = delete;
-	void operator=( DatabaseCursor&) = delete;
+	DatabaseCursor( DatabaseCursor&) = delete;	//... non copyable
+	void operator=( DatabaseCursor&) = delete;	//... non copyable
 #endif
 
 private:
