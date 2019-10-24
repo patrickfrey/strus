@@ -30,6 +30,7 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "private/errorUtils.hpp"
 #include <string>
@@ -633,7 +634,7 @@ struct DocumentBuilder
 			char attributename[ 32];
 			snprintf( attributename, sizeof(attributename), "A%02u", ai);
 			char attributevalue[ 32];
-			snprintf( attributevalue, sizeof(attributevalue), "a%02u", ai);
+			snprintf( attributevalue, sizeof(attributevalue), "a%02u", ai + docno);
 
 			rt.push_back( Feature( Feature::Attribute, attributename, attributevalue));
 		}
@@ -643,7 +644,7 @@ struct DocumentBuilder
 			char metadataname[ 32];
 			snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
 			char metadatavalue[ 32];
-			snprintf( metadatavalue, sizeof(metadatavalue), "%1u", mi * 11);
+			snprintf( metadatavalue, sizeof(metadatavalue), "%1u", mi + docno);
 
 			rt.push_back( Feature( Feature::MetaData, metadataname, metadatavalue));
 		}
@@ -860,6 +861,143 @@ static void testDfCalculation()
 	}
 }
 
+struct MetaDataDump
+{
+	typedef std::vector<std::string> Row;
+	std::string header;
+	std::string content;
+	std::vector<Row> rows;
+
+	MetaDataDump()
+		:header(),content(){}
+	MetaDataDump( const std::string& header_, const std::string& content_)
+		:header(header_),content(content_){}
+	MetaDataDump( const MetaDataDump& o)
+		:header(o.header),content(o.content){}
+};
+
+static MetaDataDump readMetaDataDump( const Storage& storage)
+{
+	MetaDataDump rt;
+	strus::Reference<strus::MetaDataReaderInterface> mdreader( storage.sci->createMetaDataReader());
+	if (!mdreader.get()) throw std::runtime_error( g_errorhnd->fetchError());
+
+	int ei = 0, ee = mdreader->nofElements();
+	for (; ei != ee; ++ei)
+	{
+		rt.header += strus::string_format( ei?", %s %s":"%s %s", mdreader->getType(ei), mdreader->getName(ei));
+	}
+	unsigned int di=0,de=storage.sci->nofDocumentsInserted();
+	for (; di != de; ++di)
+	{
+		char docid[ 32];
+		snprintf( docid, sizeof(docid), "D%02u", di);
+
+		int docno = storage.sci->documentNumber( docid);
+		if (!docno) throw strus::runtime_error( "document '%s' not found", docid);
+
+		mdreader->skipDoc( docno);
+		std::string mdline;
+		mdline.append( docid);
+		mdline.append( ": ");
+		MetaDataDump::Row row;
+		for (ei=0; ei != ee; ++ei)
+		{
+			if (ei) mdline.append(", ");
+			row.push_back( (const char*)mdreader->getValue( ei).tostring());
+			mdline += row.back();
+		}
+		mdline.append("\n");
+		rt.content.append( mdline);
+		rt.rows.push_back( row);
+	}
+	return rt;
+}
+
+static void testReloadConfig()
+{
+	DocumentBuilder::Dim dim;
+	dim.nofDocs = 100;
+	dim.nofTermTypes = 3;
+	dim.nofTermValues = 3;
+	dim.nofDiffTermValues = 3;
+	dim.nofAttributes = 2;
+	dim.nofMetaData = 10;
+
+	Storage storage;
+	storage.open( "path=storage; cache=100K; max_open_files=128; write_buffer_size=2G; block_size=4K;"
+			"metadata=M0 UINT32, M1 UINT16, M2 UINT8, M3 FLOAT16, M4 FLOAT32,"
+			"M5 INT16, M6 UINT16, M7 UINT8, M8 INT16, M9 INT32",
+			true);
+	insertCollection( storage.sci.get(), dim);
+
+	std::string config_orig = storage.sci->config();
+	if (config_orig != "path='storage';cache=100K;max_open_files=128;write_buffer_size=2147483648;block_size=4096;"
+				"metadata=m0 UInt32,m4 Float32,m9 Int32,m1 UInt16,m3 Float16,m5 Int16,m6 UInt16,m8 Int16,m2 UInt8,m7 UInt8")
+	{
+		throw std::runtime_error("original configuration does not match");
+	}
+	/*	0: m0
+		1: m4
+		2: m9
+		3: m1
+		4: m3
+		5: m5
+		6: m6
+		7: m8
+		8: m2
+		9: m7
+	*/
+	MetaDataDump metadata_orig = readMetaDataDump( storage);
+
+	if (!storage.sci->reload(
+			"path=storage; cache=112K; max_open_files=140; write_buffer_size=1G; block_size=8K;"
+			"metadata=M0 UINT32, M2 UINT8, M3 FLOAT32,"
+			"M5 INT8, M6 UINT32, M7 UINT8, M8 FLOAT32, M9 INT16"))
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	std::string config_new = storage.sci->config();
+	if (config_new != "path='storage';cache=112K;max_open_files=140;write_buffer_size=1073741824;block_size=8192;"
+				"metadata=m0 UInt32,m3 Float32,m6 UInt32,m8 Float32,m9 Int16,m2 UInt8,m5 Int8,m7 UInt8")
+	{
+		throw std::runtime_error("altered configuration does not match");
+	}
+	/*	0: m0 -> 0
+		1: m3 -> 4
+		2: m6 -> 6
+		3: m8 -> 7
+		4: m9 -> 2
+		5: m2 -> 8
+		6: m5 -> 5
+		7: m7 -> 9
+	*/
+	enum {NofElemHandle=8};
+	int elemHandleMap[ NofElemHandle] = {0, 4, 6, 7, 2, 8, 5, 9};
+
+	MetaDataDump metadata_new = readMetaDataDump( storage);
+
+	std::cerr << "CONFIG ORIG:\n" << config_orig << std::endl;
+	std::cerr << "CONFIG NEW:\n" << config_new << std::endl;
+	std::cerr << "METADATA HEADER ORIG:\n" << metadata_orig.header << std::endl;
+	std::cerr << "METADATA HEADER NEW:\n" << metadata_new.header << std::endl;
+	std::cerr << "METADATA CONTENT ORIG:\n" << metadata_orig.content << std::endl;
+	std::cerr << "METADATA CONTENT NEW:\n" << metadata_new.content << std::endl;
+
+	if (metadata_new.rows.size() != metadata_orig.rows.size()) throw std::runtime_error("lost metadata");
+	std::size_t di = 0, de = metadata_orig.rows.size();
+	for (; di != de; ++di)
+	{
+		int ei = 0, ee = NofElemHandle;
+		for (; ei != ee; ++ei)
+		{
+			if (metadata_new.rows[ di][ ei] != metadata_orig.rows[ di][ elemHandleMap[ ei]])
+			{
+				throw std::runtime_error("metadata does not match");
+			}
+		}
+	}
+}
 
 #define RUN_TEST( idx, TestName)\
 	try\
@@ -935,6 +1073,7 @@ int main( int argc, const char* argv[])
 			case 4: RUN_TEST( ti, TrivialInsert ) break;
 			case 5: RUN_TEST( ti, SimpleDocumentUpdate) break;
 			case 6: RUN_TEST( ti, DocumentUpdate) break;
+			case 7: RUN_TEST( ti, ReloadConfig) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;

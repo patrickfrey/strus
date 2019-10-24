@@ -90,6 +90,7 @@ StorageClient::StorageClient(
 void StorageClient::init( const std::string& databaseConfig)
 {
 	m_database.reset( m_dbtype->createClient( databaseConfig));
+	m_close_called = false;
 	if (m_statisticsProc)
 	{
 		std::string databaseConfigCopy = databaseConfig;
@@ -106,17 +107,37 @@ void StorageClient::init( const std::string& databaseConfig)
 	loadVariables( m_database.get());
 }
 
-
 bool StorageClient::reload( const std::string& databaseConfig)
 {
 	try
 	{
-		if (!m_close_called) try
-		{
-			storeVariables();
-		}
-		CATCH_ERROR_MAP( _TXT("error reloading storage client: %s"), *m_errorhnd);
+		std::string src = databaseConfig;
+		std::string metadatasrc;
+		bool useAcl;
+		bool fillDfCache = (0!=m_documentFrequencyCache.get());
 
+		if (extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd))
+		{
+			if (useAcl != withAcl())
+			{
+				if (useAcl == true)
+				{
+					m_next_userno.set( 1);
+				}
+				else
+				{
+					throw std::runtime_error(_TXT("'acl' cannot be switched off"));
+				}
+			}
+		}
+		(void)extractStringFromConfigString( metadatasrc, src, "metadata", m_errorhnd);
+		if (m_errorhnd->hasError()) return false;
+
+		MetaDataDescription metadescr( metadatasrc);
+		StorageMetaDataTransaction metadata_transaction( this, m_errorhnd, metadescr);
+		if (!metadata_transaction.commit()) return false;
+
+		close();
 		m_next_typeno.set(0);
 		m_next_termno.set(0);
 		m_next_structno.set(0);
@@ -127,13 +148,10 @@ bool StorageClient::reload( const std::string& databaseConfig)
 
 		m_database.reset( new DatabaseClientUndefinedStub( m_errorhnd));
 		//... the assignment of DatabaseClientUndefinedStub guarantees that m_database is initialized, event if 'init' throws
-		MetaDataDescription metadescr;
 		m_metaDataBlockCache.reset( new MetaDataBlockCache( m_database.get(), metadescr));
 		//... this assignment guarantees that m_metaDataBlockCache is initialized, event if 'init' throws
 
-		bool fillDfCache = (0!=m_documentFrequencyCache.get());
 		m_documentFrequencyCache.reset();
-		m_close_called = false;
 		m_statisticsPath.clear();
 
 		init( databaseConfig);
@@ -141,6 +159,15 @@ bool StorageClient::reload( const std::string& databaseConfig)
 		return true;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' reloading configuration: %s"), MODULENAME, *m_errorhnd, false);
+}
+
+StorageClient::~StorageClient()
+{
+	if (!m_close_called) try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
 }
 
 std::string StorageClient::config() const
@@ -275,15 +302,6 @@ void StorageClient::getVariablesWriteBatch(
 	{
 		varstor.store( transaction, "UserNo", m_next_userno.value());
 	}
-}
-
-StorageClient::~StorageClient()
-{
-	if (!m_close_called) try
-	{
-		storeVariables();
-	}
-	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
 }
 
 Index StorageClient::getTermValue( const std::string& name) const

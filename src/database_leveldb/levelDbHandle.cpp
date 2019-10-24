@@ -48,7 +48,6 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	,m_compression(compression_)
 	,m_writeBufferSize(writeBufferSize_)
 	,m_blockSize(blockSize_)
-
 {
 	m_dboptions.create_if_missing = false;
 	if (m_maxOpenFiles)

@@ -29,6 +29,9 @@ public:
 	MetaDataElement( const MetaDataElement& o)
 		:m_type(o.m_type),m_ofs(o.m_ofs){}
 
+	bool operator==( const MetaDataElement& o) const	{return isequal(o);}
+	bool operator!=( const MetaDataElement& o) const	{return !isequal(o);}
+	bool isequal( const MetaDataElement& o) const		{return m_type == o.m_type && m_ofs == o.m_ofs;}
 
 	static unsigned int size( Type t)
 	{

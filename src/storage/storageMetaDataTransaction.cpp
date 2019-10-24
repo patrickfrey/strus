@@ -22,6 +22,19 @@ using namespace strus;
 
 StorageMetaDataTransaction::StorageMetaDataTransaction(
 		StorageClient* storage_,
+		ErrorBufferInterface* errorhnd_,
+		const MetaDataDescription& metadescr_new_)
+	:m_storage(storage_)
+	,m_metadescr_old(),m_metadescr_new(metadescr_new_),m_metadescr_resets()
+	,m_commit(false)
+	,m_rollback(false)
+	,m_errorhnd(errorhnd_)
+{
+	m_metadescr_old.load( m_storage->databaseClient());
+}
+
+StorageMetaDataTransaction::StorageMetaDataTransaction(
+		StorageClient* storage_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_metadescr_old(),m_metadescr_new(),m_metadescr_resets()
@@ -54,6 +67,11 @@ bool StorageMetaDataTransaction::commit()
 	{
 		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit after rollback"));
 		return false;
+	}
+	if (m_metadescr_resets.empty() && m_metadescr_old == m_metadescr_new)
+	{
+		// ... nothing has changed, do nothing, return with success
+		return true;
 	}
 	StorageClient::TransactionLock lock( m_storage);
 
@@ -135,14 +153,14 @@ void StorageMetaDataTransaction::alterElement(
 	{
 		MetaDataElement::Type type = MetaDataElement::typeFromName( datatype.c_str());
 	
+		if (m_metadescr_new.getHandle( oldname) < 0)
+		{
+			throw strus::runtime_error(_TXT("metadata element '%s' does not exist"), oldname.c_str());
+		}
 		m_metadescr_old.renameElement( oldname, name);
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
 	
-		if (m_metadescr_new.getHandle( name) < 0)
-		{
-			throw strus::runtime_error(_TXT("altered metadata element '%s' does not exist"), name.c_str());
-		}
 		changeElementType( name, type);
 	}
 	CATCH_ERROR_MAP( _TXT("error altering meta data element: %s"), *m_errorhnd);
@@ -154,14 +172,13 @@ void StorageMetaDataTransaction::renameElement(
 {
 	try
 	{
+		if (m_metadescr_new.getHandle( oldname) < 0)
+		{
+			throw strus::runtime_error(_TXT("metadata element '%s' does not exist"), oldname.c_str());
+		}
 		m_metadescr_old.renameElement( oldname, name);
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
-
-		if (m_metadescr_new.getHandle( name) < 0)
-		{
-			throw strus::runtime_error(_TXT("renamed metadata element '%s' does not exist"), name.c_str());
-		}
 	}
 	CATCH_ERROR_MAP( _TXT("error renaming meta data element: %s"), *m_errorhnd);
 }

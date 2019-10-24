@@ -34,6 +34,9 @@ public:
 	MetaDataDescription( const MetaDataDescription& o);
 
 	MetaDataDescription& operator=( const MetaDataDescription& o);
+	bool operator==( const MetaDataDescription& o) const	{return isequal(o);}
+	bool operator!=( const MetaDataDescription& o) const	{return !isequal(o);}
+	bool isequal( const MetaDataDescription& o) const;
 
 	std::string tostring() const;
 

@@ -36,6 +36,10 @@ public:
 	StorageMetaDataTransaction(
 			StorageClient* storage_,
 			ErrorBufferInterface* errorhnd_);
+	StorageMetaDataTransaction(
+			StorageClient* storage_,
+			ErrorBufferInterface* errorhnd_,
+			const MetaDataDescription& metadescr_new);
 
 	~StorageMetaDataTransaction();
 

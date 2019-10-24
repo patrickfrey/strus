@@ -88,6 +88,13 @@ MetaDataDescription& MetaDataDescription::operator=( const MetaDataDescription& 
 	return *this;
 }
 
+bool MetaDataDescription::isequal( const MetaDataDescription& o) const
+{
+	return (nofElements() == o.nofElements()
+		&& bytesize() == o.bytesize()
+		&& m_ar == o.m_ar && m_namemap == o.m_namemap);
+}
+
 std::string MetaDataDescription::tostring() const
 {
 	std::string rt;
