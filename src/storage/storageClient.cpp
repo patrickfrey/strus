@@ -63,6 +63,8 @@ using namespace strus;
 
 #define MODULENAME "storageClient"
 
+static char const** getConfigParamList( const DatabaseInterface* db);
+
 StorageClient::StorageClient(
 		const DatabaseInterface* database_,
 		const StatisticsProcessorInterface* statisticsProc_,
@@ -70,6 +72,7 @@ StorageClient::StorageClient(
 		ErrorBufferInterface* errorhnd_)
 	:m_dbtype(database_)
 	,m_database()
+	,m_cfgparam(getConfigParamList(database_))
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_structno(0)
@@ -85,6 +88,21 @@ StorageClient::StorageClient(
 	,m_errorhnd(errorhnd_)
 {
 	init( databaseConfig);
+}
+
+static char const** getConfigParamList( const DatabaseInterface* db)
+{
+	char const** rt;
+	std::vector<const char*> cfgar;
+	char const** cfg = db->getConfigParameters( DatabaseInterface::CmdCreateClient);
+	for (int ci = 0; cfg[ci]; ++ci) cfgar.push_back( cfg[ci]);
+	cfgar.push_back( "acl");
+	cfgar.push_back( "metadata");
+	rt = (char const**)std::malloc( (cfgar.size()+1) * sizeof(rt[0]));
+	if (rt == NULL) throw std::bad_alloc();
+	std::memcpy( rt, cfgar.data(), cfgar.size() * sizeof(rt[0]));
+	rt[ cfgar.size()] = 0;
+	return rt;
 }
 
 void StorageClient::init( const std::string& databaseConfig)
@@ -168,6 +186,7 @@ StorageClient::~StorageClient()
 		storeVariables();
 	}
 	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
+	std::free( m_cfgparam);
 }
 
 std::string StorageClient::config() const
@@ -1194,6 +1213,10 @@ StorageDumpInterface* StorageClient::createDump(
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
+const char** StorageClient::getConfigParameters() const
+{
+	return m_cfgparam;
+}
 
 bool StorageClient::checkStorage( std::ostream& errorlog) const
 {

@@ -270,6 +270,10 @@ public:
 	virtual StorageDumpInterface* createDump(
 			const std::string& keyprefix) const=0;
 
+	/// \brief Get a list of configuration parameters that can be used in reload (e.g. same as for createClient)
+	/// \return NULL terminated array of config parameters
+	virtual const char** getConfigParameters() const=0;
+
 	/// \brief Iterate through all key/value pairs and check their data for validity
 	/// \param[out] errorlog stream for reporting errors
 	/// \return true, if the check succeeds, false if it fails

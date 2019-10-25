@@ -166,6 +166,8 @@ public:
 	virtual StorageDumpInterface* createDump(
 			const std::string& keyprefix) const;
 
+	virtual const char** getConfigParameters() const;
+
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
 	virtual void close();
@@ -278,6 +280,7 @@ private:
 private:
 	const DatabaseInterface* m_dbtype;			///< type of key value store database interface
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
+	char const** m_cfgparam;				///< list of configuration parameters
 	strus::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
 	strus::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
 	strus::AtomicCounter<Index> m_next_structno;		///< next index to assign to a new structure type
