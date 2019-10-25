@@ -50,6 +50,9 @@ public:
 	virtual void deleteElement(
 			const std::string& name)=0;
 
+	/// \brief Declare all meta data elements to be deleted
+	virtual void deleteElements()=0;
+	
 	/// \brief Declare a meta data element to be reset (all values are reinitialized with their default)
 	/// \param[in] name name of the element values to reset
 	virtual void clearElement(

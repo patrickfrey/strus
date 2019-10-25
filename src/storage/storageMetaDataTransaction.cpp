@@ -211,6 +211,15 @@ void StorageMetaDataTransaction::deleteElement(
 	CATCH_ERROR_MAP( _TXT("error deleting meta data element: %s"), *m_errorhnd);
 }
 
+void StorageMetaDataTransaction::deleteElements()
+{
+	try
+	{
+		m_metadescr_new.clear();
+	}
+	CATCH_ERROR_MAP( _TXT("error deleting all meta data elements: %s"), *m_errorhnd);
+}
+
 void StorageMetaDataTransaction::clearElement(
 		const std::string& name)
 {

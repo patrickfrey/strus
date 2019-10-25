@@ -261,3 +261,11 @@ void MetaDataDescription::renameElement( const std::string& oldname, const std::
 	m_namemap = newnamemap;
 }
 
+void MetaDataDescription::clear()
+{
+	m_bytesize = 0;
+	m_ar.clear();
+	m_namemap.clear();
+}
+
+

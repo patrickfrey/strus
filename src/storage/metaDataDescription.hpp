@@ -94,6 +94,9 @@ public:
 	/// \param[in] newname new name of the element
 	void renameElement( const std::string& oldname, const std::string& newname);
 
+	/// \brief delete all elements
+	void clear();
+
 	class const_iterator
 	{
 	public:

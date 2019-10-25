@@ -59,6 +59,8 @@ public:
 	virtual void deleteElement(
 			const std::string& name);
 
+	virtual void deleteElements();
+
 	void clearElement(
 			const std::string& name);
 
