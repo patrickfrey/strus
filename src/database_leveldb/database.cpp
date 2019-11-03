@@ -28,6 +28,26 @@
 
 using namespace strus;
 
+static bool checkConfigString( const std::string& configsource, ErrorBufferInterface* errorhnd)
+{
+	std::vector<std::pair<std::string,std::string> > items = strus::getConfigStringItems( configsource, errorhnd);
+	std::vector<std::pair<std::string,std::string> >::const_iterator ci = items.begin(), ce = items.end();
+	for (; ci != ce; ++ci)
+	{
+		static const char* ar[] = {
+			"path","compression","autocompact","cache",
+			"max_open_files","write_buffer_size","block_size",0};
+		char const** ai = ar;
+		for (; *ai && 0!=std::strcmp(*ai,ci->first.c_str()); ++ai){}
+		if (!*ai)
+		{
+			errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("undefined configuration item key '%s'"), ci->first.c_str());
+			return false;
+		}
+	}
+	return true;
+}
+
 DatabaseClientInterface* Database::createClient( const std::string& configsource) const
 {
 	try
@@ -61,6 +81,8 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size", m_errorhnd);
 		(void)extractUIntFromConfigString( blockSize, src, "block_size", m_errorhnd);
 		if (m_errorhnd->hasError()) return 0;
+
+		if (!checkConfigString( src, m_errorhnd)) return 0;
 		return new DatabaseClient( &m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize, autocompaction, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database client: %s"), *m_errorhnd, 0);
@@ -110,6 +132,8 @@ bool Database::createDatabase( const std::string& configsource) const
 		bool compression = true;
 		std::string path;
 		std::string src = configsource;
+
+		if (!checkConfigString( src, m_errorhnd)) return false;
 
 		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{

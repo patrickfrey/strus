@@ -32,8 +32,6 @@ class StructIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
-class StorageMetaDataTransactionInterface;
-/// \brief Forward declaration
 class StorageDocumentInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
@@ -109,9 +107,6 @@ public:
 
 	virtual StorageTransactionInterface*
 			createTransaction();
-
-	virtual StorageMetaDataTransactionInterface*
-			createMetaDataTransaction();
 
 	virtual StorageDocumentInterface*
 			createDocumentChecker(
@@ -257,7 +252,7 @@ public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 
-public:/*strusResizeBlocks,StorageDocumentChecker*/
+public:/*strusResizeBlocks,StorageDocumentChecker,StorageTransaction*/
 	Index maxTermTypeNo() const;
 	Index maxStructTypeNo() const;
 	DatabaseClientInterface* databaseClient()

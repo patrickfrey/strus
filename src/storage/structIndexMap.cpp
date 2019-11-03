@@ -15,7 +15,7 @@
 
 using namespace strus;
 
-StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, Index maxstructo_)
+StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructo_)
 	:m_database(database_),m_defar(),m_mapar(maxstructo_),m_docno(0)
 {}
 
@@ -26,6 +26,12 @@ void StructIndexMap::clear()
 	m_docno = 0;
 	m_defar.clear();
 	m_mapar.clear();
+}
+
+void StructIndexMap::reset( const Index& maxstructno_)
+{
+	clear();
+	m_mapar = std::vector<Map>(maxstructno_);
 }
 
 void StructIndexMap::defineStructure(
@@ -130,7 +136,7 @@ void StructIndexMap::writeNewBlocks(
 		StructBlockBuilder& blk)
 {
 	Index docno = 0;
-	while (mi != me)
+	for (; mi != me; ++mi)
 	{
 		docno = mi->second;
 		int idx = mi->second;

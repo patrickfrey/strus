@@ -7,7 +7,6 @@
  */
 #ifndef _STRUS_STORAGE_METADATA_TRANSACTION_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_TRANSACTION_HPP_INCLUDED
-#include "strus/storageMetaDataTransactionInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/reference.hpp"
 #include "metaDataBlock.hpp"
@@ -26,12 +25,12 @@ class ErrorBufferInterface;
 
 /// \class StorageTransaction
 class StorageMetaDataTransaction
-	:public StorageMetaDataTransactionInterface
 {
 private:
-	StorageMetaDataTransaction( const StorageMetaDataTransaction&){}	//... non copyable
-	void operator=( const StorageMetaDataTransaction&){}		//... non copyable
-
+#if __cplusplus >= 201103L
+	StorageMetaDataTransaction( StorageMetaDataTransaction&) = delete;	//... non copyable
+	void operator=( StorageMetaDataTransaction&) = delete;			//... non copyable
+#endif
 public:
 	StorageMetaDataTransaction(
 			StorageClient* storage_,
@@ -61,13 +60,18 @@ public:
 
 	virtual void deleteElements();
 
-	void clearElement(
+	virtual void clearElement(
 			const std::string& name);
 
-	/// \brief Transaction commit
 	virtual bool commit();
-	/// \brief Transaction rollback (automatically called with the destructor)
+
 	virtual void rollback();
+
+public:/*StorageTransaction*/
+	bool empty() const
+	{
+		return m_nofOperations == 0;
+	}
 
 private:
 	void renameElementReset(
@@ -85,6 +89,7 @@ private:
 	MetaDataDescription m_metadescr_new;			///< meta data structure changes
 	std::vector<std::string> m_metadescr_resets;		///< meta data structure elements resets
 
+	int m_nofOperations;					///< number of operations
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors

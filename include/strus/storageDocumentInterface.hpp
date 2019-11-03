@@ -79,7 +79,7 @@ public:
 	virtual void setUserAccessRight(
 			const std::string& username_)=0;
 
-	/// \brief Closing the document definition
+	/// \brief Closing the document definition and transmit it into the transaction context
 	virtual void done()=0;
 };
 

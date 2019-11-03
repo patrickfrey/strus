@@ -27,6 +27,7 @@
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
+#include "strus/storageMetaDataTableUpdateInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
@@ -66,6 +67,13 @@ public:
 		sti.reset();
 		dbi.reset();
 	}
+
+	struct MetaDataDef
+	{
+		const char* key;
+		const char* type;
+	};
+	void defineMetaData( MetaDataDef const* deflist);
 	void dump();
 };
 
@@ -98,6 +106,22 @@ void Storage::open( const char* config, bool reset)
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
+}
+
+void Storage::defineMetaData( MetaDataDef const* deflist)
+{
+	strus::Reference<strus::StorageTransactionInterface> transaction( sci->createTransaction());
+	if (!transaction.get()) throw strus::runtime_error( "failed to create transaction: %s", g_errorhnd->fetchError());
+	strus::Reference<strus::StorageMetaDataTableUpdateInterface> update( transaction->createMetaDataTableUpdate());
+	if (!update.get()) throw strus::runtime_error( "failed to create structure for declaring meta data: %s", g_errorhnd->fetchError());
+	
+	int di = 0;
+	for (; deflist[di].key; ++di)
+	{
+		update->addElement( deflist[di].key, deflist[di].type);
+	}
+	update->done();
+	if (!transaction->commit()) throw strus::runtime_error( "failed to commit meta data structure definition: %s", g_errorhnd->fetchError());
 }
 
 static void destroyStorage( const char* config)
@@ -745,7 +769,10 @@ static void testTrivialInsert()
 	dim.nofMetaData = 3;
 
 	Storage storage;
-	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8", true);
+	storage.open( "path=storage", true);
+	const Storage::MetaDataDef metadata[] = {{"M0", "UINT32"},{"M1", "UINT16"},{"M2", "UINT8"},{0,0}};
+	storage.defineMetaData( metadata);
+
 	insertCollection( storage.sci.get(), dim);
 
 	unsigned int di=0,de=dim.nofDocs;
@@ -797,7 +824,10 @@ static void testDfCalculation()
 	dim.nofMetaData = 0;
 
 	Storage storage;
-	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8", true);
+	storage.open( "path=storage", true);
+	const Storage::MetaDataDef metadata[] = {{"M0", "UINT32"},{"M1", "UINT16"},{"M2", "UINT8"},{0,0}};
+	storage.defineMetaData( metadata);
+
 	insertCollection( storage.sci.get(), dim);
 
 	DfMap dfmap = calculateCollectionDfMap( dim);
@@ -876,127 +906,39 @@ struct MetaDataDump
 		:header(o.header),content(o.content){}
 };
 
-static MetaDataDump readMetaDataDump( const Storage& storage)
-{
-	MetaDataDump rt;
-	strus::Reference<strus::MetaDataReaderInterface> mdreader( storage.sci->createMetaDataReader());
-	if (!mdreader.get()) throw std::runtime_error( g_errorhnd->fetchError());
-
-	int ei = 0, ee = mdreader->nofElements();
-	for (; ei != ee; ++ei)
-	{
-		rt.header += strus::string_format( ei?", %s %s":"%s %s", mdreader->getType(ei), mdreader->getName(ei));
-	}
-	unsigned int di=0,de=storage.sci->nofDocumentsInserted();
-	for (; di != de; ++di)
-	{
-		char docid[ 32];
-		snprintf( docid, sizeof(docid), "D%02u", di);
-
-		int docno = storage.sci->documentNumber( docid);
-		if (!docno) throw strus::runtime_error( "document '%s' not found", docid);
-
-		mdreader->skipDoc( docno);
-		std::string mdline;
-		mdline.append( docid);
-		mdline.append( ": ");
-		MetaDataDump::Row row;
-		for (ei=0; ei != ee; ++ei)
-		{
-			if (ei) mdline.append(", ");
-			row.push_back( (const char*)mdreader->getValue( ei).tostring());
-			mdline += row.back();
-		}
-		mdline.append("\n");
-		rt.content.append( mdline);
-		rt.rows.push_back( row);
-	}
-	return rt;
-}
-
 static void testReloadConfig()
 {
 	DocumentBuilder::Dim dim;
-	dim.nofDocs = 100;
+	dim.nofDocs = 5;
 	dim.nofTermTypes = 3;
 	dim.nofTermValues = 3;
 	dim.nofDiffTermValues = 3;
 	dim.nofAttributes = 2;
-	dim.nofMetaData = 10;
+	dim.nofMetaData = 3;
 
 	Storage storage;
-	storage.open( "path=storage; cache=100K; max_open_files=128; write_buffer_size=2G; block_size=4K;"
-			"metadata=M0 UINT32, M1 UINT16, M2 UINT8, M3 FLOAT16, M4 FLOAT32,"
-			"M5 INT16, M6 UINT16, M7 UINT8, M8 INT16, M9 INT32",
-			true);
+	storage.open( "path=storage; cache=100K; max_open_files=128; write_buffer_size=2G; block_size=4K;", true);
+	const Storage::MetaDataDef metadata[] = {{"M0", "UINT32"},{"M1", "UINT16"},{"M2", "UINT8"},{0,0}};
+	storage.defineMetaData( metadata);
 	insertCollection( storage.sci.get(), dim);
 
 	std::string config_orig = storage.sci->config();
-	if (config_orig != "path='storage';cache=100K;max_open_files=128;write_buffer_size=2147483648;block_size=4096;"
-				"metadata=m0 UInt32,m4 Float32,m9 Int32,m1 UInt16,m3 Float16,m5 Int16,m6 UInt16,m8 Int16,m2 UInt8,m7 UInt8")
+	if (config_orig != "path='storage';cache=100K;max_open_files=128;write_buffer_size=2147483648;block_size=4096")
 	{
 		throw std::runtime_error("original configuration does not match");
 	}
-	/*	0: m0
-		1: m4
-		2: m9
-		3: m1
-		4: m3
-		5: m5
-		6: m6
-		7: m8
-		8: m2
-		9: m7
-	*/
-	MetaDataDump metadata_orig = readMetaDataDump( storage);
-
 	if (!storage.sci->reload(
-			"path=storage; cache=112K; max_open_files=140; write_buffer_size=1G; block_size=8K;"
-			"metadata=M0 UINT32, M2 UINT8, M3 FLOAT32,"
-			"M5 INT8, M6 UINT32, M7 UINT8, M8 FLOAT32, M9 INT16"))
+			"path=storage; cache=112K; max_open_files=140; write_buffer_size=1G; block_size=8K"))
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
 	std::string config_new = storage.sci->config();
-	if (config_new != "path='storage';cache=112K;max_open_files=140;write_buffer_size=1073741824;block_size=8192;"
-				"metadata=m0 UInt32,m3 Float32,m6 UInt32,m8 Float32,m9 Int16,m2 UInt8,m5 Int8,m7 UInt8")
+	if (config_new != "path='storage';cache=112K;max_open_files=140;write_buffer_size=1073741824;block_size=8192")
 	{
 		throw std::runtime_error("altered configuration does not match");
 	}
-	/*	0: m0 -> 0
-		1: m3 -> 4
-		2: m6 -> 6
-		3: m8 -> 7
-		4: m9 -> 2
-		5: m2 -> 8
-		6: m5 -> 5
-		7: m7 -> 9
-	*/
-	enum {NofElemHandle=8};
-	int elemHandleMap[ NofElemHandle] = {0, 4, 6, 7, 2, 8, 5, 9};
-
-	MetaDataDump metadata_new = readMetaDataDump( storage);
-
 	std::cerr << "CONFIG ORIG:\n" << config_orig << std::endl;
 	std::cerr << "CONFIG NEW:\n" << config_new << std::endl;
-	std::cerr << "METADATA HEADER ORIG:\n" << metadata_orig.header << std::endl;
-	std::cerr << "METADATA HEADER NEW:\n" << metadata_new.header << std::endl;
-	std::cerr << "METADATA CONTENT ORIG:\n" << metadata_orig.content << std::endl;
-	std::cerr << "METADATA CONTENT NEW:\n" << metadata_new.content << std::endl;
-
-	if (metadata_new.rows.size() != metadata_orig.rows.size()) throw std::runtime_error("lost metadata");
-	std::size_t di = 0, de = metadata_orig.rows.size();
-	for (; di != de; ++di)
-	{
-		int ei = 0, ee = NofElemHandle;
-		for (; ei != ee; ++ei)
-		{
-			if (metadata_new.rows[ di][ ei] != metadata_orig.rows[ di][ elemHandleMap[ ei]])
-			{
-				throw std::runtime_error("metadata does not match");
-			}
-		}
-	}
 }
 
 #define RUN_TEST( idx, TestName)\

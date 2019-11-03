@@ -20,7 +20,6 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/storageObjectBuilderInterface.hpp"
-#include "strus/storageMetaDataTransactionInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseInterface.hpp"

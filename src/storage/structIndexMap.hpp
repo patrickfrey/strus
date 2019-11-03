@@ -27,7 +27,7 @@ class DatabaseTransactionInterface;
 class StructIndexMap
 {
 public:
-	StructIndexMap( DatabaseClientInterface* database_, Index maxstructno_);
+	StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructno_);
 
 	void defineStructure(
 		const Index& structno,
@@ -45,6 +45,7 @@ public:
 	void print( std::ostream& out) const;
 
 	void clear();
+	void reset( const Index& maxstructno_);
 
 private:
 	struct StructDef

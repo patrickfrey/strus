@@ -31,7 +31,6 @@
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "storageTransaction.hpp"
-#include "storageMetaDataTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "extractKeyValueData.hpp"
 #include "documentFrequencyCache.hpp"
@@ -97,7 +96,7 @@ static char const** getConfigParamList( const DatabaseInterface* db)
 	char const** cfg = db->getConfigParameters( DatabaseInterface::CmdCreateClient);
 	for (int ci = 0; cfg[ci]; ++ci) cfgar.push_back( cfg[ci]);
 	cfgar.push_back( "acl");
-	cfgar.push_back( "metadata");
+	cfgar.push_back( "statsproc");
 	rt = (char const**)std::malloc( (cfgar.size()+1) * sizeof(rt[0]));
 	if (rt == NULL) throw std::bad_alloc();
 	std::memcpy( rt, cfgar.data(), cfgar.size() * sizeof(rt[0]));
@@ -107,17 +106,22 @@ static char const** getConfigParamList( const DatabaseInterface* db)
 
 void StorageClient::init( const std::string& databaseConfig)
 {
-	m_database.reset( m_dbtype->createClient( databaseConfig));
+	std::string databaseConfigCopy( databaseConfig);
+	removeKeyFromConfigString( databaseConfigCopy, "acl", m_errorhnd);
+	removeKeyFromConfigString( databaseConfigCopy, "statsproc", m_errorhnd);
+
+	Reference<DatabaseClientInterface> db( m_dbtype->createClient( databaseConfigCopy));
+	if (!db.get()) throw strus::runtime_error(_TXT("failed to initialize database client: %s"), m_errorhnd->fetchError());
+
+	m_database = db;
 	m_close_called = false;
 	if (m_statisticsProc)
 	{
-		std::string databaseConfigCopy = databaseConfig;
 		if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
 		{
 			throw strus::runtime_error(_TXT("variable '%s' not defined in configuration"), "path");
 		}
 	}
-	if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
 	MetaDataDescription metadescr;
 	metadescr.load( m_database.get());
 	m_metaDataBlockCache.reset( new MetaDataBlockCache( m_database.get(), metadescr));
@@ -130,7 +134,7 @@ bool StorageClient::reload( const std::string& databaseConfig)
 	try
 	{
 		std::string src = databaseConfig;
-		std::string metadatasrc;
+		std::string statsproc;
 		bool useAcl;
 		bool fillDfCache = (0!=m_documentFrequencyCache.get());
 
@@ -148,12 +152,12 @@ bool StorageClient::reload( const std::string& databaseConfig)
 				}
 			}
 		}
-		(void)extractStringFromConfigString( metadatasrc, src, "metadata", m_errorhnd);
-		if (m_errorhnd->hasError()) return false;
+		(void)extractStringFromConfigString( statsproc, src, "statsproc", m_errorhnd);
 
-		MetaDataDescription metadescr( metadatasrc);
-		StorageMetaDataTransaction metadata_transaction( this, m_errorhnd, metadescr);
-		if (!metadata_transaction.commit()) return false;
+		MetaDataDescription metadescr;
+		metadescr.load( m_database.get());
+
+		if (m_errorhnd->hasError()) return false;
 
 		close();
 		m_next_typeno.set(0);
@@ -196,13 +200,6 @@ std::string StorageClient::config() const
 		std::string rt( m_database->config());
 		strus::shared_ptr<MetaDataBlockCache> mt = m_metaDataBlockCache;
 
-		std::string mdstr( mt->descr().tostring());
-		if (!mdstr.empty())
-		{
-			if (!rt.empty()) rt.push_back(';');
-			rt.append( "metadata=");
-			rt.append( mdstr);
-		}
 		if (withAcl())
 		{
 			if (!rt.empty()) rt.push_back(';');
@@ -268,7 +265,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	}
 	if (!varstor.load( "StructNo", next_structno_))
 	{
-		next_structno_	= 0;
+		next_structno_ = 1;
 	}
 	if (!varstor.load( "Version", version_))
 	{
@@ -526,15 +523,6 @@ StorageTransactionInterface*
 		return new StorageTransaction( this, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
-}
-
-StorageMetaDataTransactionInterface* StorageClient::createMetaDataTransaction()
-{
-	try
-	{
-		return new StorageMetaDataTransaction( this, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client metadata transaction: %s"), *m_errorhnd, 0);
 }
 
 StorageDocumentInterface* 
@@ -1249,9 +1237,13 @@ void StorageClient::close()
 		storeVariables();
 	}
 	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage: %s"), *m_errorhnd);
-	m_database->compactDatabase();
-	m_database->close();
-	m_close_called = true;
+
+	if (!m_close_called)
+	{
+		m_database->compactDatabase();
+		m_database->close();
+		m_close_called = true;
+	}
 }
 
 void StorageClient::compaction()
@@ -1259,9 +1251,9 @@ void StorageClient::compaction()
 	try
 	{
 		storeVariables();
+		m_database->compactDatabase();
 	}
-	CATCH_ERROR_MAP( _TXT("error storing variables in compaction of storage: %s"), *m_errorhnd);
-	m_database->compactDatabase();
+	CATCH_ERROR_MAP( _TXT("error in compaction of storage: %s"), *m_errorhnd);
 }
 
 

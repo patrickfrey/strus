@@ -11,6 +11,7 @@
 #define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/storageCommitResult.hpp"
 #include "strus/numericVariant.hpp"
 
 namespace strus
@@ -20,6 +21,8 @@ namespace strus
 class StorageDocumentInterface;
 /// \brief Forward declaration
 class StorageDocumentUpdateInterface;
+/// \brief Forward declaration
+class StorageMetaDataTableUpdateInterface;
 
 /// \class StorageTransactionInterface
 /// \brief Object to declare all items for one insert/update of a document in the storage
@@ -69,16 +72,16 @@ public:
 	/// \note This method is useful if you want to store the document frequency for features in the forward index, that do not get a df value assigned implicitely. For example for weighting of extracted features with their occurrence and idf.
 	virtual void updateDocumentFrequency( const std::string& type, const std::string& value, int df_change)=0;
 
+	/// \brief Create an interface to declare changes in the meta data table structure
+	/// \note Currently it is not possible (disallowed by a flag) to update the meta data table structure and update document contents in the storage within the same transaction, you have to use a transaction to alter the one or the other. The reason for this is that we cannot guarantee that it works, therefore it is forbidden.
+	virtual StorageMetaDataTableUpdateInterface* createMetaDataTableUpdate()=0;
+
 	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
-	/// \return true on success, false on error
-	virtual bool commit()=0;
+	/// \return structure with some info about the transaction, implicitely convertible to bool indicating the success of the transaction
+	virtual StorageCommitResult commit()=0;
 
 	/// \brief Rollback of the transaction, no changes made
 	virtual void rollback()=0;
-
-	/// \brief Get the number of documents affected by the last transaction in case of a successful commit
-	/// \return the number of documents (deletes,updates,inserts)
-	virtual unsigned int nofDocumentsAffected() const=0;
 };
 
 }//namespace

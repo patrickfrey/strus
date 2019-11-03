@@ -73,12 +73,11 @@ bool Storage::createStorage(
 	try
 	{
 		bool useAcl = false;
-		std::string metadata;
 		ByteOrderMark byteOrderMark;
 
 		std::string src = configsource;
-		(void)extractStringFromConfigString( metadata, src, "metadata", m_errorhnd);
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
+		removeKeyFromConfigString( src, "statsproc", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
 		if (!dbi->createDatabase( src)) throw std::runtime_error( _TXT("failed to create key/value store database"));
@@ -93,6 +92,7 @@ bool Storage::createStorage(
 	
 		stor.store( transaction.get(), "TermNo", 1);
 		stor.store( transaction.get(), "TypeNo", 1);
+		stor.store( transaction.get(), "StructNo", 1);
 		stor.store( transaction.get(), "DocNo", 1);
 		stor.store( transaction.get(), "AttribNo", 1);
 		stor.store( transaction.get(), "NofDocs", 0);
@@ -102,15 +102,6 @@ bool Storage::createStorage(
 		{
 			stor.store( transaction.get(), "UserNo", 1);
 		}
-		if (!transaction->commit()) return false;
-
-		// 2nd phase, store metadata:
-		transaction.reset( database->createTransaction());
-		if (!transaction.get()) return false;
-
-		MetaDataDescription md( metadata);
-		md.store( transaction.get());
-	
 		return transaction->commit();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
@@ -124,7 +115,7 @@ const char* Storage::getConfigDescription( const ConfigType& type) const
 			return "cachedterms=<file with list of terms to cache>";
 
 		case CmdCreate:
-			return "acl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";
+			return "acl=<yes/no, yes if users with different access rights exist>";
 	}
 	return 0;
 }
@@ -132,7 +123,7 @@ const char* Storage::getConfigDescription( const ConfigType& type) const
 const char** Storage::getConfigParameters( const ConfigType& type) const
 {
 	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
-	static const char* keys_CreateStorage[]		= {"acl", "metadata", 0};
+	static const char* keys_CreateStorage[]		= {"acl", 0};
 	switch (type)
 	{
 		case CmdCreateClient:	return keys_CreateStorageClient;

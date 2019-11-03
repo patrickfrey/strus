@@ -48,6 +48,8 @@ public:
 			DatabaseTransactionInterface* transaction);
 
 	void clear();
+	void reset( const strus::shared_ptr<MetaDataBlockCache>& mdcache_);
+
 	const MetaDataDescription* description() const
 	{
 		return m_descr;

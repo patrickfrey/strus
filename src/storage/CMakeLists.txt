@@ -42,6 +42,7 @@ set( source_files
 	structBlock.cpp
 	structIndexMap.cpp
 	structIterator.cpp
+	storageMetaDataTableUpdate.cpp
 	storageMetaDataTransaction.cpp
 	storage.cpp
 	storageClient.cpp

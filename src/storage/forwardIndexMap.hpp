@@ -27,8 +27,12 @@ class DatabaseTransactionInterface;
 class ForwardIndexMap
 {
 public:
-	ForwardIndexMap( DatabaseClientInterface* database_, Index maxtype_, unsigned int maxblocksize_=ForwardIndexBlock::MaxBlockTokens)
-		:m_database(database_),m_docno(0),m_maxtype(maxtype_),m_maxblocksize(maxblocksize_){}
+	ForwardIndexMap( DatabaseClientInterface* database_, const Index& maxtype_, unsigned int maxblocksize_=ForwardIndexBlock::MaxBlockTokens)
+		:m_database(database_),m_map(),m_blocklist(),m_curblockmap(),m_strings()
+		,m_docno(0)
+		,m_maxtype(maxtype_),m_maxblocksize(maxblocksize_)
+		,m_docno_deletes(),m_docno_typeno_deletes()
+	{}
 
 	void openForwardIndexDocument( const Index& docno);
 
@@ -46,6 +50,7 @@ public:
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 	void clear();
+	void reset( const Index& maxtype_);
 
 private:
 	struct MapKey

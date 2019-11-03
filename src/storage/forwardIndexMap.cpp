@@ -273,3 +273,9 @@ void ForwardIndexMap::clear()
 	m_docno_typeno_deletes.clear();
 }
 
+void ForwardIndexMap::reset( const Index& maxtype_)
+{
+	clear();
+	m_maxtype = maxtype_;
+}
+

@@ -119,9 +119,10 @@ public:
 	}
 
 private:
-	StringMap( const StringMap&){}		///> non copyable
-	void operator=( const StringMap&){}	///> non copyable
-
+#if __cplusplus >= 201103L
+	StringMap( StringMap&) = delete;	//... non copyable
+	void operator=( StringMap&) = delete;	//... non copyable
+#endif
 private:
 	Map m_map;
 	BlockAllocator m_keystring_blocks;

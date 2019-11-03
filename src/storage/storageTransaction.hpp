@@ -14,6 +14,7 @@
 #include "metaDataRecord.hpp"
 #include "metaDataMap.hpp"
 #include "metaDataReader.hpp"
+#include "storageMetaDataTransaction.hpp"
 #include "attributeMap.hpp"
 #include "booleanBlock.hpp"
 #include "userAclMap.hpp"
@@ -39,6 +40,8 @@ class StorageClient;
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class StorageMetaDataTableUpdateInterface;
 
 
 /// \class StorageTransaction
@@ -47,8 +50,8 @@ class StorageTransaction
 {
 public:
 	///\param[in] storage_ storage to call refresh after commit or rollback
-	///\param[in] database_ database handle
-	///\param[in] maxtypeno_ biggest type number to use in this transaction in the forward index map when deleting elements there
+	///\param[in] maxtypeno_ maximum type number
+	///\param[in] maxstructno_ maximum structure number
 	StorageTransaction( 
 		StorageClient* storage_,
 		const Index& maxtypeno_,
@@ -77,13 +80,10 @@ public:
 	virtual void updateDocumentFrequency(
 			const std::string& type, const std::string& value, int df_change);
 
-	virtual bool commit();
-	virtual void rollback();
+	virtual StorageMetaDataTableUpdateInterface* createMetaDataTableUpdate();
 
-	virtual unsigned int nofDocumentsAffected() const
-	{
-		return m_nof_documents_affected;
-	}
+	virtual StorageCommitResult commit();
+	virtual void rollback();
 
 public:/*Document,DocumentUpdate*/
 	Index getOrCreateTermValue( const std::string& name);
@@ -127,10 +127,12 @@ public:/*Document,DocumentUpdate*/
 	void closeForwardIndexDocument();
 
 private:
-	void clearMaps();
+	void reset();
+	StorageCommitResult commit_contentTransaction();
 
 private:
 	StorageClient* m_storage;				///< storage to call refresh after commit or rollback
+	strus::Reference<StorageMetaDataTransaction> m_metadataTransaction;	///< transaction for altering meta data table structure
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
 	MetaDataMap m_metaDataMap;				///< map of meta data blocks for writing
@@ -152,8 +154,8 @@ private:
 
 	DocumentFrequencyMap m_explicit_dfmap;			///< df map for features not in search index with explicit df change
 
-	int m_nof_deleted_documents;				///< total adjustment for the number of documents deleted
-	int m_nof_documents_affected;				///< total number of documents affected by last transaction
+	int m_nofDeletedDocuments;				///< total adjustment for the number of documents deleted
+	int m_nofOperations;					///< number of atering operations in this transaction without counting meta data table structure operations, used to decide wheter this transaction in changing meta data or content */
 
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back

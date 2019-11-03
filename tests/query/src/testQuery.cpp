@@ -24,6 +24,7 @@
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
+#include "strus/storageMetaDataTableUpdateInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
@@ -60,6 +61,12 @@ public:
 	strus::shared_ptr<strus::StorageInterface> sti;
 	strus::shared_ptr<strus::StorageClientInterface> sci;
 
+	struct MetaDataDef
+	{
+		const char* key;
+		const char* type;
+	};
+	void defineMetaData( MetaDataDef const* deflist);
 	void open( const char* options);
 };
 
@@ -90,6 +97,22 @@ void Storage::open( const char* config)
 	}
 }
 
+void Storage::defineMetaData( MetaDataDef const* deflist)
+{
+	strus::Reference<strus::StorageTransactionInterface> transaction( sci->createTransaction());
+	if (!transaction.get()) throw strus::runtime_error( "failed to create transaction: %s", g_errorhnd->fetchError());
+	strus::Reference<strus::StorageMetaDataTableUpdateInterface> update( transaction->createMetaDataTableUpdate());
+	if (!update.get()) throw strus::runtime_error( "failed to create structure for declaring meta data: %s", g_errorhnd->fetchError());
+	
+	int di = 0;
+	for (; deflist[di].key; ++di)
+	{
+		update->addElement( deflist[di].key, deflist[di].type);
+	}
+	update->done();
+	if (!transaction->commit()) throw strus::runtime_error( "failed to commit meta data structure definition: %s", g_errorhnd->fetchError());
+}
+
 static void destroyStorage( const char* config)
 {
 	strus::shared_ptr<strus::DatabaseInterface> dbi;
@@ -112,7 +135,9 @@ public:
 	explicit QueryEvaluationEnv( const strus::QueryProcessorInterface* qpi)
 	{
 		static const unsigned int primes[5] = {2,3,5,7,0};
-		storage.open( "path=storage; metadata=docno UINT16");
+		storage.open( "path=storage");
+		const Storage::MetaDataDef metadata[] = {{"docno", "UINT16"},{0,0}};
+		storage.defineMetaData( metadata);
 		strus::local_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 		enum {NofDocs=10};
 		unsigned int di=0,de=NofDocs;

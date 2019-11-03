@@ -149,4 +149,11 @@ void MetaDataMap::clear()
 	m_map.clear();
 }
 
+void MetaDataMap::reset( const strus::shared_ptr<MetaDataBlockCache>& mdcache_)
+{
+	clear();
+	m_metaDataBlockCache = mdcache_;
+	m_descr = &m_metaDataBlockCache->descr();
+	
+}
 

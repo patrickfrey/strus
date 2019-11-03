@@ -35,8 +35,6 @@ class ValueIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
-class StorageMetaDataTransactionInterface;
-/// \brief Forward declaration
 class StorageDocumentInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
@@ -222,11 +220,6 @@ public:
 	/// \return the created transaction interface (with ownership)
 	/// \note this function is thread safe, multiple concurrent transactions are allowed 
 	virtual StorageTransactionInterface* createTransaction()=0;
-
-	/// \brief Create a transaction object for altering the metadata table structure
-	/// \return the created transaction interface (with ownership)
-	/// \note this function is thread safe, multiple concurrent transactions are allowed (but not recommended :-)
-	virtual StorageMetaDataTransactionInterface* createMetaDataTransaction()=0;
 
 	/// \brief Creates an iterator on all storage term occurrence statistics
 	/// \note Returns NULL with error if no statistics processor instance defined for this storage client

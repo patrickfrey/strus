@@ -12,6 +12,7 @@
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "storageMetaDataTableUpdate.hpp"
 #include "storageDocument.hpp"
 #include "storageDocumentUpdate.hpp"
 #include "storageClient.hpp"
@@ -49,10 +50,8 @@ StorageTransaction::StorageTransaction(
 	,m_termTypeMapInv()
 	,m_termValueMapInv()
 	,m_explicit_dfmap(storage_->databaseClient())
-	,m_nof_deleted_documents(0)
-	,m_nof_documents_affected(0)
-	,m_commit(false)
-	,m_rollback(false)
+	,m_nofDeletedDocuments(0)
+	,m_nofOperations(0)
 	,m_errorhnd(errorhnd_)
 {
 	if (m_storage->getStatisticsProcessor() != 0)
@@ -64,7 +63,7 @@ StorageTransaction::StorageTransaction(
 
 StorageTransaction::~StorageTransaction()
 {
-	if (!m_rollback && !m_commit) rollback();
+	if (m_nofOperations) rollback();
 }
 
 Index StorageTransaction::lookUpTermValue( const std::string& name)
@@ -213,6 +212,7 @@ void StorageTransaction::deleteUserAccessRights(
 		if (userno != 0)
 		{
 			m_userAclMap.deleteUserAccess( userno);
+			++m_nofOperations;
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting document user access rights in transaction: %s"), *m_errorhnd);
@@ -239,7 +239,8 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 
 		//[5] Delete the document id
 		m_docIdMap.deleteKey( docid);
-		m_nof_deleted_documents += 1;
+		m_nofDeletedDocuments += 1;
+		++m_nofOperations;
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting document in transaction: %s"), *m_errorhnd);
 }
@@ -251,6 +252,7 @@ StorageDocumentInterface*
 	try
 	{
 		Index dn = m_docIdMap.getOrCreate( docid);
+		++m_nofOperations;
 		return new StorageDocument( this, docid, dn, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document in transaction: %s"), *m_errorhnd, 0);
@@ -262,6 +264,7 @@ StorageDocumentUpdateInterface*
 {
 	try
 	{
+		++m_nofOperations;
 		return new StorageDocumentUpdate( this, docno_, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document update in transaction: %s"), *m_errorhnd, 0);
@@ -272,6 +275,7 @@ void StorageTransaction::updateMetaData(
 {
 	try
 	{
+		++m_nofOperations;
 		defineMetaData( docno, varname, value);
 	}
 	CATCH_ERROR_MAP( _TXT("error updating document meta data in transaction: %s"), *m_errorhnd);
@@ -283,154 +287,179 @@ void StorageTransaction::updateDocumentFrequency( const std::string& type, const
 	{
 		Index typeno = getOrCreateTermType( type);
 		Index termno = getOrCreateTermValue( value);
+		++m_nofOperations;
 		m_explicit_dfmap.increment( typeno, termno, df_change);
 	}
 	CATCH_ERROR_MAP( _TXT("error updating document frequency of a feature in transaction: %s"), *m_errorhnd);
 }
 
-bool StorageTransaction::commit()
+StorageMetaDataTableUpdateInterface* StorageTransaction::createMetaDataTableUpdate()
+{
+	try
+	{
+		if (!m_metadataTransaction.get())
+		{
+			m_metadataTransaction.reset( new StorageMetaDataTransaction( m_storage, m_errorhnd));
+		}
+		return new StorageMetaDataTableUpdate( m_metadataTransaction.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data table structure update: %s"), *m_errorhnd, 0);
+}
+
+StorageCommitResult StorageTransaction::commit_contentTransaction()
+{
+	if (m_storage->getMetaDataBlockCacheRef().get() != m_metaDataMap.metaDataBlockCache().get())
+	{
+		throw std::runtime_error(_TXT("transaction rollback because meta data structure changed during lifetime of transaction"));
+	}
+	const StatisticsProcessorInterface* statsproc = m_storage->getStatisticsProcessor();
+	Reference<StatisticsBuilderInterface> statisticsBuilder;
+	if (statsproc)
+	{
+		statisticsBuilder.reset( statsproc->createBuilder( m_storage->statisticsPath()));
+	}
+	DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
+
+	strus::local_ptr<DatabaseTransactionInterface> transaction( m_storage->databaseClient()->createTransaction());
+	if (!transaction.get())
+	{
+		m_errorhnd->explain( _TXT( "error creating transaction: %s"));
+		return StorageCommitResult();
+	}
+	std::map<Index,Index> termnoUnknownMap;
+	m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
+	std::map<Index,Index> docnoUnknownMap;
+	int nof_new_documents = 0;
+	int nof_chg_documents = 0;
+	m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get(), &nof_new_documents, &nof_chg_documents);
+	int nof_documents_incr = nof_new_documents - m_nofDeletedDocuments;
+	std::vector<Index> refreshList;
+	m_attributeMap.renameNewDocNumbers( docnoUnknownMap);
+	m_attributeMap.getWriteBatch( transaction.get());
+	m_metaDataMap.renameNewDocNumbers( docnoUnknownMap);
+	m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
+
+	m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
+	m_structIndexMap.renameNewNumbers( docnoUnknownMap);
+
+	DocumentFrequencyCache::Batch dfbatch;
+
+	m_invertedIndexMap.getWriteBatch(
+			transaction.get(),
+			statisticsBuilder.get(), dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
+			m_termTypeMapInv, m_termValueMapInv);
+	m_structIndexMap.getWriteBatch( transaction.get());
+
+	if (statsproc)
+	{
+		statisticsBuilder->addNofDocumentsInsertedChange( nof_documents_incr);
+	}
+	m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
+	m_forwardIndexMap.getWriteBatch( transaction.get());
+
+	m_explicit_dfmap.renameNewTermNumbers( termnoUnknownMap);
+	m_explicit_dfmap.getWriteBatch( transaction.get(), statisticsBuilder.get(),
+					dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
+					m_termTypeMapInv, m_termValueMapInv);
+
+	m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
+	m_userAclMap.getWriteBatch( transaction.get());
+
+	m_storage->getVariablesWriteBatch( transaction.get(), nof_documents_incr);
+	if (m_errorhnd->hasError())
+	{
+		m_errorhnd->explain(_TXT("error in transaction commit gathering data: %s"));
+		return StorageCommitResult();
+	}
+	if (statsproc)
+	{
+		if (!statisticsBuilder->commit())
+		{
+			m_errorhnd->explain( _TXT("error in statistics message builder commit: %s"));
+			return StorageCommitResult();
+		}
+	}
+	if (!transaction->commit())
+	{
+		m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
+		return StorageCommitResult();
+	}
+	if (dfcache)
+	{
+		dfcache->writeBatch( dfbatch);
+	}
+	m_storage->declareNofDocumentsInserted( nof_documents_incr);
+	m_storage->releaseTransaction( refreshList);
+
+	StorageCommitResult result( true, nof_new_documents + nof_chg_documents + m_nofDeletedDocuments);
+	reset();
+	return result;
+}
+
+StorageCommitResult StorageTransaction::commit()
 {
 	if (m_errorhnd->hasError())
 	{
-		return false;
-	}
-	if (m_commit)
-	{
-		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction commit twice"));
-		return false;
-	}
-	if (m_rollback)
-	{
-		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction commit after rollback"));
-		return false;
+		return StorageCommitResult();
 	}
 	if (m_errorhnd->hasError())
 	{
 		m_errorhnd->explain( _TXT( "storage transaction with error: %s"));
-		return false;
+		return StorageCommitResult();
 	}
 	try
 	{
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
-		if (m_storage->getMetaDataBlockCacheRef().get() != m_metaDataMap.metaDataBlockCache().get())
+		if (m_nofOperations)
 		{
-			throw std::runtime_error(_TXT("transaction rollback because meta data structure changed during lifetime of transaction"));
-		}
-		const StatisticsProcessorInterface* statsproc = m_storage->getStatisticsProcessor();
-		Reference<StatisticsBuilderInterface> statisticsBuilder;
-		if (statsproc)
-		{
-			statisticsBuilder.reset( statsproc->createBuilder( m_storage->statisticsPath()));
-		}
-		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
-
-		strus::local_ptr<DatabaseTransactionInterface> transaction( m_storage->databaseClient()->createTransaction());
-		if (!transaction.get())
-		{
-			m_errorhnd->explain( _TXT( "error creating transaction: %s"));
-			return false;
-		}
-		std::map<Index,Index> termnoUnknownMap;
-		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
-		std::map<Index,Index> docnoUnknownMap;
-		int nof_new_documents = 0;
-		int nof_chg_documents = 0;
-		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get(), &nof_new_documents, &nof_chg_documents);
-		int nof_documents_incr = nof_new_documents - m_nof_deleted_documents;
-		std::vector<Index> refreshList;
-		m_attributeMap.renameNewDocNumbers( docnoUnknownMap);
-		m_attributeMap.getWriteBatch( transaction.get());
-		m_metaDataMap.renameNewDocNumbers( docnoUnknownMap);
-		m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
-
-		m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
-		m_structIndexMap.renameNewNumbers( docnoUnknownMap);
-
-		DocumentFrequencyCache::Batch dfbatch;
-
-		m_invertedIndexMap.getWriteBatch(
-				transaction.get(),
-				statisticsBuilder.get(), dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
-				m_termTypeMapInv, m_termValueMapInv);
-		m_structIndexMap.getWriteBatch( transaction.get());
-
-		if (statsproc)
-		{
-			statisticsBuilder->addNofDocumentsInsertedChange( nof_documents_incr);
-		}
-		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
-		m_forwardIndexMap.getWriteBatch( transaction.get());
-
-		m_explicit_dfmap.renameNewTermNumbers( termnoUnknownMap);
-		m_explicit_dfmap.getWriteBatch( transaction.get(), statisticsBuilder.get(),
-						dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
-						m_termTypeMapInv, m_termValueMapInv);
-
-		m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
-		m_userAclMap.getWriteBatch( transaction.get());
-
-		m_storage->getVariablesWriteBatch( transaction.get(), nof_documents_incr);
-		if (m_errorhnd->hasError())
-		{
-			m_errorhnd->explain(_TXT("error in transaction commit gathering data: %s"));
-			return false;
-		}
-		if (statsproc)
-		{
-			if (!statisticsBuilder->commit())
+			m_nofOperations = 0;
+			if (m_metadataTransaction.get() && !m_metadataTransaction->empty())
 			{
-				m_errorhnd->explain( _TXT("error in statistics message builder commit: %s"));
-				return false;
+				m_errorhnd->report( ErrorCodeNotAllowed, _TXT( "conflicting operations: altering meta data structure and altering content is not allowed within the same transaction"));
+				reset();
+				return StorageCommitResult();
+			}
+			else
+			{
+				return commit_contentTransaction();
 			}
 		}
-		if (!transaction->commit())
+		else
 		{
-			m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
-			return false;
+			if (m_metadataTransaction.get())
+			{
+				StorageCommitResult result( m_metadataTransaction->commit(), 0);
+				reset();
+				return result;
+			}
+			else
+			{
+				reset();
+				return StorageCommitResult( true, 0);
+			}
 		}
-		if (dfcache)
-		{
-			dfcache->writeBatch( dfbatch);
-		}
-		m_storage->declareNofDocumentsInserted( nof_documents_incr);
-		m_storage->releaseTransaction( refreshList);
-
-		m_commit = true;
-		m_nof_documents_affected = nof_new_documents + nof_chg_documents + m_nof_deleted_documents;
-		clearMaps();
-		return true;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, StorageCommitResult());
 }
 
 void StorageTransaction::rollback()
 {
-	if (m_rollback)
-	{
-		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction rollback twice"));
-		return;
-	}
-	if (m_commit)
-	{
-		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction rollback after commit"));
-		return;
-	}
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
-	m_rollback = true;
-	m_nof_documents_affected = 0;
-	clearMaps();
+	reset();
 }
 
-void StorageTransaction::clearMaps()
+void StorageTransaction::reset()
 {
+	m_metadataTransaction.reset();
 	m_attributeMap.clear();
-	m_metaDataMap.clear();
+	m_metaDataMap.reset( m_storage->getMetaDataBlockCacheRef());
 
 	m_invertedIndexMap.clear();
-	m_forwardIndexMap.clear();
+	m_structIndexMap.reset( m_storage->maxStructTypeNo());
+	m_forwardIndexMap.reset( m_storage->maxTermTypeNo());
 	m_userAclMap.clear();
 
 	m_termTypeMap.clear();
@@ -444,5 +473,8 @@ void StorageTransaction::clearMaps()
 	m_termValueMapInv.clear();
 
 	m_explicit_dfmap.clear();
+
+	m_nofDeletedDocuments = 0;
+	m_nofOperations = 0;
 }
 
