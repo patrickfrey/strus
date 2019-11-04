@@ -24,16 +24,15 @@ public:
 	enum {
 		MaxBlockSize=1024
 	};
-	typedef Index DocnoType;
 	typedef unsigned short PositionType;
 	typedef unsigned short MemberIdxType;
 
 	struct BlockHeader
 	{
-		unsigned short docindexsize;
 		unsigned short structlistidx;
 		unsigned short structidx;
 		unsigned short memberidx;
+		unsigned short _RESERVED;
 	};
 	struct StructureMember
 	{
@@ -184,16 +183,20 @@ public:
 
 		IndexRange skip( const Index& pos)
 		{
-			if (initialized()) return IndexRange();
+			if (m_itr >= m_ar.size())
+			{
+				if (m_itr == 0) return IndexRange();
+				m_itr = 0;
+			}
 			if ((Index)m_ar[ m_itr].start > pos)
 			{
 				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureMemberSearchCompare());
-				if (idx > 0) m_itr = idx; else return IndexRange();
+				if (idx >= 0) m_itr = idx; else return IndexRange();
 			}
 			else if ((Index)m_ar[ m_itr].end <= pos)
 			{
 				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureMemberSearchCompare());
-				if (idx > 0) m_itr = idx; else return IndexRange();
+				if (idx >= 0) m_itr = idx; else return IndexRange();
 			}
 			return IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
 		}
@@ -240,7 +243,11 @@ public:
 
 		IndexRange skip( const Index& pos)
 		{
-			if (initialized()) return IndexRange();
+			if (m_itr >= m_ar.size())
+			{
+				if (m_itr == 0) return IndexRange();
+				m_itr = 0;
+			}
 			if ((Index)m_ar[ m_itr].header_start > pos)
 			{
 				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureDefSearchCompare());

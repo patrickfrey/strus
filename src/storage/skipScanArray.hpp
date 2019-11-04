@@ -49,12 +49,12 @@ public:
 			int ee = (bi < end) ? BlockSize : (BlockSize - (bi-end));
 			bi -= BlockSize;
 			for (; ei < ee && cmp( m_ar[ bi+ei], needle); ++ei){}
-			if (bi+ei == end) return -1;
+			if (bi+ei == end) return -1/*upperbound not found*/;
 			return bi + ei;
 		}
 		else
 		{
-			return 0;
+			return 0/*upperbound is first element*/;
 		}
 	}
 

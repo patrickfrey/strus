@@ -15,30 +15,53 @@
 
 using namespace strus;
 
+namespace {
+struct _AlignmentBaseStruct {char _;};
+#define AlignmentBase sizeof(_AlignmentBaseStruct)
+}
+
+
+template <typename Element>
+static const Element* getStructPtr( const void* dataPtr, unsigned short indexStart, unsigned short indexEnd)
+{
+	if (indexStart % AlignmentBase != 0 || (indexEnd-indexStart) % sizeof(Element) != 0 || indexEnd < indexStart)
+	{
+		throw strus::runtime_error( _TXT( "data corruption in structure block"));
+	}
+	return (Element*)((char*)dataPtr + indexStart);
+}
+
+template <typename Element>
+static int getStructSize( unsigned short indexStart, unsigned short indexEnd)
+{
+	return (indexEnd-indexStart) % sizeof(Element);
+}
+
 void StructBlock::initFrame()
 {
-	if (size() < sizeof(BlockHeader))
+	if (empty())
 	{
 		m_docIndexNodeArray.init( 0, 0);
 		m_structlistar = 0;
 		m_structar = 0;
 		m_memberar = 0;
 	}
-	else
+	else if (size() >= sizeof(BlockHeader))
 	{
 		const BlockHeader* hdr = (const BlockHeader*)ptr();
-		unsigned short docindexidx = sizeof(BlockHeader);
-		if (hdr->docindexsize > (int)DataBlock::size() / sizeof( DocIndexNode)
-		||  hdr->structlistidx < (int)sizeof(BlockHeader) || hdr->structlistidx > (int)DataBlock::size() / sizeof(StructureDefList)
-		||  hdr->structidx < (int)sizeof(BlockHeader) || hdr->structidx > (int)DataBlock::size() / sizeof(StructureDef)
-		||  hdr->memberidx < (int)sizeof(BlockHeader) || hdr->memberidx > (int)DataBlock::size() / sizeof(StructureMember))
-		{
-			throw strus::runtime_error( _TXT( "data corruption in structure block"));
-		}
-		m_docIndexNodeArray.init( (const DocIndexNode*)data_at( docindexidx), hdr->docindexsize);
-		m_structlistar = (const StructureDefList*)data_at( hdr->structlistidx);
-		m_structar = (const StructureDef*)data_at( hdr->structidx);
-		m_memberar = (const StructureMember*)data_at( hdr->memberidx);
+		unsigned short blockSize = (int)DataBlock::size();
+
+		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( ptr(), sizeof(BlockHeader), hdr->structlistidx);
+		int docIndexNodeSize = getStructSize<DocIndexNode>( sizeof(BlockHeader), hdr->structlistidx);
+		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
+
+		m_structlistar = getStructPtr<StructureDefList>( ptr(), hdr->structlistidx, hdr->structidx);
+		m_structar = getStructPtr<StructureDef>( ptr(), hdr->structidx, hdr->memberidx);
+		m_memberar = getStructPtr<StructureMember>( ptr(), hdr->memberidx, blockSize);
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT( "data corruption in structure block"));
 	}
 }
 
@@ -149,10 +172,10 @@ StructBlock StructBlockBuilder::createBlock() const
 	int blksize = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
 	if (blksize > std::numeric_limits<unsigned short>::max()) throw strus::runtime_error(_TXT("sizeof block (%d) exceeds maximum limit %d"), blksize, (int)std::numeric_limits<unsigned short>::max());
 
-	hdr.docindexsize = m_docIndexNodeArray.size();
 	hdr.structlistidx = structlistofs;
 	hdr.structidx = structofs;
 	hdr.memberidx = memberofs;
+	hdr._RESERVED = 0;
 
 	MemBlock blkmem( blksize);
 	char* dt = (char*)blkmem.ptr();

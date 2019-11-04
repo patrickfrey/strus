@@ -52,9 +52,6 @@ public:
 			const std::string& type_,
 			const std::string& value_,
 			const Index& length_);
-	virtual void pushDocField(
-			const std::string& metadataRangeStart,
-			const std::string& metadataRangeEnd);
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
 			unsigned int argc, int range_, unsigned int cardinality_);
@@ -98,14 +95,13 @@ public:
 	{
 		NullNode,
 		TermNode,
-		DocFieldNode,
 		ExpressionNode
 	};
 	enum {NodeTypeShift=28, NodeTypeMask=0x7, NodeIndexMask=(1<<NodeTypeShift)-1};
 
 	static const char* nodeTypeName( NodeType i)
 	{
-		static const char* ar[] = {"NullNode","TermNode","DocFieldNode","ExpressionNode"};
+		static const char* ar[] = {"NullNode","TermNode","ExpressionNode"};
 		return ar[i];
 	}
 
@@ -145,18 +141,6 @@ public:
 		std::string type;	///< term type name
 		std::string value;	///< term value
 		Index length;		///< term length (ordinal position count)
-	};
-
-	/// \brief Metadata defined postings specifying a single area in the document 
-	struct DocField
-	{
-		DocField( const DocField& o)
-			:metadataRangeStart(o.metadataRangeStart),metadataRangeEnd(o.metadataRangeEnd){}
-		DocField( const std::string& start, const std::string& end)
-			:metadataRangeStart(start),metadataRangeEnd(end){}
-
-		std::string metadataRangeStart;		///< metadata element defining the start of the field
-		std::string metadataRangeEnd;		///< metadata element defining the end of the field
 	};
 
 	struct Expression
@@ -244,7 +228,6 @@ private:
 	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
 	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
 	std::vector<Term> m_terms;					///< query terms
-	std::vector<DocField> m_docfields;				///< fields in document defined by meta data
 	std::vector<Expression> m_expressions;				///< query expressions
 	std::vector<Feature> m_features;				///< query features
 	std::vector<NodeAddress> m_stack;				///< expression build stack

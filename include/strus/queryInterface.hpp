@@ -42,14 +42,6 @@ public:
 			const std::string& value_,
 			const Index& length_)=0;
 
-	/// \brief Push an expression on the query stack that defines a single field per document. The fields are represented as a sets of postings. The postings are defined as meta data elements describing the start and the end of the field for each document.
-	/// \param[in] metadataRangeStart name of metadata element that defines the start position of the field in a document
-	/// \param[in] metadataRangeEnd name of metadata element that defines the end position of the field (first position after the field) in a document
-	/// \note fields can be used to identify elements in a certain document area without access of posting blocks and without assigning a different feature type and thus having different statistics
-	virtual void pushDocField(
-			const std::string& metadataRangeStart,
-			const std::string& metadataRangeEnd)=0;
-
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
 	/// \param[in] operation the expression join operator

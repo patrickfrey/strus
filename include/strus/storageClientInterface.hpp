@@ -81,11 +81,11 @@ public:
 			const Index& length) const=0;
 
 	/// \brief Create an iterator on the structures (relations of ordinal position ranges) of a defined type
-	/// \param[in] structstr name of the structure to get the iterator on
+	/// \param[in] structname name of the structure to get the iterator on
 	/// \return the created iterator reference (with ownership)
 	virtual StructIteratorInterface*
 		createStructIterator(
-			const std::string& structstr) const=0;
+			const std::string& structname) const=0;
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.
@@ -98,17 +98,6 @@ public:
 		createBrowsePostingIterator(
 			const MetaDataRestrictionInterface* restriction,
 			const Index& maxpos) const=0;
-
-	/// \brief Create an iterator postings specified as field in the meta data (by start and end position)
-	/// \param[in] meta_fieldStart meta data element that specifies the start of the field
-	/// \param[in] meta_fieldEnd meta data element that specifies the end of the field (first position not belonging to the field anymore)
-	/// \return the created iterator reference (with ownership)
-	/// \note Fields can avoid superfluos access on posting blocks
-	/// \note Fields give you the possibility to treat elements in the document differently while using the same statistics that are defined by feature type
-	virtual PostingIteratorInterface*
-		createFieldPostingIterator(
-			const std::string& meta_fieldStart,
-			const std::string& meta_fieldEnd) const=0;
 
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected

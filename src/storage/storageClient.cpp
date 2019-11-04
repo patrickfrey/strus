@@ -40,7 +40,6 @@
 #include "postingIterator.hpp"
 #include "structIterator.hpp"
 #include "browsePostingIterator.hpp"
-#include "metaDataRangePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
@@ -97,6 +96,7 @@ static char const** getConfigParamList( const DatabaseInterface* db)
 	for (int ci = 0; cfg[ci]; ++ci) cfgar.push_back( cfg[ci]);
 	cfgar.push_back( "acl");
 	cfgar.push_back( "statsproc");
+	cfgar.push_back( "database");
 	rt = (char const**)std::malloc( (cfgar.size()+1) * sizeof(rt[0]));
 	if (rt == NULL) throw std::bad_alloc();
 	std::memcpy( rt, cfgar.data(), cfgar.size() * sizeof(rt[0]));
@@ -152,7 +152,7 @@ bool StorageClient::reload( const std::string& databaseConfig)
 				}
 			}
 		}
-		(void)extractStringFromConfigString( statsproc, src, "statsproc", m_errorhnd);
+		(void)removeKeyFromConfigString( src, "database", m_errorhnd);
 
 		MetaDataDescription metadescr;
 		metadescr.load( m_database.get());
@@ -395,21 +395,6 @@ StructIteratorInterface*
 		return new StructIterator( this, m_database.get(), structno, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating structure iterator: %s"), *m_errorhnd, 0);
-}
-
-PostingIteratorInterface*
-	StorageClient::createFieldPostingIterator(
-		const std::string& meta_fieldStart,
-		const std::string& meta_fieldEnd) const
-{
-	try
-	{
-		strus::shared_ptr<MetaDataBlockCache> mc = m_metaDataBlockCache;
-		return new MetaDataRangePostingIterator(
-				new MetaDataReader( mc, m_errorhnd),
-				m_nof_documents.value(), meta_fieldStart, meta_fieldEnd, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating field posting iterator defined by meta data: %s"), *m_errorhnd, 0);
 }
 
 PostingIteratorInterface*

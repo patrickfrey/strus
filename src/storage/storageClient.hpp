@@ -86,11 +86,6 @@ public:
 			const MetaDataRestrictionInterface* restriction,
 			const Index& maxpos) const;
 
-	virtual PostingIteratorInterface*
-		createFieldPostingIterator(
-			const std::string& meta_fieldStart,
-			const std::string& meta_fieldEnd) const;
-
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
 				const std::string& type) const;

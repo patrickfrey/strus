@@ -49,13 +49,13 @@ public:
 	{
 		return m_structureScanner.initialized()
 			? IndexRange( m_structureScanner.current()->header_start, m_structureScanner.current()->header_end)
-			: IndexRange(0,0);
+			: IndexRange();
 	}
 	IndexRange sink() const
 	{
 		return m_memberScanner.initialized()
 			? IndexRange( m_memberScanner.current()->start, m_memberScanner.current()->end)
-			: IndexRange(0,0);
+			: IndexRange();
 	}
 
 private:
@@ -99,19 +99,19 @@ public:
 	}
 	virtual IndexRange skipPosSource( const Index& firstpos)
 	{
-		return IndexRange(0,0);
+		return IndexRange();
 	}
 	virtual IndexRange skipPosSink( const Index& firstpos)
 	{
-		return IndexRange(0,0);
+		return IndexRange();
 	}
 	virtual IndexRange source() const
 	{
-		return IndexRange(0,0);
+		return IndexRange();
 	}
 	virtual IndexRange sink() const
 	{
-		return IndexRange(0,0);
+		return IndexRange();
 	}
 };
 
