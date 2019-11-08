@@ -134,13 +134,13 @@ void strus::packIndex( std::string& buf, const Index& idx)
 void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
 {
 	size += packIndex_( buf+size, idx);
-	if (size > maxsize) throw strus::logic_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
+	if (size > maxsize) throw strus::runtime_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
 }
 
 void strus::packRange( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx, const Index& rangesize)
 {
 	size += packRange_( buf, idx, rangesize);
-	if (size > maxsize) throw strus::logic_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
+	if (size > maxsize) throw strus::runtime_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
 }
 
 void strus::packRange( std::string& buf, const Index& idx, const Index& rangesize)

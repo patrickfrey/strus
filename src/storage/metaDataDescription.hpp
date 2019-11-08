@@ -55,7 +55,7 @@ public:
 
 	const MetaDataElement* get( int handle) const
 	{
-		if ((std::size_t)handle >= m_ar.size()) throw strus::logic_error( _TXT( "array bound read in function %s"), __FUNCTION__);
+		if ((std::size_t)handle >= m_ar.size()) throw strus::runtime_error( _TXT( "array bound read in function %s"), __FUNCTION__);
 		return &m_ar[ handle];
 	}
 	const char* getName( int handle) const

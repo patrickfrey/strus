@@ -102,7 +102,7 @@ void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 		m_docIndexNodeArray.push_back( DocIndexNode());
 		if (!m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
 		{
-			throw strus::logic_error( _TXT( "corrupt structure in posinfo block builder"));
+			throw strus::runtime_error( _TXT( "corrupt structure in posinfo block builder"));
 		}
 	}
 	PositionType ii=0, nn=posar[0];

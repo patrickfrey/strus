@@ -34,7 +34,7 @@ std::string ForwardIndexBlock::value_at( const char* ref) const
 const char* ForwardIndexBlock::nextItem( const char* ref) const
 {
 	if (ref == charend()) return 0;
-	if (ref < charptr() || ref > charend()) throw strus::logic_error( _TXT( "illegal forward index block access (%s)"), __FUNCTION__);
+	if (ref < charptr() || ref > charend()) throw strus::runtime_error( _TXT( "logic error: illegal forward index block access (%s)"), __FUNCTION__);
 	char const* rt = (const char*)std::memchr( ref, EndItemMarker, charend()-ref);
 	return (rt)?(rt+1):charend();
 }
@@ -42,7 +42,7 @@ const char* ForwardIndexBlock::nextItem( const char* ref) const
 const char* ForwardIndexBlock::prevItem( const char* ref) const
 {
 	if (ref == charptr()) return 0;
-	if (ref < charptr() || ref > charend()) throw strus::logic_error( _TXT( "illegal forward index block access (%s)"), __FUNCTION__);
+	if (ref < charptr() || ref > charend()) throw strus::runtime_error( _TXT( "logic error: illegal forward index block access (%s)"), __FUNCTION__);
 	char const* rt = (const char*)strus_memrchr( charptr(), EndItemMarker, ref-charptr()-1);
 	return (rt >= charptr())?(rt+1):charptr();
 }
@@ -51,7 +51,7 @@ const char* ForwardIndexBlock::upper_bound( const Index& pos_, const char* lower
 {
 	if (!lowerbound || lowerbound == charend()) return 0;
 
-	if (id() < pos_) throw strus::logic_error( _TXT( "called %s with wrong block"), __FUNCTION__);
+	if (id() < pos_) throw strus::runtime_error( _TXT( "logic error: called %s with wrong block"), __FUNCTION__);
 
 	const char* rt = findStructIndexDesc(
 				lowerbound, charend(), EndItemMarker,

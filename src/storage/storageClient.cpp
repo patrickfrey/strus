@@ -539,7 +539,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "typeno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for non immediate alloc"), "typeno");
 	}
 
 private:
@@ -558,7 +558,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "structno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for non immediate alloc"), "structno");
 	}
 
 private:
@@ -573,7 +573,7 @@ public:
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name)
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "docno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for immediate alloc"), "docno");
 	}
 	virtual Index alloc()
 	{
@@ -599,7 +599,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "userno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for non immediate alloc"), "userno");
 	}
 private:
 	StorageClient* m_storage;
@@ -617,7 +617,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "attribno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for non immediate alloc"), "attribno");
 	}
 private:
 	StorageClient* m_storage;
@@ -632,7 +632,7 @@ public:
 
 	virtual Index getOrCreate( const std::string& name)
 	{
-		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "termno");
+		throw strus::runtime_error( _TXT( "cannot use %s allocator for immediate alloc"), "termno");
 	}
 	virtual Index alloc()
 	{

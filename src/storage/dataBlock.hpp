@@ -68,12 +68,12 @@ public:
 
 	void setByte( std::size_t idx, unsigned char elem)
 	{
-		if (idx >= m_size) throw strus::logic_error( _TXT( "array bound write (%s)"), __FUNCTION__);
+		if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (%s)"), __FUNCTION__);
 		m_ptr[ idx] = elem;
 	}
 	void unionByte( std::size_t idx, unsigned char elem)
 	{
-		if (idx >= m_size) throw strus::logic_error( _TXT( "array bound write (%s)"), __FUNCTION__);
+		if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (%s)"), __FUNCTION__);
 		m_ptr[ idx] |= elem;
 	}
 	void resize( std::size_t newsize_)

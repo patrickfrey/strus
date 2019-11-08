@@ -91,7 +91,7 @@ void MetaDataBlock::init( const MetaDataDescription* descr_,
 
 const MetaDataRecord MetaDataBlock::operator[]( std::size_t idx) const
 {
-	if (idx >= BlockSize) throw strus::logic_error( _TXT( "array bound read in meta data block"));
+	if (idx >= BlockSize) throw strus::runtime_error( _TXT( "array bound read in meta data block"));
 	void* recaddr = (char*)m_ptr + (idx * m_descr->bytesize());
 	return MetaDataRecord( m_descr, recaddr);
 }

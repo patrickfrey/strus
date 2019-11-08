@@ -22,6 +22,11 @@ struct Constants
 	{
 		return "docid";
 	}
+	/// \brief Get the attribute name for the access list of a document
+	static const char* attribute_access()
+	{
+		return "access";
+	}
 	/// \brief Get the name reserved for the internal document number
 	static const char* identifier_docno()
 	{

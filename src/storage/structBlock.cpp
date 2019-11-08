@@ -73,7 +73,7 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 		m_docIndexNodeArray.push_back( DocIndexNode());
 		if (!m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
 		{
-			throw strus::logic_error( _TXT( "corrupt structure in structure block builder"));
+			throw strus::runtime_error( _TXT( "corrupt structure in structure block builder"));
 		}
 	}
 	StructureDefList lst;
@@ -90,7 +90,7 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 	{
 		if ((Index)m_memberar.back().end > sink.start())
 		{
-			throw strus::logic_error( _TXT( "structure members in structure block builder not appended in strictly ascending order"));
+			throw strus::runtime_error( _TXT( "structure members in structure block builder not appended in strictly ascending order"));
 		}
 	}
 	member.start = sink.start();
@@ -124,7 +124,7 @@ void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const 
 	{
 		if (src.start() < (Index)m_structurear.back().header_start)
 		{
-			throw strus::logic_error( _TXT( "structures in structure block builder not appended in ascending order"));
+			throw strus::runtime_error( _TXT( "structures in structure block builder not appended in ascending order"));
 		}
 		else if (src.start() == (Index)m_structurear.back().header_start)
 		{
@@ -134,12 +134,12 @@ void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const 
 			}
 			else
 			{
-				throw strus::logic_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
+				throw strus::runtime_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
 			}
 		}
 		else if (src.start() < (Index)m_structurear.back().header_end)
 		{
-			throw strus::logic_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
+			throw strus::runtime_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
 		}
 		else
 		{

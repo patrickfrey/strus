@@ -35,7 +35,7 @@ public:
 	{
 		if (n != 1)
 		{
-			throw strus::logic_error( _TXT( "illegal use of allocator, only one item can be allocated at once"));
+			throw strus::runtime_error( _TXT( "illegal use of allocator, only one item can be allocated at once"));
 		}
 		StructType* rt = m_freelist.pop();
 		if (!rt) return alloc();
@@ -46,7 +46,7 @@ public:
 	{
 		if (n != 1)
 		{
-			throw strus::logic_error( _TXT( "illegal use of allocator, only on item can be deallocated at once"));
+			throw strus::runtime_error( _TXT( "illegal use of allocator, only on item can be deallocated at once"));
 		}
 		m_freelist.push( p);
 	}

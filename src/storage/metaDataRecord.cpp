@@ -139,7 +139,7 @@ static inline void setValue_( const MetaDataDescription& descr, void* ptr, const
 			*(float*)((char*)ptr + elem->ofs()) = (float)value;
 			break;
 		default:
-			throw strus::logic_error( _TXT( "unknown meta data type"));
+			throw strus::runtime_error( _TXT( "unknown meta data type"));
 	}
 }
 
@@ -196,7 +196,7 @@ static inline ValueType getValue_( const MetaDataDescription& descr, const void*
 #endif
 			return (ValueType)*(float*)((const char*)ptr + elem->ofs());
 	}
-	throw strus::logic_error( _TXT( "unknown meta data type"));
+	throw strus::runtime_error( _TXT( "unknown meta data type"));
 }
 
 void MetaDataRecord::setValueInt( const MetaDataElement* elem, int64_t value_)

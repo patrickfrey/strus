@@ -114,7 +114,7 @@ std::string MetaDataDescription::tostring() const
 				break;
 			}
 		}
-		if (ni == ne) throw strus::logic_error( _TXT( "corrupt meta data description"));
+		if (ni == ne) throw strus::runtime_error( _TXT( "corrupt meta data description"));
 		rt.append( ei->typeName());
 	}
 	return rt;
