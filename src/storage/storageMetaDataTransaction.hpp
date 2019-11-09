@@ -42,30 +42,30 @@ public:
 
 	~StorageMetaDataTransaction();
 
-	virtual void alterElement(
+	void alterElement(
 			const std::string& oldname,
 			const std::string& name,
 			const std::string& datatype);
 
-	virtual void addElement(
+	void addElement(
 			const std::string& name,
 			const std::string& datatype);
 
-	virtual void renameElement(
+	void renameElement(
 			const std::string& oldname,
 			const std::string& name);
 
-	virtual void deleteElement(
+	void deleteElement(
 			const std::string& name);
 
-	virtual void deleteElements();
+	void deleteElements();
 
-	virtual void clearElement(
+	void clearElement(
 			const std::string& name);
 
-	virtual bool commit();
+	bool commit();
 
-	virtual void rollback();
+	void rollback();
 
 public:/*StorageTransaction*/
 	bool empty() const
