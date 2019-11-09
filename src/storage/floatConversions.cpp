@@ -7,6 +7,8 @@
  */
 #include "floatConversions.hpp"
 #include <cstdlib>
+#include <cmath>
+#include <stdexcept>
 
 using namespace strus;
 

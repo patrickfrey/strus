@@ -15,6 +15,7 @@ set( source_files
 	documentFrequencyCache.cpp
 	documentFrequencyMap.cpp
 	floatConversions.cpp
+	uintCompaction.cpp
 	forwardIndexBlock.cpp
 	forwardIndexMap.cpp
 	forwardIterator.cpp
