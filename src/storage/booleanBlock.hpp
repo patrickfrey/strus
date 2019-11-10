@@ -8,6 +8,7 @@
 #ifndef _STRUS_STORAGE_BOOLEAN_BLOCK_HPP_INCLUDED
 #define _STRUS_STORAGE_BOOLEAN_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
+#include "strus/constants.hpp"
 #include <vector>
 #include <map>
 
@@ -18,11 +19,6 @@ namespace strus {
 class BooleanBlock
 	:public DataBlock
 {
-public:
-	enum {
-		MaxBlockSize=1024
-	};
-
 public:
 	BooleanBlock()
 		:m_first(0)
@@ -78,7 +74,7 @@ public:
 
 	bool full() const
 	{
-		return size() >= MaxBlockSize;
+		return size() >= Constants::maxBooleanBlockSize();
 	}
 
 	/// \brief Check if the address 'elemno_', if it exists, is in this block.

@@ -32,6 +32,7 @@ public:
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+		FfBlockPrefix='o',	///< [typeno,termno,docno]     ->  [ff]
 		StructBlockPrefix='s',	///< [structno,docno]          ->  [struct]*
 		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff,firstpos]*
 
@@ -62,6 +63,7 @@ public:
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";
+			case FfBlockPrefix: return "first access ff block";
 			case StructBlockPrefix: return "structure block";
 			case InverseTermPrefix: return "inverse terminfo block";
 			case UserAclBlockPrefix: return "user ACL block";

@@ -87,14 +87,14 @@ PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 	if (!(docno=o.firstDoc( idx))) return;
 	do
 	{
-		append( m_lastDoc = docno, o.posinfo_at( idx));
+		append( docno, o.posinfo_at( idx));
 	}
 	while (!!(docno=o.nextDoc( idx)));
 }
 
 void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 {
-	if (m_id && m_id < docno) throw strus::runtime_error( "%s",  _TXT( "assigned illegal id to block"));
+	if (m_id && m_id < docno) throw std::runtime_error(_TXT("assigned illegal id to block"));
 
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
@@ -102,7 +102,7 @@ void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 		m_docIndexNodeArray.push_back( DocIndexNode());
 		if (!m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
 		{
-			throw strus::runtime_error( _TXT( "corrupt structure in posinfo block builder"));
+			throw std::runtime_error( _TXT("corrupt structure in posinfo block builder"));
 		}
 	}
 	PositionType ii=0, nn=posar[0];
@@ -120,7 +120,7 @@ bool PosinfoBlockBuilder::fitsInto( std::size_t nofpos) const
 
 PosinfoBlock PosinfoBlockBuilder::createBlock() const
 {
-	if (empty()) throw strus::runtime_error( "%s",  _TXT( "tried to create empty posinfo block"));
+	if (empty()) throw std::runtime_error(_TXT("tried to create empty posinfo block"));
 
 	std::size_t blksize =
 		sizeof( unsigned int)
@@ -146,7 +146,7 @@ PosinfoBlock PosinfoBlockBuilder::createBlock() const
 	{
 		posinfoptr[ pidx] = *pi;
 	}
-	return PosinfoBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
+	return PosinfoBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true/*allocated, means copied*/);
 }
 
 void PosinfoBlockBuilder::clear()
@@ -159,7 +159,7 @@ void PosinfoBlockBuilder::clear()
 
 void PosinfoBlockBuilder::setId( const Index& id_)
 {
-	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( "%s",  _TXT( "assigning illegal id to block"));
+	if (id_ && id_ < m_lastDoc) throw std::runtime_error(_TXT("assigning illegal id to block"));
 	m_id = id_;
 }
 

@@ -512,6 +512,7 @@ void InvertedIndexMap::insertNewPosElements(
 		{
 			// Delete docno list block element (BooleanBlock):
 			defineDocnoRangeElement( docrangear, ei->first.docno, false);
+			++ei;
 		}
 	}
 	if (!newposblk.empty())

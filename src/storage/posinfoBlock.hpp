@@ -9,6 +9,7 @@
 #define _STRUS_POSINFO_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "docIndexNode.hpp"
+#include "strus/constants.hpp"
 #include <vector>
 
 namespace strus {
@@ -19,9 +20,6 @@ class PosinfoBlock
 	:public DataBlock
 {
 public:
-	enum {
-		MaxBlockSize=1024
-	};
 	typedef unsigned short PositionType;
 
 public:
@@ -173,7 +171,7 @@ public:
 	{
 		return (m_posinfoArray.size() * sizeof(PositionType)
 				+ m_docIndexNodeArray.size() * sizeof(DocIndexNode))
-			>= PosinfoBlock::MaxBlockSize;
+			>= Constants::maxPosInfoBlockSize();
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const	{return m_docIndexNodeArray;}

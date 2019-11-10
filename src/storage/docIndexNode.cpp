@@ -56,7 +56,7 @@ bool DocIndexNode::addDocument( const Index& docno, unsigned short ref_)
 		std::size_t ii = 0;
 		for (; ii<(Size-1) && ofs[ii]; ++ii){}
 		if (ii == (Size-1)) return false;
-		ofs[ ii] = docno - base;
+		ofs[ ii] = (docno - base);
 		ref[ ii+1] = ref_;
 	}
 	return true;
@@ -74,7 +74,7 @@ Index DocIndexNode::skipDoc( const Index& docno, unsigned short& cursor_docidx) 
 		return 0;
 	}
 	if (docno - base > std::numeric_limits<unsigned short>::max()) return 0;
-	unsigned short ofs_ = (unsigned short)(docno - base);
+	unsigned short ofs_ = (docno - base);
 	std::size_t ii = 0;
 	for (; ii<(Size-1) && ofs_ > ofs[ii]; ++ii){}
 	if (ii == (Size-1))

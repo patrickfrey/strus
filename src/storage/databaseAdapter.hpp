@@ -16,6 +16,7 @@
 #include "databaseKey.hpp"
 #include "dataBlock.hpp"
 #include "posinfoBlock.hpp"
+#include "ffBlock.hpp"
 #include "structBlock.hpp"
 #include "booleanBlock.hpp"
 #include "invTermBlock.hpp"
@@ -475,7 +476,7 @@ struct DatabaseAdapter_ForwardIndex
 struct DatabaseAdapter_PosinfoBlock
 {
 	typedef DatabaseAdapter_TypedDataBlock<
-			DatabaseKey::PosinfoBlockPrefix, PosinfoBlock, true> Parent;
+			DatabaseKey::PosinfoBlockPrefix, PosinfoBlock, true/*use cache*/> Parent;
 
 	class Reader
 		:public Parent::Reader
@@ -521,6 +522,59 @@ struct DatabaseAdapter_PosinfoBlock
 			:Cursor(o),Writer(o){}
 	};
 };
+
+
+struct DatabaseAdapter_FfBlock
+{
+	typedef DatabaseAdapter_TypedDataBlock<
+			DatabaseKey::FfBlockPrefix, FfBlock, true/*use cache*/> Parent;
+
+	class Reader
+		:public Parent::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Reader( database_, BlockKey(typeno_,termno_)){}
+		Reader( const Reader& o)
+			:Parent::Reader(o){}
+	};
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Writer( database_, BlockKey(typeno_,termno_)){}
+		Writer( const Writer& o)
+			:Parent::Writer(o){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Cursor( database_, BlockKey(typeno_,termno_)){}
+		Cursor( const Cursor& o)
+			:Parent::Cursor(o){}
+	};
+
+	class WriteCursor
+		:public Cursor
+		,public Writer
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, 
+				const Index& typeno_, const Index& termno_)
+			:Cursor(database_,typeno_,termno_)
+			,Writer(database_,typeno_,termno_){}
+		WriteCursor( const WriteCursor& o)
+			:Cursor(o),Writer(o){}
+	};
+};
+
+
 
 struct DatabaseAdapter_StructBlock
 {
