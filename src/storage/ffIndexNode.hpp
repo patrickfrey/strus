@@ -9,6 +9,7 @@
 #define _STRUS_INDEX_BLOCK_FF_INDEX_NODE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "uintCompaction.hpp"
+#include <vector>
 #include <utility>
 #include <algorithm>
 

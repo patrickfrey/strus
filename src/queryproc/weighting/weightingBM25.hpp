@@ -12,6 +12,7 @@
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/reference.hpp"
 #include "strus/index.hpp"
 #include "strus/constants.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -50,7 +51,6 @@ class WeightingFunctionContextBM25
 public:
 	WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata_,
 		const WeightingFunctionParameterBM25& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
@@ -81,13 +81,13 @@ public:
 	virtual std::string debugCall( const Index& docno);
 
 private:
-	double featureWeight( const Feature& feat, const Index& docno) const;
+	double featureWeight( const Feature& feat, const Index& docno);
 
 private:
 	WeightingFunctionParameterBM25 m_parameter;
 	double m_nofCollectionDocuments;
 	std::vector<Feature> m_featar;
-	MetaDataReaderInterface* m_metadata;
+	strus::Reference<MetaDataReaderInterface> m_metadata;
 	int m_metadata_doclen;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

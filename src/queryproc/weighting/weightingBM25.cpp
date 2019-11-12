@@ -26,20 +26,24 @@ using namespace strus;
 
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata_,
 		const WeightingFunctionParameterBM25& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_)
 	:m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
-	,m_featar(),m_metadata(metadata_)
+	,m_featar()
+	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
 	,m_errorhnd(errorhnd_)
 {
+	if (!m_metadata.get())
+	{
+		throw strus::runtime_error( _TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+	}
 	if (m_parameter.b)
 	{
-		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_);
+		m_metadata_doclen = m_metadata->elementHandle( attribute_doclen_);
 		if (m_metadata_doclen<0)
 		{
 			throw strus::runtime_error( _TXT("parameter 'b' set, but no meta data element '%s' for the document length defined"), attribute_doclen_.c_str());
@@ -65,7 +69,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 			double nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
 			double idf = 0.0;
 		
-			if (m_nofCollectionDocuments > nofMatches * 2)
+			if (m_nofCollectionDocuments > nofMatches * 2)//... avoid negative IDFs
 			{
 				idf = strus::Math::log10(
 						(m_nofCollectionDocuments - nofMatches + 0.5)
@@ -85,8 +89,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-
-double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const Index& docno) const
+double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const Index& docno)
 {
 	if (docno==feat.itr->skipDoc( docno))
 	{
@@ -99,6 +102,7 @@ double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const I
 			m_metadata->skipDoc( docno);
 			double doclen = m_metadata->getValue( m_metadata_doclen);
 			double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
+
 			return feat.weight * feat.idf
 				* (ff * (m_parameter.k1 + 1.0))
 				/ (ff + m_parameter.k1 
@@ -220,7 +224,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25( storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
