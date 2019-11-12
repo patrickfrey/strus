@@ -84,7 +84,6 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const {return "forwardindex";}

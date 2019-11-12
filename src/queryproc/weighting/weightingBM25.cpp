@@ -218,7 +218,6 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
 	try

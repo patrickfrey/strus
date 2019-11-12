@@ -466,7 +466,6 @@ void SummarizerFunctionInstanceAccumulateNear::defineResultName(
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*,
 		const GlobalStatistics& stats) const
 {
 	if (m_data->type.empty())

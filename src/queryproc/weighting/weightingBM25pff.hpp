@@ -82,7 +82,6 @@ class WeightingFunctionContextBM25pff
 public:
 	WeightingFunctionContextBM25pff(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata_,
 		const WeightingFunctionParameterBM25pff& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
@@ -158,7 +157,7 @@ private:
 	bool m_relevantfeat[ MaxNofArguments];			///< marker for features with a df smaller than maxdf
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
-	MetaDataReaderInterface* m_metadata;			///< meta data reader
+	strus::Reference<MetaDataReaderInterface> m_metadata;	///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
 	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
@@ -186,7 +185,6 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
 	virtual const char* name() const {return "bm25pff";}

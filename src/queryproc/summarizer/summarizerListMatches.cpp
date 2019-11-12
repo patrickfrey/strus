@@ -153,7 +153,6 @@ void SummarizerFunctionInstanceListMatches::defineResultName(
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
 		const StorageClientInterface*,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try

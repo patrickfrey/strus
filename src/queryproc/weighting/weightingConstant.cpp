@@ -158,7 +158,6 @@ void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& 
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceConstant::createFunctionContext(
 		const StorageClientInterface*,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try

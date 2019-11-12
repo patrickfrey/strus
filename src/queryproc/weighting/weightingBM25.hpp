@@ -114,7 +114,6 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
 	virtual const char* name() const {return "bm25";}

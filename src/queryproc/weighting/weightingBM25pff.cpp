@@ -28,7 +28,6 @@ using namespace strus;
 
 WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata_,
 		const WeightingFunctionParameterBM25pff& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
@@ -41,11 +40,16 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_paraarsize(0)
 	,m_nof_maxdf_features(0)
 	,m_initialized(false)
-	,m_metadata(metadata_)
-	,m_metadata_doclen( metadata_->elementHandle( metadata_doclen_))
+	,m_metadata(storage->createMetaDataReader())
+	,m_metadata_doclen(-1)
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
+	if (!m_metadata.get())
+	{
+		throw strus::runtime_error( _TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+	}
+	m_metadata_doclen = m_metadata->elementHandle( metadata_doclen_);
 	if (m_metadata_doclen<0)
 	{
 		throw strus::runtime_error( _TXT("no meta data element '%s' for the document lenght defined"), metadata_doclen_.c_str());
@@ -627,14 +631,13 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceBM25pff::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextBM25pff(
-				storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
+				storage_, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

@@ -204,11 +204,13 @@ std::vector<std::string> WeightingFunctionInstanceScalar::getVariables() const
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceScalar::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
 	try
 	{
+		strus::Reference<MetaDataReaderInterface> metadata( storage_->createMetaDataReader());
+		if (!metadata.get()) throw strus::runtime_error( _TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+
 		if (!m_func.get()) initFunction();
 
 		std::vector<Index> metadatahnd;
@@ -223,7 +225,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceScalar::createFuncti
 			metadatahnd.push_back( elemhnd);
 		}
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextScalar( m_func.get(), metadata, metadatahnd, (double)nofdocs, m_errorhnd);
+		return new WeightingFunctionContextScalar( m_func.get(), metadata.release(), metadatahnd, (double)nofdocs, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

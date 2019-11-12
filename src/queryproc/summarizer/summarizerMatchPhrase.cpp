@@ -909,7 +909,6 @@ void SummarizerFunctionInstanceMatchPhrase::defineResultName(
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
 	if (m_parameter->m_type.empty())
@@ -918,9 +917,12 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 	}
 	try
 	{
+		strus::Reference<MetaDataReaderInterface> metadata( storage->createMetaDataReader());
+		if (!metadata.get()) throw strus::runtime_error(_TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextMatchPhrase(
-				storage, m_processor, metadata, m_parameter,
+				storage, m_processor, metadata.release(), m_parameter,
 				nofCollectionDocuments, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);

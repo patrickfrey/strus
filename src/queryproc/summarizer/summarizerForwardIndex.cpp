@@ -159,7 +159,6 @@ void SummarizerFunctionInstanceForwardIndex::defineResultName(
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try

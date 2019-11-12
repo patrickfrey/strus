@@ -206,7 +206,7 @@ private:
 private:
 	const StorageClientInterface* m_storage;		///< storage access
 	const QueryProcessorInterface* m_processor;		///< query processor interface
-	MetaDataReaderInterface* m_metadata;			///< access metadata arguments
+	Reference<MetaDataReaderInterface> m_metadata;		///< access metadata arguments
 	Reference<ForwardIteratorInterface> m_forwardindex;	///< forward index iterator
 	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
 	double m_nofCollectionDocuments;			///< number of documents in the collection
@@ -252,7 +252,6 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
-			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const {return "matchphrase";}

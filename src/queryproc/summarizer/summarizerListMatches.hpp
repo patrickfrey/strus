@@ -81,7 +81,6 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const {return "matchpos";}

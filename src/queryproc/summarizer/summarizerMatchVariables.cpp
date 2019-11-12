@@ -185,7 +185,6 @@ void SummarizerFunctionInstanceMatchVariables::defineResultName(
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	if (m_data->type.empty())

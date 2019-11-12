@@ -12,6 +12,7 @@
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include <limits>
@@ -51,7 +52,7 @@ public:
 	virtual std::string debugCall( const Index& docno);
 
 private:
-	MetaDataReaderInterface* m_metadata;
+	strus::Reference<MetaDataReaderInterface> m_metadata;
 	Index m_elementHandle;
 	double m_weight;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -79,7 +80,6 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const	{return "metadata";}

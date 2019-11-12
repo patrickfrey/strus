@@ -10,7 +10,9 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include <string>
 #include <vector>
@@ -22,8 +24,6 @@ namespace strus
 
 /// \brief Forward declaration
 class StorageClientInterface;
-/// \brief Forward declaration
-class MetaDataReaderInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
@@ -56,7 +56,7 @@ public:
 	virtual std::string debugCall( const Index& docno);
 
 private:
-	MetaDataReaderInterface* m_metadata;
+	strus::Reference<MetaDataReaderInterface> m_metadata;
 	std::string m_resultname;
 	std::string m_metaname;
 	int m_attrib;
@@ -89,8 +89,7 @@ public:
 	}
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
-			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata,
+			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const {return "metadata";}

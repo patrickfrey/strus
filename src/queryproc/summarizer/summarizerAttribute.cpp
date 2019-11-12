@@ -158,7 +158,6 @@ StructView SummarizerFunctionInstanceAttribute::view() const
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try

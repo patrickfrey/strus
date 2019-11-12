@@ -114,7 +114,6 @@ void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::str
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::createFunctionContext(
 		const StorageClientInterface*,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try

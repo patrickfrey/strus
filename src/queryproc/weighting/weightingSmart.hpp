@@ -110,7 +110,7 @@ private:
 	typedef std::vector<Feature> FeatureVector;
 	Reference<ScalarFunctionInstanceInterface> m_func;	///< scalar function instance to execute
 	std::vector<Feature> m_featar;				///< list of argument features
-	MetaDataReaderInterface* m_metadata;			///< meta data reader
+	Reference<MetaDataReaderInterface> m_metadata;		///< meta data reader
 	std::vector<Index> m_metadatahnd;			///< array of meta data element handles feeded to the function
 	double m_nofCollectionDocuments;			///< document collection size
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
@@ -139,7 +139,6 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
 	virtual const char* name() const	{return "smart";}

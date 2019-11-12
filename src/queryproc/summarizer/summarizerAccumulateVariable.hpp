@@ -136,7 +136,6 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
-			MetaDataReaderInterface*,
 			const GlobalStatistics&) const;
 
 	virtual const char* name() const {return "accuvar";}

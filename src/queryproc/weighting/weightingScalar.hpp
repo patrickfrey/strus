@@ -14,6 +14,7 @@
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/index.hpp"
 #include <vector>
@@ -29,8 +30,6 @@ class QueryProcessorInterface;
 class ScalarFunctionInstanceInterface;
 /// \brief Forward declaration
 class ScalarFunctionParserInterface;
-/// \brief Forward declaration
-class MetaDataReaderInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
@@ -70,7 +69,7 @@ private:
 
 private:
 	Reference<ScalarFunctionInstanceInterface> m_func;	///< scalar function instance to execute
-	MetaDataReaderInterface* m_metadata;			///< meta data reader
+	Reference<MetaDataReaderInterface> m_metadata;		///< meta data reader
 	std::vector<Index> m_metadatahnd;			///< array of meta data element handles feeded to the function
 	double m_nofCollectionDocuments;			///< document collection size
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
@@ -99,7 +98,6 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
 	virtual const char* name() const	{return "scalar";}

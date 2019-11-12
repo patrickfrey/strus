@@ -200,7 +200,6 @@ double WeightingFunctionContextFormula::call( const Index& docno)
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
 	try

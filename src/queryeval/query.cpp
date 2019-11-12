@@ -588,10 +588,9 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				DEBUG_OPEN( "function" )
 				DEBUG_EVENT1( "name", "%s", wi->functionName().c_str())
 				strus::local_ptr<WeightingFunctionContextInterface> execContext(
-					wi->function()->createFunctionContext(
-						m_storage, m_metaDataReader.get(), m_globstats));
+					wi->function()->createFunctionContext( m_storage, m_globstats));
 				if (!execContext.get()) throw std::runtime_error( _TXT("error creating weighting function context"));
-	
+
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = wi->featureParameters().begin(),
 					se = wi->featureParameters().end();
@@ -714,8 +713,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			{
 				// [5.1] Create the summarizer:
 				summarizers.push_back(
-					zi->function()->createFunctionContext(
-						m_storage, m_metaDataReader.get(), m_globstats));
+					zi->function()->createFunctionContext( m_storage, m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
 				if (!closure) throw std::runtime_error( _TXT("error creating summarizer context"));
 

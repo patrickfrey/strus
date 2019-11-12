@@ -144,12 +144,11 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const
 	{
 		try
 		{
-			Reference<WeightingFunctionContextInterface> context( m_func->createFunctionContext( storage_, metadata_, stats));
+			Reference<WeightingFunctionContextInterface> context( m_func->createFunctionContext( storage_, stats));
 			if (!context.get()) throw strus::runtime_error(_TXT("error creating '%s' weighting function context"), m_name);
 			Reference<SummarizerFunctionContextInterface> rt( new WeightingFunctionSummarizerContext( m_name, m_errorhnd, context.get(), m_resultname));
 			context.release();

@@ -62,12 +62,10 @@ public:
 
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
-	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
 	/// \param[in] stats global statistics for weighting
 	/// \return the execution context, the summarization function instance with its execution context (ownership to caller)
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const=0;
 
 	/// \brief Get the name of the function

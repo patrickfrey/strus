@@ -141,13 +141,14 @@ void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string&
 }
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFunctionContext(
-		const StorageClientInterface*,
-		MetaDataReaderInterface* metadata,
+		const StorageClientInterface* storage,
 		const GlobalStatistics&) const
 {
 	try
 	{
-		return new SummarizerFunctionContextMetaData( metadata, m_metaname, m_resultname.empty() ? m_metaname : m_resultname, m_errorhnd);
+		strus::Reference<MetaDataReaderInterface> metadata( storage->createMetaDataReader());
+		if (!metadata.get()) throw strus::runtime_error(_TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+		return new SummarizerFunctionContextMetaData( metadata.release(), m_metaname, m_resultname.empty() ? m_metaname : m_resultname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

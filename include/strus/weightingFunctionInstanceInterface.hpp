@@ -50,7 +50,6 @@ public:
 	/// \return the execution context to fetch the calculated document weights from (ownership to caller)
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const=0;
 
 	/// \brief Get the list of variables used by this function defined in the query with 'QueryInterface::setWeightingVariableValue( const std::string&, double)'

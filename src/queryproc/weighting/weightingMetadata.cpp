@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "weightingMetadata.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
@@ -29,10 +30,11 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 		double weight_,
 		ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
-	,m_elementHandle(metadata_->elementHandle(elementName_))
+	,m_elementHandle(-1)
 	,m_weight(weight_)
 	,m_errorhnd(errorhnd_)
 {
+	m_elementHandle = m_metadata->elementHandle(elementName_);
 	if (m_elementHandle < 0)
 	{
 		throw strus::runtime_error( _TXT("metadata element '%s' is not defined"), elementName_.c_str());
@@ -118,8 +120,7 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunctionContext(
-		const StorageClientInterface*,
-		MetaDataReaderInterface* metadata_,
+		const StorageClientInterface* storage,
 		const GlobalStatistics&) const
 {
 	try
@@ -128,7 +129,10 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunc
 		{
 			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("undefined '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, "name");
 		}
-		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight, m_errorhnd);
+		strus::Reference<MetaDataReaderInterface> metadata( storage->createMetaDataReader());
+		if (!metadata.get()) throw strus::runtime_error(_TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
+
+		return new WeightingFunctionContextMetadata( metadata.release(), m_elementName, m_weight, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

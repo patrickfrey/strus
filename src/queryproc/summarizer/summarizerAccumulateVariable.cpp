@@ -340,7 +340,6 @@ void SummarizerFunctionInstanceAccumulateVariable::defineResultName( const std::
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
 	try
