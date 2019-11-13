@@ -12,7 +12,9 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/shared_ptr.hpp"
+#include "strus/base/fileio.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -184,6 +186,37 @@ bool DatabaseClient::readValue(
 		return true;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' readValue: %s"), MODULENAME, *m_errorhnd, false);
+}
+
+long DatabaseClient::diskUsage() const
+{
+	try
+	{
+		std::string path = m_conn->path();
+		if (path.empty()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "diskUsage");
+	
+		std::vector<std::string> files;
+		int ec = strus::readDirFiles( path, ""/*ext (none)*/, files);
+		if (ec) throw strus::runtime_error( "failed to list storage directory %s: %s", path.c_str(), ::strerror(ec));
+	
+		long rt = 0;
+		std::vector<std::string>::const_iterator fi = files.begin(), fe = files.end();
+		for (; fi != fe; ++fi)
+		{
+			std::string filepath = strus::joinFilePath( path, *fi);
+			if (filepath.empty()) throw std::runtime_error( m_errorhnd->fetchError());
+	
+			std::size_t filesize;
+			ec = strus::readFileSize( filepath, filesize);
+			if (ec) throw strus::runtime_error( "failed to get file size of file %s: %s", filepath.c_str(), ::strerror(ec));
+	
+			std::size_t usagesize = (filesize / Constants::platformMinimumFileSize() + 1)
+						* Constants::platformMinimumFileSize();
+			rt += usagesize / 1024;
+		}
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' diskUsage: %s"), MODULENAME, *m_errorhnd, 0);
 }
 
 std::string DatabaseClient::config() const

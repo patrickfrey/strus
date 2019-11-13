@@ -38,6 +38,8 @@ public:
 		{NOT_IMPLEMENTED();}
 	virtual bool readValue( const char* key, std::size_t keysize, std::string& value, const DatabaseOptions& options) const
 		{NOT_IMPLEMENTED(); return false;}
+	virtual long diskUsage() const
+		{NOT_IMPLEMENTED(); return 0;}
 	virtual std::string config() const
 		{NOT_IMPLEMENTED(); return std::string();}
 	virtual bool compactDatabase()

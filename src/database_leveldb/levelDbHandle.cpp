@@ -158,11 +158,11 @@ void LevelDbConnection::close()
 	if (m_db.get())
 	{
 		// Dereference if this connection is the last one:
-		const char* path = m_db->path().c_str();
+		const char* pathstr = m_db->path().c_str();
 		if (m_db.use_count() == 2)
 		{
 			m_db.reset();
-			m_dbmap->dereference( path);
+			m_dbmap->dereference( pathstr);
 		}
 		else
 		{

@@ -75,6 +75,9 @@ public:
 			std::string& value,
 			const DatabaseOptions& options) const=0;
 
+	/// \brief Get the disk usage in kilo byte units (approximately) of the database
+	virtual long diskUsage() const=0;
+
 	/// \brief Get the interpreted configuration this database client was created with
 	/// \return the configuration as string
 	virtual std::string config() const=0;

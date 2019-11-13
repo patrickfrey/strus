@@ -122,6 +122,11 @@ public:
 		return (m_db.get())?m_db->config():std::string();
 	}
 
+	std::string path() const
+	{
+		return (m_db.get())?m_db->path():std::string();
+	}
+
 private:
 	LevelDbHandleMap* m_dbmap;			///< pointer to map of shared levelDB handles, needed for unregister
 	strus::shared_ptr<LevelDbHandle> m_db;		///< shared levelDB handle

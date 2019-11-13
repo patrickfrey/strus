@@ -314,6 +314,8 @@ void StorageDocumentUpdate::done()
 		m_invs.clear();
 		m_delete_search_typenolist.clear();
 		m_delete_forward_typenolist.clear();
+		m_delete_search_structnolist.clear();
+		m_structures.clear();
 		m_attributes.clear();
 		m_metadata.clear();
 		m_add_userlist.clear();

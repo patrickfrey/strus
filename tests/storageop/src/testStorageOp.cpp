@@ -18,6 +18,7 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/shared_ptr.hpp"
+#include "strus/base/configParser.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/fileLocatorInterface.hpp"
@@ -66,6 +67,10 @@ public:
 		sci.reset();
 		sti.reset();
 		dbi.reset();
+	}
+	long diskUsage() const
+	{
+		return sci->diskUsage();
 	}
 
 	struct MetaDataDef
@@ -605,6 +610,7 @@ struct Feature
 		Attribute,
 		MetaData
 	};
+	enum {NofKind=4};
 	Kind kind;
 	std::string type;
 	std::string value;
@@ -627,6 +633,37 @@ struct DocumentBuilder
 		unsigned int nofAttributes;
 		unsigned int nofMetaData;
 	};
+
+	static std::vector<Feature> createRandom( unsigned int docno, const Dim& dim)
+	{
+		std::vector<Feature> rt;
+
+		unsigned int ti=0, te=g_random.get( 1, dim.nofTermValues+1);
+		for (ti=0; ti<te; ++ti)
+		{
+			Feature::Kind kind = (Feature::Kind)g_random.get( 0, g_random.get( 0, Feature::NofKind) + 1);
+			char kindprefix = 0;
+			unsigned int maxtype = 0;
+			unsigned int maxvalue = 0;
+			switch (kind)
+			{
+				case Feature::SearchIndex: kindprefix = 'q'; maxtype = dim.nofTermTypes; maxvalue = dim.nofDiffTermValues; break;
+				case Feature::ForwardIndex: kindprefix = 'r'; maxtype = dim.nofTermTypes; maxvalue = dim.nofDiffTermValues; break;
+				case Feature::Attribute: kindprefix = 'A'; maxtype = dim.nofAttributes; maxvalue = 255; break;
+				case Feature::MetaData: kindprefix = 'M'; maxtype = dim.nofMetaData; maxvalue = 255; break;
+			}
+			unsigned int typeidx = g_random.get( 0, g_random.get( 1, maxtype+1));
+			unsigned int valueidx = g_random.get( 0, g_random.get( 1, maxvalue+1));
+			char typestr[ 32];
+			snprintf( typestr, sizeof(typestr), "%c%u", kindprefix, typeidx);
+			char valuestr[ 32];
+			snprintf( valuestr, sizeof(typestr), "%u", valueidx);
+
+			int pos = (kind == Feature::SearchIndex || Feature::ForwardIndex) ? (ti+1) : 0;
+			rt.push_back( Feature( kind, typestr, valuestr, pos));
+		}
+		return rt;
+	}
 
 	static std::vector<Feature> create( unsigned int docno, const Dim& dim)
 	{
@@ -676,7 +713,8 @@ struct DocumentBuilder
 	}
 };
 
-static void insertDocument( strus::StorageDocumentInterface* doc, const std::vector<Feature>& featurelist)
+template <class DocumentInterface>
+static void insertDocument( DocumentInterface* doc, const std::vector<Feature>& featurelist)
 {
 	std::vector<Feature>::const_iterator fi = featurelist.begin(), fe = featurelist.end();
 	for (; fi != fe; ++fi)
@@ -724,6 +762,50 @@ static void insertCollection( strus::StorageClientInterface* storage, const Docu
 		throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
 	}
 }
+
+static void insertRandomCollection( strus::StorageClientInterface* storage, const DocumentBuilder::Dim& dim)
+{
+	strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
+	unsigned int di=0, de=dim.nofDocs;
+	for (; di != de; ++di)
+	{
+		char docid[ 32];
+		snprintf( docid, sizeof(docid), "D%02u", di);
+		strus::local_ptr<strus::StorageDocumentInterface>
+			doc( transaction->createDocument( docid));
+		if (!doc.get()) throw strus::runtime_error("error creating document to insert");
+
+		std::vector<Feature> feats = DocumentBuilder::createRandom( di, dim);
+		insertDocument( doc.get(), feats);
+	}
+	if (!transaction->commit() || g_errorhnd->hasError())
+	{
+		throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
+	}
+}
+
+static void randomCollectionUpdate( strus::StorageClientInterface* storage, const DocumentBuilder::Dim& dim)
+{
+	strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
+	unsigned int di=0, de=dim.nofDocs;
+	for (; di != de; ++di)
+	{
+		char docid[ 32];
+		snprintf( docid, sizeof(docid), "D%02u", di);
+		strus::Index docno = storage->documentNumber( docid);
+		strus::local_ptr<strus::StorageDocumentUpdateInterface>
+			doc( transaction->createDocumentUpdate( docno));
+		if (!doc.get()) throw strus::runtime_error("error creating document to update");
+
+		std::vector<Feature> feats = DocumentBuilder::createRandom( di, dim);
+		insertDocument( doc.get(), feats);
+	}
+	if (!transaction->commit() || g_errorhnd->hasError())
+	{
+		throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
+	}
+}
+
 
 typedef std::pair<std::string,std::string> DfMapKey;
 typedef std::map<DfMapKey,strus::Index> DfMap;
@@ -812,6 +894,85 @@ static void testTrivialInsert()
 		}
 	}
 }
+
+static int getPercentageGrowth( long value, long base)
+{
+	int growth_percentage = ((double)value / (double)base - 1) * 100;
+	return growth_percentage;
+}
+
+static void testStorageReinsertStability()
+{
+	DocumentBuilder::Dim dim;
+	dim.nofDocs = 100;
+	dim.nofTermTypes = 10;
+	dim.nofTermValues = 300;
+	dim.nofDiffTermValues = 50;
+	dim.nofAttributes = 3;
+	dim.nofMetaData = 3;
+
+	Storage storage;
+	storage.open( "path=storage", true);
+	const Storage::MetaDataDef metadata[] = {{"M0", "UINT32"},{"M1", "UINT16"},{"M2", "UINT8"},{0,0}};
+	storage.defineMetaData( metadata);
+
+	insertRandomCollection( storage.sci.get(), dim);
+	long du = storage.diskUsage();
+	long first_du = du;
+
+	std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK", (unsigned int)(int)du) << std::endl;
+	int ii=0, ie=12;
+	for (;ii<ie; ++ii)
+	{
+		insertRandomCollection( storage.sci.get(), dim);
+		du = storage.diskUsage();
+		int pg = getPercentageGrowth( du, first_du);
+		std::string percentage_growth = strus::string_format( pg < 0 ? "%d":"+%d", pg);
+		std::cerr << strus::string_format( "disk usage after %d overwriting random reinsert transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
+	}
+	if (first_du > du + du / 6)
+	{
+		unsigned int growth_percentage = getPercentageGrowth( du, first_du);
+		throw strus::runtime_error("suspicious disk usage growth of %u percent", growth_percentage);
+	}
+}
+
+static void testStorageUpdateStability()
+{
+	DocumentBuilder::Dim dim;
+	dim.nofDocs = 100;
+	dim.nofTermTypes = 10;
+	dim.nofTermValues = 300;
+	dim.nofDiffTermValues = 50;
+	dim.nofAttributes = 3;
+	dim.nofMetaData = 3;
+
+	Storage storage;
+	storage.open( "path=storage", true);
+	const Storage::MetaDataDef metadata[] = {{"M0", "UINT32"},{"M1", "UINT16"},{"M2", "UINT8"},{0,0}};
+	storage.defineMetaData( metadata);
+
+	insertRandomCollection( storage.sci.get(), dim);
+	long du = storage.diskUsage();
+	long first_du = du;
+
+	std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK (increase %d%%)", (unsigned int)(int)du, getPercentageGrowth( du, first_du)) << std::endl;
+	int ii=0, ie=12;
+	for (;ii<ie; ++ii)
+	{
+		randomCollectionUpdate( storage.sci.get(), dim);
+		du = storage.diskUsage();
+		int pg = getPercentageGrowth( du, first_du);
+		std::string percentage_growth = strus::string_format( pg < 0 ? "%d":"+%d", pg);
+		std::cerr << strus::string_format( "disk usage after %d overwriting random update transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
+	}
+	if (first_du > du + du / 6)
+	{
+		unsigned int growth_percentage = getPercentageGrowth( du, first_du);
+		throw strus::runtime_error("suspicious disk usage growth of %u percent", growth_percentage);
+	}
+}
+
 
 static void testDfCalculation()
 {
@@ -987,6 +1148,7 @@ int main( int argc, const char* argv[])
 			std::cerr << "  -h      :print usage" << std::endl;
 			std::cerr << "  -K      :keep artefacts, do not clean up" << std::endl;
 			std::cerr << "  -T <i>  :execute only test with index <i>" << std::endl;
+			return 0;
 		}
 		else if (argv[ii][0] == '-')
 		{
@@ -1014,8 +1176,10 @@ int main( int argc, const char* argv[])
 			case 3: RUN_TEST( ti, TermTypeIterator ) break;
 			case 4: RUN_TEST( ti, TrivialInsert ) break;
 			case 5: RUN_TEST( ti, SimpleDocumentUpdate) break;
-			case 6: RUN_TEST( ti, DocumentUpdate) break;
-			case 7: RUN_TEST( ti, ReloadConfig) break;
+			case 6: RUN_TEST( ti, StorageReinsertStability) break;
+			case 7: RUN_TEST( ti, StorageUpdateStability) break;
+			case 8: RUN_TEST( ti, DocumentUpdate) break;
+			case 9: RUN_TEST( ti, ReloadConfig) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;

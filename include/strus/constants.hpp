@@ -159,6 +159,14 @@ struct Constants
 	{
 		return 1024;
 	}
+
+	///\brief Minimum OS file size
+	///\note Used to approximate disk usage by counting sum of file sizes rounded to this value
+	///\remark should be probed
+	static inline unsigned int platformMinimumFileSize()
+	{
+		return 4096;
+	}
 };
 }//namespace
 #endif

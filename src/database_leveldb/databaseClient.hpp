@@ -72,6 +72,8 @@ public:
 			std::string& value,
 			const DatabaseOptions& options) const;
 
+	virtual long diskUsage() const;
+
 	virtual std::string config() const;
 
 	virtual bool compactDatabase();

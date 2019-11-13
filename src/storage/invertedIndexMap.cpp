@@ -15,6 +15,7 @@
 #include "indexPacker.hpp"
 #include <sstream>
 #include <limits>
+#include <utility>
 
 using namespace strus;
 
@@ -260,50 +261,48 @@ void InvertedIndexMap::renameNewNumbers(
 		}
 	}{
 		// Rename deletes:
-		std::vector<Index> eraselist;
+		std::map<Index, std::set<Index> > new_docno_typeno_deletes;
 	
 		std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
 		for (; ui != ue; ++ui)
 		{
 			if (KeyMap::isUnknown( ui->first))
 			{
-				eraselist.push_back( ui->first);
 				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( ui->first);
 				if (ri == docnoUnknownMap.end())
 				{
 					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inverted index map");
 				}
-				m_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ri->second, ui->second));
+				new_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ri->second, ui->second));
 			}
-			
+			else
+			{
+				new_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ui->first, ui->second));
+			}
 		}
-		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
-		for (; ei != ee; ++ei)
-		{
-			m_docno_typeno_deletes.erase( *ei);
-		}
+		std::swap( m_docno_typeno_deletes, new_docno_typeno_deletes);
 	}{
-		std::vector<Index> eraselist;
+		std::set<Index> new_docno_deletes;
+
 		std::set<Index>::const_iterator ti = m_docno_deletes.begin(), te = m_docno_deletes.end();
 		for (; ti != te; ++ti)
 		{
 			if (KeyMap::isUnknown( *ti))
 			{
-				eraselist.push_back( *ti);
 				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( *ti);
 				if (ri == docnoUnknownMap.end())
 				{
 					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
 				}
-				m_docno_deletes.insert( ri->second);
+				new_docno_deletes.insert( ri->second);
+			}
+			else
+			{
+				new_docno_deletes.insert( *ti);
 			}
 			
 		}
-		std::vector<Index>::const_iterator ei = eraselist.begin(), ee = eraselist.end();
-		for (; ei != ee; ++ei)
-		{
-			m_docno_deletes.erase( *ei);
-		}
+		std::swap( m_docno_deletes, new_docno_deletes);
 	}{
 		// Rename df:
 		m_dfmap.renameNewTermNumbers( termUnknownMap);

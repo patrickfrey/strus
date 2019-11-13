@@ -193,6 +193,11 @@ StorageClient::~StorageClient()
 	std::free( m_cfgparam);
 }
 
+long StorageClient::diskUsage() const
+{
+	return m_database->diskUsage();
+}
+
 std::string StorageClient::config() const
 {
 	try

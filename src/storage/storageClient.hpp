@@ -163,6 +163,7 @@ public:
 	virtual void close();
 	virtual void compaction();
 
+	virtual long diskUsage() const;
 	virtual std::string config() const;
 
 public:/*Storage (constructor)*/
