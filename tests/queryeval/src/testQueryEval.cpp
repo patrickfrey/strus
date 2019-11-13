@@ -459,7 +459,7 @@ private:
 
 			std::vector<strus::QueryEvalInterface::FeatureParameter> featureParameters;
 			featureParameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
-			qei->addWeightingFunction( "bm25", function.release(), featureParameters);
+			qei->addWeightingFunction( function.release(), featureParameters);
 		}
 	}
 
@@ -776,7 +776,7 @@ std::string getResultDocumentDocid( const strus::ResultDocument& res)
 	std::vector<strus::SummaryElement>::const_iterator si = res.summaryElements().begin(), se = res.summaryElements().end();
 	for (; si != se; ++si)
 	{
-		if (si->name() == "docid") return si->value();
+		if (si->name() == "attribute:docid") return si->value();
 	}
 	return std::string();
 }

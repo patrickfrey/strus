@@ -34,9 +34,14 @@ public:
 	SummaryElement& operator=( SummaryElement&& o)
 		{m_name=std::move(o.m_name); m_value=std::move(o.m_value); m_weight=o.m_weight; m_index=o.m_index; return *this;}
 #endif
+	/// \brief Set the summarizer id prefix given to it when defining it for the query evaluation
+	void setSummarizerPrefix( const std::string& id_)
+	{
+		m_name.insert( 0, id_);
+	}
 
 	/// \brief Get the name of the element
-	const std::string& name() const		{return m_name;}
+	const std::string& name() const	{return m_name;}
 	/// \brief Get the value of the element
 	const std::string& value() const	{return m_value;}
 	/// \brief Get the weight of the element if defined
@@ -45,10 +50,10 @@ public:
 	int index() const			{return m_index;}
 
 private:
-	std::string m_name;	///< name of the element
-	std::string m_value;	///< content value of the element
-	double m_weight;	///< weight of the element if defined
-	int m_index;		///< index for multiple results (results with same index belong to the same group)
+	std::string m_name;		///< name of the element
+	std::string m_value;		///< content value of the element
+	double m_weight;		///< weight of the element if defined
+	int m_index;			///< index for multiple results (results with same index belong to the same group)
 };
 
 } //namespace

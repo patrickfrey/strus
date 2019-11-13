@@ -199,7 +199,7 @@ std::vector<SummaryElement> SummarizerFunctionContextAccumulateVariable::getSumm
 			if (m_forwardindex->skipPos( ri->idx) == ri->idx)
 			{
 				rt.push_back( SummaryElement(
-						m_data->resultname, m_forwardindex->fetch(),
+						m_data->var, m_forwardindex->fetch(),
 						ri->weight * m_data->norm));
 			}
 		}
@@ -211,7 +211,7 @@ std::vector<SummaryElement> SummarizerFunctionContextAccumulateVariable::getSumm
 			if (m_forwardindex->skipPos( wi->first) == wi->first)
 			{
 				rt.push_back( SummaryElement(
-						m_data->resultname, m_forwardindex->fetch(),
+						m_data->var, m_forwardindex->fetch(),
 						wi->second * m_data->norm));
 			}
 		}
@@ -272,14 +272,6 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 		else if (strus::caseInsensitiveEquals( name_, "var"))
 		{
 			m_data->var = value;
-			if (m_data->resultname.empty())
-			{
-				m_data->resultname = value;
-			}
-		}
-		else if (strus::caseInsensitiveEquals( name_, "result"))
-		{
-			m_data->resultname = value;
 		}
 		else if (strus::caseInsensitiveEquals( name_, "cofactor"))
 		{
@@ -329,15 +321,6 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	}
 }
 
-void SummarizerFunctionInstanceAccumulateVariable::defineResultName( const std::string& resultname, const std::string& itemname)
-{
-	try
-	{
-		throw strus::runtime_error(_TXT("no result rename defined for '%s' summarizer"), THIS_METHOD_NAME);
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable::createFunctionContext(
 		const StorageClientInterface* storage,
 		const GlobalStatistics&) const
@@ -359,7 +342,6 @@ StructView SummarizerFunctionInstanceAccumulateVariable::view() const
 		rt( "norm", m_data->norm);
 		rt( "cofactor", m_data->cofactor);
 		rt( "var", m_data->var);
-		if (!m_data->resultname.empty()) rt( "result", m_data->resultname);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

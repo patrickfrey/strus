@@ -38,7 +38,7 @@ public:
 	/// \brief Constructor
 	/// \param[in] metadata_ reader for document meta data
 	/// \param[in] metaname_ meta data field identifier
-	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& metaname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_);
+	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& metaname_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMetaData(){}
 
@@ -57,7 +57,6 @@ public:
 
 private:
 	strus::Reference<MetaDataReaderInterface> m_metadata;
-	std::string m_resultname;
 	std::string m_metaname;
 	int m_attrib;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -71,17 +70,13 @@ class SummarizerFunctionInstanceMetaData
 {
 public:
 	explicit SummarizerFunctionInstanceMetaData( ErrorBufferInterface* errorhnd_)
-		:m_resultname(),m_metaname(),m_errorhnd(errorhnd_){}
+		:m_metaname(),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMetaData(){}
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
-
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{
@@ -96,7 +91,6 @@ public:
 	virtual StructView view() const;
 
 private:
-	std::string m_resultname;
 	std::string m_metaname;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for error messages
 };

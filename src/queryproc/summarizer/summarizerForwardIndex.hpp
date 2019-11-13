@@ -33,7 +33,7 @@ class SummarizerFunctionContextForwardIndex
 public:
 	SummarizerFunctionContextForwardIndex( 
 			const StorageClientInterface* storage_,
-			const std::string& resultname_, const std::string& type_, unsigned int maxNofMatches_,
+			const std::string& type_, unsigned int maxNofMatches_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextForwardIndex(){}
 
@@ -53,8 +53,7 @@ public:
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index iterator
-	std::string m_resultname;					///< result element name
-	std::string m_type;						///< result element name
+	std::string m_type;						///< forward index type name
 	unsigned int m_maxNofMatches;					///< maximum number of matches to return
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -67,15 +66,11 @@ class SummarizerFunctionInstanceForwardIndex
 {
 public:
 	explicit SummarizerFunctionInstanceForwardIndex( ErrorBufferInterface* errorhnd_)
-		:m_resultname(),m_type(),m_maxNofMatches(100),m_errorhnd(errorhnd_){}
+		:m_type(),m_maxNofMatches(100),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionInstanceForwardIndex(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
-
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{
@@ -90,7 +85,6 @@ public:
 	virtual StructView view() const;
 
 private:
-	std::string m_resultname;					///< result element name
 	std::string m_type;						///< forward index type name to fetch
 	unsigned int m_maxNofMatches;					///< maximum number of matches to return
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

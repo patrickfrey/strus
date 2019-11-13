@@ -52,9 +52,6 @@ struct SummarizerFunctionParameterMatchPhrase
 		,m_maxdf(0.1)
 		,m_matchmark()
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
-		,m_name_para("para")
-		,m_name_phrase("phrase")
-		,m_name_docstart("docstart")
 		,m_weight_same_sentence(0.6)
 		,m_weight_invdist(0.6)
 		,m_weight_invpos_start(2.5)
@@ -72,9 +69,6 @@ struct SummarizerFunctionParameterMatchPhrase
 	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	std::string m_name_para;				///< name of the summary elements for paragraphs
-	std::string m_name_phrase;				///< name of the summary elements for phrases
-	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
 	double m_weight_same_sentence;				///< factor for weighting same sentences
 	double m_weight_invdist;				///< factor for weighting proximity
 	double m_weight_invpos_start;				///< factor for weighting distance to document start
@@ -240,10 +234,6 @@ public:
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
-
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{

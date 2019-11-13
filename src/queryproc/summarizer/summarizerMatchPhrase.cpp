@@ -619,7 +619,7 @@ std::vector<SummaryElement>
 	if (para_abstract.isDefined())
 	{
 		std::string paratitle = getParaTitleString( para_abstract);
-		rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
+		rt.push_back( SummaryElement( "para", paratitle, 1.0));
 	}
 	// Create the highlighted phrase result, if exists:
 	if (phrase_abstract.isDefined())
@@ -627,11 +627,11 @@ std::vector<SummaryElement>
 		std::string phrase = getPhraseString( phrase_abstract, wdata);
 		if (phrase_abstract.is_docstart)
 		{
-			rt.push_back( SummaryElement( m_parameter->m_name_docstart, phrase, 1.0));
+			rt.push_back( SummaryElement( "start", phrase, 1.0));
 		}
 		else
 		{
-			rt.push_back( SummaryElement( m_parameter->m_name_phrase, phrase, 1.0));
+			rt.push_back( SummaryElement( "phrase", phrase, 1.0));
 		}
 	}
 	return rt;
@@ -880,33 +880,6 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	}
 }
 
-void SummarizerFunctionInstanceMatchPhrase::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		if (strus::caseInsensitiveEquals( itemname, "para"))
-		{
-			m_parameter->m_name_para = resultname;
-		}
-		else if (strus::caseInsensitiveEquals( itemname, "phrase"))
-		{
-			m_parameter->m_name_phrase = resultname;
-		}
-		else if (strus::caseInsensitiveEquals( itemname, "docstart"))
-		{
-			m_parameter->m_name_docstart = resultname;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
-		}
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
-}
-
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::createFunctionContext(
 		const StorageClientInterface* storage,
 		const GlobalStatistics& stats) const
@@ -941,12 +914,6 @@ StructView SummarizerFunctionInstanceMatchPhrase::view() const
 		rt( "type", m_parameter->m_type);
 		rt( "matchmark", getStructViewMark( m_parameter->m_matchmark));
 		rt( "floatingmark", getStructViewMark( m_parameter->m_floatingmark));
-		rt( "features", 
-		    StructView()
-			( "para", m_parameter->m_name_para)
-			( "phrase", m_parameter->m_name_phrase)
-			( "docstart", m_parameter->m_name_docstart)
-		);
 		rt( "paragraphsize", m_parameter->m_paragraphsize);
 		rt( "sentencesize", m_parameter->m_sentencesize);
 		rt( "windowsize", m_parameter->m_windowsize);

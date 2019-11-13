@@ -36,8 +36,7 @@ class SummarizerFunctionContextAttribute
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] attribname_ attribute identifier
-	/// \param[in] resultname_ result identifier
-	SummarizerFunctionContextAttribute( AttributeReaderInterface* attribreader_, const std::string& attribname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_);
+	SummarizerFunctionContextAttribute( AttributeReaderInterface* attribreader_, const std::string& attribname_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextAttribute();
 
@@ -57,7 +56,6 @@ public:
 private:
 	AttributeReaderInterface* m_attribreader;			///< attribute reader interface
 	std::string m_attribname;					///< attribute name to output
-	std::string m_resultname;					///< output item name
 	int m_attrib;							///< attribute handle to output
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -70,13 +68,12 @@ class SummarizerFunctionInstanceAttribute
 {
 public:
 	explicit SummarizerFunctionInstanceAttribute( ErrorBufferInterface* errorhnd_)
-		:m_attribname(),m_resultname(),m_errorhnd(errorhnd_){}
+		:m_attribname(),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAttribute(){}
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
-	virtual void defineResultName( const std::string& resultname, const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{
@@ -92,7 +89,6 @@ public:
 
 private:
 	std::string m_attribname;					///< attribute name to output
-	std::string m_resultname;					///< output item name
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

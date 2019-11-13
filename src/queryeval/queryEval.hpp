@@ -60,13 +60,12 @@ public:
 	virtual std::vector<std::string> getExclusionFeatureSets() const;
 	
 	virtual void addSummarizerFunction(
-			const std::string& functionName,
+			const std::string& summaryId,
 			SummarizerFunctionInstanceInterface* function,
 			const std::vector<FeatureParameter>& featureParameters,
 			const std::string& debugAttributeName);
 
 	virtual void addWeightingFunction(
-			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
 			const std::vector<FeatureParameter>& featureParameters,
 			const std::string& debugAttributeName);

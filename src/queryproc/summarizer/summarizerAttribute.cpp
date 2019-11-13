@@ -23,10 +23,9 @@ using namespace strus;
 #define THIS_METHOD_NAME const_cast<char*>("attribute")
 
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
-		AttributeReaderInterface* attribreader_, const std::string& attribname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
+		AttributeReaderInterface* attribreader_, const std::string& attribname_, ErrorBufferInterface* errorhnd_)
 	:m_attribreader(attribreader_)
 	,m_attribname(attribname_)
-	,m_resultname(resultname_)
 	,m_attrib(attribreader_->elementHandle( attribname_.c_str()))
 	,m_errorhnd(errorhnd_)
 {
@@ -66,7 +65,7 @@ std::vector<SummaryElement>
 		std::string attr = m_attribreader->getValue( m_attrib);
 		if (!attr.empty()) 
 		{
-			rt.push_back( SummaryElement( m_resultname, attr, 1.0));
+			rt.push_back( SummaryElement( m_attribname, attr, 1.0));
 		}
 		return rt;
 	}
@@ -84,7 +83,7 @@ std::string SummarizerFunctionContextAttribute::debugCall( const Index& docno)
 	if (!attr.empty()) 
 	{
 		out << strus::string_format( _TXT( "attribute name=%s, value=%s"),
-				m_resultname.c_str(), attr.c_str()) << std::endl;
+				m_attribname.c_str(), attr.c_str()) << std::endl;
 	}
 	return out.str();
 }
@@ -95,16 +94,7 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 	{
 		if (strus::caseInsensitiveEquals( name_, "name"))
 		{
-			m_resultname = value;
 			m_attribname = value;
-		}
-		else if (strus::caseInsensitiveEquals( name_, "attribute"))
-		{
-			m_attribname = value;
-		}
-		else if (strus::caseInsensitiveEquals( name_, "result"))
-		{
-			m_resultname = value;
 		}
 		else
 		{
@@ -126,31 +116,12 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
-void SummarizerFunctionInstanceAttribute::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		if (strus::caseInsensitiveEquals( itemname, m_resultname) || strus::caseInsensitiveEquals( itemname, "result"))
-		{
-			m_resultname = resultname;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
-		}
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "metadata", *m_errorhnd);
-}
-
 StructView SummarizerFunctionInstanceAttribute::view() const
 {
 	try
 	{
 		StructView rt;
 		rt( "attribute", m_attribname);
-		if (!m_resultname.empty()) rt( "result", m_resultname);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -168,7 +139,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 			m_errorhnd->explain( _TXT("error creating context of 'attribute' summarizer: %s"));
 			return 0;
 		}
-		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_resultname.empty()? m_attribname : m_resultname, m_errorhnd);
+		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

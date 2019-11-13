@@ -117,7 +117,7 @@ std::vector<std::string> QueryEval::getExclusionFeatureSets() const
 }
 
 void QueryEval::addSummarizerFunction(
-		const std::string& functionName,
+		const std::string& summaryId,
 		SummarizerFunctionInstanceInterface* function,
 		const std::vector<FeatureParameter>& featureParameters,
 		const std::string& debugAttributeName)
@@ -129,13 +129,12 @@ void QueryEval::addSummarizerFunction(
 			functionref->getVariables(),
 			VariableAssignment::SummarizerFunction,
 			m_summarizers.size());
-		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters, debugAttributeName));
+		m_summarizers.push_back( SummarizerDef( summaryId, functionref, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
 }
 
 void QueryEval::addWeightingFunction(
-		const std::string& functionName,
 		WeightingFunctionInstanceInterface* function,
 		const std::vector<FeatureParameter>& featureParameters,
 		const std::string& debugAttributeName)
@@ -155,7 +154,7 @@ void QueryEval::addWeightingFunction(
 				m_weightingSets.push_back( fi->featureSet());
 			}
 		}
-		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, debugAttributeName));
+		m_weightingFunctions.push_back( WeightingDef( functionref, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
 }
@@ -223,7 +222,7 @@ static StructView getStructView( const std::vector<QueryEvalInterface::FeaturePa
 static StructView getStructView( const WeightingDef& o)
 {
 	StructView rt;
-	rt( "function", o.functionName());
+	rt( "function", o.function()->name());
 	if (o.function())
 	{
 		StructView param( o.function()->view());
@@ -251,7 +250,7 @@ static StructView getStructView( const std::vector<WeightingDef>& o)
 static StructView getStructView( const SummarizerDef& o)
 {
 	StructView rt;
-	rt( "function", o.functionName());
+	rt( "function", o.function()->name());
 	if (o.function())
 	{
 		StructView param( o.function()->view());

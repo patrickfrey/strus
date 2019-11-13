@@ -386,7 +386,7 @@ static void parseWeightingConfig(
 		throw std::runtime_error( _TXT( "close oval bracket ')' expected at end of weighting function parameter list"));
 	}
 	lexer.next();
-	qeval.addWeightingFunction( functionName, function.get(), featureParameters, debuginfoName); 
+	qeval.addWeightingFunction( function.get(), featureParameters, debuginfoName); 
 	(void)function.release();
 }
 
@@ -402,11 +402,25 @@ static void parseSummarizerConfig(
 
 	if (!lexer.current().isToken(TokIdentifier))
 	{
-		throw std::runtime_error( _TXT( "name of summarizer function expected at start of summarizer definition"));
+		throw std::runtime_error( _TXT( "name or id of summarizer expected at start of summarizer definition"));
 	}
-	functionName = string_conv::tolower( lexer.current().value());
+	std::string summaryId = string_conv::tolower( lexer.current().value());
 	lexer.next();
 
+	if (lexer.current().isToken(TokAssign))
+	{
+		lexer.next();
+		if (!lexer.current().isToken(TokIdentifier))
+		{
+			throw std::runtime_error( _TXT( "name of summarizer function expected after assign operator '='"));
+		}
+		functionName = string_conv::tolower( lexer.current().value());
+		lexer.next();
+	}
+	else
+	{
+		functionName = summaryId;
+	}
 	const SummarizerFunctionInterface* sf = queryproc->getSummarizerFunction( functionName);
 	if (!sf) throw strus::runtime_error(_TXT( "summarizer function not defined: '%s'"), functionName.c_str());
 
@@ -503,7 +517,7 @@ static void parseSummarizerConfig(
 	{
 		throw std::runtime_error( _TXT( "close oval bracket ')' expected at end of summarizer function parameter list"));
 	}
-	qeval.addSummarizerFunction( functionName, function.get(), featureParameters, debuginfoName);
+	qeval.addSummarizerFunction( summaryId, function.get(), featureParameters, debuginfoName);
 	(void)function.release();
 	lexer.next();
 }

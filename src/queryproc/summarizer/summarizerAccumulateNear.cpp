@@ -278,7 +278,7 @@ std::vector<SummaryElement>
 	std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
 	for (; ri != re; ++ri)
 	{
-		rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx]->first, ri->weight));
+		rt.push_back( SummaryElement( m_data->type, valuerefs[ ri->idx]->first, ri->weight));
 	}
 	return rt;
 }
@@ -377,14 +377,6 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		else if (strus::caseInsensitiveEquals( name_, "type"))
 		{
 			m_data->type = value;
-			if (m_data->resultname.empty())
-			{
-				m_data->resultname = value;
-			}
-		}
-		else if (strus::caseInsensitiveEquals( name_, "result"))
-		{
-			m_data->resultname = value;
 		}
 		else if (strus::caseInsensitiveEquals( name_, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
@@ -453,17 +445,6 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	}
 }
 
-void SummarizerFunctionInstanceAccumulateNear::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		throw strus::runtime_error(_TXT("no result rename defined for '%s' summarizer"), THIS_METHOD_NAME);
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::createFunctionContext(
 		const StorageClientInterface* storage,
 		const GlobalStatistics& stats) const
@@ -486,7 +467,6 @@ StructView SummarizerFunctionInstanceAccumulateNear::view() const
 	{
 		StructView rt;
 		rt( paramView("type", m_data->type));
-		if (!m_data->resultname.empty()) rt( paramView("result",m_data->resultname));
 		rt( paramView( "cofactor", m_data->cofactor));
 		rt( paramView( "nofranks", m_data->nofranks));
 		if (m_data->cardinality_frac > std::numeric_limits<float>::epsilon())

@@ -31,8 +31,8 @@ class WeightingFunctionSummarizerContext
 	:public SummarizerFunctionContextInterface
 {
 public:
-	WeightingFunctionSummarizerContext( const char* name_, ErrorBufferInterface* errorhnd_, WeightingFunctionContextInterface* func_, const std::string& resultname_)
-		:m_errorhnd(errorhnd_),m_name(name_),m_func( func_),m_resultname(resultname_){}
+	WeightingFunctionSummarizerContext( const std::string& name_, ErrorBufferInterface* errorhnd_, WeightingFunctionContextInterface* func_)
+		:m_errorhnd(errorhnd_),m_name(name_),m_func( func_){}
 
 	virtual ~WeightingFunctionSummarizerContext()
 	{
@@ -61,17 +61,10 @@ public:
 			std::ostringstream out;
 			out << m_func->call( docno);
 			std::vector<SummaryElement> rt;
-			if (m_resultname.empty())
-			{
-				rt.push_back( SummaryElement( m_name, out.str()));
-			}
-			else
-			{
-				rt.push_back( SummaryElement( m_resultname, out.str()));
-			}
+			rt.push_back( SummaryElement( m_name, out.str()));
 			return rt;
 		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name, *m_errorhnd, std::vector<SummaryElement>());
+		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::vector<SummaryElement>());
 	}
 
 	virtual std::string debugCall( const Index& docno)
@@ -80,14 +73,13 @@ public:
 		{
 			return m_func->debugCall( docno);
 		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name, *m_errorhnd, std::string());
+		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::string());
 	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;
-	const char* m_name;
+	std::string m_name;
 	WeightingFunctionContextInterface* m_func;
-	std::string m_resultname;
 };
 
 
@@ -96,8 +88,8 @@ class WeightingFunctionSummarizerInstance
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	WeightingFunctionSummarizerInstance( const char* name_, ErrorBufferInterface* errorhnd_, WeightingFunctionInstanceInterface* func_)
-		:m_errorhnd(errorhnd_),m_name(name_),m_func( func_),m_resultname(){}
+	WeightingFunctionSummarizerInstance( const std::string& name_, ErrorBufferInterface* errorhnd_, WeightingFunctionInstanceInterface* func_)
+		:m_errorhnd(errorhnd_),m_name(name_),m_func( func_){}
 
 	virtual ~WeightingFunctionSummarizerInstance()
 	{
@@ -118,25 +110,6 @@ public:
 		m_func->addNumericParameter( name_, value);
 	}
 
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname)
-	{
-		try
-		{
-			if (strus::caseInsensitiveEquals( itemname, "weight")
-			||  strus::caseInsensitiveEquals( itemname, m_name))
-			{
-				m_resultname = resultname;
-			}
-			else
-			{
-				throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
-			}
-		}
-		CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), m_name, *m_errorhnd);
-	}
-
 	virtual std::vector<std::string> getVariables() const
 	{
 		return m_func->getVariables();
@@ -149,15 +122,15 @@ public:
 		try
 		{
 			Reference<WeightingFunctionContextInterface> context( m_func->createFunctionContext( storage_, stats));
-			if (!context.get()) throw strus::runtime_error(_TXT("error creating '%s' weighting function context"), m_name);
-			Reference<SummarizerFunctionContextInterface> rt( new WeightingFunctionSummarizerContext( m_name, m_errorhnd, context.get(), m_resultname));
+			if (!context.get()) throw strus::runtime_error(_TXT("error creating '%s' weighting function context"), m_name.c_str());
+			Reference<SummarizerFunctionContextInterface> rt( new WeightingFunctionSummarizerContext( m_name, m_errorhnd, context.get()));
 			context.release();
 			return rt.release();
 		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer context: %s"), m_name, *m_errorhnd, 0);
+		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, 0);
 	}
 
-	virtual const char* name() const	{return m_name;}
+	virtual const char* name() const	{return m_name.c_str();}
 
 	virtual StructView view() const	
 	{
@@ -168,14 +141,13 @@ public:
 			rt( "weighting", m_func->view());
 			return rt;
 		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), m_name, *m_errorhnd, std::string());
+		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), m_name.c_str(), *m_errorhnd, std::string());
 	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;
-	const char* m_name;
+	std::string m_name;
 	WeightingFunctionInstanceInterface* m_func;
-	std::string m_resultname;
 };
 
 

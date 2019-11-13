@@ -586,7 +586,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			for (; wi != we; ++wi)
 			{
 				DEBUG_OPEN( "function" )
-				DEBUG_EVENT1( "name", "%s", wi->functionName().c_str())
+				DEBUG_EVENT1( "name", "%s", wi->function()->name())
 				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext( m_storage, m_globstats));
 				if (!execContext.get()) throw std::runtime_error( _TXT("error creating weighting function context"));
@@ -703,6 +703,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		// [6] Summarization:
 		evaluationPhase = "summarization";
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
+		std::vector<std::string> summarizerPrefixList;
 		if (!resultlist.empty())
 		{
 			// [6.1] Create the summarizers:
@@ -712,6 +713,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			for (; zi != ze; ++zi)
 			{
 				// [5.1] Create the summarizer:
+				summarizerPrefixList.push_back( zi->summaryId().empty() ? std::string() : (zi->summaryId() + ":"));
 				summarizers.push_back(
 					zi->function()->createFunctionContext( m_storage, m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
@@ -756,11 +758,19 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			DEBUG_EVENT2( "result", "docno=%d weight=%f", ri->docno(), ri->weight())
 			std::vector<SummaryElement> summaries;
 
+			std::vector<std::string>::const_iterator
+				prefix_si = summarizerPrefixList.begin(),
+				prefix_se = summarizerPrefixList.end();
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
-			for (;si != se; ++si)
+			for (;si != se; ++si,++prefix_si)
 			{
 				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
+				std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
+				for (; li != le; ++li)
+				{
+					li->setSummarizerPrefix( *prefix_si);
+				}
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
 			if (m_debugMode)
@@ -775,7 +785,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					if (!zi->debugAttributeName().empty())
 					{
 						std::string debuginfo = (*si)->debugCall( ri->docno());
-						summaries.push_back( SummaryElement( zi->debugAttributeName(), debuginfo));
+						summaries.push_back( SummaryElement( std::string("debug:") + zi->debugAttributeName(), debuginfo));
 					}
 				}
 				std::vector<WeightingDef>::const_iterator
@@ -787,7 +797,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					if (!wi->debugAttributeName().empty())
 					{
 						std::string debuginfo = accumulator.getWeightingDebugInfo( widx, ri->docno());
-						summaries.push_back( SummaryElement( wi->debugAttributeName(), debuginfo));
+						summaries.push_back( SummaryElement( std::string("debug:") + wi->debugAttributeName(), debuginfo));
 					}
 				}
 			}

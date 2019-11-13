@@ -100,15 +100,7 @@ std::vector<SummaryElement>
 						{
 							if (pos == m_forwardindex->skipPos( pos))
 							{
-								MatchVariablesData::NameMap::const_iterator ni = m_data->namemap.find( vi->name());
-								if (ni == m_data->namemap.end())
-								{
-									rt.push_back( SummaryElement( vi->name(), m_forwardindex->fetch(), fi->weight, groupidx));
-								}
-								else
-								{
-									rt.push_back( SummaryElement( ni->second, m_forwardindex->fetch(), fi->weight, groupidx));
-								}
+								rt.push_back( SummaryElement( vi->name(), m_forwardindex->fetch(), fi->weight, groupidx));
 							}
 						}
 					}
@@ -172,17 +164,6 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 	}
 }
 
-void SummarizerFunctionInstanceMatchVariables::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		m_data->namemap[ resultname] = itemname;
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
 		const GlobalStatistics&) const
@@ -203,15 +184,7 @@ StructView SummarizerFunctionInstanceMatchVariables::view() const
 	try
 	{
 		StructView rt;
-		StructView namemapview;
-		MatchVariablesData::NameMap::const_iterator ni = m_data->namemap.begin(), ne = m_data->namemap.end();
-		for (; ni != ne; ++ni)
-		{
-			namemapview( ni->first, ni->second);
-		}
-		
 		rt( "type", m_data->type);
-		rt( "variables", namemapview);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

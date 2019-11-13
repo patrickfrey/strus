@@ -71,7 +71,7 @@ std::vector<SummaryElement>
 				{
 					char posstr[ 64];
 					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
-					rt.push_back( SummaryElement( m_resultname, posstr, 1.0, gidx));
+					rt.push_back( SummaryElement( "pos", posstr, 1.0, gidx));
 				}
 			}
 		}
@@ -102,10 +102,6 @@ void SummarizerFunctionInstanceListMatches::addStringParameter( const std::strin
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "name"))
-	{
-		m_resultname = value;
-	}
 	else
 	{
 		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
@@ -132,32 +128,13 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	}
 }
 
-void SummarizerFunctionInstanceListMatches::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		if (strus::caseInsensitiveEquals( itemname, "position"))
-		{
-			m_resultname = resultname;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
-		}
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "ListMatches", *m_errorhnd);
-}
-
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
 		const StorageClientInterface*,
 		const GlobalStatistics&) const
 {
 	try
 	{
-		return new SummarizerFunctionContextListMatches( m_resultname, m_maxNofMatches, m_errorhnd);
+		return new SummarizerFunctionContextListMatches( m_maxNofMatches, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
@@ -168,7 +145,6 @@ StructView SummarizerFunctionInstanceListMatches::view() const
 	{
 		StructView rt;
 		rt( "nof", m_maxNofMatches);
-		if (!m_resultname.empty()) rt( "result", m_resultname);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());

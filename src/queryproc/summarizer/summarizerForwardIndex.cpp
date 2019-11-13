@@ -27,14 +27,10 @@
 using namespace strus;
 #define THIS_METHOD_NAME const_cast<char*>("forwardindex")
 
-SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( const StorageClientInterface* storage_, const std::string& resultname_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
+SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( const StorageClientInterface* storage_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_forwardindex(storage_->createForwardIterator(type_))
-	,m_resultname(resultname_),m_type(type_),m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_)
+	,m_type(type_),m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_)
 {
-	if (m_type.empty() || m_resultname.empty())
-	{
-		throw strus::runtime_error(_TXT("missing type and result definition of '%s'"), THIS_METHOD_NAME);
-	}
 	if (!m_forwardindex.get())
 	{
 		throw strus::runtime_error(_TXT("failed to create summarizer context for '%s': %s"), THIS_METHOD_NAME, m_errorhnd->fetchError());
@@ -67,7 +63,7 @@ std::vector<SummaryElement>
 		Index pos = 0;
 		while (0 != (pos = m_forwardindex->skipPos( pos+1)))
 		{
-			rt.push_back( SummaryElement( m_resultname, m_forwardindex->fetch(), 1.0, pos));
+			rt.push_back( SummaryElement( m_type, m_forwardindex->fetch(), 1.0, pos));
 			if (--cnt == 0) break;
 		}
 		return rt;
@@ -85,7 +81,7 @@ std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno
 	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
 	for (; ri != re; ++ri)
 	{
-		out << string_format( _TXT("match %s %s"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+		out << string_format( _TXT("match %s '%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
 	}
 	return out.str();
 }
@@ -93,22 +89,9 @@ std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno
 
 void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::string& name_, const std::string& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "name"))
-	{
-		m_resultname = value;
-		m_type = value;
-	}
-	else if (strus::caseInsensitiveEquals( name_, "result"))
-	{
-		m_resultname = value;
-	}
-	else if (strus::caseInsensitiveEquals( name_, "type"))
+	if (strus::caseInsensitiveEquals( name_, "type"))
 	{
 		m_type = value;
-		if (m_resultname.empty())
-		{
-			m_resultname = value;
-		}
 	}
 	else
 	{
@@ -138,24 +121,6 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 	}
 }
 
-void SummarizerFunctionInstanceForwardIndex::defineResultName(
-		const std::string& resultname,
-		const std::string& itemname)
-{
-	try
-	{
-		if (itemname.empty() || strus::caseInsensitiveEquals( itemname, "result"))
-		{
-			m_resultname = resultname;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
-		}
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
-}
-
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::createFunctionContext(
 		const StorageClientInterface* storage_,
@@ -163,7 +128,11 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::crea
 {
 	try
 	{
-		return new SummarizerFunctionContextForwardIndex( storage_, m_resultname, m_type, m_maxNofMatches, m_errorhnd);
+		if (m_type.empty())
+		{
+			throw strus::runtime_error(_TXT("missing type and result definition of '%s'"), THIS_METHOD_NAME);
+		}
+		return new SummarizerFunctionContextForwardIndex( storage_, m_type, m_maxNofMatches, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
@@ -174,7 +143,6 @@ StructView SummarizerFunctionInstanceForwardIndex::view() const
 	{
 		StructView rt;
 		rt( "type", m_type);
-		if (!m_resultname.empty()) rt( "result", m_resultname);
 		rt( "N", m_maxNofMatches);
 		return rt;
 	}

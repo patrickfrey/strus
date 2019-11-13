@@ -31,8 +31,8 @@ class SummarizerFunctionContextListMatches
 	:public SummarizerFunctionContextInterface
 {
 public:
-	SummarizerFunctionContextListMatches( const std::string& resultname_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
-		:m_resultname(resultname_),m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_){}
+	SummarizerFunctionContextListMatches( unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
+		:m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionContextListMatches(){}
 
 	virtual void addSummarizationFeature(
@@ -51,7 +51,6 @@ public:
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	std::vector<PostingIteratorInterface*> m_itrs;			///< iterators for summarization
-	std::string m_resultname;					///< result element name
 	unsigned int m_maxNofMatches;					///< maximum number of matches to list
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -64,15 +63,11 @@ class SummarizerFunctionInstanceListMatches
 {
 public:
 	explicit SummarizerFunctionInstanceListMatches( ErrorBufferInterface* errorhnd_)
-		:m_resultname("position"),m_maxNofMatches(100),m_errorhnd(errorhnd_){}
+		:m_maxNofMatches(100),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionInstanceListMatches(){}
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
-
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{
@@ -87,7 +82,6 @@ public:
 	virtual StructView view() const;
 
 private:
-	std::string m_resultname;					///< result element name
 	unsigned int m_maxNofMatches;					///< maximum number of matches to list
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

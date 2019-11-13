@@ -49,13 +49,6 @@ public:
 			const std::string& name,
 			const NumericVariant& value)=0;
 
-	/// \brief Rename a specific result item with a hardcoded name to another name
-	/// \param[in] resultname the name assigned to it in the result
-	/// \param[in] itemname the internal hardcoded name of the item
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname)=0;
-
 	/// \brief Get the list of variables used by this function defined in the query with 'QueryInterface::setWeightingVariableValue( const std::string&, double)'
 	/// \return the list of variables
 	virtual std::vector<std::string> getVariables() const=0;

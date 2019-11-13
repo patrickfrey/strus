@@ -39,12 +39,11 @@ struct MatchVariablesData
 {
 	typedef std::map<std::string,std::string> NameMap;
 	std::string type;		//< forward index type
-	NameMap namemap;		//< map for renaming results (defaultvariable names)
 
 	MatchVariablesData()
-		:type(),namemap(){}
+		:type(){}
 	MatchVariablesData( const MatchVariablesData& o)
-		:type(o.type),namemap(o.namemap){}
+		:type(o.type){}
 };
 
 class SummarizerFunctionContextMatchVariables
@@ -109,10 +108,6 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
-
-	virtual void defineResultName(
-			const std::string& resultname,
-			const std::string& itemname);
 
 	virtual std::vector<std::string> getVariables() const
 	{
