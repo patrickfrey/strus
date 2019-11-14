@@ -20,9 +20,11 @@ struct DocIndexNode
 
 	bool addDocument( const Index& docno_, unsigned short ref_);
 	Index skipDoc( const Index& docno_, unsigned short& cursor_docidx) const;
+	Index firstDoc( unsigned short& cursor_docidx) const	{cursor_docidx=0; return base;}
+	Index firstDoc() const					{return base;}
+	Index nextDoc( unsigned short& cursor_docidx) const;
+	Index lastDoc() const;
 	std::size_t nofElements() const;
-	Index firstDoc() const		{return base;}
-	Index lastDoc() const		{int ii=0; for (;ofs[ii];++ii){} return ii?(base+ofs[ii]):base;}
 
 	Index base;
 	unsigned short ofs[ Size-1];
@@ -60,6 +62,10 @@ struct DocIndexNodeArray
 		{ar=ar_;size=size_;}
 
 	Index docno_at( const DocIndexNodeCursor& cursor) const;
+	int ref_at( const DocIndexNodeCursor& cursor) const
+	{
+		return ar[ cursor.nodeidx].ref[ cursor.docidx];
+	}
 	const DocIndexNode& operator[]( const DocIndexNodeCursor& cursor) const
 	{
 		return ar[ cursor.nodeidx];

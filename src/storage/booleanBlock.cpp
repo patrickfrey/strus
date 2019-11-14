@@ -496,6 +496,80 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 }
 
 void BooleanBlock::merge( 
+		const BooleanBlock& blk1,
+		const BooleanBlock& blk2,
+		BooleanBlock& newblk)
+{
+	newblk.clear();
+	newblk.setId( blk1.id() > blk2.id() ? blk1.id() : blk2.id());
+
+	NodeCursor cursor1;
+	strus::Index from1;
+	strus::Index to1;
+
+	NodeCursor cursor2;
+	strus::Index from2;
+	strus::Index to2;
+
+	bool hasMore1 = blk1.getFirstRange( cursor1, from1, to1);
+	bool hasMore2 = blk2.getFirstRange( cursor2, from2, to2);
+	while (hasMore1 && hasMore2)
+	{
+		strus::Index from;
+		strus::Index to;
+
+		if (from1 <= from2)
+		{
+			if (to1 >= from2)
+			{
+				// ... case overlap ( [ ) ]  or ( [ ] )
+				from = from1;
+				to = to1 > to2 ? to1 : to2;
+				hasMore1 = blk1.getNextRange( cursor1, from1, to1);
+				hasMore2 = blk2.getNextRange( cursor2, from2, to2);
+			}
+			else
+			{
+				// case choose first ( ) .. [ ]
+				from = from1;
+				to = to1;
+				hasMore1 = blk1.getNextRange( cursor1, from1, to1);
+			}
+		}
+		else /*from1 > from2*/
+		{
+			if (from1 > to2)
+			{
+				// case choose second [ ] .. ( )
+				from = from2;
+				to = to2;
+				hasMore2 = blk2.getNextRange( cursor2, from2, to2);
+			}
+			else/*from1 <= to2*/
+			{
+				// ... case overlap [ ( ) ]  of [ ( ] )
+				from = from2;
+				to = to1 > to2 ? to1 : to2;
+				hasMore1 = blk1.getNextRange( cursor1, from1, to1);
+				hasMore2 = blk2.getNextRange( cursor2, from2, to2);
+			}
+		}
+		newblk.defineRange( from, to - from);
+	}
+	while (hasMore1)
+	{
+		newblk.defineRange( from1, to1 - from1);
+		hasMore1 = blk1.getNextRange( cursor1, from1, to1);
+	}
+	while (hasMore2)
+	{
+		newblk.defineRange( from2, to2 - from2);
+		hasMore2 = blk2.getNextRange( cursor2, from2, to2);
+	}
+}
+
+
+void BooleanBlock::merge( 
 		std::vector<MergeRange>::const_iterator ei,
 		const std::vector<MergeRange>::const_iterator& ee,
 		const BooleanBlock& oldblk,

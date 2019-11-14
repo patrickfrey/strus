@@ -62,6 +62,35 @@ bool DocIndexNode::addDocument( const Index& docno, unsigned short ref_)
 	return true;
 }
 
+Index DocIndexNode::nextDoc( unsigned short& cursor_docidx) const
+{
+	if (cursor_docidx < 0)
+	{
+		cursor_docidx = 0;
+		return base;
+	}
+	else
+	{
+		int ii = cursor_docidx++;
+		if (ii < (Size-1) && ofs[ ii])
+		{
+			return base + ofs[ ii];
+		}
+		else
+		{
+			--cursor_docidx;
+			return 0;
+		}
+	}
+}
+
+Index DocIndexNode::lastDoc() const
+{
+	int ii = 0;
+	for (;ii<(Size-1) && ofs[ii];++ii){}
+	return ii ? (base+ofs[ii-1]):base;
+}
+
 Index DocIndexNode::skipDoc( const Index& docno, unsigned short& cursor_docidx) const
 {
 	if (docno <= base)

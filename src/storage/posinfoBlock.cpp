@@ -12,6 +12,7 @@
 #include <cstring>
 #include <limits>
 #include <iostream>
+#include <set>
 
 using namespace strus;
 
@@ -50,15 +51,14 @@ Index PosinfoBlock::PositionScanner::skip( const Index& pos)
 	}
 	if (pos > (Index)std::numeric_limits<PositionType>::max()) return 0;
 
-	unsigned int fibres = 0, fib1 = 1, fib2 = 1, ii = m_itr+1, nn = m_size;
+	int fib1 = 1, fib2 = 1, ii = m_itr+1, nn = m_size;
 	while (ii < nn && (Index)m_ar[ ii] < pos)
 	{
-		fibres = fib1 + fib2;
-		ii += fibres;
-		fib1 = fib2;
-		fib2 = fibres;
+		fib2 = fib1 + fib2;
+		std::swap( fib1, fib2);
+		ii = m_itr + fib1;
 	}
-	for (ii -= fibres; ii < nn && (Index)m_ar[ ii] < pos; ++ii){}
+	for (ii = m_itr+fib2; ii < nn && (Index)m_ar[ ii] < pos; ++ii){}
 	return ii < nn ? m_ar[ m_itr = (unsigned short)ii]:0;
 }
 
@@ -111,6 +111,70 @@ void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 		m_posinfoArray.push_back( posar[ii]);
 	}
 	m_lastDoc = docno;
+}
+
+void PosinfoBlockBuilder::merge( const PosinfoBlockBuilder& blk1, const PosinfoBlockBuilder& blk2, PosinfoBlockBuilder& newblk)
+{
+	if (blk1.m_docIndexNodeArray.empty())
+	{
+		newblk = blk2;
+		return;
+	}
+	if (blk2.m_docIndexNodeArray.empty())
+	{
+		newblk = blk1;
+		return;
+	}
+	Cursor cursor1( blk1);
+	Cursor cursor2( blk2);
+
+	while (cursor1.docno && cursor1.docno)
+	{
+		if (cursor1.docno < cursor2.docno)
+		{
+			newblk.append( cursor1.docno, cursor1.posinfo());
+			cursor1.next();
+		}
+		else if (cursor1.docno > cursor2.docno)
+		{
+			newblk.append( cursor2.docno, cursor2.posinfo());
+			cursor2.next();
+		}
+		else/*(docno1 == docno2)*/
+		{
+			std::set<PositionType> poset;
+			std::vector<PositionType> posar;
+			{
+				const PositionType* par = cursor1.posinfo();
+				for (PositionType ii=1, nn=par[0]; ii<=nn; ++ii)
+				{
+					poset.insert( par[ ii]);
+				}
+			}{
+				const PositionType* par = cursor2.posinfo();
+				for (PositionType ii=1, nn=par[0]; ii<=nn; ++ii)
+				{
+					poset.insert( par[ ii]);
+				}
+			}
+			posar.push_back( poset.size());
+			posar.insert( posar.end(), poset.begin(), poset.end());
+			newblk.append( cursor1.docno, posar.data());
+
+			cursor1.next();
+			cursor2.next();
+		}
+	}
+	while (cursor1.docno)
+	{
+		newblk.append( cursor1.docno, cursor1.posinfo());
+		cursor1.next();
+	}
+	while (cursor2.docno)
+	{
+		newblk.append( cursor2.docno, cursor2.posinfo());
+		cursor2.next();
+	}
 }
 
 bool PosinfoBlockBuilder::fitsInto( std::size_t nofpos) const

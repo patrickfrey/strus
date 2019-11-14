@@ -11,6 +11,7 @@
 #include "docIndexNode.hpp"
 #include "strus/constants.hpp"
 #include <vector>
+#include <utility>
 
 namespace strus {
 
@@ -44,7 +45,6 @@ public:
 		DataBlock::swap( o);
 		initFrame();
 	}
-
 
 	/// \brief Get the document number of the current DocIndexNodeCursor
 	Index docno_at( const DocIndexNodeCursor& cursor) const
@@ -155,7 +155,29 @@ public:
 		,m_posinfoArray(o.m_posinfoArray)
 		,m_lastDoc(o.m_lastDoc)
 		,m_id(o.m_id){}
-
+	PosinfoBlockBuilder& operator=( const PosinfoBlockBuilder& o)
+	{
+		m_docIndexNodeArray = o.m_docIndexNodeArray;
+		m_posinfoArray = o.m_posinfoArray;
+		m_lastDoc = o.m_lastDoc;
+		m_id = o.m_id;
+		return *this;
+	}
+#if __cplusplus >= 201103L
+	PosinfoBlockBuilder& operator=( PosinfoBlockBuilder&& o)
+	{
+		m_docIndexNodeArray = std::move(o.m_docIndexNodeArray);
+		m_posinfoArray = std::move(o.m_posinfoArray);
+		m_lastDoc = o.m_lastDoc;
+		m_id = o.m_id;
+		return *this;
+	}
+	PosinfoBlockBuilder( PosinfoBlockBuilder&& o)
+		:m_docIndexNodeArray(std::move(o.m_docIndexNodeArray))
+		,m_posinfoArray(std::move(o.m_posinfoArray))
+		,m_lastDoc(o.m_lastDoc)
+		,m_id(o.m_id){}
+#endif
 	Index id() const						{return m_id;}
 	void setId( const Index& id_);
 
@@ -167,11 +189,17 @@ public:
 	void append( const Index& docno, const PositionType* posar);
 
 	bool fitsInto( std::size_t nofpos) const;
+
 	bool full() const
 	{
-		return (m_posinfoArray.size() * sizeof(PositionType)
-				+ m_docIndexNodeArray.size() * sizeof(DocIndexNode))
-			>= Constants::maxPosInfoBlockSize();
+		return size() >= Constants::maxPosInfoBlockSize();
+	}
+	/// \brief Eval if the block is filled with a given ratio
+	/// \param[in] ratio value between 0.0 and 1.0, reasonable is a value close to one
+	/// \note A small value leads to fragmentation, a value close to 1.0 leads to transactions slowing down
+	bool filledWithRatio( float ratio) const
+	{
+		return size() >= (int)(ratio * Constants::maxPosInfoBlockSize());
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const	{return m_docIndexNodeArray;}
@@ -179,6 +207,71 @@ public:
 
 	PosinfoBlock createBlock() const;
 	void clear();
+
+	int size() const
+	{
+		return (m_posinfoArray.size() * sizeof(PositionType)
+				+ m_docIndexNodeArray.size() * sizeof(DocIndexNode));
+	}
+
+	static void merge( const PosinfoBlockBuilder& blk1, const PosinfoBlockBuilder& blk2, PosinfoBlockBuilder& newblk);
+
+private:
+	struct Cursor
+	{
+		std::size_t idx;
+		const PosinfoBlockBuilder* blk;
+		const DocIndexNode* nd;
+		unsigned short subidx;
+		strus::Index docno;
+
+		explicit Cursor( const PosinfoBlockBuilder& blk_)
+			:idx(0),blk(&blk_),nd(0),subidx(0),docno(0)
+		{
+			for (; !docno && idx < blk->docIndexNodes(); ++idx)
+			{
+				nd = blk->docIndexNodeRef( idx);
+				docno = nd->firstDoc( subidx);
+			}
+		}
+
+		void next()
+		{
+			docno = nd->nextDoc( subidx);
+			while (!docno)
+			{
+				if (++idx < blk->docIndexNodes())
+				{
+					nd = blk->docIndexNodeRef( idx);
+					docno = nd->firstDoc( subidx);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+
+		const PositionType* posinfo() const
+		{
+			return blk->posinfo( nd->ref[ subidx]);
+		}
+	};
+
+
+public:/*Cursor*/
+	const DocIndexNode* docIndexNodeRef( std::size_t idx) const
+	{
+		return &m_docIndexNodeArray[ idx];
+	}
+	std::size_t docIndexNodes() const
+	{
+		return m_docIndexNodeArray.size();
+	}
+	const PositionType* posinfo( std::size_t ref) const
+	{
+		return m_posinfoArray.data() + ref;
+	}
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;

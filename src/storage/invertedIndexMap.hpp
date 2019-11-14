@@ -98,6 +98,7 @@ private:
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlockBuilder& newposblk,
+			//[+] FfBlockBuilder& newffblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergeNewPosElements(
@@ -106,6 +107,7 @@ private:
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlockBuilder& newposblk,
+			//[+] FfBlockBuilder& newffblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergePosBlock(

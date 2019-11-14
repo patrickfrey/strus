@@ -39,6 +39,12 @@ public:
 	{
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 	}
+#if __cplusplus >= 201103L
+	DataBlock( DataBlock&& o)
+		:m_id(o.m_id),m_ptr(o.m_ptr),m_size(o.m_size),m_allocsize(o.m_allocsize){}
+	DataBlock& operator= ( DataBlock&& o)
+		{m_id = o.m_id;m_ptr = o.m_ptr;m_size = o.m_size;m_allocsize = o.m_allocsize; return *this;}
+#endif
 
 	virtual ~DataBlock();
 

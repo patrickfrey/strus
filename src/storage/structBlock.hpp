@@ -10,6 +10,7 @@
 #include "dataBlock.hpp"
 #include "docIndexNode.hpp"
 #include "skipScanArray.hpp"
+#include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include <vector>
 
@@ -46,8 +47,8 @@ public:
 	};
 	struct StructureDef
 	{
-		PositionType header_end;
 		PositionType header_start;
+		PositionType header_end;
 		MemberIdxType membersSize;
 		MemberIdxType membersIdx;
 	};
@@ -103,7 +104,7 @@ public:
 	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
 	const StructureDef* structures_at( const DocIndexNodeCursor& cursor, int& nofstructs) const
 	{
-		const StructureDefList* lst = m_structlistar + m_docIndexNodeArray[ cursor].ref[ cursor.docidx];
+		const StructureDefList* lst = m_structlistar + m_docIndexNodeArray.ref_at( cursor);
 		nofstructs = lst->size;
 		return m_structar + lst->idx;
 	}
@@ -181,24 +182,24 @@ public:
 			return false;
 		}
 
-		IndexRange skip( const Index& pos)
+		strus::IndexRange skip( const Index& pos)
 		{
 			if (m_itr >= m_ar.size())
 			{
-				if (m_itr == 0) return IndexRange();
+				if (m_itr == 0) return strus::IndexRange();
 				m_itr = 0;
 			}
 			if ((Index)m_ar[ m_itr].start > pos)
 			{
 				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureMemberSearchCompare());
-				if (idx >= 0) m_itr = idx; else return IndexRange();
+				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
 			}
 			else if ((Index)m_ar[ m_itr].end <= pos)
 			{
 				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureMemberSearchCompare());
-				if (idx >= 0) m_itr = idx; else return IndexRange();
+				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
 			}
-			return IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
+			return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
 		}
 	private:
 		SkipScanArray<StructureMember,Index,StructureMemberSearchCompare> m_ar;
@@ -241,24 +242,24 @@ public:
 			return false;
 		}
 
-		IndexRange skip( const Index& pos)
+		strus::IndexRange skip( const Index& pos)
 		{
 			if (m_itr >= m_ar.size())
 			{
-				if (m_itr == 0) return IndexRange();
+				if (m_itr == 0) return strus::IndexRange();
 				m_itr = 0;
 			}
 			if ((Index)m_ar[ m_itr].header_start > pos)
 			{
 				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureDefSearchCompare());
-				if (idx > 0) m_itr = idx; else return IndexRange();
+				if (idx > 0) m_itr = idx; else return strus::IndexRange();
 			}
 			else if ((Index)m_ar[ m_itr].header_end <= pos)
 			{
 				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureDefSearchCompare());
-				if (idx > 0) m_itr = idx; else return IndexRange();
+				if (idx > 0) m_itr = idx; else return strus::IndexRange();
 			}
-			return IndexRange( m_ar[ m_itr].header_start, m_ar[ m_itr].header_end);
+			return strus::IndexRange( m_ar[ m_itr].header_start, m_ar[ m_itr].header_end);
 		}
 
 		MemberScanner members() const
@@ -328,12 +329,20 @@ public:
 		return m_structurear.empty();
 	}
 
-	void push( const Index& docno, const IndexRange& src, const IndexRange& sink);
+	/// \brief Add a new structure relation to the block
+	void append( const Index& docno, const strus::IndexRange& src, const strus::IndexRange& sink);
 
 	bool fitsInto( std::size_t nofstructures) const;
 	bool full() const
 	{
-		return size() >= StructBlock::MaxBlockSize;
+		return size() >= Constants::maxStructBlockSize();
+	}
+	/// \brief Eval if the block is filled with a given ratio
+	/// \param[in] ratio value between 0.0 and 1.0, reasonable is a value close to one
+	/// \note A small value leads to fragmentation, a value close to 1.0 leads to transactions slowing down
+	bool filledWithRatio( float ratio) const
+	{
+		return size() >= (int)(ratio * Constants::maxStructBlockSize());
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
@@ -343,6 +352,7 @@ public:
 
 	StructBlock createBlock() const;
 	void clear();
+
 	int size() const
 	{
 		int dd = m_docIndexNodeArray.size() * sizeof(DocIndexNode);
@@ -352,10 +362,89 @@ public:
 		return dd + mm + ll + ss;
 	}
 
+	static void merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk);
+
 private:
 	void addNewDocument( const Index& docno);
-	void addLastDocStructure( const IndexRange& src);
-	void addLastStructureMember( const IndexRange& sink);
+	void addLastDocStructure( const strus::IndexRange& src);
+	void addLastStructureMember( const strus::IndexRange& sink);
+
+private:
+	struct Cursor
+	{
+		Cursor() :aridx(0),docidx(0),docno(0),stuidx(0),stuend(0),mbridx(0),mbrend(0){}
+
+		std::size_t aridx;
+		unsigned short docidx;
+		strus::Index docno;
+		std::size_t stuidx;
+		std::size_t stuend;
+		std::size_t mbridx;
+		std::size_t mbrend;
+	};
+
+	strus::Index currentMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		if (cursor.mbridx < cursor.mbrend)
+		{
+			src = strus::IndexRange(
+				m_structurear[ cursor.stuidx].header_start,
+				m_structurear[ cursor.stuidx].header_end);
+			sink = strus::IndexRange(
+				m_memberar[ cursor.mbridx].start,
+				m_memberar[ cursor.mbridx].end);
+			return cursor.docno;
+		}
+		return 0;
+	}
+
+	strus::Index nextMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		++cursor.mbridx;
+		return currentMemberNode( cursor, src, sink);
+	}
+
+	strus::Index nextStructureFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		for (++cursor.stuidx; cursor.stuidx < cursor.stuend; ++cursor.stuidx)
+		{
+			cursor.mbridx = m_structurear[ cursor.stuidx].membersIdx;
+			cursor.mbrend = cursor.mbridx + m_structurear[ cursor.stuidx].membersSize;
+			if (cursor.mbridx < cursor.mbrend) return currentMemberNode( cursor, src, sink);
+		}
+		return 0;
+	}
+
+	strus::Index nextDocFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		for (++cursor.aridx; cursor.aridx < m_docIndexNodeArray.size(); ++cursor.aridx)
+		{
+			cursor.docno = m_docIndexNodeArray[ cursor.aridx].firstDoc( cursor.docidx);
+			if (cursor.docno)
+			{
+				strus::Index ref = m_docIndexNodeArray[ cursor.aridx].ref[ cursor.docidx];
+				cursor.stuidx = m_structurelistar[ ref].idx;
+				cursor.stuend = cursor.stuidx + m_structurelistar[ ref].size;
+				--cursor.stuidx;
+				if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
+			}
+		}
+		return 0;
+	}
+
+	strus::Index firstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		cursor.aridx = -1;
+		return nextDocFirstNode( cursor, src, sink);
+	}
+
+	strus::Index nextNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		if (nextMemberNode( cursor, src, sink)) return cursor.docno;
+		if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
+		if (nextDocFirstNode( cursor, src, sink)) return cursor.docno;
+		return 0;
+	}
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;

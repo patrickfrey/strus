@@ -22,7 +22,7 @@ struct FfIndexNode
 	FfIndexNode( const FfIndexNode& o)
 		:base(o.base),ofs(o.ofs){ff[0]=o.ff[0];ff[1]=o.ff[1];}
 
-	bool setDocumentFf( const Index& docno_, unsigned int ff_)
+	bool setDocumentFf( const strus::Index& docno_, unsigned int ff_)
 	{
 		if (ofs)
 		{
@@ -53,7 +53,7 @@ struct FfIndexNode
 		}
 	}
 
-	Index skipDoc( const Index& docno_, strus::Index& ff_) const
+	strus::Index skipDoc( const strus::Index& docno_, strus::Index& ff_) const
 	{
 		if (docno_ <= base) {ff_ = ff[0]; return base;}
 		if (docno_ > base + ofs) {ff_ = 0; return 0;}
@@ -65,10 +65,10 @@ struct FfIndexNode
 		return base ? (ofs ? 2 : 1) : 0;
 	}
 
-	Index firstDoc() const		{return base;}
-	Index lastDoc() const		{return base+ofs;}
+	strus::Index firstDoc() const		{return base;}
+	strus::Index lastDoc() const		{return base+ofs;}
 
-	Index base;
+	strus::Index base;
 	unsigned short ofs;
 	uint8_t ff[ 2];
 };
@@ -101,7 +101,7 @@ struct FfIndexNodeArray
 	void init( const FfIndexNode* ar_, int size_)
 		{ar=ar_;size=size_;}
 
-	Index docno_at( const FfIndexNodeCursor& cursor) const
+	strus::Index docno_at( const FfIndexNodeCursor& cursor) const
 	{
 		if (cursor.nodeidx == size)
 		{
@@ -109,7 +109,7 @@ struct FfIndexNodeArray
 		}
 		else
 		{
-			Index rt = ar[ cursor.nodeidx].base;
+			strus::Index rt = ar[ cursor.nodeidx].base;
 			if (cursor.elemidx)
 			{
 				rt += ar[ cursor.nodeidx].ofs;
@@ -129,12 +129,12 @@ struct FfIndexNodeArray
 		}
 	}
 
-	Index firstDoc( FfIndexNodeCursor& cursor) const
+	strus::Index firstDoc( FfIndexNodeCursor& cursor) const
 	{
 		cursor.reset();
 		return docno_at( cursor);
 	}
-	Index nextDoc( FfIndexNodeCursor& cursor) const
+	strus::Index nextDoc( FfIndexNodeCursor& cursor) const
 	{
 		if (cursor.nodeidx == size)
 		{
@@ -153,7 +153,7 @@ struct FfIndexNodeArray
 			return cursor.nodeidx == size ? 0 : ar[ cursor.nodeidx].base;
 		}
 	}
-	Index skipDoc( const Index& docno, FfIndexNodeCursor& cursor) const
+	strus::Index skipDoc( const strus::Index& docno, FfIndexNodeCursor& cursor) const
 	{
 		if (cursor.nodeidx == size)
 		{
@@ -176,7 +176,7 @@ struct FfIndexNodeArray
 		return selectCursorDocno( docno, cursor);
 	}
 
-	Index lastDoc() const
+	strus::Index lastDoc() const
 	{
 		if (size == 0) return 0;
 		return ar[ size-1].base + ar[ size-1].ofs;
@@ -194,7 +194,7 @@ struct FfIndexNodeArray
 	}
 
 private:
-	Index selectCursorDocno( const Index& docno, FfIndexNodeCursor& cursor) const
+	strus::Index selectCursorDocno( const strus::Index& docno, FfIndexNodeCursor& cursor) const
 	{
 		if (ar[ cursor.nodeidx].base >= docno)
 		{
@@ -207,12 +207,12 @@ private:
 			return ar[ cursor.nodeidx].base + ar[ cursor.nodeidx].ofs;
 		}
 	}
-	int linSearchIndex( const Index& docno, int eidx) const
+	int linSearchIndex( const strus::Index& docno, int eidx) const
 	{
 		for (; eidx < size && ar[ eidx].base + ar[ eidx-1].ofs < docno; ++eidx){}
 		return eidx;
 	}
-	int fibSearchIndex( const Index& docno, int eidx) const
+	int fibSearchIndex( const strus::Index& docno, int eidx) const
 	{
 		// Fibonacci search: f1,f2 = f1+f2,f1 => f2 += f1, swap( f1, f2)
 		int f1 = 1, f2 = 1;

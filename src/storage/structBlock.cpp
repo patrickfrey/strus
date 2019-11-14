@@ -26,7 +26,7 @@ static const Element* getStructPtr( const void* dataPtr, unsigned short indexSta
 {
 	if (indexStart % AlignmentBase != 0 || (indexEnd-indexStart) % sizeof(Element) != 0 || indexEnd < indexStart)
 	{
-		throw strus::runtime_error( _TXT( "data corruption in structure block"));
+		throw strus::runtime_error( _TXT("data corruption in structure block"));
 	}
 	return (Element*)((char*)dataPtr + indexStart);
 }
@@ -61,7 +61,7 @@ void StructBlock::initFrame()
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "data corruption in structure block"));
+		throw strus::runtime_error( _TXT("data corruption in structure block"));
 	}
 }
 
@@ -73,7 +73,7 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 		m_docIndexNodeArray.push_back( DocIndexNode());
 		if (!m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
 		{
-			throw strus::runtime_error( _TXT( "corrupt structure in structure block builder"));
+			throw strus::runtime_error( _TXT("corrupt structure in structure block builder"));
 		}
 	}
 	StructureDefList lst;
@@ -90,7 +90,7 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 	{
 		if ((Index)m_memberar.back().end > sink.start())
 		{
-			throw strus::runtime_error( _TXT( "structure members in structure block builder not appended in strictly ascending order"));
+			throw strus::runtime_error( _TXT("structure members in structure block builder not appended in strictly ascending order"));
 		}
 	}
 	member.start = sink.start();
@@ -110,21 +110,21 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 	++m_structurelistar.back().size;
 }
 
-void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const IndexRange& sink)
+void StructBlockBuilder::append( const Index& docno, const IndexRange& src, const IndexRange& sink)
 {
-	if (!docno) throw std::runtime_error(_TXT("cannot add docno 0"));
+	if (docno <= 0) throw std::runtime_error(_TXT("cannot add docno <= 0"));
 	if (src.start() >= src.end() || sink.start() >= sink.end()) throw std::runtime_error(_TXT("adding empty structures not allowed"));
 	if (m_lastDoc > docno) throw std::runtime_error(_TXT("documents not added in ascending order"));
 	if (m_lastDoc != docno)
 	{
-		if (m_id && m_id < docno) throw strus::runtime_error( "%s",  _TXT( "assigned illegal id to block"));
+		if (m_id && m_id < docno) throw strus::runtime_error( _TXT("assigned illegal id to block"));
 		addNewDocument( docno);
 	}
 	if (m_structurelistar.back().size)
 	{
 		if (src.start() < (Index)m_structurear.back().header_start)
 		{
-			throw strus::runtime_error( _TXT( "structures in structure block builder not appended in ascending order"));
+			throw strus::runtime_error( _TXT("structures in structure block builder not appended in ascending order"));
 		}
 		else if (src.start() == (Index)m_structurear.back().header_start)
 		{
@@ -134,12 +134,12 @@ void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const 
 			}
 			else
 			{
-				throw strus::runtime_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
+				throw strus::runtime_error( _TXT("overlaping sources of structures not equal in structure block builder"));
 			}
 		}
 		else if (src.start() < (Index)m_structurear.back().header_end)
 		{
-			throw strus::runtime_error( _TXT( "overlaping sources of structures not equal in structure block builder"));
+			throw strus::runtime_error( _TXT("overlaping sources of structures not equal in structure block builder"));
 		}
 		else
 		{
@@ -154,6 +154,58 @@ void StructBlockBuilder::push( const Index& docno, const IndexRange& src, const 
 	}
 }
 
+void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk)
+{
+	Cursor cursor1;
+	strus::IndexRange src1;
+	strus::IndexRange sink1;
+	strus::Index docno1 = blk1.firstNode( cursor1, src1, sink1);
+
+	Cursor cursor2;
+	strus::IndexRange src2;
+	strus::IndexRange sink2;
+	strus::Index docno2 = blk2.firstNode( cursor2, src2, sink2);
+
+	while (docno1 && docno2)
+	{
+		if (docno1 < docno2)
+		{
+			newblk.append( docno1, src1, sink1);
+			docno1 = blk1.nextNode( cursor1, src1, sink1);
+		}
+		else if (docno1 > docno2)
+		{
+			newblk.append( docno2, src2, sink2);
+			docno2 = blk2.nextNode( cursor2, src2, sink2);
+		}
+		else/*(docno1 == docno2)*/
+		{
+			if (src1.start() < src2.start())
+			{
+				newblk.append( docno1, src1, sink1);
+				newblk.append( docno2, src2, sink2);
+			}
+			else
+			{
+				newblk.append( docno2, src2, sink2);
+				newblk.append( docno1, src1, sink1);
+			}
+			docno1 = blk1.nextNode( cursor1, src1, sink1);
+			docno2 = blk2.nextNode( cursor2, src2, sink2);
+		}
+	}
+	while (docno1)
+	{
+		newblk.append( docno1, src1, sink1);
+		docno1 = blk1.nextNode( cursor1, src1, sink1);
+	}
+	while (docno2)
+	{
+		newblk.append( docno2, src2, sink2);
+		docno2 = blk2.nextNode( cursor2, src2, sink2);
+	}
+}
+
 bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
 	return m_memberar.size() + nofstructures <= (std::size_t)std::numeric_limits<short>::max();
@@ -161,7 +213,7 @@ bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 
 StructBlock StructBlockBuilder::createBlock() const
 {
-	if (empty()) throw strus::runtime_error( "%s",  _TXT( "tried to create empty structure block"));
+	if (empty()) throw strus::runtime_error( _TXT("tried to create empty structure block"));
 
 	StructBlock::BlockHeader hdr;
 
@@ -190,7 +242,7 @@ StructBlock StructBlockBuilder::createBlock() const
 
 void StructBlockBuilder::setId( const Index& id_)
 {
-	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( "%s",  _TXT( "assigning illegal id to block"));
+	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( _TXT("assigning illegal id to block"));
 	m_id = id_;
 }
 

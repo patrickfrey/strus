@@ -143,19 +143,25 @@ struct Constants
 	}
 
 	///\brief Size of a position info block that leads to flushing it to the database and opening a new one
-	static inline unsigned int maxPosInfoBlockSize()
+	static inline int maxPosInfoBlockSize()
 	{
 		return 1024;
 	}
 
 	///\brief Size of a feature frequency block that leads to flushing it to the database and opening a new one
-	static inline unsigned int maxFfBlockSize()
+	static inline int maxFfBlockSize()
 	{
 		return 1024;
 	}
 
 	///\brief Size of a boolean block for representing sets that leads to flushing it to the database and opening a new one
-	static inline unsigned int maxBooleanBlockSize()
+	static inline int maxBooleanBlockSize()
+	{
+		return 1024;
+	}
+
+	///\brief Size of a block for representing structures that leads to flushing it to the database and opening a new one
+	static inline int maxStructBlockSize()
 	{
 		return 1024;
 	}
@@ -163,9 +169,18 @@ struct Constants
 	///\brief Minimum OS file size
 	///\note Used to approximate disk usage by counting sum of file sizes rounded to this value
 	///\remark should be probed
-	static inline unsigned int platformMinimumFileSize()
+	static inline int platformMinimumFileSize()
 	{
 		return 4096;
+	}
+
+	///\brief Ratio of the total size that decides wheter a block is replaced completely in a transaction (defines what fill grade leads to flushing it to the database and opening a new one)
+	///\note Should be a value between 0.5 and 1.0
+	///\note A value closer to one will slow down query, but probably be a little bit more efficient in insert and update as fewer blocks are written
+	///\remark should maybe be made configurable in the future, but currently the default seems reasonable, probably a matter of over-configuration, measure first
+	static inline float minimumBlockFillRatio()
+	{
+		return 0.75;
 	}
 };
 }//namespace

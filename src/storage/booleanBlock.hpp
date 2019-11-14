@@ -74,7 +74,14 @@ public:
 
 	bool full() const
 	{
-		return size() >= Constants::maxBooleanBlockSize();
+		return (int)size() >= Constants::maxBooleanBlockSize();
+	}
+	/// \brief Eval if the block is filled with a given ratio
+	/// \param[in] ratio value between 0.0 and 1.0, reasonable is a value close to one
+	/// \note A small value leads to fragmentation, a value close to 1.0 leads to transactions slowing down
+	bool filledWithRatio( float ratio) const
+	{
+		return (int)size() >= (int)(ratio * Constants::maxBooleanBlockSize());
 	}
 
 	/// \brief Check if the address 'elemno_', if it exists, is in this block.
@@ -106,6 +113,8 @@ public:
 			const std::vector<MergeRange>::const_iterator& ee,
 			const BooleanBlock& oldblk,
 			BooleanBlock& newblk);
+
+	static void merge( const BooleanBlock& blk1, const BooleanBlock& blk2, BooleanBlock& newblk);
 
 	void check() const;
 

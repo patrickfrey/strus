@@ -20,18 +20,13 @@ class FfBlock
 	:public DataBlock
 {
 public:
-	enum {
-		MaxBlockSize=1024
-	};
-
-public:
 	explicit FfBlock()
 		:DataBlock(),m_ffIndexNodeArray()
 	{}
 	FfBlock( const FfBlock& o)
 		:DataBlock(o)
 		{initFrame();}
-	FfBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	FfBlock( const strus::Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
 		{initFrame();}
 
@@ -48,7 +43,7 @@ public:
 	}
 
 	/// \brief Get the document number of the current FfIndexNodeCursor
-	Index docno_at( const FfIndexNodeCursor& cursor) const
+	strus::Index docno_at( const FfIndexNodeCursor& cursor) const
 	{
 		return m_ffIndexNodeArray.docno_at( cursor);
 	}
@@ -60,30 +55,30 @@ public:
 	}
 
 	/// \brief Get the next document with the current cursor
-	Index nextDoc( FfIndexNodeCursor& cursor) const
+	strus::Index nextDoc( FfIndexNodeCursor& cursor) const
 	{
 		return m_ffIndexNodeArray.nextDoc( cursor);
 	}
 	/// \brief Get the first document with the current cursor
-	Index firstDoc( FfIndexNodeCursor& cursor) const
+	strus::Index firstDoc( FfIndexNodeCursor& cursor) const
 	{
 		return m_ffIndexNodeArray.firstDoc( cursor);
 	}
 	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( const Index& docno_, FfIndexNodeCursor& cursor) const
+	strus::Index skipDoc( const strus::Index& docno, FfIndexNodeCursor& cursor) const
 	{
-		return m_ffIndexNodeArray.skipDoc( docno_, cursor);
+		return m_ffIndexNodeArray.skipDoc( docno, cursor);
 	}
 
-	bool isThisBlockAddress( const Index& docno_) const
+	bool isThisBlockAddress( const strus::Index& docno) const
 	{
-		return (docno_ <= id() && m_ffIndexNodeArray.size && docno_ > m_ffIndexNodeArray.ar[ 0].base);
+		return (docno <= id() && m_ffIndexNodeArray.size && docno > m_ffIndexNodeArray.ar[ 0].base);
 	}
-	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
-	bool isFollowBlockAddress( const Index& docno_) const
+	/// \brief Check if the address 'docno', if it exists, is most likely located in the following block (cheaper to fetch) or not
+	bool isFollowBlockAddress( const strus::Index& docno) const
 	{
 		Index diff = id() - (m_ffIndexNodeArray.size?m_ffIndexNodeArray.ar[ 0].base:1);
-		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
+		return (docno > id()) && (docno < id() + diff - (diff>>4));
 	}
 
 	const FfIndexNodeArray& nodes() const
@@ -112,20 +107,34 @@ public:
 		:m_ffIndexNodeArray(o.m_ffIndexNodeArray)
 		,m_lastDoc(o.m_lastDoc)
 		,m_id(o.m_id){}
+	FfBlockBuilder& operator=( const FfBlockBuilder& o)
+	{
+		m_ffIndexNodeArray = o.m_ffIndexNodeArray;
+		m_lastDoc = o.m_lastDoc;
+		m_id = o.m_id;
+		return *this;
+	}
 
-	Index id() const						{return m_id;}
-	void setId( const Index& id_);
+	strus::Index id() const						{return m_id;}
+	void setId( const strus::Index& id_);
 
 	bool empty() const						{return m_ffIndexNodeArray.empty();}
 
 	/// \brief Append document with ff
 	/// \param[in] docno document number
 	/// \param[in] ff term feature frequency (ff, number of occurrencies) in the document
-	void append( const Index& docno, int ff);
+	void append( const strus::Index& docno, int ff);
 
 	bool full() const
 	{
-		return (m_ffIndexNodeArray.size() * sizeof(FfIndexNode)) >= Constants::maxFfBlockSize();
+		return size() >= Constants::maxFfBlockSize();
+	}
+	/// \brief Eval if the block is filled with a given ratio
+	/// \param[in] ratio value between 0.0 and 1.0, reasonable is a value close to one
+	/// \note A small value leads to fragmentation, a value close to 1.0 leads to transactions slowing down
+	bool filledWithRatio( float ratio) const
+	{
+		return size() >= (int)(ratio * Constants::maxFfBlockSize());
 	}
 
 	const std::vector<FfIndexNode>& ffIndexNodeArray() const	{return m_ffIndexNodeArray;}
@@ -139,10 +148,17 @@ public:
 		m_id = 0;
 	}
 
+	int size() const
+	{
+		return (m_ffIndexNodeArray.size() * sizeof(FfIndexNode));
+	}
+
+	static void merge( const FfBlockBuilder& blk1, const FfBlockBuilder& blk2, FfBlockBuilder& newblk);
+
 private:
 	std::vector<FfIndexNode> m_ffIndexNodeArray;
-	Index m_lastDoc;
-	Index m_id;
+	strus::Index m_lastDoc;
+	strus::Index m_id;
 };
 
 }//namespace

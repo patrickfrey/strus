@@ -773,7 +773,7 @@ void SentenceAnalyzerInstance::SentenceAnalyzerInstance::analyzeTermList( Execut
 			}
 		}
 		init_states.clear();
-		std::swap( init_states, accept_states);
+		init_states.swap( accept_states);
 	}
 	std::size_t sidx = 0;
 	for (; sidx != init_states.size(); ++sidx)

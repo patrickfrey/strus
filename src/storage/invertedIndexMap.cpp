@@ -280,7 +280,7 @@ void InvertedIndexMap::renameNewNumbers(
 				new_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >( ui->first, ui->second));
 			}
 		}
-		std::swap( m_docno_typeno_deletes, new_docno_typeno_deletes);
+		m_docno_typeno_deletes.swap( new_docno_typeno_deletes);
 	}{
 		std::set<Index> new_docno_deletes;
 
@@ -302,7 +302,7 @@ void InvertedIndexMap::renameNewNumbers(
 			}
 			
 		}
-		std::swap( m_docno_deletes, new_docno_deletes);
+		m_docno_deletes.swap( new_docno_deletes);
 	}{
 		// Rename df:
 		m_dfmap.renameNewTermNumbers( termUnknownMap);
@@ -532,14 +532,14 @@ void InvertedIndexMap::mergeNewPosElements(
 	PosinfoBlock blk;
 	while (ei != ee && dbadapter_posinfo.loadUpperBound( ei->first.docno, blk))
 	{
-		// Merge posinfo block elements (PosinfoBlock):
+		// Define docno list block elements (BooleanBlock):
 		Map::const_iterator newposblk_start = ei;
 		for (; ei != ee && ei->first.docno <= blk.id(); ++ei)
 		{
-			// Define docno list block elements (BooleanBlock):
 			defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
 		}
 
+		// Merge posinfo block elements (PosinfoBlock):
 		mergePosBlock( dbadapter_posinfo, transaction, newposblk_start, ei, blk, newposblk);
 		if (dbadapter_posinfo.loadNext( blk))
 		{
@@ -552,14 +552,19 @@ void InvertedIndexMap::mergeNewPosElements(
 		}
 		else
 		{
-			if (newposblk.full())
+			// ... blk unchanged, upperbound block
+			if (newposblk.filledWithRatio( Constants::minimumBlockFillRatio()))
 			{
-				// ... it is the last block, but full
+				// ... it is the last block, but acceptable complete, we store it
 				dbadapter_posinfo.store( transaction, newposblk.createBlock());
 				newposblk.clear();
 			}
 			else
 			{
+				// ... the olf block is replaced by the overlapping new block
+				//	thus the old block is deleted and the new one kept
+				// [REMARK] Probably not very efficient as we touch too many blocks
+				// in a transaction
 				dbadapter_posinfo.remove( transaction, blk.id());
 				newposblk.setId(0);
 			}

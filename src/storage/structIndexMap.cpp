@@ -148,7 +148,7 @@ void StructIndexMap::writeNewBlocks(
 			StructDefSet::const_iterator si = st.begin(), se = st.end();
 			for (; si != se; ++si)
 			{
-				blk.push( docno, si->source, si->sink);
+				blk.append( docno, si->source, si->sink);
 			}
 		}
 		else

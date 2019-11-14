@@ -32,7 +32,7 @@ void BooleanBlockBatchWrite::insertNewElements(
 	{
 		Index blockid = lastInsertBlockId;
 		std::vector<BooleanBlock::MergeRange>::iterator bi = ei;
-		for (std::size_t mm = newblk.size(); ei != ee && mm < Constants::maxBooleanBlockSize(); ++ei)
+		for (std::size_t mm = newblk.size(); ei != ee && (int)mm < Constants::maxBooleanBlockSize(); ++ei)
 		{
 			// ... estimate block size approximately
 			if (ei->isMember)
