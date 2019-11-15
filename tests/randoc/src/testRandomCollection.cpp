@@ -194,6 +194,13 @@ struct RandomDoc
 		}
 	}
 
+	void swap( RandomDoc& o)
+	{
+		docid.swap( o.docid);
+		occurrencear.swap( o.occurrencear);
+		weightmap.swap( o.weightmap);
+	}
+
 	struct Occurrence
 	{
 		unsigned int term;
@@ -287,6 +294,20 @@ struct RandomCollection
 		}
 	}
 
+	void shuffle()
+	{
+		std::size_t ii = 0, ie = docar.size();
+		for (; ii<ie; ii++)
+		{
+			std::size_t ai = g_random.get( 0, docar.size());
+			std::size_t bi = g_random.get( 0, docar.size());
+			if (ai != bi)
+			{
+				docar[ ai].swap( docar[ bi]);
+			}
+		}
+	}
+
 	std::string docSummary( std::size_t docidx_, unsigned int pos_, unsigned int range) const
 	{
 		std::ostringstream rt;
@@ -313,6 +334,17 @@ struct RandomCollection
 	std::vector<RandomDoc> docar;
 };
 
+static void buildRandomDocument( strus::StorageDocumentInterface* dinterf, const RandomCollection& collection, const RandomDoc& doc)
+{
+	std::vector<RandomDoc::Occurrence>::const_iterator oi = doc.occurrencear.begin(), oe = doc.occurrencear.end();
+	for (; oi != oe; ++oi)
+	{
+		const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
+		dinterf->addForwardIndexTerm( term.type, term.value, oi->pos);
+		dinterf->addSearchIndexTerm( term.type, term.value, oi->pos);
+	}
+	dinterf->done();
+}
 
 struct RandomQuery
 {
@@ -920,6 +952,19 @@ static bool compareMatches( const std::vector<RandomQuery::Match>& res, const st
 	return true;
 }
 
+void checkCollection( strus::StorageClientInterface* storage, const RandomCollection& collection, std::size_t nofDocuments)
+{
+	std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.begin() + nofDocuments;
+	for (; di != de; ++di)
+	{
+		strus::Reference<strus::StorageDocumentInterface>
+			checker( storage->createDocumentChecker( di->docid, "-"/*std::cout*/));
+		if (!checker.get()) throw std::runtime_error( g_errorhnd->fetchError());
+
+		buildRandomDocument( checker.get(), collection, *di);
+	}
+}
+
 /// \brief the assignement of document numbers is not transparent and the document numbers get not assigned
 ///	in ascending order of insertion. We have to query the storage to get the document numbers assigned.
 static std::vector<strus::Index> getDocnoMap(
@@ -965,12 +1010,14 @@ static std::string doubleToString( double val_)
 
 static void printUsage( int argc, const char* argv[])
 {
-	std::cerr << "usage: " << argv[0] << " <config> <nofdocs> <maxsize> <features> <ops>" << std::endl;
-	std::cerr << "<config>  = storage description" << std::endl;
-	std::cerr << "<nofdocs> = number of documents to insert" << std::endl;
-	std::cerr << "<maxsize> = maximum size of a document" << std::endl;
-	std::cerr << "<features>= number of distinct features" << std::endl;
-	std::cerr << "<ops>     = number of random test query operations" << std::endl;
+	std::cerr << "usage: " << argv[0] << " <config> <nofdocs> <maxsize> <features> <ops> [<commitsize>]" << std::endl;
+	std::cerr << "<config>     = storage description" << std::endl;
+	std::cerr << "<nofdocs>    = number of documents to insert" << std::endl;
+	std::cerr << "<maxsize>    = maximum size of a document" << std::endl;
+	std::cerr << "<features>   = number of distinct features" << std::endl;
+	std::cerr << "<ops>        = number of random test query operations" << std::endl;
+	std::cerr << "<commitsize> = (optional) number of documents per commit" << std::endl;
+	std::cerr << "               if set the documents are shuffled before insert" << std::endl;
 }
 
 int main( int argc, const char* argv[])
@@ -995,13 +1042,13 @@ int main( int argc, const char* argv[])
 	}
 	else if (argc < 6)
 	{
-		std::cerr << "ERROR too few parameters" << std::endl;
+		std::cerr << "ERROR too few arguments" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
-	else if (argc > 6)
+	else if (argc > 7)
 	{
-		std::cerr << "ERROR too many parameters" << std::endl;
+		std::cerr << "ERROR too many arguments" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
@@ -1012,6 +1059,7 @@ int main( int argc, const char* argv[])
 		unsigned int maxDocumentSize = getUintValue( argv[3]);
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
+		unsigned int commitSize = argc > 6 ? getUintValue( argv[6]) : 0;
 
 		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 		if (!dbi.get())
@@ -1037,12 +1085,13 @@ int main( int argc, const char* argv[])
 			}
 
 			RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
-	
+			if (commitSize) collection.shuffle();
+
 			strus::Index totNofOccurrencies = 0;
 			strus::Index totNofDocuments = 0;
 			strus::Index totTermStringSize = 0;
-			unsigned int insertIntervallSize = 1000;
-			unsigned int insertIntervallCnt = 0;
+			int insertIntervallSize = 1000;
+			int insertIntervallCnt = 0;
 	
 			typedef strus::local_ptr<strus::StorageTransactionInterface> StorageTransaction;
 			StorageTransaction transaction( storage->createTransaction());
@@ -1053,27 +1102,24 @@ int main( int argc, const char* argv[])
 			std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 			for (; di != de; ++di,++totNofDocuments)
 			{
-				typedef strus::local_ptr<strus::StorageDocumentInterface> StorageDocument;
+				typedef strus::local_ptr<strus::StorageDocumentInterface> StorageDocumentRef;
 	
-				StorageDocument doc( transaction->createDocument( di->docid));
+				StorageDocumentRef doc( transaction->createDocument( di->docid));
 				if (!doc.get())
 				{
 					throw std::runtime_error( g_errorhnd->fetchError());
 				}
 				std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
-	
-				for (; oi != oe; ++oi,++totNofOccurrencies)
+				totNofOccurrencies += di->occurrencear.size();
+				for (; oi != oe; ++oi)
 				{
 					const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
-					doc->addForwardIndexTerm( term.type, term.value, oi->pos);
-					doc->addSearchIndexTerm( term.type, term.value, oi->pos);
+					totTermStringSize += term.value.size();
 #ifdef STRUS_LOWLEVEL_DEBUG
 					std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif
-					totTermStringSize += term.value.size();
 				}
-				doc->done();
-	
+				buildRandomDocument( doc.get(), collection, *di);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
 #endif
@@ -1081,6 +1127,12 @@ int main( int argc, const char* argv[])
 				{
 					insertIntervallCnt = 0;
 					std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
+				}
+				if (commitSize && totNofDocuments % commitSize == (commitSize-1))
+				{
+					transaction->commit();
+					std::cerr << "commit after " << (commitSize+1) << " inserts" << std::endl;
+					checkCollection( storage.get(), collection, totNofDocuments);
 				}
 			}
 			if (g_errorhnd->hasError())

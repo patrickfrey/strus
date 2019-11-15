@@ -189,6 +189,7 @@ public:
 	void append( const Index& docno, const PositionType* posar);
 
 	bool fitsInto( std::size_t nofpos) const;
+	bool fitsIntoApproximately( std::size_t nofpos, float acceptedFillRatio) const;
 
 	bool full() const
 	{
@@ -210,8 +211,9 @@ public:
 
 	int size() const
 	{
-		return (m_posinfoArray.size() * sizeof(PositionType)
-				+ m_docIndexNodeArray.size() * sizeof(DocIndexNode));
+		return sizeof( unsigned int)
+			+ m_posinfoArray.size() * sizeof(PositionType)
+			+ m_docIndexNodeArray.size() * sizeof(DocIndexNode);
 	}
 
 	static void merge( const PosinfoBlockBuilder& blk1, const PosinfoBlockBuilder& blk2, PosinfoBlockBuilder& newblk);

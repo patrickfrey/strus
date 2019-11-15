@@ -292,7 +292,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
 			for (; mi != me; ++mi)
 			{
-				Index hnd = metadata->elementHandle( mi->first.c_str());
+				Index hnd = metadata->elementHandle( mi->first);
 				if (hnd < 0)
 				{
 					logError( logout, m_docid,
@@ -322,7 +322,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
 			for (; ai != ae; ++ai)
 			{
-				Index hnd = attributes->elementHandle( ai->first.c_str());
+				Index hnd = attributes->elementHandle( ai->first);
 				if (hnd == 0)
 				{
 					logError( logout, m_docid,
@@ -380,6 +380,10 @@ void StorageDocumentChecker::done()
 		if (m_logfile == "-")
 		{
 			doCheck( std::cout);
+		}
+		else if (m_logfile.empty())
+		{
+			doCheck( std::cerr);
 		}
 		else
 		{

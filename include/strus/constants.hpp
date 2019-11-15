@@ -176,11 +176,20 @@ struct Constants
 
 	///\brief Ratio of the total size that decides wheter a block is replaced completely in a transaction (defines what fill grade leads to flushing it to the database and opening a new one)
 	///\note Should be a value between 0.5 and 1.0
-	///\note A value closer to one will slow down query, but probably be a little bit more efficient in insert and update as fewer blocks are written
-	///\remark should maybe be made configurable in the future, but currently the default seems reasonable, probably a matter of over-configuration, measure first
+	///\note A value closer to 1.0 may potentially slow down query (not proven to be true), but probably be a little bit more efficient in insert and update as fewer blocks are written
+	///\remark should maybe be made configurable in the future, but currently the default seems reasonable, probably an issue of over-configuration, measure first, we simply do not know enough
 	static inline float minimumBlockFillRatio()
 	{
 		return 0.75;
+	}
+
+	///\brief Ratio of tolerated block size above the declared maximum for blocks that can be split (a very large document may occupy a larger block size because the document is the entity that cannot be split)
+	///\note Should be a value greater or equal to 1.0
+	///\note A value closer to 1.0 may potentially slow down query (not proven to be true), but insert and update will be more efficient as fewer blocks are written
+	///\remark should maybe be made configurable in the future, but currently the default seems reasonable, probably a matter of over-configuration, measure first
+	static inline float maximumBlockFillRatio()
+	{
+		return 1.4;
 	}
 };
 }//namespace

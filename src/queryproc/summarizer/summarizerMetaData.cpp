@@ -29,7 +29,7 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 		MetaDataReaderInterface* metadata_, const std::string& metaname_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
 	,m_metaname(metaname_)
-	,m_attrib(metadata_->elementHandle( metaname_.c_str()))
+	,m_attrib(metadata_->elementHandle( metaname_))
 	,m_errorhnd(errorhnd_)
 {
 	if (m_attrib < 0)

@@ -208,7 +208,8 @@ void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBloc
 
 bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
-	return m_memberar.size() + nofstructures <= (std::size_t)std::numeric_limits<short>::max();
+	int estimatedConsumption = nofstructures * (sizeof(StructureMember) + sizeof(StructureMember));
+	return size() + estimatedConsumption <= Constants::maxStructBlockSize();
 }
 
 StructBlock StructBlockBuilder::createBlock() const

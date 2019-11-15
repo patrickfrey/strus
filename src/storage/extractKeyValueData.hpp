@@ -182,6 +182,63 @@ struct PosinfoBlockData
 	void print( std::ostream& out);
 };
 
+struct StructBlockData
+{
+	Index valueno;
+	Index docno;
+	
+	struct Structure
+	{
+		Index docno;
+		IndexRange source;
+		IndexRange sink;
+
+		Structure( const Index& docno_, const IndexRange& source_, const IndexRange& sink_)
+			:docno(docno_),source(source_),sink(sink_){}
+		Structure( const Structure& o)
+			:docno(o.docno),source(o.source),sink(o.sink){}
+	};
+	std::vector<Structure> structures;
+
+	StructBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct StructTypeInvData
+{
+	const char* valuestr;
+	std::size_t valuesize;
+	Index valueno;
+
+	StructTypeInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct FfBlockData
+{
+	Index typeno;
+	Index valueno;
+	Index docno;
+
+	struct Posting
+	{
+		Index docno;
+		int ff;
+
+		Posting( const Index& docno_, int ff_)
+			:docno(docno_),ff(ff_){}
+		Posting( const Posting& o)
+			:docno(o.docno),ff(o.ff){}
+	};
+	std::vector<Posting> postings;
+
+	FfBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
 struct DocListBlockData
 {
 	Index typeno;

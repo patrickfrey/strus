@@ -5,6 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include "primeFactorCollection.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -65,233 +66,10 @@ static bool g_verbose = false;
 static strus::PseudoRandom g_random;
 enum {MinRank=0, MaxNofRanks=100, MaxNofClasses=3, StorageCommitSize=100, MaxNofQueryTerms=12};
 
-class PrimeFactors
-{
-public:
-	enum {MinNumber=2};
-
-	PrimeFactors( int nofNumbers)
-		:m_ar( nofNumbers, std::vector<int>())
-	{
-		int mi = MinNumber, me=nofNumbers+MinNumber;
-		for (; mi<me; ++mi)
-		{
-			std::vector<int>& tfactors = m_ar[ mi-MinNumber];
-			if (tfactors.empty())
-			{
-				tfactors.push_back( mi);
-				m_occurrencies[ mi] += 1;
-			}
-			int bi = MinNumber, be = mi+1;
-			for (; bi < be && bi*mi < me; ++bi)
-			{
-				std::vector<int>& ufactors = m_ar[ (bi*mi)-MinNumber];
-				std::vector<int>& bfactors = m_ar[ bi-MinNumber];
-				if (ufactors.empty())
-				{
-					ufactors.insert( ufactors.end(), bfactors.begin(), bfactors.end());
-					ufactors.insert( ufactors.end(), tfactors.begin(), tfactors.end());
-					std::sort( ufactors.begin(), ufactors.end());
-					std::set<int> uniqueset( ufactors.begin(), ufactors.end());
-					std::set<int>::const_iterator ui = uniqueset.begin(), ue = uniqueset.end();
-					for (; ui != ue; ++ui)
-					{
-						++m_occurrencies[ *ui];
-					}
-				}
-			}
-		}
-	}
-
-	int maxNumber() const
-	{
-		return m_ar.size() + MinNumber;
-	}
-
-	const std::vector<int>& factorList( int number) const
-	{
-		return m_ar[ number-MinNumber];
-	}
-
-	std::set<int> factorSet( int number) const
-	{
-		return std::set<int>( m_ar[ number-MinNumber].begin(), m_ar[ number-MinNumber].end());
-	}
-
-	std::map<int,int> factorMap( int number) const
-	{
-		std::map<int,int> rt;
-		std::vector<int>::const_iterator fi = m_ar[ number-MinNumber].begin(), fe = m_ar[ number-MinNumber].end();
-		for (; fi != fe; ++fi)
-		{
-			++rt[ *fi];
-		}
-		return rt;
-	}
-
-	std::map<int,int> queryFeatToFfMap( int number, const std::vector<int>& query) const
-	{
-		std::map<int,int> rt;
-		const std::vector<int>& factors = factorList( number);
-		std::vector<int>::const_iterator fi = factors.begin(), fe = factors.end();
-		for (; fi != fe; ++fi)
-		{
-			std::vector<int>::const_iterator qi = query.begin(), qe = query.end();
-			for (; qi != qe && *fi != *qi; ++qi){}
-			if (qi != qe) ++rt[ *qi];
-		}
-		return rt;
-	}
-
-	int frequency( int number) const
-	{
-		std::map<int,int>::const_iterator oi = m_occurrencies.find( number);
-		return (oi == m_occurrencies.end()) ? 0 : oi->second;
-	}
-
-	int size() const
-	{
-		return m_ar.size();
-	}
-
-	int randomPrime() const
-	{
-		for (;;)
-		{
-			int rt = g_random.get( PrimeFactors::MinNumber, (int)m_ar.size()+PrimeFactors::MinNumber);
-			if (frequency( rt)) return rt;
-		}
-	}
-
-	static std::string docid( int docno)
-	{
-		return strus::string_format( "D%d", docno + PrimeFactors::MinNumber);
-	}
-
-private:
-	std::vector<std::vector<int> > m_ar;
-	std::map<int,int> m_occurrencies;
-};
-
-
-class Storage
-{
-public:
-	Storage(){}
-	Storage( const Storage& o)
-		:dbi(o.dbi),sti(o.sti),sci(o.sci){}
-	~Storage(){}
-
-	strus::Reference<strus::DatabaseInterface> dbi;
-	strus::Reference<strus::StorageInterface> sti;
-	strus::Reference<strus::StorageClientInterface> sci;
-
-	void open( const char* options, bool reset);
-	void close()
-	{
-		sci.reset();
-		sti.reset();
-		dbi.reset();
-	}
-
-	struct MetaDataDef
-	{
-		const char* key;
-		const char* type;
-	};
-	void defineMetaData( MetaDataDef const* deflist);
-	void dump();
-};
-
-
-struct Feature
-{
-	enum Kind
-	{
-		SearchIndex,
-		ForwardIndex,
-		Attribute,
-		MetaData
-	};
-	static const char* kindName( Kind kind)
-	{
-		static const char* ar[] = {"searchindex","forwardindex","attribute","metadata"};
-		return ar[ kind];
-	}
-	Kind kind;
-	std::string type;
-	std::string value;
-	unsigned int pos;
-
-	Feature( Kind kind_, const std::string& type_, const std::string& value_, unsigned int pos_=0)
-		:kind(kind_),type(type_),value(value_),pos(pos_){}
-	Feature( const Feature& o)
-		:kind(o.kind),type(o.type),value(o.value),pos(o.pos){}
-};
-
-
-struct DocumentBuilder
-{
-	PrimeFactors primeFactors;
-	int nofDocuments;
-
-	explicit DocumentBuilder( int nofDocuments_)
-		:primeFactors( nofDocuments_)
-		,nofDocuments( nofDocuments_)
-	{}
-
-	std::vector<Feature> create( int docno) const
-	{
-		std::vector<Feature> rt;
-		int number = docno + PrimeFactors::MinNumber;
-		std::string description;
-		std::string title = strus::string_format( "number %d", number);
-
-		const std::vector<int>& fc = primeFactors.factorList( number);
-		std::set<int> uc;
-		int maxnum = 0;
-		int minnum = 0;
-		unsigned int ti=0, te=fc.size();
-		for (ti=0; ti<te; ++ti)
-		{
-			uc.insert( fc[ti]);
-			if (!minnum || minnum > fc[ti])
-			{
-				minnum = fc[ti];
-			}
-			if (maxnum < fc[ti])
-			{
-				maxnum = fc[ti];
-			}
-			if (ti) description.push_back( ' ');
-			description.append( strus::string_format( "%u", fc[ti]));
-
-			std::string searchtype = "word";
-			std::string searchvalue = strus::string_format( "s%u", fc[ti]);
-			rt.push_back( Feature( Feature::SearchIndex, searchtype, searchvalue, ti+1));
-
-			std::string forwardtype = "orig";
-			std::string forwardvalue = strus::string_format( "f%u", fc[ti]);
-			rt.push_back( Feature( Feature::ForwardIndex, forwardtype, forwardvalue, ti+1));
-		}
-		rt.push_back( Feature( Feature::Attribute, "title", title));
-		rt.push_back( Feature( Feature::Attribute, "docid", PrimeFactors::docid( docno)));
-		rt.push_back( Feature( Feature::Attribute, "description", description));
-
-		std::string sizestr = strus::string_format( "%u", (unsigned int)fc.size());
-		std::string lostr = strus::string_format( "%u", fc.empty() ? 0:minnum);
-		std::string histr = strus::string_format( "%u", fc.empty() ? 0:maxnum);
-		std::string nnstr = strus::string_format( "%u", (unsigned int)uc.size());
-
-		rt.push_back( Feature( Feature::MetaData, "doclen", sizestr));
-		rt.push_back( Feature( Feature::MetaData, "lo", lostr));
-		rt.push_back( Feature( Feature::MetaData, "hi", histr));
-		rt.push_back( Feature( Feature::MetaData, "nn", nnstr));
-
-		return rt;
-	}
-};
-
+typedef strus::test::PrimeFactorCollection PrimeFactorCollection;
+typedef strus::test::PrimeFactorDocumentBuilder PrimeFactorDocumentBuilder;
+typedef strus::test::Storage Storage;
+typedef strus::test::Feature Feature;
 
 class ExpectedResultElement
 {
@@ -398,7 +176,7 @@ public:
 
 	static std::vector<ExpectedResultElement>
 		calculateExpectedRanklist(
-			const DocumentBuilder& documentBuilder,
+			const PrimeFactorDocumentBuilder& documentBuilder,
 			const char* method,
 			const std::vector<int>& query)
 	{
@@ -406,7 +184,7 @@ public:
 		{
 			return getRanklist( documentBuilder,
 					calculateWeights_bm25( 
-						documentBuilder.primeFactors, query));
+						documentBuilder.primeFactorCollection, query));
 		}
 		else
 		{
@@ -490,30 +268,30 @@ private:
 		int m_docno;
 	};
 
-	static std::vector<ExpectedResultElement> getRanklist( const DocumentBuilder& documentBuilder, const std::vector<WeightedResultElement>& elements_)
+	static std::vector<ExpectedResultElement> getRanklist( const PrimeFactorDocumentBuilder& documentBuilder, const std::vector<WeightedResultElement>& elements_)
 	{
 		std::vector<ExpectedResultElement> rt;
 		std::vector<WeightedResultElement> elements = cutRanklist( elements_);
 		std::vector<WeightedResultElement>::const_iterator ei = elements.begin(), ee = elements.end();
 		for (; ei != ee; ++ei)
 		{
-			rt.push_back( ExpectedResultElement( PrimeFactors::docid( ei->docno()), ei->weight()));
+			rt.push_back( ExpectedResultElement( PrimeFactorCollection::docid( ei->docno()), ei->weight()));
 		}
 		return rt;
 	}
 
-	static std::vector<WeightedResultElement> calculateWeights_bm25( const PrimeFactors& primeFactors, const std::vector<int>& query)
+	static std::vector<WeightedResultElement> calculateWeights_bm25( const PrimeFactorCollection& primeFactorCollection, const std::vector<int>& query)
 	{
 		std::vector<WeightedResultElement> rt;
-		int docno = 0, ni = PrimeFactors::MinNumber, ne = primeFactors.maxNumber();
+		int docno = 0, ni = PrimeFactorCollection::MinNumber, ne = primeFactorCollection.maxNumber();
 		for (; ni < ne; ++ni,++docno)
 		{
 			double score = 0.0;
 			BM25Param p;
-			double N = primeFactors.size();
-			double doclen = primeFactors.factorList( ni).size();
+			double N = primeFactorCollection.size();
+			double doclen = primeFactorCollection.factorList( ni).size();
 			double reldoclen = (doclen+1) / p.avgdoclen;
-			std::map<int,int> ffMap = primeFactors.queryFeatToFfMap( ni, query);
+			std::map<int,int> ffMap = primeFactorCollection.queryFeatToFfMap( ni, query);
 			std::map<int,int> qfMap;
 			std::vector<int>::const_iterator qi = query.begin(), qe = query.end();
 			for (; qi != qe; ++qi)
@@ -525,7 +303,7 @@ private:
 				std::map<int,int>::const_iterator fi = ffMap.begin(), fe = ffMap.end();
 				for (; fi != fe; ++fi)
 				{
-					double df = primeFactors.frequency( fi->first);
+					double df = primeFactorCollection.frequency( fi->first);
 					double ff = fi->second;
 					double qf = qfMap[ fi->first];
 
@@ -550,169 +328,6 @@ private:
 		return rt;
 	}
 };
-
-
-void Storage::open( const char* config, bool reset)
-{
-	dbi.reset( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
-	if (!dbi.get())
-	{
-		throw std::runtime_error( g_errorhnd->fetchError());
-	}
-	sti.reset( strus::createStorageType_std( g_fileLocator, g_errorhnd));
-	if (!sti.get() || g_errorhnd->hasError())
-	{
-		throw std::runtime_error( g_errorhnd->fetchError());
-	}
-	if (reset)
-	{
-		(void)dbi->destroyDatabase( config);
-		(void)g_errorhnd->fetchError();
-	
-		if (!sti->createStorage( config, dbi.get()))
-		{
-			throw std::runtime_error( g_errorhnd->fetchError());
-		}
-	}
-	const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
-	sci.reset( sti->createClient( config, dbi.get(), statisticsMessageProc));
-	if (!sci.get())
-	{
-		throw std::runtime_error( g_errorhnd->fetchError());
-	}
-}
-
-void Storage::defineMetaData( MetaDataDef const* deflist)
-{
-	strus::Reference<strus::StorageTransactionInterface> transaction( sci->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error( "failed to create transaction: %s", g_errorhnd->fetchError());
-	strus::Reference<strus::StorageMetaDataTableUpdateInterface> update( transaction->createMetaDataTableUpdate());
-	if (!update.get()) throw strus::runtime_error( "failed to create structure for declaring meta data: %s", g_errorhnd->fetchError());
-	
-	int di = 0;
-	for (; deflist[di].key; ++di)
-	{
-		update->addElement( deflist[di].key, deflist[di].type);
-	}
-	update->done();
-	if (!transaction->commit()) throw strus::runtime_error( "failed to commit meta data structure definition: %s", g_errorhnd->fetchError());
-}
-
-static void destroyStorage( const char* config)
-{
-	strus::shared_ptr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
-	if (!dbi.get())
-	{
-		throw std::runtime_error( g_errorhnd->fetchError());
-	}
-	dbi->destroyDatabase( config);
-}
-
-void Storage::dump()
-{
-	strus::local_ptr<strus::StorageDumpInterface> chunkitr( sci->createDump( ""/*keyprefix*/));
-
-	const char* chunk;
-	std::size_t chunksize;
-	std::string dumpcontent;
-	while (chunkitr->nextChunk( chunk, chunksize))
-	{
-		dumpcontent.append( chunk, chunksize);
-	}
-	if (g_errorhnd->hasError())
-	{
-		throw std::runtime_error( g_errorhnd->fetchError());
-	}
-	else
-	{
-		std::cout << dumpcontent << std::endl;
-	}
-}
-
-
-static void printDocument( std::ostream& out, const std::string& docid, const std::vector<Feature>& featurelist)
-{
-	out << strus::string_format( "docid %s\n", docid.c_str());
-	std::vector<Feature>::const_iterator fi = featurelist.begin(), fe = featurelist.end();
-	for (; fi != fe; ++fi)
-	{
-		if (fi->pos)
-		{
-			out << strus::string_format( "\tpos %d: %s %s '%s'\n", fi->pos, Feature::kindName( fi->kind), fi->type.c_str(), fi->value.c_str());
-		}
-		else
-		{
-			out << strus::string_format( "\t%s %s '%s'\n", Feature::kindName( fi->kind), fi->type.c_str(), fi->value.c_str());
-		}
-	}
-	out << std::endl; 
-}
-
-static void insertDocument( strus::StorageDocumentInterface* doc, const std::vector<Feature>& featurelist)
-{
-	std::vector<Feature>::const_iterator fi = featurelist.begin(), fe = featurelist.end();
-	for (; fi != fe; ++fi)
-	{
-		switch (fi->kind)
-		{
-			case Feature::SearchIndex:
-				doc->addSearchIndexTerm( fi->type, fi->value, fi->pos);
-				break;
-			case Feature::ForwardIndex:
-				doc->addForwardIndexTerm( fi->type, fi->value, fi->pos);
-				break;
-			case Feature::Attribute:
-				doc->setAttribute( fi->type, fi->value);
-				break;
-			case Feature::MetaData:
-			{
-				strus::NumericVariant::UIntType val = atoi(fi->value.c_str());
-				doc->setMetaData( fi->type, val);
-				break;
-			}
-		}
-	}
-	doc->done();
-	
-}
-
-static void insertCollection( strus::StorageClientInterface* storage, const DocumentBuilder& documentBuilder)
-{
-	strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
-	unsigned int di=0, de=documentBuilder.nofDocuments;
-	for (; di != de; ++di)
-	{
-		if (di % StorageCommitSize == 0)
-		{
-			if (g_errorhnd->hasError())
-			{
-				throw strus::runtime_error( "insert failed: %s", g_errorhnd->fetchError());
-			}
-			if (!transaction->commit())
-			{
-				throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
-			}
-		}
-		std::string docid = PrimeFactors::docid( di);
-		strus::local_ptr<strus::StorageDocumentInterface>
-			doc( transaction->createDocument( docid.c_str()));
-		if (!doc.get()) throw strus::runtime_error("error creating document to insert");
-
-		std::vector<Feature> feats = documentBuilder.create( di);
-		insertDocument( doc.get(), feats);
-
-		if (g_verbose) printDocument( std::cerr, docid, feats);
-	}
-	if (g_errorhnd->hasError())
-	{
-		throw strus::runtime_error( "insert failed: %s", g_errorhnd->fetchError());
-	}
-	if (!transaction->commit())
-	{
-		throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
-	}
-}
 
 static std::string queryResultToString( const strus::QueryResult& res)
 {
@@ -814,27 +429,26 @@ bool compareRanklist( const std::vector<strus::ResultDocument>& result, const st
 
 static void testQueryEvaluation( int nofNumbers, const char* method, int nofQueries)
 {
-	Storage storage;
+	Storage storage( g_fileLocator, g_errorhnd);
 	storage.open( "path=storage", true);
-	const Storage::MetaDataDef metadata[] = {{"doclen", "UINT8"},{"lo", "UINT16"},{"hi", "UINT16"},{"nn", "UINT8"},{0,0}};
-	storage.defineMetaData( metadata);
+	storage.defineMetaData( PrimeFactorDocumentBuilder::metadata());
 
-	DocumentBuilder documentBuilder( nofNumbers);
+	PrimeFactorDocumentBuilder documentBuilder( nofNumbers, g_verbose, g_errorhnd);
 	if (g_verbose)
 	{
 		if (nofNumbers)
 		{
-			std::cerr << strus::string_format( "create collection for numbers from %d to %d with their prime factors as features", PrimeFactors::MinNumber, nofNumbers+PrimeFactors::MinNumber-1) << std::endl;
+			std::cerr << strus::string_format( "create collection for numbers from %d to %d with their prime factors as features", PrimeFactorCollection::MinNumber, nofNumbers+PrimeFactorCollection::MinNumber-1) << std::endl;
 		}
 		int ni = 0, ne = nofNumbers;
 		for (; ni != ne; ++ni)
 		{
-			int df = documentBuilder.primeFactors.frequency( ni+PrimeFactors::MinNumber);
-			if (df) std::cerr << strus::string_format( "df %d = %d", ni+PrimeFactors::MinNumber, df) << std::endl;
+			int df = documentBuilder.primeFactorCollection.frequency( ni+PrimeFactorCollection::MinNumber);
+			if (df) std::cerr << strus::string_format( "df %d = %d", ni+PrimeFactorCollection::MinNumber, df) << std::endl;
 		}
 	}
 	if (g_verbose) std::cerr << "* inserting documents of generated collection" << std::endl;
-	insertCollection( storage.sci.get(), documentBuilder);
+	documentBuilder.insert( storage.sci.get(), StorageCommitSize);
 
 	QueryEval queryEval( storage.sci, method);
 	if (g_verbose) std::cerr << "* evaluate queries" << std::endl;
@@ -848,7 +462,7 @@ static void testQueryEvaluation( int nofNumbers, const char* method, int nofQuer
 		int ni = 0, ne = randomNofQueryTerms();
 		for (; ni < ne; ++ni)
 		{
-			int prime = documentBuilder.primeFactors.randomPrime();
+			int prime = documentBuilder.primeFactorCollection.randomPrime( g_random);
 			featureidxar.push_back( prime);
 
 			features.push_back( strus::string_format( "s%d", prime));
@@ -969,7 +583,7 @@ int main( int argc, const char* argv[])
 TESTS_DONE:
 	if (do_cleanup)
 	{
-		destroyStorage( "path=storage");
+		Storage::destroy( "path=storage", g_fileLocator, g_errorhnd);
 	}
 	delete g_fileLocator;
 	delete g_errorhnd;

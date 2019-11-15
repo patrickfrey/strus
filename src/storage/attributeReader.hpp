@@ -27,7 +27,7 @@ public:
 	AttributeReader( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
 		:m_storage(storage_),m_database(database_),m_docno(0),m_errorhnd(errorhnd_){}
 
-	virtual Index elementHandle( const char* name) const;
+	virtual Index elementHandle( const std::string& name) const;
 
 	virtual void skipDoc( const Index& docno)
 	{

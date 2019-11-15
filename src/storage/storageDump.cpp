@@ -62,9 +62,15 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
-			case DatabaseKey::DocAttributePrefix:
+			case DatabaseKey::AttributeKeyPrefix:
 			{
-				DocAttributeData data( key, value);
+				AttributeKeyData data( key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::UserNamePrefix:
+			{
+				UserNameData data( key, value);
 				data.print( out);
 				break;
 			}
@@ -80,34 +86,39 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
+			case DatabaseKey::StructTypeInvPrefix:
+			{
+				StructTypeInvData data( key, value);
+				data.print( out);
+				break;
+			}
 			case DatabaseKey::ForwardIndexPrefix:
 			{
 				ForwardIndexData data( key, value);
 				data.print( out);
 				break;
 			}
-			case DatabaseKey::DocMetaDataPrefix:
-			{
-				MetaDataDescription metadescr( database);
-				DocMetaDataData data( &metadescr, key, value);
-				data.print( out);
-				break;
-			}
-			case DatabaseKey::UserNamePrefix:
-			{
-				UserNameData data( key, value);
-				data.print( out);
-				break;
-			}
-			case DatabaseKey::DocFrequencyPrefix:
-			{
-				DocFrequencyData data( key, value);
-				data.print( out);
-				break;
-			}
 			case DatabaseKey::PosinfoBlockPrefix:
 			{
 				PosinfoBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::FfBlockPrefix:
+			{
+				FfBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::StructBlockPrefix:
+			{
+				StructBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::InverseTermPrefix:
+			{
+				InverseTermData data( key, value);
 				data.print( out);
 				break;
 			}
@@ -129,21 +140,28 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
-			case DatabaseKey::InverseTermPrefix:
+			case DatabaseKey::DocMetaDataPrefix:
 			{
-				InverseTermData data( key, value);
+				MetaDataDescription metadescr( database);
+				DocMetaDataData data( &metadescr, key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::DocAttributePrefix:
+			{
+				DocAttributeData data( key, value);
+				data.print( out);
+				break;
+			}
+			case DatabaseKey::DocFrequencyPrefix:
+			{
+				DocFrequencyData data( key, value);
 				data.print( out);
 				break;
 			}
 			case DatabaseKey::MetaDataDescrPrefix:
 			{
 				MetaDataDescrData data( key, value);
-				data.print( out);
-				break;
-			}
-			case DatabaseKey::AttributeKeyPrefix:
-			{
-				AttributeKeyData data( key, value);
 				data.print( out);
 				break;
 			}

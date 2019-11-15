@@ -179,7 +179,12 @@ void PosinfoBlockBuilder::merge( const PosinfoBlockBuilder& blk1, const PosinfoB
 
 bool PosinfoBlockBuilder::fitsInto( std::size_t nofpos) const
 {
-	return m_posinfoArray.size() + nofpos <= std::numeric_limits<PositionType>::max();
+	return (int)(size() + nofpos * sizeof(PositionType)) <= Constants::maxPosInfoBlockSize();
+}
+
+bool PosinfoBlockBuilder::fitsIntoApproximately( std::size_t nofpos, float acceptedFillRatio) const
+{
+	return (int)(size() + nofpos * sizeof(PositionType) * acceptedFillRatio) <= Constants::maxPosInfoBlockSize();
 }
 
 PosinfoBlock PosinfoBlockBuilder::createBlock() const

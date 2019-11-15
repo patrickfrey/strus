@@ -26,7 +26,7 @@ public:
 	/// \brief Get the handle of an element addressed by its name
 	/// \param[in] name name of the element
 	/// \return the element handle as number (count starting with 1) or 0 on error
-	virtual Index elementHandle( const char* name) const=0;
+	virtual Index elementHandle( const std::string& name) const=0;
 
 	/// \brief Move the attribute reader context to a specific document
 	/// \param[in] docno the number of the document to move the context to

@@ -26,7 +26,7 @@ SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& attribname_, ErrorBufferInterface* errorhnd_)
 	:m_attribreader(attribreader_)
 	,m_attribname(attribname_)
-	,m_attrib(attribreader_->elementHandle( attribname_.c_str()))
+	,m_attrib(attribreader_->elementHandle( attribname_))
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_attrib)

@@ -813,6 +813,11 @@ Index StorageClient::termTypeNumber( const std::string& type) const
 	return getTermType( type);
 }
 
+Index StorageClient::termValueNumber( const std::string& value) const
+{
+	return getTermValue( value);
+}
+
 bool StorageClient::isForwardIndexTerm( const std::string& type) const
 {
 	Index typeno = getTermType( type);

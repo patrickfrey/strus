@@ -14,7 +14,7 @@
 
 using namespace strus;
 
-Index AttributeReader::elementHandle( const char* name) const
+Index AttributeReader::elementHandle( const std::string& name) const
 {
 	try
 	{

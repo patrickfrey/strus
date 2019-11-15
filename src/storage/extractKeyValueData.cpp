@@ -11,6 +11,8 @@
 #include "metaDataBlock.hpp"
 #include "forwardIndexBlock.hpp"
 #include "booleanBlock.hpp"
+#include "structBlock.hpp"
+#include "ffBlock.hpp"
 #include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
@@ -243,6 +245,114 @@ TermValueInvData::TermValueInvData( const strus::DatabaseCursorInterface::Slice&
 void TermValueInvData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::TermValueInvPrefix << ' ' << escapestr( valuestr, valuesize) << ' ' << valueno << std::endl;
+}
+
+StructTypeInvData::StructTypeInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	valuestr = vi;
+	valuesize = ve-vi;
+	if (!strus::checkStringUtf8( vi, ve-vi))
+	{
+		throw std::runtime_error( _TXT( "value of term is not a valid UTF8 string"));
+	}
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term number"));
+	}
+}
+
+void StructTypeInvData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::StructTypeInvPrefix << ' ' << escapestr( valuestr, valuesize) << ' ' << valueno << std::endl;
+}
+
+StructBlockData::StructBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+	}
+	StructBlock blk( docno, vi, ve-vi);
+	DocIndexNodeCursor cursor;
+	Index dn = blk.firstDoc( cursor);
+
+	for (; dn; dn = blk.nextDoc( cursor))
+	{
+		StructBlock::StructureScanner stu = blk.structureScanner_at( cursor);
+		strus::IndexRange source = stu.skip( 0);
+
+		for (; source.defined(); source = stu.skip( source.end()))
+		{
+			StructBlock::MemberScanner memb = stu.members();
+			strus::IndexRange sink = memb.skip( 0);
+
+			for (; sink.defined(); sink = memb.skip( sink.end()))
+			{
+				structures.push_back( Structure( dn, source, sink));
+			}
+		}
+	}
+}
+
+void StructBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::StructBlockPrefix << ' ' << valueno << ' ' << posinfo.size();
+	std::vector<Structure>::const_iterator itr = structures.begin(), end = structures.end();
+	for (; itr != end; ++itr)
+	{
+		out << ' ' << itr->docno << ":" << itr->source.start() << "," << itr->source.end()
+			<< "->" << itr->sink.start() << "," << itr->sink.end();
+	}
+	out << std::endl;
+}
+
+FfBlockData::FfBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+	}
+	FfBlock blk( docno, vi, ve-vi);
+
+	FfIndexNodeCursor cursor;
+	strus::Index dn = blk.firstDoc( cursor);
+	for (; dn; dn = blk.nextDoc( cursor))
+	{
+		int ff = frequency_at( cursor);
+		postings.push_back( Posting( dn, ff));
+	}
+}
+
+void FfBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::FfBlockPrefix << ' ' << typeno << ' ' << valueno << ' ' << postings.size();
+	std::vector<Posting>::const_iterator itr = postings.begin(), end = postings.end();
+	for (; itr != end; ++itr)
+	{
+		out << ' ' << itr->docno << ':' << itr->ff;
+	}
+	out << std::endl;
 }
 
 static std::string encodeString( const std::string& value)

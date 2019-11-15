@@ -136,6 +136,8 @@ public:
 
 	virtual Index termTypeNumber( const std::string& type) const;
 
+	virtual Index termValueNumber( const std::string& value) const;
+
 	virtual bool isForwardIndexTerm( const std::string& type) const;
 
 	virtual ValueIteratorInterface* createTermTypeIterator() const;

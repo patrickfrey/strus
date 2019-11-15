@@ -26,9 +26,9 @@ public:
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
-		TermTypeInvPrefix='K',	///< [typeno]                  ->  [type string]
-		TermValueInvPrefix='N',	///< [valueno]                 ->  [term string]
-		StructTypeInvPrefix='X',///< [structno]                ->  [struct type string]
+		TermTypeInvPrefix='K',	///< [typeno]                  ->  [type-string]
+		TermValueInvPrefix='N',	///< [valueno]                 ->  [term-string]
+		StructTypeInvPrefix='X',///< [structno]                ->  [struct-type-string]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*

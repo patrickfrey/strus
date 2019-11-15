@@ -155,6 +155,11 @@ public:
 	/// \return the term type number or 0, if it is not known yet
 	virtual Index termTypeNumber( const std::string& type) const=0;
 
+	/// \brief Get the local internal term value number
+	/// \param[in] value term value
+	/// \return the term value number or 0, if it is not known yet
+	virtual Index termValueNumber( const std::string& type) const=0;
+
 	/// \brief Evaluate if there exists forward index blocks for this type
 	/// \param[in] type term type name
 	/// \return true, if yes, false if no or if an error occurred (check error)
