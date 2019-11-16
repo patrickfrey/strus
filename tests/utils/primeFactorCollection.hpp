@@ -297,10 +297,14 @@ struct Feature
 	std::string value;
 	strus::Index pos;
 
+	Feature()
+		:kind(Attribute),type(),value(),pos(0){}
 	Feature( Kind kind_, const std::string& type_, const std::string& value_, strus::Index pos_=0)
 		:kind(kind_),type(type_),value(value_),pos(pos_){}
 	Feature( const Feature& o)
 		:kind(o.kind),type(o.type),value(o.value),pos(o.pos){}
+	Feature& operator=( const Feature& o)
+		{kind=o.kind;type=o.type;value=o.value;pos=o.pos; return *this;}
 
 	bool operator <( const Feature& o) const	{return compare(o) < 0;}
 	bool operator >( const Feature& o) const	{return compare(o) > 0;}
@@ -426,8 +430,9 @@ struct PrimeFactorDocumentBuilder
 		}
 		out << std::endl; 
 	}
-	
-	static void insertDocument( strus::StorageDocumentInterface* doc, const std::vector<Feature>& featurelist)
+
+	template <class DocumentInterface>
+	static void buildDocument( DocumentInterface* doc, const std::vector<Feature>& featurelist)
 	{
 		std::vector<Feature>::const_iterator fi = featurelist.begin(), fe = featurelist.end();
 		for (; fi != fe; ++fi)
@@ -466,7 +471,60 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
-	void insert( strus::StorageClientInterface* storage, int commitSize)
+	Feature randomFeature( const Feature& oldfeat, PseudoRandom& random)
+	{
+		int fidx = primeFactorCollection.randomPrime( random);
+		switch (oldfeat.kind)
+		{
+			case Feature::SearchIndex:
+				return Feature(
+					Feature::SearchIndex, searchIndexFeatureType(),
+					searchIndexFeatureValue( fidx), oldfeat.pos);
+			case Feature::ForwardIndex:
+				return Feature(
+					Feature::ForwardIndex, forwardIndexFeatureType(),
+					forwardIndexFeatureValue( fidx), oldfeat.pos);
+			case Feature::Attribute:
+				return Feature(
+					Feature::Attribute, oldfeat.type,
+					strus::string_format( "random %d", fidx), 0/*no pos*/);
+			case Feature::MetaData:
+				return Feature(
+					Feature::MetaData, oldfeat.type,
+					strus::string_format( "%d", fidx), 0/*no pos*/);
+		}
+		throw std::runtime_error("unknown feature class");
+	}
+
+	std::vector<Feature> randomAlterFeatures( const std::vector<Feature>& features, PseudoRandom& random)
+	{
+		std::vector<Feature> rt = features;
+		int nofChanges = random.get( 1, random.get( 1, features.size()+2) +1);
+		int ii=0, ie=nofChanges;
+		for (; ii<ie; ++ii)
+		{
+			enum ChangeType {InsertFeat,AlterFeat,DeleteFeat};
+			ChangeType changeType = (ChangeType)random.get( 0, 3);
+			std::size_t chgidx = random.get( 0, rt.size());
+
+			switch (changeType)
+			{
+				case InsertFeat:
+					rt.insert( rt.begin()+chgidx, randomFeature( rt[ chgidx], random));
+					break;
+				case AlterFeat:
+					rt[ chgidx] = randomFeature( rt[ chgidx], random);
+					break;
+				case DeleteFeat:
+					rt.erase( rt.begin()+chgidx);
+					break;
+			}
+		}
+		return rt;
+	}
+
+	enum WriteMode {InsertMode, UpdateMode, InsertAlteredMode, UpdateAlteredMode};
+	void insertCollection( strus::StorageClientInterface* storage, PseudoRandom& random, int commitSize, WriteMode mode=InsertMode)
 	{
 		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
 		unsigned int di=0, de=nofDocuments;
@@ -485,13 +543,34 @@ struct PrimeFactorDocumentBuilder
 				listObservedTerms( std::cerr, storage);
 			}
 			std::string docid = PrimeFactorCollection::docid( di);
-			strus::local_ptr<strus::StorageDocumentInterface>
-				doc( transaction->createDocument( docid.c_str()));
-			if (!doc.get()) throw strus::runtime_error("error creating document to insert");
-	
 			std::vector<Feature> feats = createDocument( di);
-			insertDocument( doc.get(), feats);
-	
+			switch (mode)
+			{
+				case InsertAlteredMode:
+					feats = randomAlterFeatures( feats, random);
+					/*no break here!*/
+				case InsertMode:
+				{
+					strus::local_ptr<strus::StorageDocumentInterface>
+						doc( transaction->createDocument( docid.c_str()));
+					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
+					buildDocument( doc.get(), feats);
+					break;
+				}
+				case UpdateAlteredMode:
+					feats = randomAlterFeatures( feats, random);
+					/*no break here!*/
+				case UpdateMode:
+				{
+					strus::Index docno = storage->documentNumber( docid);
+					if (!docno) throw strus::runtime_error("document '%s' to update does not exist", docid.c_str());
+					strus::local_ptr<strus::StorageDocumentUpdateInterface>
+						doc( transaction->createDocumentUpdate( docno));
+					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
+					buildDocument( doc.get(), feats);
+					break;
+				}
+			}
 			if (verbose) printDocument( std::cerr, docid, feats);
 		}
 		if (errorhnd->hasError())
@@ -750,6 +829,8 @@ struct PrimeFactorDocumentBuilder
 
 			// Search index terms:
 			std::string type = searchIndexFeatureType();
+			strus::Index valueno = storage->termValueNumber( oi->value);
+
 			strus::Reference<strus::PostingIteratorInterface>
 				pitr( storage->createTermPostingIterator( type, oi->value, 1/*length*/));
 			if (!pitr.get()) throw std::runtime_error( errorhnd->fetchError());
@@ -767,11 +848,11 @@ struct PrimeFactorDocumentBuilder
 			}
 			if (occurrencies.empty())
 			{
-				out << strus::string_format( "observed term %s in document %s not found\n", oi->value.c_str(), oi->docid.c_str());
+				out << strus::string_format( "observed term %s (%d) in document %s (%d) not found\n", oi->value.c_str(), valueno, oi->docid.c_str(), docno);
 			}
 			else
 			{
-				out << strus::string_format( "observed term %s in document %s at %s\n", oi->value.c_str(), oi->docid.c_str(), occurrencies.c_str());
+				out << strus::string_format( "observed term %s (%d) in document %s (%d) at %s\n", oi->value.c_str(), (int)valueno, oi->docid.c_str(), docno, occurrencies.c_str());
 			}
 		}
 	}

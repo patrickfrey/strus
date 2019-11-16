@@ -448,7 +448,7 @@ static void testQueryEvaluation( int nofNumbers, const char* method, int nofQuer
 		}
 	}
 	if (g_verbose) std::cerr << "* inserting documents of generated collection" << std::endl;
-	documentBuilder.insert( storage.sci.get(), StorageCommitSize);
+	documentBuilder.insertCollection( storage.sci.get(), g_random, StorageCommitSize);
 
 	QueryEval queryEval( storage.sci, method);
 	if (g_verbose) std::cerr << "* evaluate queries" << std::endl;

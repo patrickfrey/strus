@@ -425,16 +425,10 @@ void InvertedIndexMap::getWriteBatch(
 	
 			PosinfoBlockBuilder newposblk;
 			std::vector<BooleanBlock::MergeRange> docrangear;
-	
+
 			// [1] Merge new elements with existing upper bound blocks:
 			mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
-			// [1.1] The last block is deleted and the elements are kept in newposblk
-			// for the following inserts
-			if (newposblk.id())
-			{
-				dbadapter_posinfo.remove( transaction, newposblk.id());
-				newposblk.setId(0);
-			}
+
 			// [2] Write the new blocks that could not be merged into existing ones:
 			insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
 	
@@ -495,6 +489,12 @@ void InvertedIndexMap::insertNewPosElements(
 	{
 		if (ei->second)
 		{
+			// Delete blocks passed and not used
+			if (newposblk.id() && ei->first.docno > newposblk.id())
+			{
+				dbadapter_posinfo.remove( transaction, newposblk.id());
+				newposblk.setId(0);
+			}
 			// Define posinfo block elements (PosinfoBlock):
 			if (!newposblk.empty() && !newposblk.fitsInto( m_posinfo[ ei->second] + 1))
 			{

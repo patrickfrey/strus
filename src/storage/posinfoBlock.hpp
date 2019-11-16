@@ -230,27 +230,25 @@ private:
 		explicit Cursor( const PosinfoBlockBuilder& blk_)
 			:idx(0),blk(&blk_),nd(0),subidx(0),docno(0)
 		{
-			for (; !docno && idx < blk->docIndexNodes(); ++idx)
+			while (idx < blk->docIndexNodes())
 			{
 				nd = blk->docIndexNodeRef( idx);
 				docno = nd->firstDoc( subidx);
+				if (docno) break;
+				nd = 0;
+				++idx;
 			}
 		}
 
 		void next()
 		{
+			if (!nd) return;
 			docno = nd->nextDoc( subidx);
 			while (!docno)
 			{
-				if (++idx < blk->docIndexNodes())
-				{
-					nd = blk->docIndexNodeRef( idx);
-					docno = nd->firstDoc( subidx);
-				}
-				else
-				{
-					break;
-				}
+				if (++idx >= blk->docIndexNodes()) break;
+				nd = blk->docIndexNodeRef( idx);
+				docno = nd->firstDoc( subidx);
 			}
 		}
 

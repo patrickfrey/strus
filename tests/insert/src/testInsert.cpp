@@ -106,28 +106,38 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 	PrimeFactorDocumentBuilder documentBuilder( nofNumbers, g_verbose, g_errorhnd);
 	buildObserved( documentBuilder, observed);
 
-	if (nofCycles != 1)
+	if (g_verbose) std::cerr << "* inserting/updating documents of generated collection" << std::endl;
+	documentBuilder.insertCollection(
+		storage.sci.get(), g_random, commitSize, 
+		nofCycles == 1
+			? PrimeFactorDocumentBuilder::InsertMode
+			: PrimeFactorDocumentBuilder::InsertAlteredMode);
+	int ci = 1, ce = nofCycles-1;
+	for (; ci < ce; ++ci)
 	{
-		throw std::runtime_error( "TODO: implement variations of documents (e.g. one feature rendomly eliminated) first before using cycles");
+		PrimeFactorDocumentBuilder::WriteMode
+			writeMode = (PrimeFactorDocumentBuilder::WriteMode)g_random.get( 1, 4);
+		documentBuilder.insertCollection(
+			storage.sci.get(), g_random, commitSize, writeMode);
 	}
-	int ci = 0, ce = nofCycles;
-	for (; ci != ce; ++ci)
+	if (nofCycles > 1)
 	{
-		if (g_verbose)
+		documentBuilder.insertCollection(
+			storage.sci.get(), g_random, commitSize,
+			PrimeFactorDocumentBuilder::UpdateMode);
+	}
+	if (g_verbose)
+	{
+		if (nofNumbers)
 		{
-			if (nofNumbers)
-			{
-				std::cerr << strus::string_format( "create collection for numbers from %d to %d with their prime factors as features", PrimeFactorCollection::MinNumber, nofNumbers+PrimeFactorCollection::MinNumber-1) << std::endl;
-			}
-			int ni = 0, ne = nofNumbers;
-			for (; ni != ne; ++ni)
-			{
-				int df = documentBuilder.primeFactorCollection.frequency( ni+PrimeFactorCollection::MinNumber);
-				if (df) std::cerr << strus::string_format( "df %d = %d", ni+PrimeFactorCollection::MinNumber, df) << std::endl;
-			}
+			std::cerr << strus::string_format( "create collection for numbers from %d to %d with their prime factors as features", PrimeFactorCollection::MinNumber, nofNumbers+PrimeFactorCollection::MinNumber-1) << std::endl;
 		}
-		if (g_verbose) std::cerr << "* inserting documents of generated collection" << std::endl;
-		documentBuilder.insert( storage.sci.get(), commitSize);
+		int ni = 0, ne = nofNumbers;
+		for (; ni != ne; ++ni)
+		{
+			int df = documentBuilder.primeFactorCollection.frequency( ni+PrimeFactorCollection::MinNumber);
+			if (df) std::cerr << strus::string_format( "df %d = %d", ni+PrimeFactorCollection::MinNumber, df) << std::endl;
+		}
 	}
 	if (g_verbose)
 	{
@@ -141,6 +151,9 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 static void printUsage()
 {
 	std::cerr << "usage: testInsert [options] <cycles> <nofdocs> <commitsize> {<observed>}" << std::endl;
+	std::cerr << "description: Inserts a collection of documents representing numbers" << std::endl;
+	std::cerr << "             with their prime factors as features. Verify the stored" << std::endl;
+	std::cerr << "             data at the end of the test." << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -h             :print usage" << std::endl;
 	std::cerr << "  -V             :verbose output" << std::endl;

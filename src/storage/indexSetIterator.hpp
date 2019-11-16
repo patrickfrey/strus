@@ -9,8 +9,6 @@
 #define _STRUS_STORAGE_INDEX_SET_ITERATOR_HPP_INCLUDED
 #include "booleanBlock.hpp"
 #include "databaseAdapter.hpp"
-/*[-]*/#include <string>
-/*[-]*/#include "strus/base/string_format.hpp"
 
 namespace strus {
 
