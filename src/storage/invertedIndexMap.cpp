@@ -620,6 +620,7 @@ void InvertedIndexMap::mergePosBlock(
 {
 	newblk.setId( oldblk.id());
 	DocIndexNodeCursor blkcursor;
+	int blocksWritten = 0;
 
 	Index old_docno = oldblk.firstDoc( blkcursor);
 	while (ei != ee && old_docno)
@@ -634,6 +635,7 @@ void InvertedIndexMap::mergePosBlock(
 					newblk.setId(0);
 					if (!newblk.empty())
 					{
+						blocksWritten += 1;
 						dbadapter_posinfo.store( transaction, newblk.createBlock());
 					}
 					newblk.clear();
@@ -653,6 +655,13 @@ void InvertedIndexMap::mergePosBlock(
 			newblk.append( old_docno, oldblk.posinfo_at( blkcursor));
 			old_docno = oldblk.nextDoc( blkcursor);
 		}
+	}
+	if (blocksWritten)
+	{
+		//... if there are blocks written then rest of the block will fit into the maximum
+		// block size as both parts fit into it and we have only one part left.
+		// We may avoid the creation of a small plus a very small block as an anomaly here.
+		acceptedFillRatio = Constants::maximumBlockFillRatio();
 	}
 	while (ei != ee)
 	{
