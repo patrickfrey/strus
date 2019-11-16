@@ -68,6 +68,8 @@ private:
 	PosinfoIterator m_posinfoIterator;
 
 	Index m_docno;
+	Index m_termtypeno;
+	Index m_termvalueno;
 	Index m_length;
 	std::string m_featureid;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for error reporting

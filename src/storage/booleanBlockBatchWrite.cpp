@@ -89,7 +89,6 @@ void BooleanBlockBatchWrite::mergeNewElements(
 				ei->to = blk.id();
 			}
 		}
-
 		BooleanBlock::merge( newblk_start, ei, blk, newblk);
 		if (splitStart)
 		{

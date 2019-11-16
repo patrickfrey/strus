@@ -45,6 +45,8 @@ PostingIterator::PostingIterator(
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
+	,m_termtypeno( termtypeno)
+	,m_termvalueno( termvalueno)
 	,m_length(length_)
 	,m_errorhnd(errorhnd_)
 {

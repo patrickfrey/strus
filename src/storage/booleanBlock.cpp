@@ -94,6 +94,7 @@ bool BooleanBlock::Node::tryAddElem( const Index& elemno_)
 				if (elemno_ == elemno + 1)
 				{
 					++elemno;
+					++alt.diff;
 				}
 				else if (elemno_ == elemno - alt.diff - 1)
 				{

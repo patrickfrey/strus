@@ -309,7 +309,7 @@ StructBlockData::StructBlockData( const strus::DatabaseCursorInterface::Slice& k
 
 void StructBlockData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::StructBlockPrefix << ' ' << valueno << ' ' << posinfo.size();
+	out << (char)DatabaseKey::StructBlockPrefix << ' ' << valueno << ' ' << structures.size();
 	std::vector<Structure>::const_iterator itr = structures.begin(), end = structures.end();
 	for (; itr != end; ++itr)
 	{
@@ -339,7 +339,7 @@ FfBlockData::FfBlockData( const strus::DatabaseCursorInterface::Slice& key, cons
 	strus::Index dn = blk.firstDoc( cursor);
 	for (; dn; dn = blk.nextDoc( cursor))
 	{
-		int ff = frequency_at( cursor);
+		int ff = blk.frequency_at( cursor);
 		postings.push_back( Posting( dn, ff));
 	}
 }

@@ -323,10 +323,22 @@ private:
 
 struct PrimeFactorDocumentBuilder
 {
+	struct ObservedTerm
+	{
+		std::string docid;
+		std::string value;
+
+		ObservedTerm( const std::string& docid_, const std::string& value_)
+			:docid(docid_),value(value_){}
+		ObservedTerm( const ObservedTerm& o)
+			:docid(o.docid),value(o.value){}
+	};
+
 	strus::ErrorBufferInterface* errorhnd;
 	PrimeFactorCollection primeFactorCollection;
 	int nofDocuments;
 	bool verbose;
+	std::vector<ObservedTerm> observedTermList;
 
 	PrimeFactorDocumentBuilder( int nofDocuments_, bool verbose_, strus::ErrorBufferInterface* errorhnd_)
 		:errorhnd(errorhnd_)
@@ -470,7 +482,7 @@ struct PrimeFactorDocumentBuilder
 				{
 					throw strus::runtime_error( "transaction failed: %s", errorhnd->fetchError());
 				}
-				checkInsertedDocuments( std::cerr, storage, di);
+				listObservedTerms( std::cerr, storage);
 			}
 			std::string docid = PrimeFactorCollection::docid( di);
 			strus::local_ptr<strus::StorageDocumentInterface>
@@ -490,6 +502,7 @@ struct PrimeFactorDocumentBuilder
 		{
 			throw strus::runtime_error( "transaction failed: %s", errorhnd->fetchError());
 		}
+		listObservedTerms( std::cerr, storage);
 	}
 
 	void checkAgainstContentTerms( const strus::StorageClientInterface* storage, int didx, const std::vector<Feature>& features)
@@ -726,6 +739,46 @@ struct PrimeFactorDocumentBuilder
 			}
 			checkAgainstContentTerms( storage, di, inserted);
 		}
+	}
+
+	void listObservedTerms( std::ostream& out, const strus::StorageClientInterface* storage)
+	{
+		std::vector<ObservedTerm> ::const_iterator oi = observedTermList.begin(), oe = observedTermList.end();
+		for (; oi != oe; ++oi)
+		{
+			strus::Index docno = storage->documentNumber( oi->docid);
+
+			// Search index terms:
+			std::string type = searchIndexFeatureType();
+			strus::Reference<strus::PostingIteratorInterface>
+				pitr( storage->createTermPostingIterator( type, oi->value, 1/*length*/));
+			if (!pitr.get()) throw std::runtime_error( errorhnd->fetchError());
+
+			std::string occurrencies;
+			strus::Index dn = pitr->skipDoc( docno);
+			int pos;
+			if (dn == (strus::Index)docno)
+			{
+				pos = 0;
+				while (0!=(pos = pitr->skipPos( pos+1)))
+				{
+					occurrencies.append( strus::string_format(" %d", (int)pos));
+				}
+			}
+			if (occurrencies.empty())
+			{
+				out << strus::string_format( "observed term %s in document %s not found\n", oi->value.c_str(), oi->docid.c_str());
+			}
+			else
+			{
+				out << strus::string_format( "observed term %s in document %s at %s\n", oi->value.c_str(), oi->docid.c_str(), occurrencies.c_str());
+			}
+		}
+	}
+
+	void addObservedTerm( const std::string& docid, const std::string& value)
+	{
+		observedTermList.push_back( ObservedTerm( docid, value));
 	}
 };
 

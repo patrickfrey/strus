@@ -133,7 +133,6 @@ private:
 	InvTermMap m_invtermmap;
 	InvTermList m_invterms;
 	Index m_docno;
-	/*[-]*/bool m_observe;
 	std::set<Index> m_docno_deletes;
 	std::map<Index, std::set<Index> > m_docno_typeno_deletes;
 };

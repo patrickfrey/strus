@@ -21,7 +21,6 @@ using namespace strus;
 
 InvertedIndexMap::InvertedIndexMap( DatabaseClientInterface* database_)
 	:m_dfmap(database_),m_database(database_),m_docno(0)
-	/*[-]*/,m_observe(false)
 {
 	m_posinfo.push_back( 0);
 }
@@ -35,7 +34,6 @@ void InvertedIndexMap::clear()
 	m_invtermmap.clear();
 	m_invterms.clear();
 	m_docno = 0;
-	/*[-]*/m_observe = false;
 	m_docno_deletes.clear();
 	m_docno_typeno_deletes.clear();
 }
@@ -423,11 +421,6 @@ void InvertedIndexMap::getWriteBatch(
 			BlockKey blkkey( ei->first.termkey);
 			Index typeno = blkkey.elem(1);
 			Index termno = blkkey.elem(2);
-			/*[-]*/m_observe = (typeno == 1 && termno == 5);
-			/*[-]*/if (m_observe)
-			/*[-]*/{
-			/*[-]*/	fprintf( stderr, "OBSERVE:\n");
-			/*[-]*/}
 			DatabaseAdapter_PosinfoBlock::WriteCursor dbadapter_posinfo( m_database, typeno, termno);
 	
 			PosinfoBlockBuilder newposblk;
@@ -439,7 +432,6 @@ void InvertedIndexMap::getWriteBatch(
 			// for the following inserts
 			if (newposblk.id())
 			{
-				/*[-]*/std::cerr << "++++ remove block " << newposblk.id() << std::endl;
 				dbadapter_posinfo.remove( transaction, newposblk.id());
 				newposblk.setId(0);
 			}
@@ -561,10 +553,6 @@ void InvertedIndexMap::mergeNewPosElements(
 		Map::const_iterator newposblk_start = ei;
 		for (; ei != ee && ei->first.docno <= blk.id(); ++ei)
 		{
-			/*[-]*/if (ei->first.docno == 89)
-			/*[-]*/{
-			/*[-]*/	std::cerr << "docno " << ei->first.docno << std::endl;
-			/*[-]*/}
 			defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
 		}
 		// Merge posinfo block elements (PosinfoBlock):
@@ -607,7 +595,6 @@ void InvertedIndexMap::mergeNewPosElements(
 				if (newposblk.id())
 				{
 					// ... remove the old block though a block with same id might written again
-					/*[-]*/std::cerr << "++++ remove block " << newposblk.id() << std::endl;
 					dbadapter_posinfo.remove( transaction, newposblk.id());
 					newposblk.setId(0);
 				}

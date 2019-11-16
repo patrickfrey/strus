@@ -78,19 +78,39 @@ struct StorageDump
 	};
 };
 
+static void buildObserved( PrimeFactorDocumentBuilder& documentBuilder, const std::string& observed)
+{
+	char const* si = observed.c_str();
+	for (;;)
+	{
+		for (; *si && (unsigned char)*si <= 32; ++si){}
+		if (!*si) return;
+		char const* dstart = si;
+		for (; *si && *si != ':'; ++si){}
+		if (!*si) throw std::runtime_error("syntax error in observe pattern, expected ':' separating document id and feature string");
+		std::string docid( dstart, si-dstart);
+		++si;
+		char const* fstart = si;
+		for (; *si && (unsigned char)*si > 32; ++si){}
+		std::string value( fstart, si-fstart);
+		documentBuilder.addObservedTerm( docid, value);
+	}
+}
 
-static void testInsert( int nofCycles, int nofNumbers, int commitSize)
+static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std::string& observed)
 {
 	Storage storage( g_fileLocator, g_errorhnd);
 	storage.open( "path=storage", true);
 	storage.defineMetaData( PrimeFactorDocumentBuilder::metadata());
 
 	PrimeFactorDocumentBuilder documentBuilder( nofNumbers, g_verbose, g_errorhnd);
-	int ci = 0, ce = nofCycles;
+	buildObserved( documentBuilder, observed);
+
 	if (nofCycles != 1)
 	{
 		throw std::runtime_error( "TODO: implement variations of documents (e.g. one feature rendomly eliminated) first before using cycles");
 	}
+	int ci = 0, ce = nofCycles;
 	for (; ci != ce; ++ci)
 	{
 		if (g_verbose)
@@ -120,7 +140,7 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize)
 
 static void printUsage()
 {
-	std::cerr << "usage: testInsert [options] <cycles> <nofdocs> <commitsize>" << std::endl;
+	std::cerr << "usage: testInsert [options] <cycles> <nofdocs> <commitsize> {<observed>}" << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -h             :print usage" << std::endl;
 	std::cerr << "  -V             :verbose output" << std::endl;
@@ -128,7 +148,10 @@ static void printUsage()
 	std::cerr << "<cycles>      :number of (re-)insert cycles" << std::endl;
 	std::cerr << "<nofdocs>     :number of documents inserted in each (re-)insert cycle" << std::endl;
 	std::cerr << "<commitsize>  :number of documents inserted per transaction" << std::endl;
+	std::cerr << "<observed>    :list of ':' separated docid:value pairs describing" << std::endl;
+	std::cerr << "                  occurrencies printed after every commit." << std::endl;
 }
+
 
 int main( int argc, const char* argv[])
 {
@@ -177,14 +200,19 @@ int main( int argc, const char* argv[])
 
 	try
 	{
+		std::string observed;
 		if (argi + 3 > argc) throw std::runtime_error( "too few arguments");
-		if (argi + 3 < argc) throw std::runtime_error( "too many arguments");
 
 		int cycles = strus::numstring_conv::toint( argv[ argi+0], std::strlen(argv[ argi+0]), std::numeric_limits<int>::max());
 		int nofdocs = strus::numstring_conv::toint( argv[ argi+1], std::strlen(argv[ argi+1]), std::numeric_limits<int>::max());
 		int commitsize = strus::numstring_conv::toint( argv[ argi+2], std::strlen(argv[ argi+2]), std::numeric_limits<int>::max());
-
-		testInsert( cycles, nofdocs, commitsize);
+		int ai = argi+3, ae = argc;
+		for (; ai != ae; ++ai)
+		{
+			observed.push_back( ' ');
+			observed.append( argv[ ai]);
+		}
+		testInsert( cycles, nofdocs, commitsize, observed);
 		std::cerr << "OK" << std::endl;
 	}
 	catch (const std::bad_alloc&)
