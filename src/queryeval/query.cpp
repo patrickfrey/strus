@@ -37,14 +37,6 @@
 #include <sstream>
 
 #define STRUS_DBGTRACE_COMPONENT_NAME "query"
-#define DEBUG_OPEN( NAME) if (m_debugtrace) m_debugtrace->open( NAME);
-#define DEBUG_CLOSE() if (m_debugtrace) m_debugtrace->close();
-#define DEBUG_EVENT1( NAME, FMT, ID)				if (m_debugtrace) m_debugtrace->event( NAME, FMT, ID);
-#define DEBUG_EVENT2( NAME, FMT, ID, VAL)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, ID, VAL);
-#define DEBUG_EVENT3( NAME, FMT, X1, X2, X3)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3);
-#define DEBUG_EVENT4( NAME, FMT, X1, X2, X3, X4)		if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3, X4);
-#define DEBUG_EVENT1_IAR( NAME, FMT, VAL)			if (m_debugtrace) {std::vector<Index>::const_iterator vi=VAL.begin(), ve=VAL.end(); std::ostringstream out; out<<"{";for (int vidx=0;vi!=ve;++vi,++vidx) {if (vidx)out<<","; out<<*vi;}out<<"}"; std::string valstr(out.str()); m_debugtrace->event( NAME, FMT, valstr.c_str());}
-#define DEBUG_EVENT1_STR( NAME, FMT, VAL)			if (m_debugtrace) {std::string valstr(VAL); m_debugtrace->event( NAME, FMT, valstr.c_str());}
 
 using namespace strus;
 
@@ -119,7 +111,7 @@ std::string Query::printStack() const
 
 void Query::pushTerm( const std::string& type_, const std::string& value_, const Index& length_)
 {
-	DEBUG_EVENT3( "term", "type='%s' value='%s' len=%d", type_.c_str(), value_.c_str(), length_);
+	if (m_debugtrace) m_debugtrace->event( "term", "type='%s' value='%s' len=%d", type_.c_str(), value_.c_str(), length_);
 	try
 	{
 		m_terms.push_back( Term( type_, value_, length_));
@@ -130,7 +122,7 @@ void Query::pushTerm( const std::string& type_, const std::string& value_, const
 
 void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsigned int argc, int range_, unsigned int cardinality_)
 {
-	DEBUG_EVENT3( "expression", "argc=%d range=%d cardinality=%d", argc, range_, cardinality_);
+	if (m_debugtrace) m_debugtrace->event( "expression", "argc=%d range=%d cardinality=%d", argc, range_, cardinality_);
 	try
 	{
 		if (argc > m_stack.size())
@@ -155,7 +147,7 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsig
 
 void Query::attachVariable( const std::string& name_)
 {
-	DEBUG_EVENT1( "variable", "name='%s'", name_.c_str());
+	if (m_debugtrace) m_debugtrace->event( "variable", "name='%s'", name_.c_str());
 	try
 	{
 		if (m_stack.empty())
@@ -169,8 +161,12 @@ void Query::attachVariable( const std::string& name_)
 
 void Query::defineFeature( const std::string& set_, double weight_)
 {
-	DEBUG_EVENT1_STR( "stack", "%s", printStack())
-	DEBUG_EVENT2( "feature", "set=%s weight=%f", set_.c_str(), weight_);
+	if (m_debugtrace)
+	{
+		std::string stkstr = printStack();
+		m_debugtrace->event( "stack", "%s", stkstr.c_str());
+		m_debugtrace->event( "feature", "set=%s weight=%f", set_.c_str(), weight_);
+	}
 	try
 	{
 		if (m_stack.empty()) throw std::runtime_error( _TXT("no term or expression defined"));
@@ -186,7 +182,7 @@ void Query::addMetaDataRestrictionCondition(
 {
 	try
 	{
-		DEBUG_EVENT4( "restriction", "op='%s' name='%s' operand='%s' newgroup=%s", MetaDataRestrictionInterface::compareOperatorStr(opr), name.c_str(), operand.tostring().c_str(), newGroup?"true":"false");
+		if (m_debugtrace) m_debugtrace->event( "restriction", "op='%s' name='%s' operand='%s' newgroup=%s", MetaDataRestrictionInterface::compareOperatorStr(opr), name.c_str(), operand.tostring().c_str(), newGroup?"true":"false");
 		if (!m_metaDataRestriction.get())
 		{
 			m_metaDataRestriction.reset( m_storage->createMetaDataRestriction());
@@ -201,7 +197,19 @@ void Query::addDocumentEvaluationSet(
 {
 	try
 	{
-		DEBUG_EVENT1_IAR( "evalset", "%s", docnolist_)
+		if (m_debugtrace)
+		{
+			std::string docnoliststr;
+			std::vector<strus::Index>::const_iterator
+				di=docnolist_.begin(), de=docnolist_.end();
+			for (; di != de; ++di)
+			{
+				char buf[ 64];
+				std::snprintf( buf, sizeof( buf), docnoliststr.empty() ? "%d":" %d", (int)*di);
+				docnoliststr.append( buf);
+			}
+			m_debugtrace->event( "evalset", "%s", docnoliststr.c_str());
+		}
 		m_evalset_docnolist.insert( m_evalset_docnolist.end(), docnolist_.begin(), docnolist_.end());
 		std::sort( m_evalset_docnolist.begin(), m_evalset_docnolist.end());
 		m_evalset_defined = true;
@@ -505,24 +513,28 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 	const char* evaluationPhase = "query feature postings initialization";
 	try
 	{
-		DEBUG_OPEN("eval")
-		DEBUG_EVENT1_STR( "query", "%s", view().tostring())
+		if (m_debugtrace)
+		{
+			m_debugtrace->open( "eval");
+			std::string str = view().tostring();
+			m_debugtrace->event( "query", "%s", str.c_str());
+		}
 		// [1] Check initial conditions:
 		if (maxNofRanks == 0)
 		{
-			DEBUG_CLOSE()
+			if (m_debugtrace) m_debugtrace->close();
 			return QueryResult();
 		}
 		if (m_queryEval->weightingFunctions().empty())
 		{
 			m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "cannot evaluate query, no weighting function defined"));
-			DEBUG_CLOSE()
+			if (m_debugtrace) m_debugtrace->close();
 			return QueryResult();
 		}
 		if (m_queryEval->selectionSets().empty())
 		{
 			m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "cannot evaluate query, no selection features defined"));
-			DEBUG_CLOSE()
+			if (m_debugtrace) m_debugtrace->close();
 			return QueryResult();
 		}
 		NodeStorageDataMap nodeStorageDataMap;
@@ -538,7 +550,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					createNodePostingIterator( fi->node, nodeStorageDataMap));
 				if (!postingsElem.get())
 				{
-					DEBUG_CLOSE()
+					if (m_debugtrace) m_debugtrace->close();
 					return QueryResult();
 				}
 				postings.push_back( postingsElem);
@@ -585,8 +597,11 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				we = m_queryEval->weightingFunctions().end();
 			for (; wi != we; ++wi)
 			{
-				DEBUG_OPEN( "function" )
-				DEBUG_EVENT1( "name", "%s", wi->function()->name())
+				if (m_debugtrace)
+				{
+					m_debugtrace->open( "function");
+					m_debugtrace->event( "name", "%s", wi->function()->name());
+				}
 				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext( m_storage, m_globstats));
 				if (!execContext.get()) throw std::runtime_error( _TXT("error creating weighting function context"));
@@ -605,12 +620,12 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							execContext->addWeightingFeature(
 								si->featureRole(), nd.itr, fi->weight, nd.stats);
-							DEBUG_EVENT3( "parameter", "%s= feature %s weight=%f", si->featureRole().c_str(), fi->set.c_str(), fi->weight)
+							if (m_debugtrace) m_debugtrace->event( "parameter", "%s= feature %s weight=%f", si->featureRole().c_str(), fi->set.c_str(), fi->weight);
 						}
 					}
 				}
 				accumulator.addWeightingElement( execContext.release());
-				DEBUG_CLOSE()
+				if (m_debugtrace) m_debugtrace->close();
 			}
 		}
 		// [4.3.1] Define feature weighting variable values:
@@ -618,7 +633,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			vi = m_weightingvars.begin(), ve = m_weightingvars.end();
 		for (; vi != ve; ++vi)
 		{
-			DEBUG_EVENT3( "variable", "index=%d name=%s value=%f", (int)vi->index, vi->varname.c_str(), vi->value)
+			if (m_debugtrace) m_debugtrace->event( "variable", "index=%d name=%s value=%f", (int)vi->index, vi->varname.c_str(), vi->value);
 			accumulator.defineWeightingVariableValue( vi->index, vi->varname, vi->value);
 		}
 
@@ -627,7 +642,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 		for (; ui != ue; ++ui)
 		{
-			DEBUG_EVENT1( "user-restriction", "name=%s", ui->c_str())
+			if (m_debugtrace) m_debugtrace->event( "user-restriction", "name=%s", ui->c_str());
 			Reference<InvAclIteratorInterface> invAcl( m_storage->createInvAclIterator( *ui));
 			if (invAcl.get())
 			{
@@ -651,7 +666,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				{
 					if (*xi == fi->set)
 					{
-						DEBUG_EVENT1( "feature-restriction", "name=%s", xi->c_str())
+						if (m_debugtrace) m_debugtrace->event( "feature-restriction", "name=%s", xi->c_str());
 						accumulator.addFeatureRestriction(
 							nodeStorageData( fi->node, nodeStorageDataMap).itr, false);
 					}
@@ -671,14 +686,17 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				{
 					if (*xi == fi->set)
 					{
-						DEBUG_EVENT1( "feature-exclusion", "name=%s", xi->c_str())
+						if (m_debugtrace) m_debugtrace->event( "feature-exclusion", "name=%s", xi->c_str());
 						accumulator.addFeatureRestriction(
 							nodeStorageData( fi->node, nodeStorageDataMap).itr, true);
 					}
 				}
 			}
 		}
-		DEBUG_OPEN("ranking")
+		if (m_debugtrace)
+		{
+			m_debugtrace->open( "ranking");
+		}
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> ranks;
@@ -755,7 +773,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
-			DEBUG_EVENT2( "result", "docno=%d weight=%f", ri->docno(), ri->weight())
+			if (m_debugtrace) m_debugtrace->event( "result", "docno=%d weight=%f", ri->docno(), ri->weight());
 			std::vector<SummaryElement> summaries;
 
 			std::vector<std::string>::const_iterator
@@ -807,7 +825,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					ai = summaries.begin(), ae = summaries.end();
 				for (;ai != ae; ++ai)
 				{
-					DEBUG_EVENT4( "summary", "name=%s value='%s' weight=%f index=%d", ai->name().c_str(), ai->value().c_str(), ai->weight(), ai->index())
+					if (m_debugtrace) m_debugtrace->event( "summary", "name=%s value='%s' weight=%f index=%d", ai->name().c_str(), ai->value().c_str(), ai->weight(), ai->index());
 				}
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
@@ -816,8 +834,8 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		{
 			throw strus::runtime_error( _TXT("error evaluating query: %s"), m_errorhnd->fetchError());
 		}
-		DEBUG_CLOSE()/*ranking*/
-		DEBUG_CLOSE()/*eval*/
+		if (m_debugtrace) m_debugtrace->close();/*ranking*/
+		if (m_debugtrace) m_debugtrace->close();/*eval*/
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());

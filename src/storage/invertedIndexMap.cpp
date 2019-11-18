@@ -7,6 +7,7 @@
  */
 #include "invertedIndexMap.hpp"
 #include "booleanBlockBatchWrite.hpp"
+#include "ffBlockBatchWrite.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "private/internationalization.hpp"
@@ -425,20 +426,17 @@ void InvertedIndexMap::getWriteBatch(
 	
 			PosinfoBlockBuilder newposblk;
 			std::vector<BooleanBlock::MergeRange> docrangear;
+			std::vector<FfBlockBuilder::FfDeclaration> ffdeclar;
 
 			// [1] Merge new elements with existing upper bound blocks:
-			mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
+			mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, ffdeclar, docrangear);
 
 			// [2] Write the new blocks that could not be merged into existing ones:
-			insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
-	
+			insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, ffdeclar, docrangear);
+
 			BooleanBlock newdocblk;
-	
-			std::vector<BooleanBlock::MergeRange>::iterator
-				di = docrangear.begin(),
-				de = docrangear.end();
-			Index lastInsertBlockId = docrangear.back().to;
-	
+			std::vector<BooleanBlock::MergeRange>::iterator di = docrangear.begin(), de = docrangear.end();
+
 			// [3] Update document list of the term (boolean block) in the database:
 			DatabaseAdapter_DocListBlock::WriteCursor dbadapter_doclist( m_database, typeno, termno);
 	
@@ -446,7 +444,19 @@ void InvertedIndexMap::getWriteBatch(
 			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
 	
 			// [3.2] Insert new docno boolean block elements
-			BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
+
+			FfBlockBuilder newffblock;
+			std::vector<FfBlockBuilder::FfDeclaration>::iterator fi = ffdeclar.begin(), fe = ffdeclar.end();
+			
+			// [4] Update document ff of the term (ff block) in the database:
+			DatabaseAdapter_FfBlock::WriteCursor dbadapter_ffblock( m_database, typeno, termno);
+	
+			// [4.1] Merge new docno boolean block elements
+			FfBlockBatchWrite::mergeNewElements( &dbadapter_ffblock, fi, fe, newffblock, transaction);
+	
+			// [4.2] Insert new docno boolean block elements
+			FfBlockBatchWrite::insertNewElements( &dbadapter_ffblock, fi, fe, newffblock, transaction);
 		}
 	}{
 		// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
@@ -465,7 +475,22 @@ void InvertedIndexMap::defineDocnoRangeElement(
 	}
 	else
 	{
-		if (docrangear.back().isMember == isMember && docrangear.back().to+1 == docno)
+		if (docrangear.back().to == docno)
+		{
+			if (docrangear.back().isMember != isMember)
+			{
+				if (docrangear.back().from == docno)
+				{
+					docrangear.back().isMember = isMember;
+				}
+				else
+				{
+					--docrangear.back().to;
+					docrangear.push_back( BooleanBlock::MergeRange( docno, docno, isMember));
+				}
+			}
+		}
+		else if (docrangear.back().isMember == isMember && docrangear.back().to+1 == docno)
 		{
 			docrangear.back().to += 1;
 		}
@@ -482,7 +507,7 @@ void InvertedIndexMap::insertNewPosElements(
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
 		PosinfoBlockBuilder& newposblk,
-		//[+] FfBlockBuilder& newffblk,
+		std::vector<FfBlockBuilder::FfDeclaration>& ffdeclar,
 		std::vector<BooleanBlock::MergeRange>& docrangear)
 {
 	while (ei != ee)
@@ -501,8 +526,9 @@ void InvertedIndexMap::insertNewPosElements(
 				dbadapter_posinfo.store( transaction, newposblk.createBlock());
 				newposblk.clear();
 			}
-			// Define docno list block elements (BooleanBlock):
+			// Define docno and ff list block elements (BooleanBlock, FfBlock):
 			defineDocnoRangeElement( docrangear, ei->first.docno, true);
+			ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, m_posinfo[ ei->second]/*ff*/));
 
 			// Define posinfo block elements (PosinfoBlock):
 			newposblk.append( ei->first.docno, m_posinfo.data() + ei->second);
@@ -510,12 +536,22 @@ void InvertedIndexMap::insertNewPosElements(
 		}
 		else
 		{
-			// Delete docno list block element (BooleanBlock):
+			// Delete docno and ff list block element (BooleanBlock, FfBlock):
 			defineDocnoRangeElement( docrangear, ei->first.docno, false);
+			ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, 0/*deleted*/));
 			++ei;
 		}
 	}
-	if (!newposblk.empty())
+	if (newposblk.empty())
+	{
+		if (newposblk.id())
+		{
+			// ... delete block that got empty and was not merged to another block before (case delete all)
+			dbadapter_posinfo.remove( transaction, newposblk.id());
+			newposblk.setId(0);
+		}
+	}
+	else
 	{
 		dbadapter_posinfo.store( transaction, newposblk.createBlock());
 		newposblk.clear();
@@ -543,25 +579,52 @@ void InvertedIndexMap::mergeNewPosElements(
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
 		PosinfoBlockBuilder& newposblk,
-		//[+] FfBlockBuilder& newffblk,
+		std::vector<FfBlockBuilder::FfDeclaration>& ffdeclar,
 		std::vector<BooleanBlock::MergeRange>& docrangear)
 {
 	PosinfoBlock blk;
+	if (ei != ee && !dbadapter_posinfo.loadUpperBound( ei->first.docno, blk))
+	{
+		if (!newposblk.empty()) throw strus::runtime_error(_TXT("logic error: unexpected %s upperbound exists with block not cleared"), "ff block");
+
+		if (dbadapter_posinfo.loadLast( blk) && !blk.full())
+		{
+			newposblk = PosinfoBlockBuilder( blk);
+			dbadapter_posinfo.remove( transaction, blk.id());
+			newposblk.setId(0);
+		}
+		for (; ei != ee; ++ei)
+		{
+			defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
+			ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, m_posinfo[ ei->second]/*ff*/));
+
+			if (newposblk.full())
+			{
+				// ... block is filled with an acceptable ratio, so we store it, for stopping cascading merges
+				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				newposblk.clear();
+			}
+			newposblk.append( ei->first.docno, m_posinfo.data() + ei->second);
+		}
+	}
 	while (ei != ee && dbadapter_posinfo.loadUpperBound( ei->first.docno, blk))
 	{
-		// Define docno list block elements (BooleanBlock):
-		Map::const_iterator newposblk_start = ei;
+		if (!newposblk.empty()) throw strus::runtime_error(_TXT("logic error: unexpected %s upperbound exists with block not cleared"), "ff block");
+
+		// Define docno and ff list block elements (BooleanBlock, FfBlock):
+		Map::const_iterator start = ei;
 		for (; ei != ee && ei->first.docno <= blk.id(); ++ei)
 		{
 			defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
+			ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, m_posinfo[ ei->second]/*ff*/));
 		}
 		// Merge posinfo block elements (PosinfoBlock):
-		mergePosBlock( dbadapter_posinfo, transaction, newposblk_start, ei, blk, newposblk, 1.0);
+		mergePosBlock( dbadapter_posinfo, transaction, start, ei, blk, newposblk, 1.0);
 		while (!newposblk.empty() && dbadapter_posinfo.loadNext( blk))
 		{
 			if (newposblk.filledWithRatio( Constants::minimumBlockFillRatio()))
 			{
-				// ... it is the last block, but filled with an acceptable ratio, we store it
+				// ... block is filled with an acceptable ratio, so we store it, for stopping cascading merges
 				dbadapter_posinfo.store( transaction, newposblk.createBlock());
 				newposblk.clear();
 				break;
@@ -569,17 +632,18 @@ void InvertedIndexMap::mergeNewPosElements(
 			else
 			{
 				// Fighting fragmentation by joining blocks:
-				Map::const_iterator merge_start = ei;
+				start = ei;
 				for (; ei != ee && ei->first.docno <= blk.id(); ++ei)
 				{
 					// ... collect elements overlapping with the follow block 
-					//	and notify them for the document set block:
+					//	and notify them for the document set block and the ff block:
 					defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
+					ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, m_posinfo[ ei->second]/*ff*/));
 				}
 				// Calculate the estimated fill size and test if it would fit into a single
-				// block with a high fill ration or try to lower the fill ratio to get 
+				// block with a high fill ratio or try to lower the fill ratio to get 
 				// more than one smaller blocks:
-				int estimatedBlockSize = estimatedPosBlockSize( merge_start, ei, blk, newposblk);
+				int estimatedBlockSize = estimatedPosBlockSize( start, ei, blk, newposblk);
 				int maximumFillRatioBlockSize = Constants::maximumBlockFillRatio() * Constants::maxPosInfoBlockSize();
 				float acceptedFillRatio;
 				if (estimatedBlockSize < maximumFillRatioBlockSize)
@@ -594,7 +658,7 @@ void InvertedIndexMap::mergeNewPosElements(
 				}
 				if (newposblk.id())
 				{
-					// ... remove the old block though a block with same id might written again
+					// ... delete the old block though a block with same id might written again
 					dbadapter_posinfo.remove( transaction, newposblk.id());
 					newposblk.setId(0);
 				}
@@ -603,7 +667,7 @@ void InvertedIndexMap::mergeNewPosElements(
 				newposblk.clear();
 				PosinfoBlock merged_blk = merged_builder.createBlock();
 				merged_blk.setId( blk.id());
-				mergePosBlock( dbadapter_posinfo, transaction, merge_start, ei, merged_blk, newposblk, acceptedFillRatio);
+				mergePosBlock( dbadapter_posinfo, transaction, start, ei, merged_blk, newposblk, acceptedFillRatio);
 			}
 		}
 	}
@@ -667,7 +731,6 @@ void InvertedIndexMap::mergePosBlock(
 	{
 		if (ei->second)
 		{
-			//... append only if not empty (empty => delete)
 			if (!newblk.empty() && !newblk.fitsIntoApproximately( m_posinfo[ ei->second], acceptedFillRatio))
 			{
 				newblk.setId(0);

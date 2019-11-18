@@ -89,6 +89,11 @@ public:
 		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
 	}
 
+	bool full() const
+	{
+		return (int)size() >= Constants::maxPosInfoBlockSize();
+	}
+
 	class PositionScanner
 	{
 	public:

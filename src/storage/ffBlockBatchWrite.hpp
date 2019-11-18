@@ -5,10 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STORAGE_BOOLEAN_BLOCK_BATCH_WRITE_HPP_INCLUDED
-#define _STRUS_STORAGE_BOOLEAN_BLOCK_BATCH_WRITE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_FF_BLOCK_BATCH_WRITE_HPP_INCLUDED
+#define _STRUS_STORAGE_FF_BLOCK_BATCH_WRITE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "booleanBlock.hpp"
+#include "ffBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseCursorInterface.hpp"
@@ -18,23 +18,23 @@
 
 namespace strus {
 
-/// \class BooleanBlockBatchWrite
-/// \brief Methods for merging and inserting boolean blocks
-class BooleanBlockBatchWrite
+/// \class FfBlockBatchWrite
+/// \brief Methods for merging and inserting ff blocks
+class FfBlockBatchWrite
 {
 public:
 	static void insertNewElements(
-			DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
-			std::vector<BooleanBlock::MergeRange>::iterator& ei,
-			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
-			BooleanBlock& newblk,
+			DatabaseAdapter_FfBlock::WriteCursor* dbadapter,
+			std::vector<FfBlockBuilder::FfDeclaration>::iterator& ei,
+			const std::vector<FfBlockBuilder::FfDeclaration>::iterator& ee,
+			FfBlockBuilder& newblk,
 			DatabaseTransactionInterface* transaction);
 
 	static void mergeNewElements(
-			DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
-			std::vector<BooleanBlock::MergeRange>::iterator& ei,
-			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
-			BooleanBlock& newblk,
+			DatabaseAdapter_FfBlock::WriteCursor* dbadapter,
+			std::vector<FfBlockBuilder::FfDeclaration>::iterator& ei,
+			const std::vector<FfBlockBuilder::FfDeclaration>::iterator& ee,
+			FfBlockBuilder& newblk,
 			DatabaseTransactionInterface* transaction);
 };
 

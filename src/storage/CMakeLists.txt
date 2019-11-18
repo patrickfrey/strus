@@ -7,6 +7,8 @@ set( source_files
 	attributeMap.cpp
 	attributeReader.cpp
 	aclReader.cpp
+	ffBlockBatchWrite.cpp
+	ffBlock.cpp
 	booleanBlockBatchWrite.cpp
 	booleanBlock.cpp
 	databaseAdapter.cpp
@@ -36,7 +38,6 @@ set( source_files
 	nullPostingIterator.cpp
 	browsePostingIterator.cpp
 	statisticsInitIterator.cpp
-	ffBlock.cpp
 	docIndexNode.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp

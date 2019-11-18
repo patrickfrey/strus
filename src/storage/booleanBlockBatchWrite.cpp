@@ -9,6 +9,7 @@
 #include "databaseAdapter.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include <set>
 
 using namespace strus;
 
@@ -17,51 +18,39 @@ void BooleanBlockBatchWrite::insertNewElements(
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
-		const Index& lastInsertBlockId,
 		DatabaseTransactionInterface* transaction)
 {
-	if (ei == ee)
+	for (;ei != ee; ++ei)
 	{
-		if (!newblk.empty())
+		if ((int)newblk.size() >= Constants::maxBooleanBlockSize())
 		{
+			if (!newblk.id()) newblk.setId( newblk.getLast());
 			dbadapter->store( transaction, newblk);
 			newblk.clear();
+			newblk.setId( 0);
+		}
+		if (ei->isMember)
+		{
+			if (newblk.id() && ei->to > newblk.id())
+			{
+				dbadapter->remove( transaction, newblk.id());
+				newblk.setId( 0);
+			}
+			newblk.defineRange( ei->from, ei->to - ei->from);
 		}
 	}
-	while (ei != ee)
+	if (!newblk.empty())
 	{
-		Index blockid = lastInsertBlockId;
-		std::vector<BooleanBlock::MergeRange>::iterator bi = ei;
-		for (std::size_t mm = newblk.size(); ei != ee && (int)mm < Constants::maxBooleanBlockSize(); ++ei)
-		{
-			// ... estimate block size approximately
-			if (ei->isMember)
-			{
-				if (ei->from == ei->to)
-				{
-					mm += 2;
-				}
-				else
-				{
-					mm += 4;
-				}
-			}
-			blockid = ei->to;
-		}
-		// set new block id:
-		newblk.setId( blockid);
-
-		// insert member elements:
-		for (; bi != ei; ++bi)
-		{
-			if (bi->isMember)
-			{
-				newblk.defineRange( bi->from, bi->to - bi->from);
-			}
-		}
-		// store it:
+		if (!newblk.id()) newblk.setId( newblk.getLast());
 		dbadapter->store( transaction, newblk);
 		newblk.clear();
+		newblk.setId( 0);
+	}
+	else if (newblk.id())
+	{
+		// Remove emptied block
+		dbadapter->remove( transaction, newblk.id());
+		newblk.setId( 0);
 	}
 }
 
@@ -73,61 +62,103 @@ void BooleanBlockBatchWrite::mergeNewElements(
 		DatabaseTransactionInterface* transaction)
 {
 	BooleanBlock blk;
+	if (ei != ee && !dbadapter->loadUpperBound( ei->from, blk))
+	{
+		if (!newblk.empty()) throw strus::runtime_error(_TXT("logic error: unexpected %s upperbound exists with block not cleared"), "boolean block");
+
+		if (dbadapter->loadLast( blk) && !blk.full())
+		{
+			dbadapter->remove( transaction, blk.id());
+			newblk.swap( blk);
+			newblk.setId( 0);
+		}
+		for (; ei != ee; ++ei)
+		{
+			if (newblk.full())
+			{
+				newblk.setId( newblk.getLast());
+				// ... block is filled with an acceptable ratio, so we store it, for stopping cascading merges
+				dbadapter->store( transaction, newblk);
+				newblk.clear();
+				newblk.setId( 0);
+			}
+			newblk.defineRange( ei->from, ei->to - ei->from);
+		}
+	}
 	while (ei != ee && dbadapter->loadUpperBound( ei->from, blk))
 	{
-		Index splitStart = 0;
-		Index splitEnd = 0;
+		if (!newblk.empty()) throw strus::runtime_error(_TXT("logic error: unexpected %s upperbound exists with block not cleared"), "boolean block");
 
-		std::vector<BooleanBlock::MergeRange>::iterator newblk_start = ei;
+		std::vector<BooleanBlock::MergeRange>::iterator start = ei;
 		for (; ei != ee && ei->from <= blk.id(); ++ei)
 		{
 			if (ei->to > blk.id())
 			{
-				// ... last element is overlapping block borders, so we split it
-				splitStart = blk.id()+1;
-				splitEnd = ei->to; 
-				ei->to = blk.id();
+				// ... new element overlapping, replace old block id, means delete old block
+				dbadapter->remove( transaction, blk.id());
+				blk.setId( ei->to);
+				++ei;
+				break;
 			}
 		}
-		BooleanBlock::merge( newblk_start, ei, blk, newblk);
-		if (splitStart)
+		BooleanBlock::merge( start, ei, blk, newblk);
+		while (!newblk.empty() && dbadapter->loadNext( blk))
 		{
-			// ... last element is overlapping block borders, no we assign the second half of it to the block
-			--ei;
-			ei->from = splitStart;
-			ei->to = splitEnd;
-		}
-		if (dbadapter->loadNext( blk))
-		{
-			// ... is not the last block, so we store it and start with a new one
-			dbadapter->store( transaction, newblk);
-			newblk.clear();
-		}
-		else
-		{
-			if (newblk.full())
+			if (newblk.filledWithRatio( Constants::minimumBlockFillRatio()))
 			{
-				// ... it is not the last block, but full, so we store it and start with a new one
+				// ... it is filled with an acceptable ratio, so we store it, for stopping cascading merges:
 				dbadapter->store( transaction, newblk);
 				newblk.clear();
+				newblk.setId( 0);
+				break;
 			}
 			else
 			{
-				dbadapter->remove( transaction, newblk.id());
-			}
-			break;
-		}
-	}
-	if (newblk.empty())
-	{
-		// Fill first new block with elements of last 
-		// block and dispose the last block:
-		if (ei != ee && dbadapter->loadLast( blk))
-		{
-			if (!blk.full())
-			{
-				dbadapter->remove( transaction, blk.id());
-				newblk.swap( blk);
+				// Fighting fragmentation by joining blocks:
+				start = ei;
+				for (; ei != ee && ei->from <= blk.id(); ++ei)
+				{
+					if (ei->to > blk.id())
+					{
+						// ... new element overlapping, replace old block id, means delete old block
+						dbadapter->remove( transaction, blk.id());
+						blk.setId( 0);
+						++ei;
+						break;
+					}
+				}
+				BooleanBlock newblk_merged = newblk;
+				newblk_merged.setId( blk.id());//... gets the id of the follow block
+				BooleanBlock::merge_append( start, ei, blk, newblk_merged);
+				if (!newblk_merged.filledWithRatio( Constants::minimumBlockFillRatio()))
+				{
+					// ... block still not big enough, continue joining
+					if (newblk.id()) dbadapter->remove( transaction, newblk.id()/*id of the previous block*/);
+					newblk.swap( newblk_merged); //... continue with the merged block
+				}
+				else if (newblk_merged.size() < Constants::maximumBlockFillRatio() * Constants::maxBooleanBlockSize())
+				{
+					// ... merged block is acceptable, store it
+					if (newblk.id()) dbadapter->remove( transaction, newblk.id());//...previous block removed
+					newblk_merged.setId( blk.id() ? blk.id() : newblk_merged.getLast());//...id of the follow block appended
+					dbadapter->store( transaction, newblk_merged); //... store the merged block
+					newblk.clear(); //... reset the processed block, finished merging with follow blocks
+					newblk.setId( 0);
+				}
+				else
+				{
+					// ... merged block is too big, split it into 2, delete the old one, done
+					BooleanBlock newblk_split1;
+					BooleanBlock newblk_split2;
+					BooleanBlock::split( newblk_merged, newblk_split1, newblk_split2);
+
+					newblk_split1.setId( newblk_split1.getLast()/*new created id inbetween*/);
+					newblk_split2.setId( blk.id() ? blk.id() : newblk_merged.getLast());//...id of the follow block appended
+					dbadapter->store( transaction, newblk_split1);
+					dbadapter->store( transaction, newblk_split2);
+					newblk.clear();
+					newblk.setId( 0);
+				}
 			}
 		}
 	}

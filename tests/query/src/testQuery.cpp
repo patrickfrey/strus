@@ -14,8 +14,10 @@
 #include "strus/lib/queryeval.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_format.hpp"
 #include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/debugTraceInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
 #include "strus/queryInterface.hpp"
@@ -25,6 +27,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageMetaDataTableUpdateInterface.hpp"
+#include "strus/storageDumpInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
@@ -41,13 +44,15 @@
 #include <cstring>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <memory>
 #include <algorithm>
 
-#undef STRUS_LOWLEVEL_DEBUG
+static strus::DebugTraceInterface* g_dbgtrace = 0;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::FileLocatorInterface* g_fileLocator = 0;
+static bool g_verbose = false;
 
 class Storage
 {
@@ -145,16 +150,16 @@ public:
 		{
 			char docid[10];
 			snprintf( docid, sizeof(docid), "DOC%u", di);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "insert document " << docid << std::endl;
-#endif
+
+			if (g_verbose) std::cerr << "insert document " << docid << std::endl;
+
 			strus::local_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( docid));
 			doc->addSearchIndexTerm( "word", "hello", 1);
 			doc->addSearchIndexTerm( "word", "world", 2);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "add search index term \"word\" \"hello\"" << std::endl;
-			std::cerr << "add search index term \"word\" \"world\"" << std::endl;
-#endif
+
+			if (g_verbose) std::cerr << "document " << docid << " add search index term \"word\" \"hello\"" << std::endl;
+			if (g_verbose) std::cerr << "document " << docid << " add search index term \"word\" \"world\"" << std::endl;
+
 			unsigned int xi = di;
 			unsigned int fpos = 10;
 			for (unsigned int pidx=0; primes[pidx]; ++pidx)
@@ -164,23 +169,37 @@ public:
 				if (xi) while (xi % primes[pidx] == 0)
 				{
 					doc->addSearchIndexTerm( "prim", primbuf, ++fpos);
-#ifdef STRUS_LOWLEVEL_DEBUG
-					std::cerr << "add search index term \"prim\" \"" << primbuf << "\"" << std::endl;
-#endif
+
+					if (g_verbose) std::cerr << "document " << docid << " add search index term \"prim\" \"" << primbuf << "\" at pos " << fpos << std::endl;
+
 					xi /= primes[pidx];
 				}
 			}
 			doc->addSearchIndexTerm( "word", docid, 3);
 			doc->setMetaData( "docno", (strus::NumericVariant::IntType)di);
 			doc->setAttribute( "docid", docid);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "add search index term \"word\" \"" << docid << "\"" << std::endl;
-			std::cerr << "add attribute \"docid\" \"" << docid << "\"" << std::endl;
-#endif
+
+			if (g_verbose) std::cerr << "document " << docid << " add search index term \"word\" \"" << docid << "\"" << std::endl;
+			if (g_verbose) std::cerr << "document " << docid << " add attribute \"docid\" \"" << docid << "\"" << std::endl;
+
 			doc->done();
 		}
 		if (!transactionInsert->commit()) throw std::runtime_error("failed to insert test documents");
-	
+		if (g_verbose)
+		{
+			strus::Reference<strus::StorageDumpInterface> dump( storage.sci->createDump(""));
+			if (!dump.get()) throw std::runtime_error( g_errorhnd->fetchError());
+			const char* chunk;
+			std::size_t chunksize;
+
+			std::cerr << "storage dump:" << std::endl;
+			while (dump->nextChunk( chunk, chunksize))
+			{
+				std::cerr << std::string( chunk, chunksize) << std::endl;
+			}
+			std::cerr << std::endl;
+		}
+
 		qeval.reset( strus::createQueryEval( g_errorhnd));
 		if (!qeval.get()) throw std::runtime_error("failed to create query eval");
 		const strus::SummarizerFunctionInterface* summarizer = qpi->getSummarizerFunction( "attribute");
@@ -210,7 +229,6 @@ public:
 	}
 };
 
-#ifdef STRUS_LOWLEVEL_DEBUG
 static void printQueryResult( const strus::QueryResult& result)
 {
 	std::vector<strus::ResultDocument>::const_iterator ri = result.ranks().begin(), re = result.ranks().end(); 
@@ -226,7 +244,6 @@ static void printQueryResult( const strus::QueryResult& result)
 		std::cerr << "[" << ridx << "] " << ri->weight() << ": " << resdescr.str() << std::endl;
 	}
 }
-#endif
 
 static std::string getQueryResultMembersString( const strus::QueryResult& result)
 {
@@ -265,16 +282,16 @@ static void testPlainSingleTermQuery( const strus::QueryProcessorInterface* qpi)
 	query->defineFeature( "sel");
 
 	strus::QueryResult result = query->evaluate();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "result testPlainSingleTermQuery:" << std::endl;
-	printQueryResult( result);
-#endif
+
+	if (g_verbose) std::cerr << "result testPlainSingleTermQuery:" << std::endl;
+	if (g_verbose) printQueryResult( result);
+
 	std::string res = getQueryResultMembersString( result);
 	std::string exp = "0,1,2,3,4,5,6,7,8,9";
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "packed result: (" << res << ")" << std::endl;
-	std::cerr << "expected: (" << exp << ")" << std::endl;
-#endif
+
+	if (g_verbose) std::cerr << "packed result: (" << res << ")" << std::endl;
+	if (g_verbose) std::cerr << "expected: (" << exp << ")" << std::endl;
+
 	if (res != exp)
 	{
 		throw std::runtime_error("query result not as expected");
@@ -296,22 +313,21 @@ static void testSingleTermQueryWithExclusion( const strus::QueryProcessorInterfa
 	query->defineFeature( "exc");
 
 	strus::QueryResult result = query->evaluate();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "result testSingleTermQueryWithExclusion:" << std::endl;
-	printQueryResult( result);
-#endif
+
+	if (g_verbose) std::cerr << "result testSingleTermQueryWithExclusion:" << std::endl;
+	if (g_verbose) printQueryResult( result);
+
 	std::string res = getQueryResultMembersString( result);
 	std::string exp = "0,1,5,7";
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "packed result: (" << res << ")" << std::endl;
-	std::cerr << "expected: (" << exp << ")" << std::endl;
-#endif
+
+	if (g_verbose) std::cerr << "packed result: (" << res << ")" << std::endl;
+	if (g_verbose) std::cerr << "expected: (" << exp << ")" << std::endl;
+
 	if (res != exp)
 	{
 		throw std::runtime_error("query result not as expected");
 	}
 }
-
 
 static void testSingleTermQueryWithRestriction( const strus::QueryProcessorInterface* qpi)
 {
@@ -330,16 +346,16 @@ static void testSingleTermQueryWithRestriction( const strus::QueryProcessorInter
 	query->defineFeature( "res");
 
 	strus::QueryResult result = query->evaluate();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "result testSingleTermQueryWithRestriction:" << std::endl;
-	printQueryResult( result);
-#endif
+
+	if (g_verbose) std::cerr << "result testSingleTermQueryWithRestriction:" << std::endl;
+	if (g_verbose) printQueryResult( result);
+
 	std::string res = getQueryResultMembersString( result);
 	std::string exp = "2,3,4,6,8,9";
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "packed result: (" << res << ")" << std::endl;
-	std::cerr << "expected: (" << exp << ")" << std::endl;
-#endif
+
+	if (g_verbose) std::cerr << "packed result: (" << res << ")" << std::endl;
+	if (g_verbose) std::cerr << "expected: (" << exp << ")" << std::endl;
+
 	if (res != exp)
 	{
 		throw std::runtime_error("query result not as expected");
@@ -370,16 +386,16 @@ static void testSingleTermQueryWithRestrictionInclMetadata( const strus::QueryPr
 	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)6, false);
 
 	strus::QueryResult result = query->evaluate();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "result testSingleTermQueryWithRestrictionInclMetadata:" << std::endl;
-	printQueryResult( result);
-#endif
+
+	if (g_verbose) std::cerr << "result testSingleTermQueryWithRestrictionInclMetadata:" << std::endl;
+	if (g_verbose) printQueryResult( result);
+
 	std::string res = getQueryResultMembersString( result);
 	std::string exp = "3,4,6";
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "packed result: (" << res << ")" << std::endl;
-	std::cerr << "expected: (" << exp << ")" << std::endl;
-#endif
+
+	if (g_verbose) std::cerr << "packed result: (" << res << ")" << std::endl;
+	if (g_verbose) std::cerr << "expected: (" << exp << ")" << std::endl;
+
 	if (res != exp)
 	{
 		throw std::runtime_error("query result not as expected");
@@ -402,16 +418,16 @@ static void testSingleTermQueryWithSelectionAndRestriction( const strus::QueryPr
 	query->defineFeature( "res");
 
 	strus::QueryResult result = query->evaluate();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "result testSingleTermQueryWithRestriction:" << std::endl;
-	printQueryResult( result);
-#endif
+
+	if (g_verbose) std::cerr << "result testSingleTermQueryWithRestriction:" << std::endl;
+	if (g_verbose) printQueryResult( result);
+
 	std::string res = getQueryResultMembersString( result);
 	std::string exp = "6";
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "packed result: (" << res << ")" << std::endl;
-	std::cerr << "expected: (" << exp << ")" << std::endl;
-#endif
+
+	if (g_verbose) std::cerr << "packed result: (" << res << ")" << std::endl;
+	if (g_verbose) std::cerr << "expected: (" << exp << ")" << std::endl;
+
 	if (res != exp)
 	{
 		throw std::runtime_error("query result not as expected");
@@ -419,7 +435,7 @@ static void testSingleTermQueryWithSelectionAndRestriction( const strus::QueryPr
 }
 
 
-#define RUN_TEST( idx, TestName, qpi)\
+#define RUN_TEST( idx, TestName, qpi, rt)\
 	try\
 	{\
 		test ## TestName( qpi);\
@@ -428,12 +444,12 @@ static void testSingleTermQueryWithSelectionAndRestriction( const strus::QueryPr
 	catch (const std::runtime_error& err)\
 	{\
 		std::cerr << "error in test (" << idx << ") " << #TestName << ": " << err.what() << std::endl;\
-		return -1;\
+		rt = -1;\
 	}\
 	catch (const std::bad_alloc& err)\
 	{\
 		std::cerr << "Out of memory in test (" << idx << ") " << #TestName << std::endl;\
-		return -1;\
+		rt = -1;\
 	}\
 
 
@@ -443,6 +459,9 @@ int main( int argc, const char* argv[])
 	bool do_cleanup = true;
 	try
 	{
+		g_dbgtrace = strus::createDebugTrace_standard( 2/*maxNofThreads*/);
+		if (!g_dbgtrace) {std::cerr << "FAILED " << "strus::createDebugTrace_standard" << std::endl; return -1;}
+
 		unsigned int ii = 1;
 		unsigned int test_index = 0;
 		for (; argc > (int)ii; ++ii)
@@ -457,12 +476,28 @@ int main( int argc, const char* argv[])
 				}
 				test_index = atoi( argv[ ii]);
 			}
+			else if (std::strcmp( argv[ii], "-V") == 0)
+			{
+				g_verbose = true;
+			}
+			else if (std::strcmp( argv[ii], "-G") == 0)
+			{
+				++ii;
+				if (argc == (int)ii)
+				{
+					std::cerr << "option -G expects an argument" << std::endl;
+					return -1;
+				}
+				g_dbgtrace->enable( argv[ ii]);
+			}
 			else if (std::strcmp( argv[ii], "-h") == 0)
 			{
 				std::cerr << "usage: testQuery [options]" << std::endl;
 				std::cerr << "options:" << std::endl;
 				std::cerr << "  -h      :print usage" << std::endl;
+				std::cerr << "  -V      :verbose output" << std::endl;
 				std::cerr << "  -T <i>  :execute only test with index <i>" << std::endl;
+				std::cerr << "  -G <s>  :enable debug trace of <s>" << std::endl;
 				std::cerr << "  -K      :keep data, do not cleanup" << std::endl;
 			}
 			else if (std::strcmp( argv[ii], "-K") == 0)
@@ -480,7 +515,7 @@ int main( int argc, const char* argv[])
 				return -1;
 			}
 		}
-		g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
+		g_errorhnd = strus::createErrorBuffer_standard( stderr, 2/*maxNofThreads*/, g_dbgtrace);
 		if (!g_errorhnd) {std::cerr << "FAILED " << "strus::createErrorBuffer_standard" << std::endl; return -1;}
 		g_fileLocator = strus::createFileLocator_std( g_errorhnd);
 		if (!g_fileLocator) {std::cerr << "FAILED " << "strus::createFileLocator_std" << std::endl; return -1;}
@@ -495,18 +530,24 @@ int main( int argc, const char* argv[])
 			throw strus::runtime_error("error initializing strus objects");
 		}
 		unsigned int ti=test_index?test_index:1;
-		for (;;++ti)
+		for (;!rt;++ti)
 		{
 			switch (ti)
 			{
-				case 1: RUN_TEST( ti, PlainSingleTermQuery, qpi.get() ) break;
-				case 2: RUN_TEST( ti, SingleTermQueryWithExclusion, qpi.get() ) break;
-				case 3: RUN_TEST( ti, SingleTermQueryWithRestriction, qpi.get() ) break;
-				case 4: RUN_TEST( ti, SingleTermQueryWithRestrictionInclMetadata, qpi.get() ) break;
-				case 5: RUN_TEST( ti, SingleTermQueryWithSelectionAndRestriction, qpi.get() ) break;
+				case 1: RUN_TEST( ti, PlainSingleTermQuery, qpi.get(), rt ) break;
+				case 2: RUN_TEST( ti, SingleTermQueryWithExclusion, qpi.get(), rt ) break;
+				case 3: RUN_TEST( ti, SingleTermQueryWithRestriction, qpi.get(), rt ) break;
+				case 4: RUN_TEST( ti, SingleTermQueryWithRestrictionInclMetadata, qpi.get(), rt ) break;
+				case 5: RUN_TEST( ti, SingleTermQueryWithSelectionAndRestriction, qpi.get(), rt ) break;
 				default: goto TESTS_DONE;
 			}
 			if (test_index) break;
+		}
+		if (g_errorhnd->hasError())
+		{
+			const char* errmsg = g_errorhnd->fetchError();
+			std::cerr << "Error: " << (errmsg?errmsg:"") << std::endl;
+			rt = -1;
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -518,9 +559,22 @@ int main( int argc, const char* argv[])
 	catch (const std::bad_alloc& err)
 	{
 		std::cerr << "Out of memory" << std::endl;
-		rt = -1;
+		return -1;
 	}
 TESTS_DONE:
+	std::vector<strus::DebugTraceMessage> msglist = g_dbgtrace->fetchMessages();
+	if (!msglist.empty())
+	{
+		std::cerr << "Debug trace:" << std::endl;
+		std::vector<strus::DebugTraceMessage>::const_iterator
+			mi = msglist.begin(), me = msglist.end();
+		for (; mi != me; ++mi)
+		{
+			std::cerr << strus::string_format( "%s %s %s '%s'",
+					mi->typeName(), mi->id(), mi->component(), mi->content().c_str())
+				<< std::endl;
+		}
+	}
 	if (do_cleanup)
 	{
 		destroyStorage( "path=storage");

@@ -113,8 +113,14 @@ public:
 			const std::vector<MergeRange>::const_iterator& ee,
 			const BooleanBlock& oldblk,
 			BooleanBlock& newblk);
+	static void merge_append(
+			std::vector<MergeRange>::const_iterator ei,
+			const std::vector<MergeRange>::const_iterator& ee,
+			const BooleanBlock& oldblk,
+			BooleanBlock& appendblk);
 
 	static void merge( const BooleanBlock& blk1, const BooleanBlock& blk2, BooleanBlock& newblk);
+	static void split( const BooleanBlock& blk, BooleanBlock& newblk1, BooleanBlock& newblk2);
 
 	void check() const;
 

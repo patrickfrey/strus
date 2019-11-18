@@ -10,6 +10,7 @@
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
 #include "booleanBlock.hpp"
+#include "ffBlock.hpp"
 #include "invTermBlock.hpp"
 #include "documentFrequencyMap.hpp"
 #include "documentFrequencyCache.hpp"
@@ -98,7 +99,7 @@ private:
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlockBuilder& newposblk,
-			//[+] FfBlockBuilder& newffblk,
+			std::vector<FfBlockBuilder::FfDeclaration>& ffdeclar,
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergeNewPosElements(
@@ -107,7 +108,7 @@ private:
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlockBuilder& newposblk,
-			//[+] FfBlockBuilder& newffblk,
+			std::vector<FfBlockBuilder::FfDeclaration>& ffdeclar,
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergePosBlock(

@@ -443,6 +443,10 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 	Index from_ = 0;
 	Index to_ = 0;
 
+	if (id() && elemno + rangesize > id())
+	{
+		throw std::runtime_error( _TXT( "internal: appended range exceeds block border"));
+	}
 	std::size_t nodearsize = (size() / sizeof(Node));
 	if (nodearsize)
 	{
@@ -463,7 +467,16 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 				if (!nd->tryExpandRange( elemno+rangesize))
 				{
 					Node newnod;
-					newnod.init( elemno, elemno + rangesize);
+					
+					if (elemno == nd->getLastElem())
+					{
+						if (rangesize == 0) throw std::runtime_error( _TXT( "internal: failed to expand node covering added element"));
+						newnod.init( elemno+1, elemno + rangesize);
+					}
+					else
+					{
+						newnod.init( elemno, elemno + rangesize);
+					}
 					append( &newnod, sizeof(newnod));
 				}
 			}
@@ -569,15 +582,12 @@ void BooleanBlock::merge(
 	}
 }
 
-
-void BooleanBlock::merge( 
+void BooleanBlock::merge_append(
 		std::vector<MergeRange>::const_iterator ei,
 		const std::vector<MergeRange>::const_iterator& ee,
 		const BooleanBlock& oldblk,
-		BooleanBlock& newblk)
+		BooleanBlock& appendblk)
 {
-	newblk.clear();
-	newblk.setId( oldblk.id());
 	NodeCursor cursor;
 
 	Index old_from = 0;
@@ -597,12 +607,12 @@ void BooleanBlock::merge(
 			{
 				if (ei->from < old_from)
 				{
-					newblk.defineRange( ei->from, ei->to - ei->from);
+					appendblk.defineRange( ei->from, ei->to - ei->from);
 					++ei;
 				}
 				else
 				{
-					newblk.defineRange( old_from, old_to - old_from);
+					appendblk.defineRange( old_from, old_to - old_from);
 					old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 				}
 			}
@@ -620,7 +630,7 @@ void BooleanBlock::merge(
 					if (old_from < ei->from)
 					{
 						// => case [old.from][new.from][old.to]
-						newblk.defineRange( old_from, ei->from - old_from - 1);
+						appendblk.defineRange( old_from, ei->from - old_from - 1);
 					}
 					if (old_to > ei->to)
 					{
@@ -638,7 +648,7 @@ void BooleanBlock::merge(
 				{
 					// .... that does not touch the old block
 					// => case [old.from][old.to][new.from]
-					newblk.defineRange( old_from, old_to - old_from);
+					appendblk.defineRange( old_from, old_to - old_from);
 					old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 				}
 			}
@@ -668,15 +678,50 @@ void BooleanBlock::merge(
 	{
 		if (ei->isMember)
 		{
-			newblk.defineRange( ei->from, ei->to - ei->from);
+			appendblk.defineRange( ei->from, ei->to - ei->from);
 		}
 		++ei;
 	}
 	while (old_haselem)
 	{
-		newblk.defineRange( old_from, old_to - old_from);
+		appendblk.defineRange( old_from, old_to - old_from);
 		old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 	}
+}
+
+void BooleanBlock::merge( 
+		std::vector<MergeRange>::const_iterator ei,
+		const std::vector<MergeRange>::const_iterator& ee,
+		const BooleanBlock& oldblk,
+		BooleanBlock& newblk)
+{
+	newblk.clear();
+	newblk.setId( oldblk.id());
+	merge_append( ei, ee, oldblk, newblk);
+}
+
+void BooleanBlock::split( const BooleanBlock& blk, BooleanBlock& newblk1, BooleanBlock& newblk2)
+{
+	NodeCursor cursor;
+	strus::Index from;
+	strus::Index to = 0;
+	
+	newblk1.clear();
+	bool hasMore = blk.getFirstRange( cursor, from, to);
+	while (hasMore && newblk1.size() < blk.size()/2)
+	{
+		newblk1.defineRange( from, to - from);
+		hasMore = blk.getNextRange( cursor, from, to);
+	}
+	newblk1.setId( to);
+
+	newblk2.clear();
+	while (hasMore)
+	{
+		newblk2.defineRange( from, to - from);
+		hasMore = blk.getNextRange( cursor, from, to);
+	}
+	newblk2.setId( blk.id());
 }
 
 void BooleanBlock::check() const
@@ -689,10 +734,11 @@ void BooleanBlock::check() const
 
 	while (getNextRange( cursor, rangemin, rangemax))
 	{
-		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || rangemax > id() || rangemin <= prevmax)
+		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || (id() && rangemax > id()) || rangemin <= prevmax)
 		{
 			throw std::runtime_error( _TXT( "created illegal boolean block"));
 		}
+		prevmax = rangemax;
 	}
 }
 

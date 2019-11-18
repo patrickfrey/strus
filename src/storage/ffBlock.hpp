@@ -11,6 +11,7 @@
 #include "ffIndexNode.hpp"
 #include "strus/constants.hpp"
 #include <vector>
+#include <algorithm>
 
 namespace strus {
 
@@ -42,6 +43,11 @@ public:
 		initFrame();
 	}
 
+	bool full() const
+	{
+		return (int)size() >= Constants::maxFfBlockSize();
+	}
+
 	/// \brief Get the document number of the current FfIndexNodeCursor
 	strus::Index docno_at( const FfIndexNodeCursor& cursor) const
 	{
@@ -59,11 +65,18 @@ public:
 	{
 		return m_ffIndexNodeArray.nextDoc( cursor);
 	}
-	/// \brief Get the first document with the current cursor
+	/// \brief Get the first document and initialize the current cursor
 	strus::Index firstDoc( FfIndexNodeCursor& cursor) const
 	{
 		return m_ffIndexNodeArray.firstDoc( cursor);
 	}
+
+	/// \brief Get the last document
+	strus::Index lastDoc() const
+	{
+		return m_ffIndexNodeArray.lastDoc();
+	}
+
 	/// \brief Upper bound search for a docnument number in the block
 	strus::Index skipDoc( const strus::Index& docno, FfIndexNodeCursor& cursor) const
 	{
@@ -150,10 +163,43 @@ public:
 
 	int size() const
 	{
-		return (m_ffIndexNodeArray.size() * sizeof(FfIndexNode));
+		return sizeof(int) + (m_ffIndexNodeArray.size() * sizeof(FfIndexNode));
+	}
+	strus::Index lastDoc() const
+	{
+		return m_ffIndexNodeArray.empty() ? 0 : m_ffIndexNodeArray.back().lastDoc();
 	}
 
+	struct FfDeclaration
+	{
+		strus::Index docno;
+		int ff;
+
+		FfDeclaration( strus::Index docno_, int ff_)
+			:docno(docno_),ff(ff_){}
+		FfDeclaration( const FfDeclaration& o)
+			:docno(o.docno),ff(o.ff){}
+	};
+
+	static void merge(
+			std::vector<FfDeclaration>::const_iterator ei,
+			const std::vector<FfDeclaration>::const_iterator& ee,
+			const FfBlock& oldblk,
+			FfBlockBuilder& newblk);
+	static void merge_append(
+			std::vector<FfDeclaration>::const_iterator ei,
+			const std::vector<FfDeclaration>::const_iterator& ee,
+			const FfBlock& oldblk,
+			FfBlockBuilder& appendblk);
 	static void merge( const FfBlockBuilder& blk1, const FfBlockBuilder& blk2, FfBlockBuilder& newblk);
+	static void split( const FfBlockBuilder& blk, FfBlockBuilder& newblk1, FfBlockBuilder& newblk2);
+
+	void swap( FfBlockBuilder& o)
+	{
+		m_ffIndexNodeArray.swap( o.m_ffIndexNodeArray);
+		std::swap( m_lastDoc, o.m_lastDoc);
+		std::swap( m_id, o.m_id);
+	}
 
 private:
 	std::vector<FfIndexNode> m_ffIndexNodeArray;

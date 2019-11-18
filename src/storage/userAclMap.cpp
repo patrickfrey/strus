@@ -215,8 +215,7 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			{
 				defineRangeElement( rangear, mi->first.docno, mi->second);
 			}
-			Index lastInsertBlockId = rangear.back().to;
-	
+
 			std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
 			DatabaseAdapter_UserAclBlock::WriteCursor dbadapter_userAcl( m_database, start->first.usrno);
 			BooleanBlock newblk;
@@ -225,7 +224,7 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_userAcl, ri, re, newblk, transaction);
 	
 			// [2] Write the new blocks that could not be merged into existing ones:
-			BooleanBlockBatchWrite::insertNewElements( &dbadapter_userAcl, ri, re, newblk, lastInsertBlockId, transaction);
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_userAcl, ri, re, newblk, transaction);
 		}
 	}
 	{
@@ -240,7 +239,6 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			{
 				defineRangeElement( rangear, mi->first.usrno, mi->second);
 			}
-			Index lastInsertBlockId = rangear.back().to;
 
 			std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
 			DatabaseAdapter_AclBlock::WriteCursor dbadapter_acl( m_database, start->first.docno);
@@ -250,7 +248,7 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_acl, ri, re, newblk, transaction);
 
 			// [2] Write the new blocks that could not be merged into existing ones:
-			BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, transaction);
 		}
 	}
 }

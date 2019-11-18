@@ -48,6 +48,7 @@
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::FileLocatorInterface* g_fileLocator = 0;
 static strus::PseudoRandom g_random;
+static bool g_verbose = false;
 
 class Storage
 {
@@ -154,19 +155,19 @@ static void testDeleteNonExistingDoc()
 	doc->done();
 	transactionInsert->commit();
 
-	std::cerr << "Document inserted " << storage.sci->documentNumber( "ABC") << std::endl;
+	if (g_verbose) std::cerr << "Document inserted " << storage.sci->documentNumber( "ABC") << std::endl;
 
 	strus::local_ptr<strus::StorageTransactionInterface> transactionDelete1( storage.sci->createTransaction());
 	transactionDelete1->deleteDocument( "ABC");
 	transactionDelete1->commit();
 
-	std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
+	if (g_verbose) std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
 
 	strus::local_ptr<strus::StorageTransactionInterface> transactionDelete2( storage.sci->createTransaction());
 	transactionDelete2->deleteDocument( "ABC");
 	transactionDelete2->commit();
 
-	std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
+	if (g_verbose) std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
 	if (g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -195,7 +196,7 @@ void Storage::dump()
 	}
 	else
 	{
-		std::cout << dumpcontent << std::endl;
+		if (g_verbose) std::cerr << dumpcontent << std::endl;
 	}
 }
 
@@ -353,7 +354,7 @@ static bool check_storage_df( strus::StorageClientInterface* storage, const std:
 			if (df_expected != df)
 			{
 				rt = false;
-				std::cerr << strus::string_format("document frequency of '%s %s' %s (%u) not as expected (%u)", feat.type.c_str(), feat.value.c_str(), statestr, df, df_expected) << std::endl;
+				if (g_verbose) std::cerr << strus::string_format("document frequency of '%s %s' %s (%u) not as expected (%u)", feat.type.c_str(), feat.value.c_str(), statestr, df, df_expected) << std::endl;
 			}
 		}
 	}
@@ -920,7 +921,7 @@ static void testStorageReinsertStability()
 	long du = storage.diskUsage();
 	long first_du = du;
 
-	std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK", (unsigned int)(int)du) << std::endl;
+	if (g_verbose) std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK", (unsigned int)(int)du) << std::endl;
 	int ii=0, ie=12;
 	for (;ii<ie; ++ii)
 	{
@@ -928,7 +929,7 @@ static void testStorageReinsertStability()
 		du = storage.diskUsage();
 		int pg = getPercentageGrowth( du, first_du);
 		std::string percentage_growth = strus::string_format( pg < 0 ? "%d":"+%d", pg);
-		std::cerr << strus::string_format( "disk usage after %d overwriting random reinsert transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
+		if (g_verbose) std::cerr << strus::string_format( "disk usage after %d overwriting random reinsert transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
 	}
 	if (first_du > du + du / 6)
 	{
@@ -956,7 +957,7 @@ static void testStorageUpdateStability()
 	long du = storage.diskUsage();
 	long first_du = du;
 
-	std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK (increase %d%%)", (unsigned int)(int)du, getPercentageGrowth( du, first_du)) << std::endl;
+	if (g_verbose) std::cerr << strus::string_format( "disk usage after first random insert transaction: %uK (increase %d%%)", (unsigned int)(int)du, getPercentageGrowth( du, first_du)) << std::endl;
 	int ii=0, ie=12;
 	for (;ii<ie; ++ii)
 	{
@@ -964,7 +965,7 @@ static void testStorageUpdateStability()
 		du = storage.diskUsage();
 		int pg = getPercentageGrowth( du, first_du);
 		std::string percentage_growth = strus::string_format( pg < 0 ? "%d":"+%d", pg);
-		std::cerr << strus::string_format( "disk usage after %d overwriting random update transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
+		if (g_verbose) std::cerr << strus::string_format( "disk usage after %d overwriting random update transactions: %uK (%s%%)", ii, (unsigned int)(int)du, percentage_growth.c_str()) << std::endl;
 	}
 	if (first_du > du + du / 6)
 	{
@@ -996,7 +997,7 @@ static void testDfCalculation()
 	for (; xi != xe; ++xi)
 	{
 		strus::Index df = storage.sci->documentFrequency( xi->first.first, xi->first.second);
-		std::cout << "GET FEATURE DF " << xi->first.first << " '" << xi->first.second << "' = " << df << std::endl;
+		if (g_verbose) std::cerr << "get feature df " << xi->first.first << " '" << xi->first.second << "' = " << df << std::endl;
 		if (df != xi->second) throw strus::runtime_error("df of feature %s '%s' does not match: %d != %d", xi->first.first.c_str(), xi->first.second.c_str(), (int)df, (int)xi->second);
 	}
 	{
@@ -1098,24 +1099,24 @@ static void testReloadConfig()
 	{
 		throw std::runtime_error("altered configuration does not match");
 	}
-	std::cerr << "CONFIG ORIG:\n" << config_orig << std::endl;
-	std::cerr << "CONFIG NEW:\n" << config_new << std::endl;
+	if (g_verbose) std::cerr << "config orig:\n" << config_orig << std::endl;
+	if (g_verbose) std::cerr << "config new:\n" << config_new << std::endl;
 }
 
 #define RUN_TEST( idx, TestName)\
 	try\
 	{\
 		test ## TestName();\
-		std::cerr << "Executing test (" << idx << ") " << #TestName << " [OK]" << std::endl;\
+		std::cerr << "executing test (" << idx << ") " << #TestName << " [OK]" << std::endl;\
 	}\
 	catch (const std::runtime_error& err)\
 	{\
-		std::cerr << "Error in test (" << idx << ") " << #TestName << ": " << err.what() << std::endl;\
+		std::cerr << "error in test (" << idx << ") " << #TestName << ": " << err.what() << std::endl;\
 		return -1;\
 	}\
 	catch (const std::bad_alloc& err)\
 	{\
-		std::cerr << "Out of memory in test (" << idx << ") " << #TestName << std::endl;\
+		std::cerr << "out of memory in test (" << idx << ") " << #TestName << std::endl;\
 		return -1;\
 	}\
 
@@ -1130,6 +1131,10 @@ int main( int argc, const char* argv[])
 		if (std::strcmp( argv[ii], "-K") == 0)
 		{
 			do_cleanup = false;
+		}
+		else if (std::strcmp( argv[ii], "-V") == 0)
+		{
+			g_verbose = true;
 		}
 		else if (std::strcmp( argv[ii], "-T") == 0)
 		{
@@ -1146,6 +1151,7 @@ int main( int argc, const char* argv[])
 			std::cerr << "usage: testStorageOp [options]" << std::endl;
 			std::cerr << "options:" << std::endl;
 			std::cerr << "  -h      :print usage" << std::endl;
+			std::cerr << "  -V      :verbose output" << std::endl;
 			std::cerr << "  -K      :keep artefacts, do not clean up" << std::endl;
 			std::cerr << "  -T <i>  :execute only test with index <i>" << std::endl;
 			return 0;

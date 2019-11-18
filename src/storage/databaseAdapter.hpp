@@ -56,7 +56,7 @@ struct DatabaseAdapter_StringIndex
 
 	private:
 		bool getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value);
-	
+
 	private:
 		Reference<DatabaseCursorInterface> m_cursor;
 		char m_prefix;
@@ -72,7 +72,7 @@ struct DatabaseAdapter_StringIndex
 
 		Index get( const std::string& key) const;
 		bool load( const std::string& key, Index& value) const;
-	
+
 	private:
 		char m_prefix;
 		const DatabaseClientInterface* m_database;
@@ -89,7 +89,7 @@ struct DatabaseAdapter_StringIndex
 		void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
 		void remove( DatabaseTransactionInterface* transaction, const std::string& key);
 		void storeImm( const std::string& key, const Index& value);
-	
+
 	private:
 		char m_prefix;
 		DatabaseClientInterface* m_database;
@@ -153,7 +153,7 @@ public:
 		void store( DatabaseTransactionInterface* transaction, const Index& key, const char* value);
 		void remove( DatabaseTransactionInterface* transaction, const Index& key);
 		void storeImm( const Index& key, const std::string& value);
-	
+
 	private:
 		char m_prefix;
 		DatabaseClientInterface* m_database;

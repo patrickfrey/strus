@@ -68,6 +68,7 @@ void FfBlockBuilder::merge( const FfBlockBuilder& blk1, const FfBlockBuilder& bl
 	strus::Index ff2;
 	strus::Index docno2 = nd2->skipDoc( 0, ff2);
 
+	newblk.clear();
 	while (docno1 && docno2)
 	{
 		if (docno1 < docno2)
@@ -129,6 +130,72 @@ void FfBlockBuilder::merge( const FfBlockBuilder& blk1, const FfBlockBuilder& bl
 			docno2 = nd2->skipDoc( 0, ff2);
 		}
 	}
+}
+
+void FfBlockBuilder::merge(
+		std::vector<FfDeclaration>::const_iterator ei,
+		const std::vector<FfDeclaration>::const_iterator& ee,
+		const FfBlock& oldblk,
+		FfBlockBuilder& newblk)
+{
+	newblk.clear();
+	newblk.setId( oldblk.id());
+	merge_append( ei, ee, oldblk, newblk);
+}
+
+void FfBlockBuilder::merge_append(
+		std::vector<FfDeclaration>::const_iterator ei,
+		const std::vector<FfDeclaration>::const_iterator& ee,
+		const FfBlock& oldblk,
+		FfBlockBuilder& appendblk)
+{
+	FfIndexNodeCursor cursor;
+	strus::Index docno = oldblk.firstDoc( cursor);
+
+	while (docno && ei != ee && ei->docno <= oldblk.id())
+	{
+		if (ei->docno < docno)
+		{
+			appendblk.append( ei->docno, ei->ff);
+			++ei;
+		}
+		else if (ei->docno > docno)
+		{
+			int ff = oldblk.frequency_at( cursor);
+			if (ff)
+			{
+				appendblk.append( docno, ff);
+			}
+			else
+			{
+				//... delete => ignore creation in new block
+			}
+			docno = oldblk.nextDoc( cursor);
+		}
+		else/*ei->docno == docno*/
+		{
+			int ff = oldblk.frequency_at( cursor);
+			if (ff)
+			{
+				if (ff < ei->ff) ff = ei->ff;
+				appendblk.append( docno, ff);
+			}
+			docno = oldblk.nextDoc( cursor);
+			++ei;
+		}
+	}
+}
+
+void FfBlockBuilder::split( const FfBlockBuilder& blk, FfBlockBuilder& newblk1, FfBlockBuilder& newblk2)
+{
+	std::size_t splitidx = blk.m_ffIndexNodeArray.size() / 2;
+	newblk1.m_ffIndexNodeArray.insert( newblk1.m_ffIndexNodeArray.end(), blk.m_ffIndexNodeArray.begin(), blk.m_ffIndexNodeArray.begin()+splitidx);
+	newblk1.m_lastDoc = newblk1.m_ffIndexNodeArray.back().lastDoc();
+	newblk1.m_id = 0;
+
+	newblk2.m_ffIndexNodeArray.insert( newblk2.m_ffIndexNodeArray.end(), blk.m_ffIndexNodeArray.begin()+splitidx, blk.m_ffIndexNodeArray.end());
+	newblk2.m_lastDoc = blk.m_lastDoc;
+	newblk1.m_id = blk.m_id;
 }
 
 FfBlock FfBlockBuilder::createBlock() const
