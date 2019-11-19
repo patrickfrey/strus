@@ -21,7 +21,6 @@ using namespace strus;
 
 #define INTERFACE_NAME "posting iterator"
 
-#undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_READABLE_FEATUREID
 
 #ifdef STRUS_READABLE_FEATUREID
@@ -62,21 +61,26 @@ PostingIterator::PostingIterator(
 #endif
 }
 
+Index PostingIterator::skipDoc_impl( const Index& docno_)
+{
+	if (m_docno && m_docno == docno_) return m_docno;
+
+	if (m_posinfoIterator.isCloseCandidate( docno_))
+	{
+		m_docno = m_posinfoIterator.skipDoc( docno_);
+	}
+	else
+	{
+		m_docno = m_docnoIterator.skip( docno_);
+	}
+	return m_docno;
+}
+
 Index PostingIterator::skipDoc( const Index& docno_)
 {
 	try
 	{
-		if (m_docno && m_docno == docno_) return m_docno;
-	
-		if (m_posinfoIterator.isCloseCandidate( docno_))
-		{
-			m_docno = m_posinfoIterator.skipDoc( docno_);
-		}
-		else
-		{
-			m_docno = m_docnoIterator.skip( docno_);
-		}
-		return m_docno;
+		return skipDoc_impl( docno_);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip document: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
@@ -85,17 +89,7 @@ Index PostingIterator::skipDocCandidate( const Index& docno_)
 {
 	try
 	{
-		if (m_docno && m_docno == docno_) return m_docno;
-	
-		if (m_posinfoIterator.isCloseCandidate( docno_))
-		{
-			m_docno = m_posinfoIterator.skipDoc( docno_);
-		}
-		else
-		{
-			m_docno = m_docnoIterator.skip( docno_);
-		}
-		return m_docno;
+		return skipDoc_impl( docno_);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip document candidate: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
@@ -112,18 +106,12 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		{
 			return 0;
 		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		Index rt = m_posinfoIterator.skipPos( firstpos_);
-		if (rt) std::cerr << "skipPos " << m_featureid << " " << rt << std::endl;
-		return rt;
-#else
 		return m_posinfoIterator.skipPos( firstpos_);
-#endif
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip skip position: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
-unsigned int PostingIterator::frequency()
+int PostingIterator::frequency()
 {
 	try
 	{

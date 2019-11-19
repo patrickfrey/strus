@@ -203,7 +203,7 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 		std::cout << "create query for program:" << std::endl;
 		print( std::cout);
 #endif
-		return new Query( this, storage, m_errorhnd);
+		return new Query( this, storage, m_usePosinfo, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, 0);
 }

@@ -56,7 +56,7 @@ public:
 		return m_size;
 	}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		return (m_itr == m_end)?0:1;
 	}

@@ -129,6 +129,14 @@ public:
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc)=0;
 
+	/// \brief Set the flag to indicate wheter to use position information for evaluation or not. If set to yes=false then do not use position information in evaluation, all features that appear in a document get position 1.
+	/// \note Default is set to yes = true
+	/// \note Forces the query evluation to use a different implementation of posting iterators that are slightly more efficient for some corner cases but useless in general.
+	/// \remark Switching off position information does not make sense in the main query evaluation case. 
+	/// \remark Be aware that you know what you are doing when using this method. Posting join operators work differently when switching position information off for evaluation.
+	/// \note The motivation for this method is to use it in a preliminary evaluation step to get document candidates for query interpretation and expansion.
+	virtual void usePositionInformation( bool yes=true)=0;
+
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
 	/// \return a query instance for this query evaluation type

@@ -41,7 +41,7 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, ErrorBufferInterface* errorhnd_)
+Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, bool usePosinfo_, ErrorBufferInterface* errorhnd_)
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
@@ -58,6 +58,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_termstatsmap()
 	,m_globstats()
 	,m_debugMode(false)
+	,m_usePosinfo(usePosinfo_)
 	,m_errorhnd(errorhnd_)
 	,m_debugtrace(0)
 {
@@ -363,7 +364,14 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
+				if (m_usePosinfo)
+				{
+					joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
+				}
+				else
+				{
+					joinargs.push_back( m_storage->createFrequencyPostingIterator( term.type, term.value));
+				}
 				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
@@ -392,7 +400,14 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
+			if (m_usePosinfo)
+			{
+				rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
+			}
+			else
+			{
+				rt = m_storage->createFrequencyPostingIterator( term.type, term.value);
+			}
 			if (!rt) break;
 			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
 			break;

@@ -65,12 +65,20 @@ struct Constants
 	{
 		return "";
 	}
-	/// \brief Get the maximum position (counted from 1) in a document a token can have 
+	/// \brief Get the maximum ordinal position (counted from 1) in a document a token can have 
 	/// \note This is a limit given by the implementation of the position info block. Unfortunately it creeps through the system.
+	/// \note The length of a novel is at least 50'000 words, "War and Peace" from Tolstoi has a word count of about 250'000. But it is controversial if it is sensible to have retrievable items of this size. For books I would rather suggest to have chapters as items with some meta data about the book as a whole included.
 	static inline unsigned int storage_max_position_info()
 	{
 		return 65535;
 	}
+
+	/// \brief Defines the minimum value the fraction of the document frequency related to the collection size a feature must have to be considered as a "stopword". The categorization as stopword leads to some decicions about algorithms or data structures to use for the term.
+	static inline float stopwordDfFactor()
+	{
+		return 0.1;
+	}
+
 	/// \brief Get the name of the leveldb database type used as default database type
 	static inline const char* leveldb_database_name()
 	{

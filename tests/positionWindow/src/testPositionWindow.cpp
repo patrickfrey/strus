@@ -66,7 +66,7 @@ public:
 		return 0;
 	}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		return m_posarsize;
 	}

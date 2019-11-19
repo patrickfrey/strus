@@ -11,6 +11,7 @@
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "indexSetIterator.hpp"
+#include "uintCompaction.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -150,14 +151,26 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	
 			IndexSetIterator docnoIterator( m_storage->databaseClient(), DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 	
+			strus::local_ptr<PostingIteratorInterface> fitr(
+				m_storage->createFrequencyPostingIterator( ti->first.type, ti->first.value)); 
 			strus::local_ptr<PostingIteratorInterface> pitr(
 				m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 1)); 
+			if (!fitr.get())
+			{
+				logError( logout, m_docid, _TXT("failed to create %s checking search index: %s"), "frequency posting iterator", m_errorhnd->fetchError());
+				break;
+			}
 			if (!pitr.get())
 			{
-				logError( logout, m_docid, _TXT("memory allocation error checking search index"));
+				logError( logout, m_docid, _TXT("failed to create %s checking search index: %s"), "term posting iterator", m_errorhnd->fetchError());
 				break;
 			}
 			if (m_docno != pitr->skipDoc( m_docno))
+			{
+				logError( logout, m_docid, _TXT("term %s '%s' not found in inverted index"), ti->first.type.c_str(), ti->first.value.c_str());
+				continue;
+			}
+			if (m_docno != fitr->skipDoc( m_docno))
 			{
 				logError( logout, m_docid, _TXT("term %s '%s' not found in inverted index"), ti->first.type.c_str(), ti->first.value.c_str());
 				continue;
@@ -166,6 +179,14 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			{
 				logError( logout, m_docid,
 						_TXT("term %s '%s' not found in boolean document index"), ti->first.type.c_str(), ti->first.value.c_str());
+			}
+			int nofpos = pitr->frequency();
+			int ff_p = strus::uintFromCompaction( strus::compactUint( nofpos));
+			int ff = fitr->frequency();
+			if (ff != ff_p)
+			{
+				logError( logout, m_docid,
+						_TXT("term %s '%s' frequency differs in frequency posting iterator and term posting iterator: frequency ~%d != ~%d occurrencies counted (values compacted)"), ti->first.type.c_str(), ti->first.value.c_str(), ff, ff_p);
 			}
 			Index pos = 0;
 	
@@ -383,7 +404,23 @@ void StorageDocumentChecker::done()
 		}
 		else if (m_logfile.empty())
 		{
-			doCheck( std::cerr);
+			std::ostringstream out;
+			doCheck( out);
+			std::string res = out.str();
+			if (!res.empty())
+			{
+				char const* eoln = std::strchr( res.c_str(), '\n');
+				while (eoln && eoln - res.c_str() < 20)
+				{
+					res[ eoln - res.c_str()] = ' ';
+					eoln = std::strchr( eoln+1, '\n');
+				}
+				if (eoln)
+				{
+					res.resize( eoln - res.c_str());
+				}
+				m_errorhnd->report( ErrorCodeDataCorruption, _TXT("document storage inconsistent: %s"), res.c_str());
+			}
 		}
 		else
 		{

@@ -584,6 +584,19 @@ struct PrimeFactorDocumentBuilder
 		listObservedTerms( std::cerr, storage);
 	}
 
+	void checkDocumentWithDocumentChecker( const strus::StorageClientInterface* storage, int didx, const std::vector<Feature>& features)
+	{
+		// Check search index terms against document term inv:
+		std::string docid = primeFactorCollection.docid( didx);
+		strus::local_ptr<StorageDocumentInterface> 
+			checker( storage->createDocumentChecker( docid, ""/*errors reported to errorhnd*/));
+		if (!checker.get()) throw strus::runtime_error( "failed to create document checker: %s", errorhnd->fetchError());
+
+		buildDocument( checker.get(), features);
+		checker->done();
+		if (errorhnd->hasError()) throw std::runtime_error( errorhnd->fetchError());
+	}
+
 	void checkAgainstContentTerms( const strus::StorageClientInterface* storage, int didx, const std::vector<Feature>& features)
 	{
 		// Check search index terms against document term inv:
@@ -817,6 +830,7 @@ struct PrimeFactorDocumentBuilder
 				throw strus::runtime_error("inserted document %s not as expected", docid.c_str());
 			}
 			checkAgainstContentTerms( storage, di, inserted);
+			checkDocumentWithDocumentChecker( storage, di, expected);
 		}
 	}
 
@@ -834,6 +848,9 @@ struct PrimeFactorDocumentBuilder
 			strus::Reference<strus::PostingIteratorInterface>
 				pitr( storage->createTermPostingIterator( type, oi->value, 1/*length*/));
 			if (!pitr.get()) throw std::runtime_error( errorhnd->fetchError());
+			strus::Reference<strus::PostingIteratorInterface>
+				fitr( storage->createFrequencyPostingIterator( type, oi->value));
+			if (!fitr.get()) throw std::runtime_error( errorhnd->fetchError());
 
 			std::string occurrencies;
 			strus::Index dn = pitr->skipDoc( docno);
@@ -845,6 +862,25 @@ struct PrimeFactorDocumentBuilder
 				{
 					occurrencies.append( strus::string_format(" %d", (int)pos));
 				}
+			}
+			if (dn == fitr->skipDoc( docno))
+			{
+				if (dn)
+				{
+					int ff = pitr->frequency();
+					if (ff != fitr->frequency())
+					{
+						strus::runtime_error( "frequency of observed term %s (%d) in document %s does not match: ff %d != occurrencies %d", oi->value.c_str(), valueno, oi->docid.c_str(), (int)fitr->frequency(), ff);
+					}
+				}
+			}
+			else if (dn)
+			{
+				strus::runtime_error( "observed term %s (%d) found in document %s term index but not in frequency index", oi->value.c_str(), valueno, oi->docid.c_str());
+			}
+			else
+			{
+				strus::runtime_error( "observed term %s (%d) found in document %s frequency index but not in term index", oi->value.c_str(), valueno, oi->docid.c_str());
 			}
 			if (occurrencies.empty())
 			{

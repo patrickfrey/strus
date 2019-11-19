@@ -19,11 +19,11 @@ class DatabaseClientInterface;
 class StorageClient;
 
 class PosinfoIterator
-	:public DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock>
+	:public DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock,DocIndexNodeCursor>
 {
 public:
 	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_)
-		:DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock>( DatabaseAdapter_PosinfoBlock::Cursor(database_,termtypeno_,termvalueno_))
+		:DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock,DocIndexNodeCursor>( DatabaseAdapter_PosinfoBlock::Cursor(database_,termtypeno_,termvalueno_))
 		,m_storage(storage_)
 		,m_positionScanner()
 		,m_termtypeno(termtypeno_)
@@ -35,7 +35,7 @@ public:
 	{
 		if (docno() && docno_ == docno()) return docno_;
 		m_positionScanner.clear();
-		return DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock>::skipDoc( docno_);
+		return DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock,DocIndexNodeCursor>::skipDoc( docno_);
 	}
 
 	Index skipPos( const Index& firstpos_);

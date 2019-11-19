@@ -85,12 +85,12 @@ public:
 
 	bool isThisBlockAddress( const strus::Index& docno) const
 	{
-		return (docno <= id() && m_ffIndexNodeArray.size && docno > m_ffIndexNodeArray.ar[ 0].base);
+		return (docno <= id() && m_ffIndexNodeArray.size && docno > m_ffIndexNodeArray.ar[ 0].firstDoc());
 	}
 	/// \brief Check if the address 'docno', if it exists, is most likely located in the following block (cheaper to fetch) or not
 	bool isFollowBlockAddress( const strus::Index& docno) const
 	{
-		Index diff = id() - (m_ffIndexNodeArray.size?m_ffIndexNodeArray.ar[ 0].base:1);
+		Index diff = id() - (m_ffIndexNodeArray.size?m_ffIndexNodeArray.ar[ 0].firstDoc():1);
 		return (docno > id()) && (docno < id() + diff - (diff>>4));
 	}
 

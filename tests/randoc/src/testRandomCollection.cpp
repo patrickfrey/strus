@@ -958,7 +958,7 @@ void checkCollection( strus::StorageClientInterface* storage, const RandomCollec
 	for (; di != de; ++di)
 	{
 		strus::Reference<strus::StorageDocumentInterface>
-			checker( storage->createDocumentChecker( di->docid, "-"/*std::cout*/));
+			checker( storage->createDocumentChecker( di->docid, ""/*reported to g_errorhnd*/));
 		if (!checker.get()) throw std::runtime_error( g_errorhnd->fetchError());
 
 		buildRandomDocument( checker.get(), collection, *di);

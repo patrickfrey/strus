@@ -38,6 +38,7 @@
 #include "metaDataRestriction.hpp"
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
+#include "ffPostingIterator.hpp"
 #include "structIterator.hpp"
 #include "browsePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
@@ -386,6 +387,37 @@ PostingIteratorInterface*
 		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface*
+	StorageClient::createFrequencyPostingIterator(
+		const std::string& typestr,
+		const std::string& termstr) const
+{
+	try
+	{
+		Index typeno = getTermType( typestr);
+		Index termno = getTermValue( termstr);
+
+		if (!typeno || !termno)
+		{
+			return new NullPostingIterator( termstr.c_str());
+		}
+		else
+		{
+			float df = documentFrequency( typeno, termno);
+			float N = nofDocumentsInserted();
+			if (df / N > Constants::stopwordDfFactor())
+			{
+				return new FfPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+			}
+			else
+			{
+				return new FfNoIndexSetPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+			}
+		}
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating ff posting search index iterator: %s"), *m_errorhnd, 0);
 }
 
 StructIteratorInterface*

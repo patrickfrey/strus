@@ -77,6 +77,11 @@ public:
 			const std::string& termid,
 			const Index& length) const;
 
+	virtual PostingIteratorInterface*
+		createFrequencyPostingIterator(
+			const std::string& termtype,
+			const std::string& termid) const;
+
 	virtual StructIteratorInterface*
 		createStructIterator(
 			const std::string& structstr) const;

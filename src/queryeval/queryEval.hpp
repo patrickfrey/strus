@@ -30,15 +30,23 @@ class QueryEval
 {
 public:
 	explicit QueryEval( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+		:m_weightingSets(),m_selectionSets(),m_restrictionSets()
+		,m_exclusionSets(),m_weightingFunctions(),m_summarizers()
+		,m_weightingFormula(),m_terms(),m_varassignmap()
+		,m_usePosinfo(true),m_errorhnd(errorhnd_){}
 
 	QueryEval( const QueryEval& o)
-		:m_selectionSets(o.m_selectionSets)
+		:m_weightingSets(o.m_weightingSets)
+		,m_selectionSets(o.m_selectionSets)
 		,m_restrictionSets(o.m_restrictionSets)
 		,m_exclusionSets(o.m_exclusionSets)
 		,m_weightingFunctions(o.m_weightingFunctions)
 		,m_summarizers(o.m_summarizers)
+		,m_weightingFormula(o.m_weightingFormula)
 		,m_terms(o.m_terms)
+		,m_varassignmap(o.m_varassignmap)
+		,m_usePosinfo(o.m_usePosinfo)
+		,m_errorhnd(o.m_errorhnd)
 	{}
 
 	virtual QueryInterface* createQuery(
@@ -72,6 +80,9 @@ public:
 
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc);
+
+	virtual void usePositionInformation( bool yes)
+		{m_usePosinfo = yes;}
 
 	virtual StructView view() const;
 
@@ -114,6 +125,7 @@ private:
 
 	std::vector<TermConfig> m_terms;				///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 	std::multimap<std::string,VariableAssignment> m_varassignmap;	///< map of weight variable assignments
+	bool m_usePosinfo;						///< true (default) if position info is used for evaluation
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

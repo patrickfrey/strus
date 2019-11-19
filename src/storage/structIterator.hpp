@@ -23,11 +23,11 @@ class DatabaseClientInterface;
 class StorageClient;
 
 class StructIteratorImpl
-	:public DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock>
+	:public DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock,DocIndexNodeCursor>
 {
 public:
 	StructIteratorImpl( const StorageClient* storage_, const DatabaseClientInterface* database_, Index structno_)
-		:DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock>( DatabaseAdapter_StructBlock::Cursor(database_,structno_))
+		:DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock,DocIndexNodeCursor>( DatabaseAdapter_StructBlock::Cursor(database_,structno_))
 		,m_storage(storage_)
 		,m_structureScanner()
 		,m_memberScanner()
@@ -39,7 +39,7 @@ public:
 		if (docno() && docno_ == docno()) return docno_;
 		m_structureScanner.clear();
 		m_memberScanner.clear();
-		return DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock>::skipDoc( docno_);
+		return DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock,DocIndexNodeCursor>::skipDoc( docno_);
 	}
 
 	IndexRange skipPosSource( const Index& firstpos);

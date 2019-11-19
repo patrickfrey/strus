@@ -638,7 +638,7 @@ void InvertedIndexMap::mergeNewPosElements(
 					// ... collect elements overlapping with the follow block 
 					//	and notify them for the document set block and the ff block:
 					defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
-					ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, m_posinfo[ ei->second]/*ff*/));
+					ffdeclar.push_back( FfBlockBuilder::FfDeclaration( ei->first.docno, ei->second?m_posinfo[ ei->second]:0/*ff*/));
 				}
 				// Calculate the estimated fill size and test if it would fit into a single
 				// block with a high fill ratio or try to lower the fill ratio to get 

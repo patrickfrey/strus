@@ -73,7 +73,10 @@ void FfBlockBatchWrite::mergeNewElements(
 				dbadapter->store( transaction, newblk.createBlock());
 				newblk.clear();
 			}
-			newblk.append( ei->docno, ei->ff);
+			if (ei->ff)
+			{
+				newblk.append( ei->docno, ei->ff);
+			}
 		}
 	}
 	while (ei != ee && dbadapter->loadUpperBound( ei->docno, blk))

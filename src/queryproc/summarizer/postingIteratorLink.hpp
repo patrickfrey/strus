@@ -44,7 +44,7 @@ public:
 		return m_ref->documentFrequency();
 	}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		return m_ref->frequency();
 	}

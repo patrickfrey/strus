@@ -85,7 +85,7 @@ public:
 		return (m_maxdocno / m_divisor);
 	}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		return (m_maxposno / m_divisor);
 	}

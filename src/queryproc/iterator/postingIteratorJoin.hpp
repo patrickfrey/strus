@@ -21,7 +21,7 @@ class IteratorJoin
 public:
 	virtual ~IteratorJoin(){}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		Index idx=0;
 		unsigned int rt = 0;

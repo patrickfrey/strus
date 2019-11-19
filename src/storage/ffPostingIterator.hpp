@@ -5,11 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STORAGE_POSTING_ITERATOR_HPP_INCLUDED
-#define _STRUS_STORAGE_POSTING_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_FF_POSTING_ITERATOR_HPP_INCLUDED
+#define _STRUS_STORAGE_FF_POSTING_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
-#include "posinfoIterator.hpp"
+#include "ffIterator.hpp"
 #include "indexSetIterator.hpp"
 
 namespace strus {
@@ -20,20 +20,19 @@ class DatabaseClientInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-class PostingIterator
+class FfPostingIterator
 	:public PostingIteratorInterface
 {
 public:
-	PostingIterator( 
+	FfPostingIterator( 
 			const StorageClient* storage_,
 			const DatabaseClientInterface* database,
 			const Index& termtypeno,
 			const Index& termvalueno,
 			const char* termstr,
-			const Index& length_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~PostingIterator(){}
+	virtual ~FfPostingIterator(){}
 
 	virtual const char* featureid() const
 	{
@@ -55,12 +54,12 @@ public:
 
 	virtual Index posno() const
 	{
-		return m_posinfoIterator.posno();
+		return m_ffIterator.posno();
 	}
 
 	virtual Index length() const
 	{
-		return m_length;
+		return 1;
 	}
 
 private:
@@ -68,15 +67,70 @@ private:
 
 private:
 	IndexSetIterator m_docnoIterator;
-	PosinfoIterator m_posinfoIterator;
+	FfIterator m_ffIterator;
 
 	Index m_docno;
 	Index m_termtypeno;
 	Index m_termvalueno;
-	Index m_length;
 	std::string m_featureid;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for error reporting
 };
+
+
+class FfNoIndexSetPostingIterator
+	:public PostingIteratorInterface
+{
+public:
+	FfNoIndexSetPostingIterator( 
+			const StorageClient* storage_,
+			const DatabaseClientInterface* database,
+			const Index& termtypeno,
+			const Index& termvalueno,
+			const char* termstr,
+			ErrorBufferInterface* errorhnd_);
+
+	virtual ~FfNoIndexSetPostingIterator(){}
+
+	virtual const char* featureid() const
+	{
+		return m_featureid.c_str();
+	}
+
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
+	virtual Index skipPos( const Index& firstpos_);
+
+	virtual int frequency();
+
+	virtual Index documentFrequency() const;
+
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
+	virtual Index posno() const
+	{
+		return m_ffIterator.posno();
+	}
+
+	virtual Index length() const
+	{
+		return 1;
+	}
+
+private:
+	Index skipDoc_impl( const Index& docno_);
+
+private:
+	FfIterator m_ffIterator;
+	Index m_docno;
+	Index m_termtypeno;
+	Index m_termvalueno;
+	std::string m_featureid;
+	ErrorBufferInterface* m_errorhnd;	///< buffer for error reporting
+};
+
 
 }//namespace
 #endif

@@ -83,6 +83,18 @@ public:
 			const std::string& value,
 			const Index& length) const=0;
 
+	/// \brief Create an iterator on the document term occurrence frequencies in the storage. In opposite to the term posting iterator its skip position method returns only position = 1 for any matching document
+	/// \note This posting iterator is used when disabling position information as criterion in the query. This may be suitable when using simple query evaluation methods that are just considering the number of occurrencies and not taking positions (e.g. for proximity) into account.
+	/// \remark Be aware that switching of positions may lead to different results even when using query evaluation schemes that do not take positions into account. This is the case if your features are complex expression using positions in their joins. Therefore positions have to be explicitely switched of in the query and are not enabled or disabled by discovery.
+	/// \note In strus the use of frequeny posting iterators is encouraged in a form of initial query evaluation that decides what documents to select for feature extraction for query expansion.
+	/// \param[in] type type name of the term
+	/// \param[in] value value string of the term
+	/// \return the created iterator reference (with ownership)
+	virtual PostingIteratorInterface*
+		createFrequencyPostingIterator(
+			const std::string& type,
+			const std::string& value) const=0;
+
 	/// \brief Create an iterator on the structures (relations of ordinal position ranges) of a defined type
 	/// \param[in] structname name of the structure to get the iterator on
 	/// \return the created iterator reference (with ownership)
@@ -248,11 +260,11 @@ public:
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check
-	/// \param[in] logfilename Where to log checking failures ("-" for stdout)
+	/// \param[in] logfilename Where to log checking failures ("-" for stdout, "" for the error buffer interface)
 	/// \return the created document interface (with ownership)
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
-			const std::string& logfilename) const=0;
+			const std::string& logfilename = std::string()) const=0;
 
 	/// \brief Create a dump of a storage to iterate on
 	/// \param[in] keyprefix prefix for keys to resrict the dump to

@@ -19,7 +19,7 @@ class DatabaseClientInterface;
 class StorageClient;
 
 /// \brief Helper template for base implementation of iterators on structure blocks like posinfo or posinfo range structures
-template <class DatabaseAdapterType, class BlockType>
+template <class DatabaseAdapterType, class BlockType, class BlockCursorType>
 class DocumentBlockIteratorTemplate
 {
 public:
@@ -105,13 +105,13 @@ public:
 
 	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
 	const BlockType& currentBlock() const			{return m_blk;}
-	DocIndexNodeCursor& currentBlockCursor()		{return m_blkCursor;}
-	const DocIndexNodeCursor& currentBlockCursor() const	{return m_blkCursor;}
+	BlockCursorType& currentBlockCursor()			{return m_blkCursor;}
+	const BlockCursorType& currentBlockCursor() const	{return m_blkCursor;}
 
 private:
 	DatabaseAdapterType m_dbadapter;
 	BlockType m_blk;
-	DocIndexNodeCursor m_blkCursor;
+	BlockCursorType m_blkCursor;
 	Index m_docno;
 	Index m_docno_start;
 	Index m_docno_end;

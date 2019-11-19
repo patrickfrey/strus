@@ -49,7 +49,7 @@ public:
 		return m_posno = posno_;
 	}
 
-	virtual unsigned int frequency()
+	virtual int frequency()
 	{
 		return m_maxposno;
 	}

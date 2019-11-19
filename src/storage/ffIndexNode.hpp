@@ -39,9 +39,9 @@ struct FfIndexNode
 		}
 		else if (base && base != docno_)
 		{
-			if (base + ofs < docno_) return false;
+			if (docno_ - base > (Index)std::numeric_limits<unsigned short>::max()) return false;
 
-			ofs = (unsigned int)(docno_ - base);
+			ofs = (unsigned short)(unsigned int)(int)(docno_ - base);
 			ff[1] = strus::compactUint( ff_);
 			return true;
 		}
@@ -55,9 +55,9 @@ struct FfIndexNode
 
 	strus::Index skipDoc( const strus::Index& docno_, strus::Index& ff_) const
 	{
-		if (docno_ <= base) {ff_ = ff[0]; return base;}
+		if (docno_ <= base) {ff_ = strus::uintFromCompaction( ff[0]); return base;}
 		if (docno_ > base + ofs) {ff_ = 0; return 0;}
-		ff_ = ff[1]; return base + ofs;
+		ff_ = strus::uintFromCompaction( ff[1]); return base + ofs;
 	}
 
 	std::size_t nofElements() const
@@ -65,9 +65,14 @@ struct FfIndexNode
 		return base ? (ofs ? 2 : 1) : 0;
 	}
 
-	strus::Index firstDoc() const		{return base;}
-	strus::Index lastDoc() const		{return base+ofs;}
+	strus::Index firstDoc() const			{return base;}
+	strus::Index lastDoc() const			{return base+ofs;}
+	bool hasSecond() const				{return ofs;}
 
+	strus::Index ff_at( int elemidx) const		{return elemidx ? strus::uintFromCompaction( ff[1]) : strus::uintFromCompaction( ff[0]);}
+	strus::Index docno_at( int elemidx) const	{return elemidx ? base + ofs : base;}
+
+private:
 	strus::Index base;
 	unsigned short ofs;
 	uint8_t ff[ 2];
@@ -109,12 +114,7 @@ struct FfIndexNodeArray
 		}
 		else
 		{
-			strus::Index rt = ar[ cursor.nodeidx].base;
-			if (cursor.elemidx)
-			{
-				rt += ar[ cursor.nodeidx].ofs;
-			}
-			return rt;
+			return ar[ cursor.nodeidx].docno_at( cursor.elemidx);
 		}
 	}
 	int ff_at( const FfIndexNodeCursor& cursor) const
@@ -125,7 +125,7 @@ struct FfIndexNodeArray
 		}
 		else
 		{
-			return (unsigned int)ar[ cursor.nodeidx].ff[ cursor.elemidx];
+			return (unsigned int)ar[ cursor.nodeidx].ff_at( cursor.elemidx);
 		}
 	}
 
@@ -140,17 +140,16 @@ struct FfIndexNodeArray
 		{
 			return 0;
 		}
-		else if (cursor.elemidx == 0 && ar[ cursor.nodeidx].ofs)
+		else if (cursor.elemidx == 0 && ar[ cursor.nodeidx].hasSecond())
 		{
-			cursor.elemidx = 1;
-			return ar[ cursor.nodeidx].base + ar[ cursor.nodeidx].ofs;
+			return ar[ cursor.nodeidx].docno_at( cursor.elemidx = 1);
 		}
 		else
 		{
 			++cursor.nodeidx;
 			cursor.elemidx = 0;
 			
-			return cursor.nodeidx == size ? 0 : ar[ cursor.nodeidx].base;
+			return cursor.nodeidx == size ? 0 : ar[ cursor.nodeidx].firstDoc();
 		}
 	}
 	strus::Index skipDoc( const strus::Index& docno, FfIndexNodeCursor& cursor) const
@@ -160,11 +159,11 @@ struct FfIndexNodeArray
 			if (size == 0) return 0;
 			cursor.reset();
 		}
-		else if (ar[ cursor.nodeidx].base > docno)
+		else if (ar[ cursor.nodeidx].firstDoc() > docno)
 		{
 			cursor.reset();
 		}
-		else if (ar[ cursor.nodeidx].base + ar[ cursor.nodeidx].ofs >= docno)
+		else if (ar[ cursor.nodeidx].lastDoc() >= docno)
 		{
 			return selectCursorDocno( docno, cursor);
 		}
@@ -179,7 +178,7 @@ struct FfIndexNodeArray
 	strus::Index lastDoc() const
 	{
 		if (size == 0) return 0;
-		return ar[ size-1].base + ar[ size-1].ofs;
+		return ar[ size-1].lastDoc();
 	}
 
 	std::vector<FfIndexNode> tovector() const
@@ -196,20 +195,20 @@ struct FfIndexNodeArray
 private:
 	strus::Index selectCursorDocno( const strus::Index& docno, FfIndexNodeCursor& cursor) const
 	{
-		if (ar[ cursor.nodeidx].base >= docno)
+		if (ar[ cursor.nodeidx].firstDoc() >= docno)
 		{
 			cursor.elemidx = 0;
-			return ar[ cursor.nodeidx].base;
+			return ar[ cursor.nodeidx].firstDoc();
 		}
 		else
 		{
 			cursor.elemidx = 1;
-			return ar[ cursor.nodeidx].base + ar[ cursor.nodeidx].ofs;
+			return ar[ cursor.nodeidx].lastDoc();
 		}
 	}
 	int linSearchIndex( const strus::Index& docno, int eidx) const
 	{
-		for (; eidx < size && ar[ eidx].base + ar[ eidx-1].ofs < docno; ++eidx){}
+		for (; eidx < size && ar[ eidx].lastDoc() < docno; ++eidx){}
 		return eidx;
 	}
 	int fibSearchIndex( const strus::Index& docno, int eidx) const
@@ -222,7 +221,7 @@ private:
 			eidx = startidx + f1;
 			if (eidx < size)
 			{
-				if (ar[ eidx].base > docno)
+				if (ar[ eidx].firstDoc() > docno)
 				{
 					return linSearchIndex( docno, startidx);
 				}

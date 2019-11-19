@@ -156,7 +156,10 @@ void FfBlockBuilder::merge_append(
 	{
 		if (ei->docno < docno)
 		{
-			appendblk.append( ei->docno, ei->ff);
+			if (ei->ff)
+			{
+				appendblk.append( ei->docno, ei->ff);
+			}
 			++ei;
 		}
 		else if (ei->docno > docno)
@@ -174,15 +177,34 @@ void FfBlockBuilder::merge_append(
 		}
 		else/*ei->docno == docno*/
 		{
-			int ff = oldblk.frequency_at( cursor);
-			if (ff)
+			if (ei->ff)
 			{
-				if (ff < ei->ff) ff = ei->ff;
-				appendblk.append( docno, ff);
+				appendblk.append( docno, ei->ff);
 			}
 			docno = oldblk.nextDoc( cursor);
 			++ei;
 		}
+	}
+	while (ei != ee && ei->docno <= oldblk.id())
+	{
+		if (ei->ff)
+		{
+			appendblk.append( ei->docno, ei->ff);
+		}
+		else
+		{
+			//... delete => ignore creation in new block
+		}
+		++ei;
+	}
+	while (docno)
+	{
+		int ff = oldblk.frequency_at( cursor);
+		if (ff)
+		{
+			appendblk.append( docno, ff);
+		}
+		docno = oldblk.nextDoc( cursor);
 	}
 }
 

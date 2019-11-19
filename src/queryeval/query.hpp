@@ -44,7 +44,11 @@ public:
 	Query(
 			const QueryEval* queryEval_,
 			const StorageClientInterface* storage_,
+			bool usePosinfo_,
 			ErrorBufferInterface* errorhnd_);
+#if __cplusplus >= 201103L
+	Query( const Query& o) = delete;
+#endif
 
 	virtual ~Query();
 
@@ -241,6 +245,7 @@ private:
 	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query and not the query eval)
 	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
 	bool m_debugMode;						///< true if debug mode is enabled
+	bool m_usePosinfo;						///< true if position info is used
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 	DebugTraceContextInterface* m_debugtrace;			///< debug trace interface
 };

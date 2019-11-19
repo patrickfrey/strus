@@ -46,7 +46,7 @@ public:
 
 	/// \brief Get the frequency of the feature in the current document
 	/// \return the feature frequency (aka 'ff' of 'tf')
-	virtual unsigned int frequency()=0;
+	virtual int frequency()=0;
 
 	/// \brief Get the current document number
 	/// \return the document number

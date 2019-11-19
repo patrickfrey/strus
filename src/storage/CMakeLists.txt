@@ -9,6 +9,8 @@ set( source_files
 	aclReader.cpp
 	ffBlockBatchWrite.cpp
 	ffBlock.cpp
+	ffPostingIterator.cpp
+	ffIterator.cpp
 	booleanBlockBatchWrite.cpp
 	booleanBlock.cpp
 	databaseAdapter.cpp
