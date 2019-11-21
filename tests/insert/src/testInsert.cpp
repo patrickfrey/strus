@@ -146,6 +146,7 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 	}
 	// Check inserted documents:
 	documentBuilder.checkInsertedDocuments( std::cout, storage.sci.get(), nofNumbers);
+	documentBuilder.checkDocumentFrequencies( std::cout, storage.sci.get());
 }
 
 static void printUsage()

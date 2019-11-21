@@ -848,6 +848,25 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
+	void checkDocumentFrequencies( std::ostream& out, const strus::StorageClientInterface* storage) const
+	{
+		int ni = PrimeFactorCollection::MinNumber, ne = primeFactorCollection.maxNumber();
+		for (; ni != ne; ++ni)
+		{
+			int expected_df = primeFactorCollection.frequency( ni);
+			std::string val( searchIndexFeatureValue( ni));
+			int df = storage->documentFrequency( searchIndexFeatureType(), val);
+			if (verbose)
+			{
+				out << strus::string_format( "df %s = %d", val.c_str(), df) << std::endl;
+			}
+			if (df != expected_df)
+			{
+				throw strus::runtime_error( "df of %s does not match %d != expected %d", val.c_str(), df, expected_df);
+			}
+		}
+	}
+
 	void checkInsertedDocuments( std::ostream& out, const strus::StorageClientInterface* storage, int nofDocumentsToCheck)
 	{
 		int di = 0, de = nofDocumentsToCheck;
