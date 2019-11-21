@@ -51,6 +51,7 @@ public:
 
 	void clear();
 	void reset( const Index& maxtype_);
+	void swap( ForwardIndexMap& o);
 
 private:
 	struct MapKey

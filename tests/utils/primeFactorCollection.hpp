@@ -43,6 +43,25 @@
 namespace strus {
 namespace test {
 
+class StructureDef
+{
+public:
+	StructureDef( const std::string& name_, const IndexRange& header_, const IndexRange& content_)
+		:m_name(name_),m_header(header_),m_content(content_){}
+	StructureDef( const StructureDef& o)
+		:m_name(o.m_name),m_header(o.m_header),m_content(o.m_content){}
+
+	const std::string& name() const		{return m_name;}
+	const IndexRange& header() const	{return m_header;}
+	const IndexRange& content() const	{return m_content;}
+	
+private:
+	std::string m_name;
+	IndexRange m_header;
+	IndexRange m_content;
+};
+
+
 /// \brief Collection of items represented by a number as id containing all its prime factors as features
 class PrimeFactorCollection
 {
@@ -166,6 +185,47 @@ public:
 			}
 		}
 		throw std::runtime_error( "bad document id");
+	}
+
+	std::vector<StructureDef> getStructures( int number, int structidx) const
+	{
+		std::vector<StructureDef> rt;
+		if (structidx >= maxNumber()) return rt;
+
+		char nambuf[ 32];
+		std::snprintf( nambuf, sizeof(nambuf), "X%d", structidx);
+		if (!frequency( structidx)) throw std::runtime_error("index of structure needs to be a prime number");
+
+		const std::vector<int>& factors = factorList( number);
+		std::vector<int>::const_iterator fi = factors.begin(), fe = factors.end();
+		while (fi != fe)
+		{
+			if (*fi == structidx)
+			{
+				strus::Index start = (fi-factors.begin())+1;
+				++fi;
+				for (; fi != fe && *fi == structidx; ++fi){}
+				strus::IndexRange hdr( start, (fi-factors.begin())+1);
+				start = hdr.end();
+				if (fi != fe)
+				{
+					int prev = *fi;
+					int init = prev;
+					while (fi != fe && *fi == init)
+					{
+						for (++fi; fi != fe && *fi > prev; prev=*fi,++fi){}
+						strus::IndexRange content( start, (fi-factors.begin())+1);
+						rt.push_back( StructureDef( nambuf, hdr, content));
+						start = content.end();
+					}
+				}
+			}
+			else
+			{
+				++fi;
+			}
+		}
+		return rt;
 	}
 
 private:
@@ -432,7 +492,7 @@ struct PrimeFactorDocumentBuilder
 	}
 
 	template <class DocumentInterface>
-	static void buildDocument( DocumentInterface* doc, const std::vector<Feature>& featurelist)
+	static void buildDocument( DocumentInterface* doc, const std::vector<Feature>& featurelist, const std::vector<StructureDef>& structurelist)
 	{
 		std::vector<Feature>::const_iterator fi = featurelist.begin(), fe = featurelist.end();
 		for (; fi != fe; ++fi)
@@ -456,8 +516,13 @@ struct PrimeFactorDocumentBuilder
 				}
 			}
 		}
+		std::vector<StructureDef>::const_iterator
+			xi = structurelist.begin(), xe = structurelist.end();
+		for (; xi != xe; ++xi)
+		{
+			doc->addSearchIndexStructure( xi->name(), xi->header(), xi->content());
+		}
 		doc->done();
-		
 	}
 
 	std::vector<std::string> docids() const
@@ -523,6 +588,25 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
+	static const int* structIndices()
+	{
+		static const int ar[] = {2,3,5,0};
+		return ar;
+	}
+
+	std::vector<StructureDef> createStructures( int didx)
+	{
+		std::vector<StructureDef> rt;
+		const int* si = structIndices();
+		for (; *si; ++si)
+		{
+			int number = didx + PrimeFactorCollection::MinNumber;
+			std::vector<StructureDef> structs = primeFactorCollection.getStructures( number, *si);
+			rt.insert( rt.end(), structs.begin(), structs.end());
+		}
+		return rt;
+	}
+
 	enum WriteMode {InsertMode, UpdateMode, InsertAlteredMode, UpdateAlteredMode};
 	void insertCollection( strus::StorageClientInterface* storage, PseudoRandom& random, int commitSize, WriteMode mode=InsertMode)
 	{
@@ -544,6 +628,8 @@ struct PrimeFactorDocumentBuilder
 			}
 			std::string docid = PrimeFactorCollection::docid( di);
 			std::vector<Feature> feats = createDocument( di);
+			std::vector<StructureDef> structs = createStructures( di);
+
 			switch (mode)
 			{
 				case InsertAlteredMode:
@@ -554,7 +640,7 @@ struct PrimeFactorDocumentBuilder
 					strus::local_ptr<strus::StorageDocumentInterface>
 						doc( transaction->createDocument( docid.c_str()));
 					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
-					buildDocument( doc.get(), feats);
+					buildDocument( doc.get(), feats, structs);
 					break;
 				}
 				case UpdateAlteredMode:
@@ -567,7 +653,7 @@ struct PrimeFactorDocumentBuilder
 					strus::local_ptr<strus::StorageDocumentUpdateInterface>
 						doc( transaction->createDocumentUpdate( docno));
 					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
-					buildDocument( doc.get(), feats);
+					buildDocument( doc.get(), feats, structs);
 					break;
 				}
 			}
@@ -584,7 +670,7 @@ struct PrimeFactorDocumentBuilder
 		listObservedTerms( std::cerr, storage);
 	}
 
-	void checkDocumentWithDocumentChecker( const strus::StorageClientInterface* storage, int didx, const std::vector<Feature>& features)
+	void checkDocumentWithDocumentChecker( const strus::StorageClientInterface* storage, int didx, const std::vector<Feature>& features, const std::vector<StructureDef>& structures)
 	{
 		// Check search index terms against document term inv:
 		std::string docid = primeFactorCollection.docid( didx);
@@ -592,8 +678,7 @@ struct PrimeFactorDocumentBuilder
 			checker( storage->createDocumentChecker( docid, ""/*errors reported to errorhnd*/));
 		if (!checker.get()) throw strus::runtime_error( "failed to create document checker: %s", errorhnd->fetchError());
 
-		buildDocument( checker.get(), features);
-		checker->done();
+		buildDocument( checker.get(), features, structures);
 		if (errorhnd->hasError()) throw std::runtime_error( errorhnd->fetchError());
 	}
 
@@ -771,6 +856,7 @@ struct PrimeFactorDocumentBuilder
 			std::string docid = PrimeFactorCollection::docid( di);
 			std::vector<Feature> inserted = fetchContent( storage, di);
 			std::vector<Feature> expected = createDocument( di);
+			std::vector<StructureDef> structs = createStructures( di);
 	
 			std::sort( inserted.begin(), inserted.end());
 			std::sort( expected.begin(), expected.end());
@@ -830,7 +916,7 @@ struct PrimeFactorDocumentBuilder
 				throw strus::runtime_error("inserted document %s not as expected", docid.c_str());
 			}
 			checkAgainstContentTerms( storage, di, inserted);
-			checkDocumentWithDocumentChecker( storage, di, expected);
+			checkDocumentWithDocumentChecker( storage, di, expected, structs);
 		}
 	}
 

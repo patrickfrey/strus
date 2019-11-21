@@ -458,7 +458,7 @@ void StorageTransaction::reset()
 	m_metaDataMap.reset( m_storage->getMetaDataBlockCacheRef());
 
 	m_invertedIndexMap.clear();
-	m_structIndexMap.reset( m_storage->maxStructTypeNo());
+	m_structIndexMap.reset();
 	m_forwardIndexMap.reset( m_storage->maxTermTypeNo());
 	m_userAclMap.clear();
 

@@ -57,7 +57,7 @@ public:
 		StructureMemberSearchCompare(){}
 		bool operator()( const StructureMember& aa, const PositionType& bb) const
 		{
-			return aa.end < bb;
+			return aa.end <= bb;
 		}
 	};
 	struct StructureDefSearchCompare
@@ -65,7 +65,7 @@ public:
 		StructureDefSearchCompare(){}
 		bool operator()( const StructureDef& aa, const PositionType& bb) const
 		{
-			return aa.header_end < bb;
+			return aa.header_end <= bb;
 		}
 	};
 
@@ -129,6 +129,10 @@ public:
 	{
 		return m_docIndexNodeArray.lastDoc();
 	}
+	bool full() const
+	{
+		return (int)size() >= Constants::maxStructBlockSize();
+	}
 	/// \brief Upper bound search for a docnument number in the block
 	Index skipDoc( const Index& docno_, DocIndexNodeCursor& cursor) const
 	{
@@ -189,14 +193,9 @@ public:
 				if (m_itr == 0) return strus::IndexRange();
 				m_itr = 0;
 			}
-			if ((Index)m_ar[ m_itr].start > pos)
-			{
-				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureMemberSearchCompare());
-				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
-			}
 			else if ((Index)m_ar[ m_itr].end <= pos)
 			{
-				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureMemberSearchCompare());
+				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureMemberSearchCompare());
 				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
 			}
 			return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
@@ -249,14 +248,9 @@ public:
 				if (m_itr == 0) return strus::IndexRange();
 				m_itr = 0;
 			}
-			if ((Index)m_ar[ m_itr].header_start > pos)
+			if ((Index)m_ar[ m_itr].header_end <= pos)
 			{
-				int idx = m_ar.upperbound( pos+1, 0, m_itr, StructureDefSearchCompare());
-				if (idx > 0) m_itr = idx; else return strus::IndexRange();
-			}
-			else if ((Index)m_ar[ m_itr].header_end <= pos)
-			{
-				int idx = m_ar.upperbound( pos+1, m_itr, m_ar.size(), StructureDefSearchCompare());
+				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureDefSearchCompare());
 				if (idx > 0) m_itr = idx; else return strus::IndexRange();
 			}
 			return strus::IndexRange( m_ar[ m_itr].header_start, m_ar[ m_itr].header_end);
@@ -310,9 +304,11 @@ public:
 public:
 	StructBlockBuilder( const StructBlock& o);
 	StructBlockBuilder()
-		:m_memberar(),m_structurelistar(),m_structurear(),m_lastDoc(0),m_id(0){}
+		:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
+		,m_lastDoc(0),m_id(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
-		:m_memberar(o.m_memberar)
+		:m_docIndexNodeArray(o.m_docIndexNodeArray)
+		,m_memberar(o.m_memberar)
 		,m_structurelistar(o.m_structurelistar)
 		,m_structurear(o.m_structurear)
 		,m_lastDoc(o.m_lastDoc)
@@ -329,8 +325,32 @@ public:
 		return m_structurear.empty();
 	}
 
+	Index lastDoc() const
+	{
+		return m_docIndexNodeArray.empty() ? 0 : m_docIndexNodeArray.back().lastDoc();
+	}
+	Index firstDoc() const
+	{
+		return m_docIndexNodeArray.empty() ? 0 : m_docIndexNodeArray[ 0].firstDoc();
+	}
+
+	struct StructDeclaration
+	{
+		Index docno;
+		IndexRange src;
+		IndexRange sink;
+
+		StructDeclaration( const Index& docno_, const IndexRange& src_, const IndexRange& sink_)
+			:docno(docno_),src(src_),sink(sink_){}
+		StructDeclaration( const StructDeclaration& o)
+			:docno(o.docno),src(o.src),sink(o.sink){}
+	};
+
 	/// \brief Add a new structure relation to the block
 	void append( const Index& docno, const strus::IndexRange& src, const strus::IndexRange& sink);
+
+	/// \brief Add the structures of a document stored in another block 
+	void appendFromBlock( const Index& docno, const StructBlock& blk, const DocIndexNodeCursor& cursor);
 
 	bool fitsInto( std::size_t nofstructures) const;
 	bool full() const
@@ -364,6 +384,28 @@ public:
 
 	static void merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk);
 
+	static void merge(
+			std::vector<StructDeclaration>::const_iterator ei,
+			const std::vector<StructDeclaration>::const_iterator& ee,
+			const StructBlock& oldblk,
+			StructBlockBuilder& newblk);
+	static void merge_append(
+			std::vector<StructDeclaration>::const_iterator ei,
+			const std::vector<StructDeclaration>::const_iterator& ee,
+			const StructBlock& oldblk,
+			StructBlockBuilder& appendblk);
+	static void split( const StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2);
+
+	void swap( StructBlockBuilder& o)
+	{
+		m_docIndexNodeArray.swap( o.m_docIndexNodeArray);
+		m_memberar.swap( o.m_memberar);
+		m_structurelistar.swap( o.m_structurelistar);
+		m_structurear.swap( o.m_structurear);
+		std::swap( m_lastDoc, o.m_lastDoc);
+		std::swap( m_id, o.m_id);
+	}
+	
 private:
 	void addNewDocument( const Index& docno);
 	void addLastDocStructure( const strus::IndexRange& src);

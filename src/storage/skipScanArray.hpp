@@ -13,6 +13,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <vector>
+#include <algorithm>
 
 namespace strus {
 
@@ -37,24 +38,28 @@ public:
 
 	int upperbound( const IndexType& needle, int start, int end, const ComparatorFunctor& cmp) const
 	{
+		enum {NotFound=-1};
 		if (end == start) return -1;
-
-		// Block search:
-		enum {BlockSize = 8};
+		// Block search (fibonacci):
+		int fib1 = 1, fib2 = 1;
 		int bi = start;
-		for (;bi < end && cmp( m_ar[ bi], needle); bi += BlockSize){}
-		if (bi > start)
+		while (bi < end && cmp( m_ar[ bi], needle))
 		{
-			int ei = 0;
-			int ee = (bi < end) ? BlockSize : (BlockSize - (bi-end));
-			bi -= BlockSize;
-			for (; ei < ee && cmp( m_ar[ bi+ei], needle); ++ei){}
-			if (bi+ei == end) return -1/*upperbound not found*/;
-			return bi + ei;
+			bi = start + fib1;
+			fib2 = fib1 + fib2;
+			std::swap( fib1, fib2);
+		}
+		if (fib1 - fib2 > 1)
+		{
+			int ei = start + fib2;
+			int ee = start + fib1;
+			if (end > ee) ee = end;
+			for (; ei < ee && cmp( m_ar[ start+ei], needle); ++ei){}
+			return (ei == end) ? NotFound : ei;
 		}
 		else
 		{
-			return 0/*upperbound is first element*/;
+			return bi == end ? NotFound : bi;
 		}
 	}
 

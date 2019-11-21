@@ -47,7 +47,7 @@ bool DocIndexNode::addDocument( const Index& docno, unsigned short ref_)
 	{
 		if (base >= docno)
 		{
-			throw strus::runtime_error( "%s",  _TXT( "documents not added in ascending order into posinfo block"));
+			throw strus::runtime_error( _TXT( "documents not added in ascending order into posinfo block"));
 		}
 		if (base + std::numeric_limits<unsigned short>::max() <= docno)
 		{

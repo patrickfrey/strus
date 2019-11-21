@@ -398,7 +398,7 @@ void InvertedIndexMap::getWriteBatch(
 			InvTermBlock invblk;
 			invblk.setId( vi->first);
 			InvTermList::const_iterator li = m_invterms.begin() + vi->second, le = m_invterms.end();
-	
+
 			for (; li != le && li->typeno; ++li)
 			{
 				// inv blk:

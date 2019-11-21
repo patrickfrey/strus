@@ -24,6 +24,7 @@
 #include "private/errorUtils.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -81,7 +82,8 @@ void StorageDocumentChecker::addSearchIndexStructure(
 {
 	try
 	{
-		m_structurelist.push_back( Structure( struct_, source_, sink_));
+		std::string structnam = strus::string_conv::tolower( struct_);
+		m_structurelist.push_back( Structure( structnam, source_, sink_));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index term: %s"), *m_errorhnd);
 }
@@ -145,12 +147,12 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		{
 			Index typeno = m_storage->getTermType( ti->first.type);
 			Index termno = m_storage->getTermValue( ti->first.value);
-	
+
 			if (!typeno) throw strus::runtime_error( _TXT( "unknown term type '%s'"), ti->first.type.c_str());
 			if (!termno) throw strus::runtime_error( _TXT( "unknown term value '%s'"), ti->first.value.c_str());
-	
+
 			IndexSetIterator docnoIterator( m_storage->databaseClient(), DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
-	
+
 			strus::local_ptr<PostingIteratorInterface> fitr(
 				m_storage->createFrequencyPostingIterator( ti->first.type, ti->first.value)); 
 			strus::local_ptr<PostingIteratorInterface> pitr(
@@ -189,7 +191,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 						_TXT("term %s '%s' frequency differs in frequency posting iterator and term posting iterator: frequency ~%d != ~%d occurrencies counted (values compacted)"), ti->first.type.c_str(), ti->first.value.c_str(), ff, ff_p);
 			}
 			Index pos = 0;
-	
+
 			std::set<Index>::const_iterator
 				pi = ti->second.poset.begin(), pe = ti->second.poset.end();
 			for (pi=ti->second.poset.begin(); pi != pe; ++pi)
@@ -226,14 +228,13 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				logError( logout, m_docid, _TXT("failed to create structure iterator: %s"), m_errorhnd->fetchError());
 				break;
 			}
-			Index docno = stitr->skipDoc( 0);
-			for (; docno; docno = stitr->skipDoc( docno+1))
+			if (m_docno == stitr->skipDoc( m_docno))
 			{
 				IndexRange source = stitr->skipPosSource( 0);
 				for (; source.defined(); source = stitr->skipPosSource( source.end()))
 				{
 					IndexRange sink = stitr->skipPosSink( 0);
-					for (; sink.defined(); sink = stitr->skipPosSource( sink.end()))
+					for (; sink.defined(); sink = stitr->skipPosSink( sink.end()))
 					{
 						structures.push_back( Structure( *si, source, sink));
 					}

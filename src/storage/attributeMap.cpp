@@ -8,6 +8,7 @@
 #include "attributeMap.hpp"
 #include "databaseAdapter.hpp"
 #include "keyMap.hpp"
+#include <algorithm>
 
 using namespace strus;
 
@@ -133,5 +134,13 @@ void AttributeMap::clear()
 	m_map.clear();
 	m_strings.clear();
 	m_deletes.clear();
+}
+
+void AttributeMap::swap( AttributeMap& o)
+{
+	std::swap( m_database, o.m_database);
+	m_map.swap( o.m_map);
+	m_strings.swap( o.m_strings);
+	m_deletes.swap( o.m_deletes);
 }
 

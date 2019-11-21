@@ -45,7 +45,7 @@ public:
 	void print( std::ostream& out) const;
 
 	void clear();
-	void reset( const Index& maxstructno_);
+	void reset();
 
 private:
 	struct StructDef
@@ -70,13 +70,11 @@ private:
 		}
 	};
 
-	typedef LocalStructAllocator<StructDef> StructDefAllocator;
 	typedef std::less<StructDef> StructDefCompare;
-	typedef std::set<StructDef,StructDefCompare,StructDefAllocator> StructDefSet;
+	typedef std::set<StructDef,StructDefCompare> StructDefSet;
 
-	typedef LocalStructAllocator<std::pair<const Index,int> > MapAllocator;
 	typedef std::less<Index> MapCompare;
-	typedef std::map<Index,int,MapCompare,MapAllocator> Map;
+	typedef std::map<Index,int,MapCompare> Map;
 
 private:
 	void deleteInsertedStructs( const Index& docno, const Index& structno);
@@ -92,7 +90,7 @@ private:
 private:
 	DatabaseClientInterface* m_database;		///< database client interface
 	std::vector<StructDefSet> m_defar;		///< vector doc index index -> structures
-	std::vector<Map> m_mapar;			///< map docno -> doc index or -1 (deleted)
+	std::vector<Map> m_mapar;			///< array parallel to structures, map docno -> doc index or -1 (deleted)
 	Index m_docno;					///< current document number
 };
 

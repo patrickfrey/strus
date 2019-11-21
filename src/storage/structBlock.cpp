@@ -34,7 +34,8 @@ static const Element* getStructPtr( const void* dataPtr, unsigned short indexSta
 template <typename Element>
 static int getStructSize( unsigned short indexStart, unsigned short indexEnd)
 {
-	return (indexEnd-indexStart) % sizeof(Element);
+	if (0!=(indexEnd-indexStart) % sizeof(Element)) throw std::runtime_error(_TXT("data corruption in structure block"));
+	return (indexEnd-indexStart) / sizeof(Element);
 }
 
 void StructBlock::initFrame()
@@ -54,7 +55,6 @@ void StructBlock::initFrame()
 		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( ptr(), sizeof(BlockHeader), hdr->structlistidx);
 		int docIndexNodeSize = getStructSize<DocIndexNode>( sizeof(BlockHeader), hdr->structlistidx);
 		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
-
 		m_structlistar = getStructPtr<StructureDefList>( ptr(), hdr->structlistidx, hdr->structidx);
 		m_structar = getStructPtr<StructureDef>( ptr(), hdr->structidx, hdr->memberidx);
 		m_memberar = getStructPtr<StructureMember>( ptr(), hdr->memberidx, blockSize);
@@ -63,6 +63,20 @@ void StructBlock::initFrame()
 	{
 		throw strus::runtime_error( _TXT("data corruption in structure block"));
 	}
+}
+
+StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
+	:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
+	,m_lastDoc(0),m_id(0)
+{
+	DocIndexNodeCursor cursor;
+	strus::Index docno = o.firstDoc( cursor);
+	while (docno)
+	{
+		appendFromBlock( docno, o, cursor);
+		docno = o.nextDoc( cursor);
+	}
+	m_id = o.id();
 }
 
 void StructBlockBuilder::addNewDocument( const Index& docno)
@@ -112,9 +126,15 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 
 void StructBlockBuilder::append( const Index& docno, const IndexRange& src, const IndexRange& sink)
 {
-	if (docno <= 0) throw std::runtime_error(_TXT("cannot add docno <= 0"));
+	if (docno <= 0)
+	{
+		throw std::runtime_error(_TXT("cannot add docno <= 0"));
+	}
 	if (src.start() >= src.end() || sink.start() >= sink.end()) throw std::runtime_error(_TXT("adding empty structures not allowed"));
-	if (m_lastDoc > docno) throw std::runtime_error(_TXT("documents not added in ascending order"));
+	if (m_lastDoc > docno)
+	{
+		throw strus::runtime_error(_TXT("documents not added in ascending order (%d > %d)"), (int)m_lastDoc, (int)docno);
+	}
 	if (m_lastDoc != docno)
 	{
 		if (m_id && m_id < docno) throw strus::runtime_error( _TXT("assigned illegal id to block"));
@@ -180,18 +200,7 @@ void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBloc
 		}
 		else/*(docno1 == docno2)*/
 		{
-			if (src1.start() < src2.start())
-			{
-				newblk.append( docno1, src1, sink1);
-				newblk.append( docno2, src2, sink2);
-			}
-			else
-			{
-				newblk.append( docno2, src2, sink2);
-				newblk.append( docno1, src1, sink1);
-			}
-			docno1 = blk1.nextNode( cursor1, src1, sink1);
-			docno2 = blk2.nextNode( cursor2, src2, sink2);
+			throw std::runtime_error(_TXT("cannot merge structure blocks with overlapping document references"));
 		}
 	}
 	while (docno1)
@@ -206,9 +215,139 @@ void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBloc
 	}
 }
 
+void StructBlockBuilder::merge(
+		std::vector<StructDeclaration>::const_iterator ei,
+		const std::vector<StructDeclaration>::const_iterator& ee,
+		const StructBlock& oldblk,
+		StructBlockBuilder& newblk)
+{
+	newblk.clear();
+	newblk.setId( oldblk.id());
+	merge_append( ei, ee, oldblk, newblk);
+}
+
+void StructBlockBuilder::appendFromBlock( const Index& docno, const StructBlock& blk, const DocIndexNodeCursor& cursor)
+{
+	int nofStructs;
+	const StructureDef* structDefs = blk.structures_at( cursor, nofStructs);
+	int ni = 0, ne = nofStructs;
+	for (; ni != ne; ++ni)
+	{
+		IndexRange source( structDefs[ ni].header_start, structDefs[ ni].header_end);
+		int nofMembers;
+		const StructureMember* memberDefs = blk.members_at( cursor, structDefs+ni, nofMembers);
+		int mi = 0, me = nofMembers;
+		for (; mi != me; ++mi)
+		{
+			IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
+			append( docno, source, sink);
+		}
+	}
+}
+
+void StructBlockBuilder::merge_append(
+		std::vector<StructDeclaration>::const_iterator ei,
+		const std::vector<StructDeclaration>::const_iterator& ee,
+		const StructBlock& oldblk,
+		StructBlockBuilder& appendblk)
+{
+	strus::IndexRange src;
+	strus::IndexRange sink;
+	DocIndexNodeCursor cursor;
+
+	strus::Index docno = oldblk.firstDoc( cursor);
+	while (docno && ei != ee && ei->docno <= oldblk.id())
+	{
+		if (ei->docno < docno)
+		{
+			strus::Index first_docno = ei->docno;
+			while (ei != ee && ei->docno == first_docno)
+			{
+				if (ei->sink.defined() || ei->src.defined())
+				{
+					appendblk.append( ei->docno, ei->src, ei->sink);
+				}
+				ei++;
+			}
+		}
+		else if (ei->docno > docno)
+		{
+			appendblk.appendFromBlock( docno, oldblk, cursor);
+			docno = oldblk.nextDoc( cursor);
+		}
+		else/*(ei->docno == docno)*/
+		{
+			strus::Index first_docno = ei->docno;
+			while (ei != ee && ei->docno == first_docno)
+			{
+				if (ei->sink.defined() || ei->src.defined())
+				{
+					appendblk.append( ei->docno, ei->src, ei->sink);
+				}
+				ei++;
+			}
+			while (docno == first_docno)
+			{
+				// ... skip old block elements, they are replaced
+				docno = oldblk.nextDoc( cursor);
+			}
+		}
+	}
+	while (docno)
+	{
+		appendblk.appendFromBlock( docno, oldblk, cursor);
+		docno = oldblk.nextDoc( cursor);
+	}
+	while (ei != ee)
+	{
+		appendblk.append( ei->docno, ei->src, ei->sink);
+		++ei;
+	}
+}
+
+void StructBlockBuilder::split( const StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2)
+{
+	std::vector<StructDeclaration> declar;
+	Cursor cursor;
+	strus::IndexRange src;
+	strus::IndexRange sink;
+	strus::Index docno = blk.firstNode( cursor, src, sink);
+	while (docno)
+	{
+		declar.push_back( StructDeclaration( docno, src, sink));
+		docno = blk.nextNode( cursor, src, sink);
+	}
+	newblk1.clear();
+	newblk2.clear();
+	if (declar.empty()) return;
+
+	std::size_t splitidx = declar.size() / 2 - declar.size() / 16;
+	docno = declar[ splitidx].docno;
+	while (splitidx < declar.size() && declar[splitidx].docno == docno) {++splitidx;}
+	if (splitidx == declar.size())
+	{
+		while (splitidx > 0 && declar[splitidx-1].docno == docno) {--splitidx;}
+		if (splitidx == 0)
+		{
+			newblk1 = blk;
+			return;
+		}
+	}
+	std::vector<StructDeclaration>::const_iterator di = declar.begin(), de = declar.begin()+splitidx;
+	for (; di != de; ++di)
+	{
+		newblk1.append( di->docno, di->src, di->sink);
+	}
+	di = declar.begin()+splitidx, de = declar.end();
+	for (; di != de; ++di)
+	{
+		newblk2.append( di->docno, di->src, di->sink);
+	}
+}
+
 bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
-	int estimatedConsumption = nofstructures * (sizeof(StructureMember) + sizeof(StructureMember));
+	int estimatedConsumption = nofstructures * (sizeof(StructureMember));
 	return size() + estimatedConsumption <= Constants::maxStructBlockSize();
 }
 

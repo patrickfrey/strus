@@ -9,6 +9,7 @@
 #include "keyMapInv.hpp"
 #include "databaseAdapter.hpp"
 #include "private/internationalization.hpp"
+#include <algorithm>
 
 using namespace strus;
 #undef STRUS_READ_KEYMAPS_DURING_INSERTION

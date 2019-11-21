@@ -39,6 +39,8 @@ public:
 
 	void clear();
 
+	void swap( AttributeMap& o);
+
 private:
 	typedef LocalStructAllocator<std::pair<const BlockKeyIndex,const char*> > MapAllocator;
 	typedef std::less<BlockKeyIndex> MapCompare;

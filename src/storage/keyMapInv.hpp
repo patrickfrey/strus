@@ -44,6 +44,12 @@ public:
 		m_map.erase( idx);
 	}
 
+	void swap( KeyMapInv& o)
+	{
+		m_map.swap( o.m_map);
+		m_strings.swap( o.m_strings);
+	}
+
 private:
 	KeyMapInv( const KeyMapInv&){}		///... non copyable
 	void operator=( const KeyMapInv&){}	///... non copyable

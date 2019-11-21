@@ -10,6 +10,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "databaseAdapter.hpp"
 #include "keyMap.hpp"
+#include <algorithm>
 
 using namespace strus;
 
@@ -277,5 +278,19 @@ void ForwardIndexMap::reset( const Index& maxtype_)
 {
 	clear();
 	m_maxtype = maxtype_;
+}
+
+void ForwardIndexMap::swap( ForwardIndexMap& o)
+{
+	std::swap( m_database, o.m_database);
+	m_map.swap( o.m_map);
+	m_blocklist.swap( o.m_blocklist);
+	m_curblockmap.swap( o.m_curblockmap);
+	m_strings.swap( o.m_strings);
+	std::swap( m_docno, o.m_docno);
+	std::swap( m_maxtype, o.m_maxtype);
+	std::swap( m_maxblocksize, o.m_maxblocksize);
+	m_docno_deletes.swap( o.m_docno_deletes);
+	m_docno_typeno_deletes.swap( o.m_docno_typeno_deletes);
 }
 

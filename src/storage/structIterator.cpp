@@ -17,6 +17,8 @@ using namespace strus;
 IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 {
 	if (!docno()) return IndexRange(0,0);
+	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return IndexRange(0,0);
+
 	if (m_structureScanner.initialized())
 	{
 		const StructBlock::StructureDef* cur = m_structureScanner.current();
@@ -37,6 +39,8 @@ IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 {
 	if (!docno()) return IndexRange(0,0);
+	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return IndexRange(0,0);
+
 	if (m_memberScanner.initialized())
 	{
 		const StructBlock::StructureMember* cur = m_memberScanner.current();

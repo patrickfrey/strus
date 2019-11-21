@@ -11,7 +11,9 @@
 #include "private/internationalization.hpp"
 #include "strus/base/string_format.hpp"
 #include "keyMap.hpp"
+#include "structBlockBatchWrite.hpp"
 #include <algorithm>
+#include <limits>
 
 using namespace strus;
 
@@ -19,7 +21,7 @@ StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, const Index&
 	:m_database(database_),m_defar(),m_mapar(maxstructo_),m_docno(0)
 {}
 
-#define DELETE_STRUCTURES (Index)-1
+#define DELETE_STRUCTURES -1
 
 void StructIndexMap::clear()
 {
@@ -28,10 +30,11 @@ void StructIndexMap::clear()
 	m_mapar.clear();
 }
 
-void StructIndexMap::reset( const Index& maxstructno_)
+void StructIndexMap::reset()
 {
+	std::size_t maparsize = m_mapar.size();
 	clear();
-	m_mapar = std::vector<Map>(maxstructno_);
+	m_mapar.resize( maparsize);
 }
 
 void StructIndexMap::defineStructure(
@@ -40,16 +43,30 @@ void StructIndexMap::defineStructure(
 	const IndexRange& source,
 	const IndexRange& sink)
 {
-	if (structno > (Index)m_mapar.size() || structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
-	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
-	StructDefSet* defset = 0;
-
-	Map& map = m_mapar[ structno-1];
-	Map::iterator mi = map.find( docno);
-
-	if (mi == map.end() || mi->second == DELETE_STRUCTURES)
+	if (structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+	if (structno > (Index)m_mapar.size())
 	{
-		map[ docno] = m_defar.size();
+		if (structno == (Index)m_mapar.size()+1)
+		{
+			m_mapar.push_back( Map());
+		}
+		else
+		{
+			throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+		}
+	}
+	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
+	if (!source.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "source");
+	if (!sink.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "sink");
+	if (source.end() > std::numeric_limits<StructBlock::PositionType>::max()) throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "source");
+	if (sink.end() > std::numeric_limits<StructBlock::PositionType>::max()) throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "sink");
+
+	StructDefSet* defset = 0;
+	Map::iterator mi = m_mapar[ structno-1].find( docno);
+
+	if (mi == m_mapar[ structno-1].end() || mi->second == DELETE_STRUCTURES)
+	{
+		m_mapar[ structno-1][ docno] = m_defar.size();
 		m_defar.push_back( StructDefSet());
 		defset = &m_defar.back();
 	}
@@ -61,9 +78,8 @@ void StructIndexMap::defineStructure(
 		}
 		defset = &m_defar[ mi->second];
 	}
-	m_docno = docno;
-
 	defset->insert( StructDef( source, sink));
+	m_docno = docno;
 }
 
 void StructIndexMap::deleteInsertedStructs( const Index& docno, const Index& structno)
@@ -116,92 +132,6 @@ void StructIndexMap::renameNewNumbers( const std::map<Index,Index>& docnoUnknown
 	}
 }
 
-bool StructIndexMap::fitsNofStructuresLeft( Map::const_iterator mi, const Map::const_iterator& me, int maxLimit) const
-{
-	int nn = 0;
-	while (mi != me && nn < maxLimit)
-	{
-		int idx = mi->second;
-		if (idx == DELETE_STRUCTURES) continue;
-		nn += m_defar[ idx].size();
-	}
-	return nn < maxLimit;
-}
-
-void StructIndexMap::writeNewBlocks(
-		DatabaseAdapter_StructBlock::WriteCursor& dbadapter,
-		DatabaseTransactionInterface* transaction,
-		Map::const_iterator mi,
-		const Map::const_iterator& me,
-		StructBlockBuilder& blk)
-{
-	Index docno = 0;
-	for (; mi != me; ++mi)
-	{
-		docno = mi->second;
-		int idx = mi->second;
-		if (idx == DELETE_STRUCTURES) continue;
-		const StructDefSet& st = m_defar[ idx];
-		int nofDocStructs = st.size();
-		if (blk.empty() || blk.fitsInto( nofDocStructs))
-		{
-			StructDefSet::const_iterator si = st.begin(), se = st.end();
-			for (; si != se; ++si)
-			{
-				blk.append( docno, si->source, si->sink);
-			}
-		}
-		else
-		{
-			blk.setId( docno);
-			dbadapter.store( transaction, blk.createBlock());
-			blk.clear();
-		}
-	}
-}
-
-void StructIndexMap::loadStoredElementsFromBlock( const Index& structno, const StructBlock& blk)
-{
-	DocIndexNodeCursor cursor;
-	Index docno = blk.firstDoc( cursor);
-	for (; docno; docno = blk.nextDoc( cursor))
-	{
-		Map& map = m_mapar[ structno-1];
-		StructDefSet* defset = 0;
-		Map::iterator mi = map.find( docno);
-		if (mi == map.end())
-		{
-			map[ docno] = m_defar.size();
-			m_defar.push_back( StructDefSet());
-			defset = &m_defar.back();
-		}
-		else if (mi->second == DELETE_STRUCTURES)
-		{
-			continue;
-		}
-		else
-		{
-			defset = &m_defar[ mi->second];
-		}
-		if (defset->empty())
-		{
-			StructBlock::StructureScanner si = blk.structureScanner_at( cursor);
-			const StructBlock::StructureDef* sdef = si.current();
-			for (; sdef; si.next(),sdef = si.current())
-			{
-				IndexRange source( sdef->header_start, sdef->header_end);
-				StructBlock::MemberScanner mitr = si.members();
-				const StructBlock::StructureMember* member = mitr.current();
-				for (;member; mitr.next(),member=mitr.current())
-				{
-					IndexRange sink( member->start, member->end);
-					defset->insert( StructDef( source, sink));
-				}
-			}
-		}
-	}
-}
-
 void StructIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	Index si = 0, se = m_mapar.size();
@@ -209,41 +139,40 @@ void StructIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	{
 		Index structno = si+1;
 		DatabaseAdapter_StructBlock::WriteCursor dbadapter( m_database, structno);
+		std::vector<StructBlockBuilder::StructDeclaration> declar;
 
 		const Map& map = m_mapar[ si];
 		Map::const_iterator mi = map.begin(), me = map.end();
-		while (mi != me)
+		for (; mi != me; ++mi)
 		{
-			StructBlock blk;
-			Index docno = mi->first;
-			if (dbadapter.loadUpperBound( docno, blk))
+			strus::Index docno = mi->first;
+			if (mi->second == DELETE_STRUCTURES)
 			{
-				DocIndexNodeCursor cursor;
-				Index blk_first_docno = blk.firstDoc( cursor);
-				Map::const_iterator next_mi = map.upper_bound( blk_first_docno-1);
-				StructBlockBuilder restblk;
-				writeNewBlocks( dbadapter, transaction, mi, me, restblk);
-				if (restblk.size() + blk.size() <= StructBlock::MaxBlockSize)
-				{
-					loadStoredElementsFromBlock( structno, blk);
-					dbadapter.remove( transaction, blk.id());
-					mi = map.find( docno);
-					me = map.end();
-				}
-				else
-				{
-					if (!restblk.empty()) dbadapter.store( transaction, restblk.createBlock());
-					mi = next_mi;
-				}
+				declar.push_back( StructBlockBuilder::StructDeclaration(
+					docno, IndexRange(), IndexRange()));
 			}
 			else
 			{
-				StructBlockBuilder restblk;
-				writeNewBlocks( dbadapter, transaction, mi, me, restblk);
-				if (!restblk.empty()) dbadapter.store( transaction, restblk.createBlock());
-				mi = me;
+				if (mi->second >= (int)m_defar.size()) throw strus::runtime_error(_TXT("corrupt data, array bound read in %s"), "structure index map");
+
+				StructDefSet defset = m_defar[ mi->second];
+				StructDefSet::const_iterator di = defset.begin(), de = defset.end();
+				for (; di != de; ++di)
+				{
+					declar.push_back( StructBlockBuilder::StructDeclaration(
+						docno, di->source, di->sink));
+				}
 			}
 		}
+		StructBlockBuilder newblk;
+		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator
+			ei = declar.begin(), ee = declar.end();
+
+		// [1] Merge new elements with existing upper bound blocks:
+		StructBlockBatchWrite::mergeNewElements( &dbadapter, ei, ee, newblk, transaction);
+
+		// [2] Write the new blocks that could not be merged into existing ones:
+		StructBlockBatchWrite::insertNewElements( &dbadapter, ei, ee, newblk, transaction);
 	}
 }
 
@@ -262,7 +191,7 @@ void StructIndexMap::print( std::ostream& out) const
 			out << strus::string_format("[structno=%d, docno=%d]", structno, docno);
 			if (mi->second == DELETE_STRUCTURES)
 			{
-				out << " DELETE" << std::endl;
+				out << " []" << std::endl;
 			}
 			else
 			{
