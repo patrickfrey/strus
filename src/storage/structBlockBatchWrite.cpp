@@ -24,7 +24,7 @@ void StructBlockBatchWrite::insertNewElements(
 		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator
 			en = ei;
 		for (++en; en != ee && en->docno == ei->docno; ++en){}
-		if (!newblk.fitsInto( en-ei))
+		if (!newblk.fitsInto( en-ei) && !newblk.empty())
 		{
 			if (!newblk.id()) newblk.setId( newblk.lastDoc());
 			dbadapter->store( transaction, newblk.createBlock());
@@ -74,7 +74,7 @@ void StructBlockBatchWrite::mergeNewElements(
 			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator
 				en = ei;
 			for (++en; en != ee && en->docno == ei->docno; ++en){}
-			if (!newblk.fitsInto( en-ei))
+			if (!newblk.fitsInto( en-ei) && !newblk.empty())
 			{
 				// ... block is filled with an acceptable ratio, so we store it, for stopping cascading merges
 				dbadapter->store( transaction, newblk.createBlock());
