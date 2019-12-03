@@ -44,17 +44,8 @@ void StructIndexMap::defineStructure(
 	const IndexRange& sink)
 {
 	if (structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
-	if (structno > (Index)m_mapar.size())
-	{
-		if (structno == (Index)m_mapar.size()+1)
-		{
-			m_mapar.push_back( Map());
-		}
-		else
-		{
-			throw strus::runtime_error(_TXT("internal: '%s' not defined (%d)"), "structno", (int)structno);
-		}
-	}
+	if (structno > (Index)m_mapar.size()) m_mapar.resize( structno);
+
 	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
 	if (!source.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "source");
 	if (!sink.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "sink");
