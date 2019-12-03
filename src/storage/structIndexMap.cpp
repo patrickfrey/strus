@@ -52,7 +52,7 @@ void StructIndexMap::defineStructure(
 		}
 		else
 		{
-			throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+			throw strus::runtime_error(_TXT("internal: '%s' not defined (%d)"), "structno", (int)structno);
 		}
 	}
 	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
