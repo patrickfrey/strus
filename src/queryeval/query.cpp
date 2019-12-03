@@ -792,8 +792,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			std::vector<SummaryElement> summaries;
 
 			std::vector<std::string>::const_iterator
-				prefix_si = summarizerPrefixList.begin(),
-				prefix_se = summarizerPrefixList.end();
+				prefix_si = summarizerPrefixList.begin();
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
 			for (;si != se; ++si,++prefix_si)
