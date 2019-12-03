@@ -172,7 +172,7 @@ void StorageDocument::done()
 		{
 			m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
 		}
-		
+
 		m_transaction->openForwardIndexDocument( m_docno);
 		InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 		for (; ri != re; ++ri)
