@@ -102,9 +102,18 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 	StructureMember member;
 	if (m_structurear.back().membersSize)
 	{
-		if ((Index)m_memberar.back().end > sink.start())
+		if ((Index)m_memberar.back().end >= sink.start())
 		{
-			throw strus::runtime_error( _TXT("structure members in structure block builder not appended in strictly ascending order"));
+			if ((Index)m_memberar.back().end == sink.start())
+			{
+				// ... joining subsequent structure members to one
+				m_memberar.back().end = sink.end();
+				return;
+			}
+			else
+			{
+				throw strus::runtime_error( _TXT("structure members in structure block builder not appended in strictly ascending order"));
+			}
 		}
 	}
 	member.start = sink.start();
