@@ -108,13 +108,14 @@ public:/*Document,DocumentUpdate*/
 
 	void deleteIndex( const Index& docno);
 	void deleteDocSearchIndexType( const Index& docno, const Index& typeno);
-	void deleteDocSearchIndexStructure( const Index& docno, const Index& structno);
 	void deleteDocForwardIndexType( const Index& docno, const Index& typeno);
 
 	void definePosinfoPosting(
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
 
+	void deleteStructure( const Index& structno, const Index& docno);
+	void deleteStructures( const Index& docno);
 	void defineStructure(
 		const Index& structno,
 		const Index& docno, const IndexRange& source, const IndexRange& sink);

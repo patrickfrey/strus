@@ -111,20 +111,22 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 		storage.sci.get(), g_random, commitSize, 
 		nofCycles == 1
 			? PrimeFactorDocumentBuilder::InsertMode
-			: PrimeFactorDocumentBuilder::InsertAlteredMode);
+			: PrimeFactorDocumentBuilder::InsertAlteredMode,
+			nofCycles == 1/*is last*/);
 	int ci = 1, ce = nofCycles-1;
 	for (; ci < ce; ++ci)
 	{
 		PrimeFactorDocumentBuilder::WriteMode
 			writeMode = (PrimeFactorDocumentBuilder::WriteMode)g_random.get( 1, 4);
 		documentBuilder.insertCollection(
-			storage.sci.get(), g_random, commitSize, writeMode);
+			storage.sci.get(), g_random, commitSize, writeMode, false/*is last*/);
 	}
 	if (nofCycles > 1)
 	{
 		documentBuilder.insertCollection(
 			storage.sci.get(), g_random, commitSize,
-			PrimeFactorDocumentBuilder::UpdateMode);
+			PrimeFactorDocumentBuilder::UpdateMode,
+			true/*is last*/);
 	}
 	if (g_verbose)
 	{

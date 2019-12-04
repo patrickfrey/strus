@@ -23,6 +23,8 @@ namespace strus {
 class BooleanBlockBatchWrite
 {
 public:
+	static void checkBlocks( DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter);
+
 	static void insertNewElements(
 			DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 			std::vector<BooleanBlock::MergeRange>::iterator& ei,

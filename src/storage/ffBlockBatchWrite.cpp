@@ -14,6 +14,20 @@
 
 using namespace strus;
 
+void FfBlockBatchWrite::checkBlocks( DatabaseAdapter_FfBlock::WriteCursor* dbadapter)
+{
+	FfBlock blk;
+	strus::Index prev = 0;
+	bool more = dbadapter->loadFirst( blk);
+	for (; more; more=dbadapter->loadNext( blk))
+	{
+		FfIndexNodeCursor cursor;
+		strus::Index start = blk.firstDoc( cursor);
+		if (start < prev) throw strus::runtime_error(_TXT("ff blocks are overlapping: %d IN [%d,%d]"), (int)prev, (int)start, (int)blk.id());
+		prev = blk.id();
+	}
+}
+
 void FfBlockBatchWrite::insertNewElements(
 		DatabaseAdapter_FfBlock::WriteCursor* dbadapter,
 		std::vector<FfBlockBuilder::FfDeclaration>::iterator& ei,
@@ -129,6 +143,8 @@ void FfBlockBatchWrite::mergeNewElements(
 
 					newblk_split1.setId( newblk_split1.lastDoc());
 					newblk_split2.setId( blk.id());
+					if (newblk.id() && newblk.id() != newblk_split1.id()) dbadapter->remove( transaction, newblk.id());
+
 					dbadapter->store( transaction, newblk_split1.createBlock());
 					dbadapter->store( transaction, newblk_split2.createBlock());
 					newblk.clear();

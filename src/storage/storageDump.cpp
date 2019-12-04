@@ -50,6 +50,12 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
+			case DatabaseKey::StructTypePrefix:
+			{
+				StructTypeData data( key, value);
+				data.print( out);
+				break;
+			}
 			case DatabaseKey::DocIdPrefix:
 			{
 				DocIdData data( key, value);
@@ -167,7 +173,7 @@ static void dumpKeyValue(
 			}
 			default:
 			{
-				throw strus::runtime_error( "%s",  _TXT( "illegal data base key prefix for this storage"));
+				throw strus::runtime_error( _TXT( "illegal data base key prefix for this storage"));
 			}
 		}
 	}
@@ -188,7 +194,7 @@ bool StorageDump::nextChunk( const char*& chunk, std::size_t& chunksize)
 		{
 			if (m_key.size() == 0)
 			{
-				throw strus::runtime_error( "%s",  _TXT( "found empty key"));
+				throw strus::runtime_error( _TXT( "found empty key"));
 			}
 			dumpKeyValue( output, m_database.get(), m_key, m_cursor->value());
 		};

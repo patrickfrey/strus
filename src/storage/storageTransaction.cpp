@@ -156,6 +156,16 @@ void StorageTransaction::definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
+void StorageTransaction::deleteStructure( const Index& structno, const Index& docno)
+{
+	m_structIndexMap.deleteIndex( docno, structno);
+}
+
+void StorageTransaction::deleteStructures( const Index& docno)
+{
+	m_structIndexMap.deleteIndex( docno);
+}
+
 void StorageTransaction::defineStructure(
 	const Index& structno,
 	const Index& docno, const IndexRange& source, const IndexRange& sink)
@@ -191,11 +201,6 @@ void StorageTransaction::deleteIndex( const Index& docno)
 void StorageTransaction::deleteDocSearchIndexType( const Index& docno, const Index& typeno)
 {
 	m_invertedIndexMap.deleteIndex( docno, typeno);
-}
-
-void StorageTransaction::deleteDocSearchIndexStructure( const Index& docno, const Index& structno)
-{
-	m_structIndexMap.deleteIndex( docno, structno);
 }
 
 void StorageTransaction::deleteDocForwardIndexType( const Index& docno, const Index& typeno)

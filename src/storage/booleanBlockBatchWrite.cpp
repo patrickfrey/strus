@@ -13,6 +13,21 @@
 
 using namespace strus;
 
+void BooleanBlockBatchWrite::checkBlocks( DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter)
+{
+	BooleanBlock blk;
+	strus::Index prev = 0;
+
+	bool more = dbadapter->loadFirst( blk);
+	for (; more; more=dbadapter->loadNext( blk))
+	{
+		BooleanBlock::NodeCursor cursor;
+		strus::Index start = blk.getFirst( cursor);
+		if (start < prev) throw strus::runtime_error(_TXT("boolean blocks are overlapping: %d IN [%d,%d]"), (int)prev, (int)start, (int)blk.id());
+		prev = blk.id();
+	}
+}
+
 void BooleanBlockBatchWrite::insertNewElements(
 		DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
@@ -154,6 +169,8 @@ void BooleanBlockBatchWrite::mergeNewElements(
 
 					newblk_split1.setId( newblk_split1.getLast()/*new created id inbetween*/);
 					newblk_split2.setId( blk.id() ? blk.id() : newblk_merged.getLast());//...id of the follow block appended
+					if (newblk.id() && newblk.id() != newblk_split1.id()) dbadapter->remove( transaction, newblk.id());
+
 					dbadapter->store( transaction, newblk_split1);
 					dbadapter->store( transaction, newblk_split2);
 					newblk.clear();

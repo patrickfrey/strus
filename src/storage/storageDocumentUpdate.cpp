@@ -244,7 +244,7 @@ void StorageDocumentUpdate::done()
 			std::set<Index>::const_iterator si = m_delete_search_structnolist.begin(), se = m_delete_search_structnolist.end();
 			for (; si != se; ++si)
 			{
-				m_transaction->deleteDocSearchIndexStructure( m_docno, *si);
+				m_transaction->deleteStructure( *si, m_docno);
 			}
 		}{
 			//[2.1] Update metadata:

@@ -23,6 +23,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/storageMetaDataTableUpdateInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -30,6 +31,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/documentTermIteratorInterface.hpp"
+#include "strus/valueIteratorInterface.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "private/internationalization.hpp"
@@ -564,6 +566,7 @@ struct PrimeFactorDocumentBuilder
 	std::vector<Feature> randomAlterFeatures( const std::vector<Feature>& features, PseudoRandom& random)
 	{
 		std::vector<Feature> rt = features;
+		if (rt.empty()) return rt;
 		int nofChanges = random.get( 1, random.get( 1, features.size()+2) +1);
 		int ii=0, ie=nofChanges;
 		for (; ii<ie; ++ii)
@@ -588,6 +591,163 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
+	IndexRange randomIndexRange( const std::vector<IndexRange>& occupiedlist, PseudoRandom& random)
+	{
+		std::set<strus::Index> freeset;
+		strus::Index maximum = 0;
+		std::vector<strus::IndexRange>::const_iterator
+			oi = occupiedlist.begin(), oe = occupiedlist.end();
+		for (; oi != oe; ++oi)
+		{
+			if (maximum < oi->end()) maximum = oi->end();
+		}
+		strus::Index mi = 1, me = maximum+1;
+		for (; mi != me; ++mi)
+		{
+			freeset.insert( mi);
+		}
+		oi = occupiedlist.begin();
+		for (; oi != oe; ++oi)
+		{
+			strus::Index si = oi->start(), se = oi->end();
+			for (; si != se; ++si)
+			{
+				freeset.erase( si);
+			}
+		}
+		strus::Index start = random.get( 0, maximum+maximum/10+1);
+		std::set<strus::Index>::const_iterator fi = freeset.upper_bound( start);
+		if (fi == freeset.end())
+		{
+			strus::Index end = ++start + 1;
+			while (random.get( 0, 3) == 1) ++end;
+			return IndexRange( start, end);
+		}
+		else
+		{
+			start = *fi++;
+			strus::Index end = start + 1;
+			while (fi != freeset.end() && *fi == end && random.get( 0, 2) == 1)
+			{
+				++fi;
+				++end;
+			}
+			return IndexRange( start, end);
+		}
+	}
+
+	StructureDef randomStructure( const StructureDef& old, const std::vector<StructureDef>& stlist, PseudoRandom& random)
+	{
+		IndexRange header( old.header().start(),old.header().end());
+		IndexRange content( old.content().start(),old.content().end());
+		if (random.get( 0,2) == 1)
+		{
+			std::vector<IndexRange> rangear;
+			std::vector<StructureDef>::const_iterator si = stlist.begin(), se = stlist.end();
+			for (; si != se; ++si) rangear.push_back( si->header());
+			header = randomIndexRange( rangear, random);
+		}
+		else
+		{
+			std::vector<IndexRange> rangear;
+			std::vector<StructureDef>::const_iterator si = stlist.begin(), se = stlist.end();
+			for (; si != se; ++si) rangear.push_back( si->content());
+			content = randomIndexRange( rangear, random);
+		}
+		return StructureDef( old.name(), header, content);
+	}
+
+	void checkOverlappingIndexRanges( const std::vector<IndexRange>& rangelist)
+	{
+		std::vector<IndexRange>::const_iterator
+			ri = rangelist.begin(), re = rangelist.end();
+		for (; ri != re; ++ri)
+		{
+			std::vector<IndexRange>::const_iterator ni = ri, ne = re;
+			for (++ni; ni != ne; ++ni)
+			{
+				if (ni->start() >= ri->end()) continue;
+				if (ri->start() >= ni->end()) continue;
+				if (ri->start() != ni->start() || ri->end() != ni->end())
+				{
+					throw strus::runtime_error( "overlapping structures [%d:%d] and [%d:%d] not equal", (int)ni->start(), (int)ni->end(), (int)ri->start(), (int)ri->end());
+				}
+			}
+		}
+	}
+
+	void checkOverlappingStructures( const std::vector<StructureDef>& stlist)
+	{
+		std::set<std::string> visited;
+		std::vector<StructureDef>::const_iterator si = stlist.begin(), se = stlist.end();
+		for (; si != se; ++si)
+		{
+			if (visited.insert( si->name()).second/*insert took place*/)
+			{
+				std::vector<IndexRange> headerar;
+				std::vector<IndexRange> contentar;
+				std::vector<StructureDef>::const_iterator ni = si, ne = se;
+				for (; ni != ne; ++ni)
+				{
+					if (ni->name() == si->name())
+					{
+						headerar.push_back( ni->header());
+						contentar.push_back( ni->content());
+					}
+					try { checkOverlappingIndexRanges( headerar); }
+					catch (const std::runtime_error& err)
+					{ throw strus::runtime_error( "%s in structure '%s' %s", err.what(), si->name().c_str(), "header"); }
+
+					try { checkOverlappingIndexRanges( contentar); }
+					catch (const std::runtime_error& err)
+					{ throw strus::runtime_error( "%s in structure '%s' %s", err.what(), si->name().c_str(), "content"); }
+				}
+			}
+		}
+	}
+
+	StructureDef randomStructure( PseudoRandom& random)
+	{
+		IndexRange header( random.get( 1, 5), random.get( 6, 10));
+		IndexRange content( random.get( 1, 5), random.get( 6, 10));
+		return StructureDef( "X2", header, content);
+	}
+
+	std::vector<StructureDef> randomAlterStructures( const std::vector<StructureDef>& structures, PseudoRandom& random)
+	{
+		std::vector<StructureDef> rt = structures;
+		int nofChanges = random.get( 1, random.get( 1, structures.size()+2) +1);
+		int ii=0, ie=nofChanges;
+		for (; ii<ie; ++ii)
+		{
+			if (rt.empty())
+			{
+				rt.insert( rt.begin(), randomStructure( random));
+			}
+			else
+			{
+				enum ChangeType {InsertStruct,AlterStruct,DeleteStruct};
+				ChangeType changeType = (ChangeType)random.get( 0, 3);
+				std::size_t chgidx = random.get( 0, rt.size());
+
+				switch (changeType)
+				{
+					case InsertStruct:
+						rt.insert( rt.begin()+chgidx, randomStructure( rt[ chgidx], rt, random));
+						break;
+					case AlterStruct:
+						rt[ chgidx] = randomStructure( rt[ chgidx], rt, random);
+						break;
+					case DeleteStruct:
+						rt.erase( rt.begin()+chgidx);
+						break;
+				}
+			}
+		}
+		checkOverlappingStructures( rt);
+		return rt;
+	}
+
 	static const int* structIndices()
 	{
 		static const int ar[] = {2,3,5,0};
@@ -607,8 +767,19 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
+	void clearStructures( strus::StorageClientInterface* storage, strus::StorageDocumentUpdateInterface* doc)
+	{
+		strus::local_ptr<strus::ValueIteratorInterface> vitr( storage->createStructTypeIterator());
+		std::vector<std::string> values = vitr->fetchValues( std::numeric_limits<int>::max());
+		std::vector<std::string>::const_iterator vi = values.begin(), ve = values.end();
+		for (; vi != ve; ++vi)
+		{
+			doc->clearSearchIndexStructure( *vi);
+		}
+	}
+
 	enum WriteMode {InsertMode, UpdateMode, InsertAlteredMode, UpdateAlteredMode};
-	void insertCollection( strus::StorageClientInterface* storage, PseudoRandom& random, int commitSize, WriteMode mode=InsertMode)
+	void insertCollection( strus::StorageClientInterface* storage, PseudoRandom& random, int commitSize, WriteMode mode, bool isLast)
 	{
 		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
 		unsigned int di=0, de=nofDocuments;
@@ -634,6 +805,7 @@ struct PrimeFactorDocumentBuilder
 			{
 				case InsertAlteredMode:
 					feats = randomAlterFeatures( feats, random);
+					structs = randomAlterStructures( structs, random);
 					/*no break here!*/
 				case InsertMode:
 				{
@@ -645,6 +817,7 @@ struct PrimeFactorDocumentBuilder
 				}
 				case UpdateAlteredMode:
 					feats = randomAlterFeatures( feats, random);
+					structs = randomAlterStructures( structs, random);
 					/*no break here!*/
 				case UpdateMode:
 				{
@@ -653,6 +826,7 @@ struct PrimeFactorDocumentBuilder
 					strus::local_ptr<strus::StorageDocumentUpdateInterface>
 						doc( transaction->createDocumentUpdate( docno));
 					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
+					if (isLast) clearStructures( storage, doc.get());
 					buildDocument( doc.get(), feats, structs);
 					break;
 				}

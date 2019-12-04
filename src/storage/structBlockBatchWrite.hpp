@@ -23,6 +23,8 @@ namespace strus {
 class StructBlockBatchWrite
 {
 public:
+	static void checkBlocks( DatabaseAdapter_StructBlock::WriteCursor* dbadapter);
+	
 	static void insertNewElements(
 			DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
 			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,

@@ -12,6 +12,20 @@
 #include <set>
 using namespace strus;
 
+void StructBlockBatchWrite::checkBlocks( DatabaseAdapter_StructBlock::WriteCursor* dbadapter)
+{
+	StructBlock blk;
+	strus::Index prev = 0;
+	bool more = dbadapter->loadFirst( blk);
+	for (; more; more=dbadapter->loadNext( blk))
+	{
+		DocIndexNodeCursor cursor;
+		strus::Index start = blk.firstDoc( cursor);
+		if (start < prev) throw strus::runtime_error(_TXT("structure blocks are overlapping: %d IN [%d,%d]"), (int)prev, (int)start, (int)blk.id());
+		prev = blk.id();
+	}
+}
+
 void StructBlockBatchWrite::insertNewElements(
 		DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
 		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
@@ -140,6 +154,8 @@ void StructBlockBatchWrite::mergeNewElements(
 
 					newblk_split1.setId( newblk_split1.lastDoc());
 					newblk_split2.setId( blk.id());
+					if (newblk.id() && newblk.id() != newblk_split1.id()) dbadapter->remove( transaction, newblk.id());
+
 					dbadapter->store( transaction, newblk_split1.createBlock());
 					dbadapter->store( transaction, newblk_split2.createBlock());
 					newblk.clear();

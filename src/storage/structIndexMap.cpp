@@ -43,7 +43,10 @@ void StructIndexMap::defineStructure(
 	const IndexRange& source,
 	const IndexRange& sink)
 {
-	if (structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+	if (structno <= 0)
+	{
+		throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+	}
 	if (structno > (Index)m_mapar.size()) m_mapar.resize( structno);
 
 	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
@@ -75,7 +78,10 @@ void StructIndexMap::defineStructure(
 
 void StructIndexMap::deleteInsertedStructs( const Index& docno, const Index& structno)
 {
-	if (structno > (Index)m_mapar.size() || structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+	if (structno > (Index)m_mapar.size() || structno <= 0)
+	{
+		throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
+	}
 	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
 	m_mapar[ structno-1][ docno] = DELETE_STRUCTURES;
 }

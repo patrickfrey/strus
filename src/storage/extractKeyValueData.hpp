@@ -44,6 +44,17 @@ struct TermValueData
 	void print( std::ostream& out);
 };
 
+struct StructTypeData
+{
+	const char* structnamestr;
+	std::size_t structnamesize;
+	Index structno;
+
+	StructTypeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
 struct DocIdData
 {
 	const char* docidstr;

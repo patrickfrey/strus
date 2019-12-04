@@ -139,6 +139,8 @@ void StorageDocument::done()
 		m_transaction->deleteMetaData( m_docno);
 		//[1.2] Delete old attributes:
 		m_transaction->deleteAttributes( m_docno);
+		//[1.2] Delete old structures:
+		m_transaction->deleteStructures( m_docno);
 		//[1.3] Delete old index elements (forward index and inverted index):
 		m_transaction->deleteIndex( m_docno);
 		//[1.4] Delete old user access rights:

@@ -64,6 +64,26 @@ TermTypeData::TermTypeData( const strus::DatabaseCursorInterface::Slice& key, co
 	}
 }
 
+StructTypeData::StructTypeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	structnamestr = ki;
+	structnamesize = ke-ki;
+	if (!strus::checkStringUtf8( ki, ke-ki))
+	{
+		throw std::runtime_error( _TXT( "key of struct type is not a valid UTF8 string"));
+	}
+	structno = strus::unpackIndex( vi, ve);/*[structno]*/
+	if (vi != ve)
+	{
+		throw std::runtime_error( _TXT( "unexpected extra bytes at end of struct type number"));
+	}
+}
+
 static std::string escapestr( const char* str, std::size_t size)
 {
 	std::string rt;
@@ -113,6 +133,11 @@ static std::string escapestr( const char* str, std::size_t size)
 	return rt;
 }
 
+void StructTypeData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::StructTypePrefix << ' ' << structno << ' ' << escapestr( structnamestr, structnamesize) << std::endl;
+}
+
 void TermTypeData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::TermTypePrefix << ' ' << typeno << ' ' << escapestr( typestr, typesize) << std::endl;
@@ -143,7 +168,6 @@ void TermValueData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::TermValuePrefix << ' ' << valueno << ' ' << escapestr( valuestr, valuesize) << std::endl;
 }
-
 
 
 DocIdData::DocIdData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)

@@ -457,19 +457,27 @@ private:
 		return 0;
 	}
 
+	strus::Index resolveDocFirstStructure( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		strus::Index ref = m_docIndexNodeArray[ cursor.aridx].ref[ cursor.docidx];
+		cursor.stuidx = m_structurelistar[ ref].idx;
+		cursor.stuend = cursor.stuidx + m_structurelistar[ ref].size;
+		--cursor.stuidx;
+		return nextStructureFirstNode( cursor, src, sink);
+	}
+
 	strus::Index nextDocFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+	{
+		cursor.docno = m_docIndexNodeArray[ cursor.aridx].nextDoc( cursor.docidx);
+		return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
+	}
+
+	strus::Index nextIndexFirstDoc( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
 	{
 		for (++cursor.aridx; cursor.aridx < m_docIndexNodeArray.size(); ++cursor.aridx)
 		{
 			cursor.docno = m_docIndexNodeArray[ cursor.aridx].firstDoc( cursor.docidx);
-			if (cursor.docno)
-			{
-				strus::Index ref = m_docIndexNodeArray[ cursor.aridx].ref[ cursor.docidx];
-				cursor.stuidx = m_structurelistar[ ref].idx;
-				cursor.stuend = cursor.stuidx + m_structurelistar[ ref].size;
-				--cursor.stuidx;
-				if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
-			}
+			return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
 		}
 		return 0;
 	}
@@ -477,7 +485,7 @@ private:
 	strus::Index firstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
 	{
 		cursor.aridx = -1;
-		return nextDocFirstNode( cursor, src, sink);
+		return nextIndexFirstDoc( cursor, src, sink);
 	}
 
 	strus::Index nextNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
@@ -485,6 +493,7 @@ private:
 		if (nextMemberNode( cursor, src, sink)) return cursor.docno;
 		if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
 		if (nextDocFirstNode( cursor, src, sink)) return cursor.docno;
+		if (nextIndexFirstDoc( cursor, src, sink)) return cursor.docno;
 		return 0;
 	}
 

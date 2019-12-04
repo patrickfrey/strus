@@ -130,7 +130,10 @@ void StructBlockBuilder::append( const Index& docno, const IndexRange& src, cons
 	{
 		throw std::runtime_error(_TXT("cannot add docno <= 0"));
 	}
-	if (src.start() >= src.end() || sink.start() >= sink.end()) throw std::runtime_error(_TXT("adding empty structures not allowed"));
+	if (src.start() >= src.end() || sink.start() >= sink.end())
+	{
+		throw std::runtime_error(_TXT("adding empty structures not allowed"));
+	}
 	if (m_lastDoc > docno)
 	{
 		throw strus::runtime_error(_TXT("documents not added in ascending order (%d > %d)"), (int)m_lastDoc, (int)docno);
@@ -300,7 +303,10 @@ void StructBlockBuilder::merge_append(
 	}
 	while (ei != ee)
 	{
-		appendblk.append( ei->docno, ei->src, ei->sink);
+		if (ei->sink.defined() || ei->src.defined())
+		{
+			appendblk.append( ei->docno, ei->src, ei->sink);
+		}
 		++ei;
 	}
 }

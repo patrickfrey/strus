@@ -23,6 +23,8 @@ namespace strus {
 class FfBlockBatchWrite
 {
 public:
+	static void checkBlocks( DatabaseAdapter_FfBlock::WriteCursor* dbadapter);
+
 	static void insertNewElements(
 			DatabaseAdapter_FfBlock::WriteCursor* dbadapter,
 			std::vector<FfBlockBuilder::FfDeclaration>::iterator& ei,

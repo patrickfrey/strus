@@ -1106,14 +1106,29 @@ const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() con
 	return m_statisticsProc;
 }
 
+struct CheckHistory
+{
+	CheckHistory()
+		:elemid(0),prevKey(0){}
+
+	strus::Index elemid;
+	char prevKey;
+};
+
 static void checkKeyValue(
 		const strus::DatabaseClientInterface* database,
 		const strus::DatabaseCursorInterface::Slice& key,
 		const strus::DatabaseCursorInterface::Slice& value,
+		CheckHistory& history,
 		std::ostream& errorlog)
 {
 	try
 	{
+		if (key.ptr()[0] != history.prevKey)
+		{
+			history.elemid = 0;
+			history.prevKey = key.ptr()[0];
+		}
 		switch (key.ptr()[0])
 		{
 			case strus::DatabaseKey::TermTypePrefix:
@@ -1126,24 +1141,29 @@ static void checkKeyValue(
 				strus::TermValueData( key, value);
 				break;
 			}
+			case strus::DatabaseKey::StructTypePrefix:
+			{
+				strus::TermTypeData( key, value);
+				break;
+			}
 			case strus::DatabaseKey::DocIdPrefix:
 			{
 				strus::DocIdData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::DocAttributePrefix:
+			case strus::DatabaseKey::VariablePrefix:
 			{
-				strus::DocAttributeData( key, value);
+				strus::VariableData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::AttributeKeyPrefix:
+			{
+				strus::AttributeKeyData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::UserNamePrefix:
 			{
 				strus::UserNameData( key, value);
-				break;
-			}
-			case strus::DatabaseKey::VariablePrefix:
-			{
-				strus::VariableData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::TermTypeInvPrefix:
@@ -1156,25 +1176,44 @@ static void checkKeyValue(
 				strus::TermValueInvData( key, value);
 				break;
 			}
+			case strus::DatabaseKey::StructTypeInvPrefix:
+			{
+				strus::TermTypeInvData( key, value);
+				break;
+			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
 			{
 				strus::ForwardIndexData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::DocMetaDataPrefix:
-			{
-				strus::MetaDataDescription metadescr( database);
-				strus::DocMetaDataData( &metadescr, key, value);
-				break;
-			}
-			case strus::DatabaseKey::DocFrequencyPrefix:
-			{
-				strus::DocFrequencyData( key, value);
-				break;
-			}
 			case strus::DatabaseKey::PosinfoBlockPrefix:
 			{
-				strus::PosinfoBlockData( key, value);
+				strus::PosinfoBlockData data( key, value);
+				if (data.posinfo.empty() || history.elemid >= data.posinfo[0].docno)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "posinfo");
+				}
+				history.elemid = data.docno;
+				break;
+			}
+			case strus::DatabaseKey::FfBlockPrefix:
+			{
+				strus::FfBlockData data( key, value);
+				if (data.postings.empty() || history.elemid >= data.postings[0].docno)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "ff");
+				}
+				history.elemid = data.docno;
+				break;
+			}
+			case strus::DatabaseKey::StructBlockPrefix:
+			{
+				strus::StructBlockData data( key, value);
+				if (data.structures.empty() || history.elemid >= data.structures[0].docno)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "structure");
+				}
+				history.elemid = data.docno;
 				break;
 			}
 			case strus::DatabaseKey::InverseTermPrefix:
@@ -1184,17 +1223,48 @@ static void checkKeyValue(
 			}
 			case strus::DatabaseKey::UserAclBlockPrefix:
 			{
-				strus::UserAclBlockData( key, value);
+				strus::UserAclBlockData data( key, value);
+				if (data.docrangelist.empty() || history.elemid >= data.docrangelist[0].first)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "boolean document acl");
+				}
+				history.elemid = data.docno;
 				break;
 			}
 			case strus::DatabaseKey::AclBlockPrefix:
 			{
-				strus::AclBlockData( key, value);
+				strus::AclBlockData data( key, value);
+				if (data.userrangelist.empty() || history.elemid >= data.userrangelist[0].first)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "boolean user acl");
+				}
+				history.elemid = data.userno;
 				break;
 			}
 			case strus::DatabaseKey::DocListBlockPrefix:
 			{
-				strus::DocListBlockData( key, value);
+				strus::DocListBlockData data( key, value);
+				if (data.docrangelist.empty() || history.elemid >= data.docrangelist[0].first)
+				{
+					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "boolean document");
+				}
+				history.elemid = data.docno;
+				break;
+			}
+			case strus::DatabaseKey::DocMetaDataPrefix:
+			{
+				strus::MetaDataDescription metadescr( database);
+				strus::DocMetaDataData( &metadescr, key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocAttributePrefix:
+			{
+				strus::DocAttributeData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocFrequencyPrefix:
+			{
+				strus::DocFrequencyData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::MetaDataDescrPrefix:
@@ -1202,11 +1272,8 @@ static void checkKeyValue(
 				strus::MetaDataDescrData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::AttributeKeyPrefix:
-			{
-				strus::AttributeKeyData( key, value);
-				break;
-			}
+			default:
+				throw strus::runtime_error(_TXT("unknown database key prefix: %c"), key.ptr()[0]);
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -1237,6 +1304,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 {
 	try
 	{
+		CheckHistory history;
 		strus::local_ptr<strus::DatabaseCursorInterface>
 			cursor( m_database->createCursor( strus::DatabaseOptions()));
 		if (!cursor.get()) return false;
@@ -1250,7 +1318,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 				m_errorhnd->report( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
 				return false;
 			}
-			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);
+			checkKeyValue( m_database.get(), key, cursor->value(), history, errorlog);
 		}
 		return true;
 	}
