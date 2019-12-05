@@ -147,17 +147,17 @@ private:
 	void joinAdjacentStructureMembers( StructureList& structurelist);
 
 private:
-	const StorageClient* m_storage;
-	TermMap m_termMap;
-	InvTermMap m_invTermMap;
-	MetaDataMap m_metaDataMap;
-	AttributeMap m_attributeMap;
-	StructureList m_structurelist;
-	std::vector<std::string> m_userlist;
-	std::string m_docid;
-	Index m_docno;
-	std::string m_logfile;
-	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
+	const StorageClient* m_storage;		///< storage
+	TermMap m_termMap;			///< terms defined
+	InvTermMap m_invTermMap;		///< inverse map of search terms defined
+	MetaDataMap m_metaDataMap;		///< meta data defined
+	AttributeMap m_attributeMap;		///< attributes defined
+	StructureList m_structurelist;		///< list of structures
+	std::vector<std::string> m_userlist;	///< list of users
+	std::string m_docid;			///< document id
+	Index m_docno;				///< document number
+	std::string m_logfile;			///< log file where to log errors detected
+	ErrorBufferInterface* m_errorhnd;	///< error buffer for exception free interface
 };
 
 }
