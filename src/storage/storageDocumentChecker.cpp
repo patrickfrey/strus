@@ -83,7 +83,7 @@ void StorageDocumentChecker::addSearchIndexStructure(
 	try
 	{
 		std::string structnam = strus::string_conv::tolower( struct_);
-		m_structurelist.push_back( Structure( structnam, source_, sink_));
+		m_structurelist.insert( Structure( structnam, source_, sink_));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index term: %s"), *m_errorhnd);
 }
@@ -209,7 +209,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	}{
 		//[2] Check structures:
 		std::vector<std::string> structnamear;
-		std::vector<Structure> structures;
+		StructureList structures;
 		strus::local_ptr<ValueIteratorInterface> vitr( m_storage->createStructTypeIterator());
 		if (vitr.get())
 		{
@@ -236,18 +236,17 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 					IndexRange sink = stitr->skipPosSink( 0);
 					for (; sink.defined(); sink = stitr->skipPosSink( sink.end()))
 					{
-						structures.push_back( Structure( *si, source, sink));
+						structures.insert( Structure( *si, source, sink));
 					}
 				}
 			}
 		}
-		std::sort( structures.begin(), structures.end());
 		if (structures.size() != m_structurelist.size())
 		{
 			logError( logout, m_docid, _TXT("number of structures in index (%d) not as expected (%d)"), (int)structures.size(), (int)m_structurelist.size());
 		}
-		std::vector<Structure>::const_iterator ai = structures.begin(), ae = structures.end();
-		std::vector<Structure>::const_iterator bi = m_structurelist.begin(), be = m_structurelist.end();
+		StructureList::const_iterator ai = structures.begin(), ae = structures.end();
+		StructureList::const_iterator bi = m_structurelist.begin(), be = m_structurelist.end();
 		while (ai != ae && bi != be)
 		{
 			if (*ai < *bi)
@@ -394,11 +393,30 @@ void StorageDocumentChecker::setUserAccessRight( const std::string& username)
 	CATCH_ERROR_MAP( _TXT("error setting user access right: %s"), *m_errorhnd);
 }
 
+void StorageDocumentChecker::joinAdjacentStructureMembers( StructureList& structurelist)
+{
+	StructureList newlist;
+	StructureList::iterator si = structurelist.begin(), se = structurelist.end();
+	while (si != se)
+	{
+		StructureList::iterator sn = si;
+		++sn;
+		Structure newst( *si);
+		for (; sn != se && sn->source == si->source && sn->structname == si->structname && sn->sink.start() == newst.sink.end(); ++sn)
+		{
+			newst.sink = strus::IndexRange( newst.sink.start(), sn->sink.end());
+		}
+		newlist.insert( newst);
+		si = sn;
+	}
+	structurelist.swap( newlist);
+}
+
 void StorageDocumentChecker::done()
 {
 	try
 	{
-		std::sort( m_structurelist.begin(), m_structurelist.end());
+		joinAdjacentStructureMembers( m_structurelist);
 		if (m_logfile == "-")
 		{
 			doCheck( std::cout);

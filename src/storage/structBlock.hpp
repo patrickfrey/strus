@@ -40,6 +40,14 @@ public:
 		PositionType start;
 		PositionType end;
 	};
+	struct StructureRepeat
+	{
+		enum {ID=0xFFFF};
+		PositionType _;/*== ID*/
+
+		unsigned char ofs;
+		unsigned char size;
+	};
 	struct StructureDefList
 	{
 		unsigned short idx;
@@ -407,6 +415,7 @@ public:
 	}
 	
 private:
+	bool isFittingRepeatMember( const strus::IndexRange& sink);
 	void addNewDocument( const Index& docno);
 	void addLastDocStructure( const strus::IndexRange& src);
 	void addLastStructureMember( const strus::IndexRange& sink);

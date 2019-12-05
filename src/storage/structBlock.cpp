@@ -8,6 +8,7 @@
 #include "structBlock.hpp"
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
+#include "strus/base/static_assert.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
@@ -18,7 +19,16 @@ using namespace strus;
 namespace {
 struct _AlignmentBaseStruct {char _;};
 #define AlignmentBase sizeof(_AlignmentBaseStruct)
-}
+
+struct StaticAsserts
+{
+	StaticAsserts()
+	{
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureMember) == sizeof(StructBlock::StructureRepeat));
+	}
+};
+}//anonymous namespace
+static StaticAsserts g_staticAsserts;
 
 
 template <typename Element>
@@ -95,6 +105,15 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 	lst.size = 0;
 	m_structurelistar.push_back( lst);
 	m_lastDoc = docno;
+}
+
+bool StructBlockBuilder::isFittingRepeatMember( const strus::IndexRange& sink)
+{
+	if (!m_structurear.back().membersSize) return false;
+	if ((Index)m_memberar.back().start == StructBlock::StructureRepeat::ID)
+	{
+	}
+	return false;
 }
 
 void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)

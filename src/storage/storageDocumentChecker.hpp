@@ -129,15 +129,11 @@ private:
 
 		bool operator < ( const Structure& o) const
 		{
-			if (structname < o.structname) return true;
-			if (structname > o.structname) return false;
-			if (source.end() < o.source.end()) return true;
-			if (source.end() > o.source.end()) return false;
-			if (sink.end() < o.sink.end()) return true;
-			if (sink.end() > o.sink.end()) return false;
-			if (source.start() < o.source.start()) return true;
-			if (source.start() > o.source.start()) return false;
-			return (sink.start() < o.sink.start());
+			return (structname == o.structname)
+				? ((source == o.source)
+					? (sink < o.sink)
+					: (source < o.source))
+				: (structname < o.structname);
 		}
 	};
 
@@ -145,7 +141,10 @@ private:
 	typedef std::map<InvKey,std::string> InvTermMap;
 	typedef std::map<std::string,NumericVariant> MetaDataMap;
 	typedef std::map<std::string,std::string> AttributeMap;
-	typedef std::vector<Structure> StructureList;
+	typedef std::set<Structure> StructureList;
+
+private:
+	void joinAdjacentStructureMembers( StructureList& structurelist);
 
 private:
 	const StorageClient* m_storage;
