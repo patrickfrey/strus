@@ -17,8 +17,18 @@
 
 namespace strus {
 
+template <typename ElementType>
+class AcceptAll
+{
+public:
+	bool operator()( const ElementType& o) const
+	{
+		return true;
+	}
+};
+
 /// \class SkipScanArray
-template <typename ElementType, typename IndexType, class ComparatorFunctor>
+template <typename ElementType, typename IndexType, class ComparatorFunctor, class AcceptFunctor=AcceptAll<ElementType> >
 class SkipScanArray
 {
 public:
@@ -43,9 +53,11 @@ public:
 		// Block search (fibonacci):
 		int fib1 = 1, fib2 = 1;
 		int bi = start;
+		while (bi < end && !AcceptFunctor()( m_ar[ bi])) ++bi;
 		while (bi < end && cmp( m_ar[ bi], needle))
 		{
 			bi = start + fib1;
+			while (bi < end && !AcceptFunctor()( m_ar[ bi])) ++bi;
 			fib2 = fib1 + fib2;
 			std::swap( fib1, fib2);
 		}
@@ -54,7 +66,8 @@ public:
 			int ei = start + fib2;
 			int ee = start + fib1;
 			if (end > ee) ee = end;
-			for (; ei < ee && cmp( m_ar[ start+ei], needle); ++ei){}
+			for (; ei < ee
+				&& (!AcceptFunctor()( m_ar[ start+ei]) || cmp( m_ar[ start+ei], needle)); ++ei){}
 			return (ei == end) ? NotFound : ei;
 		}
 		else

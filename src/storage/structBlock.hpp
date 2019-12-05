@@ -39,11 +39,19 @@ public:
 	{
 		PositionType start;
 		PositionType end;
+
+		StructureMember( const PositionType& start_, const PositionType& end_)
+			:start(start_),end(end_){}
+		StructureMember( const StructureMember& o)
+			:start(o.start),end(o.end){}
 	};
 	struct StructureRepeat
 	{
 		enum {ID=0xFFFF};
 		PositionType _;/*== ID*/
+
+		StructureRepeat( unsigned char ofs_, unsigned char size_)
+			:_(ID),ofs(ofs_),size(size_){}
 
 		unsigned char ofs;
 		unsigned char size;
@@ -201,7 +209,7 @@ public:
 				if (m_itr == 0) return strus::IndexRange();
 				m_itr = 0;
 			}
-			else if ((Index)m_ar[ m_itr].end <= pos)
+			if ((Index)m_ar[ m_itr].end <= pos)
 			{
 				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureMemberSearchCompare());
 				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
@@ -209,7 +217,16 @@ public:
 			return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
 		}
 	private:
-		SkipScanArray<StructureMember,Index,StructureMemberSearchCompare> m_ar;
+		class AcceptNonRepeat
+		{
+		public:
+			bool operator()( const StructureMember& o) const
+			{
+				return o.start != StructureRepeat::ID;
+			}
+		};
+
+		SkipScanArray<StructureMember,Index,StructureMemberSearchCompare,AcceptNonRepeat> m_ar;
 		int m_itr;
 	};
 
@@ -308,6 +325,7 @@ public:
 	typedef StructBlock::StructureMember StructureMember;
 	typedef StructBlock::StructureDef StructureDef;
 	typedef StructBlock::StructureDefList StructureDefList;
+	typedef StructBlock::StructureRepeat StructureRepeat;
 
 public:
 	StructBlockBuilder( const StructBlock& o);
@@ -415,7 +433,7 @@ public:
 	}
 	
 private:
-	bool isFittingRepeatMember( const strus::IndexRange& sink);
+	bool addFittingRepeatMember( const strus::IndexRange& sink);
 	void addNewDocument( const Index& docno);
 	void addLastDocStructure( const strus::IndexRange& src);
 	void addLastStructureMember( const strus::IndexRange& sink);
@@ -423,7 +441,9 @@ private:
 private:
 	struct Cursor
 	{
-		Cursor() :aridx(0),docidx(0),docno(0),stuidx(0),stuend(0),mbridx(0),mbrend(0){}
+		Cursor()
+			:aridx(0),docidx(0),docno(0),stuidx(0),stuend(0),mbridx(0),mbrend(0)
+			,repstart(0),repend(0),repofs(0),repsize(0){}
 
 		std::size_t aridx;
 		unsigned short docidx;
@@ -432,6 +452,10 @@ private:
 		std::size_t stuend;
 		std::size_t mbridx;
 		std::size_t mbrend;
+		strus::Index repstart;
+		strus::Index repend;
+		strus::Index repofs;
+		strus::Index repsize;
 	};
 
 	strus::Index currentMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
@@ -441,9 +465,24 @@ private:
 			src = strus::IndexRange(
 				m_structurear[ cursor.stuidx].header_start,
 				m_structurear[ cursor.stuidx].header_end);
-			sink = strus::IndexRange(
-				m_memberar[ cursor.mbridx].start,
-				m_memberar[ cursor.mbridx].end);
+			if (cursor.repstart < cursor.repend)
+			{
+				sink = IndexRange( cursor.repstart, cursor.repsize);
+				cursor.repstart += cursor.repofs;
+				if (cursor.repstart >= cursor.repend)
+				{
+					cursor.repstart = 0;
+					cursor.repend = 0;
+					cursor.repofs = 0;
+					cursor.repsize = 0;
+				}
+			}
+			else
+			{
+				sink = strus::IndexRange(
+					m_memberar[ cursor.mbridx].start,
+					m_memberar[ cursor.mbridx].end);
+			}
 			return cursor.docno;
 		}
 		return 0;
@@ -452,6 +491,15 @@ private:
 	strus::Index nextMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
 	{
 		++cursor.mbridx;
+		if (cursor.mbridx+1 < cursor.mbrend && m_memberar[ cursor.mbridx+1].start == StructureRepeat::ID)
+		{
+			cursor.repstart = m_memberar[ cursor.mbridx].start;
+			cursor.repend = m_memberar[ cursor.mbridx].end;
+			++cursor.mbridx;
+			const StructureRepeat* rep = (const StructureRepeat*)&m_memberar[ cursor.mbridx];
+			cursor.repofs = (Index)(int)(unsigned int)rep->ofs;
+			cursor.repsize = (Index)(int)(unsigned int)rep->size;
+		}
 		return currentMemberNode( cursor, src, sink);
 	}
 

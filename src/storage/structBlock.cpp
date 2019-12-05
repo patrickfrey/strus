@@ -36,7 +36,7 @@ static const Element* getStructPtr( const void* dataPtr, unsigned short indexSta
 {
 	if (indexStart % AlignmentBase != 0 || (indexEnd-indexStart) % sizeof(Element) != 0 || indexEnd < indexStart)
 	{
-		throw strus::runtime_error( _TXT("data corruption in structure block"));
+		throw std::runtime_error( _TXT("data corruption in structure block"));
 	}
 	return (Element*)((char*)dataPtr + indexStart);
 }
@@ -71,7 +71,7 @@ void StructBlock::initFrame()
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("data corruption in structure block"));
+		throw std::runtime_error( _TXT("data corruption in structure block"));
 	}
 }
 
@@ -97,7 +97,7 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 		m_docIndexNodeArray.push_back( DocIndexNode());
 		if (!m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
 		{
-			throw strus::runtime_error( _TXT("corrupt structure in structure block builder"));
+			throw std::runtime_error( _TXT("corrupt structure in structure block builder"));
 		}
 	}
 	StructureDefList lst;
@@ -107,21 +107,44 @@ void StructBlockBuilder::addNewDocument( const Index& docno)
 	m_lastDoc = docno;
 }
 
-bool StructBlockBuilder::isFittingRepeatMember( const strus::IndexRange& sink)
+bool StructBlockBuilder::addFittingRepeatMember( const strus::IndexRange& sink)
 {
 	if (!m_structurear.back().membersSize) return false;
-	if ((Index)m_memberar.back().start == StructBlock::StructureRepeat::ID)
+	if ((Index)m_memberar.back().start == StructureRepeat::ID)
 	{
+		if (m_structurear.back().membersSize < 2 || m_memberar.size() < 2) throw std::runtime_error(_TXT("corrupt index: repeat structure not following a member describing the structure area"));
+		StructureMember* mmb = (StructureMember*)&m_memberar[ m_memberar.size()-2];
+		const StructureRepeat* rep = (const StructureRepeat*)&m_memberar.back();
+		if (sink.end() - sink.start() == (Index)(int)(unsigned int)rep->size
+		&&  sink.end() - mmb->end == (Index)(int)(unsigned int)rep->ofs)
+		{
+			mmb->end = sink.end();
+			return true;
+		}
+	}
+	else
+	{
+		if (m_memberar.back().end - m_memberar.back().start == sink.end() - sink.start()
+		&&  m_memberar.back().end - sink.end() < (Index)std::numeric_limits<unsigned char>::max()
+		&&  m_memberar.back().end - m_memberar.back().start < (Index)std::numeric_limits<unsigned char>::max())
+		{
+			StructureRepeat rep( m_memberar.back().end - sink.end(), m_memberar.back().end - m_memberar.back().start);
+			m_memberar.back().end = sink.end();
+			StructureMember* mmb = (StructureMember*)&rep;
+			m_memberar.push_back( *mmb);
+			++m_structurear.back().membersSize;
+			return true;
+		}
 	}
 	return false;
 }
 
 void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 {
-	StructureMember member;
 	if (m_structurear.back().membersSize)
 	{
-		if ((Index)m_memberar.back().end >= sink.start())
+		if ((Index)m_memberar.back().start != StructureRepeat::ID
+		&&  (Index)m_memberar.back().end >= sink.start())
 		{
 			if ((Index)m_memberar.back().end == sink.start())
 			{
@@ -134,10 +157,12 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 				throw strus::runtime_error( _TXT("structure members in structure block builder not appended in strictly ascending order"));
 			}
 		}
+		else if (addFittingRepeatMember( sink))
+		{
+			return;
+		}
 	}
-	member.start = sink.start();
-	member.end = sink.end();
-	m_memberar.push_back( member);
+	m_memberar.push_back( StructureMember( sink.start(), sink.end()));
 	++m_structurear.back().membersSize;
 }
 
@@ -270,8 +295,20 @@ void StructBlockBuilder::appendFromBlock( const Index& docno, const StructBlock&
 		int mi = 0, me = nofMembers;
 		for (; mi != me; ++mi)
 		{
-			IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
-			append( docno, source, sink);
+			if (memberDefs[ mi].start == StructureRepeat::ID)
+			{
+				if (m_structurear.empty() || m_structurear.back().membersSize < 1 || m_memberar.empty())
+				{
+					throw std::runtime_error(_TXT("corrupt index: repeat structure not following a member describing the structure area"));
+				}
+				m_memberar.push_back( memberDefs[ mi]);
+				++m_structurear.back().membersSize;
+			}
+			else
+			{
+				IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
+				append( docno, source, sink);
+			}
 		}
 	}
 }
