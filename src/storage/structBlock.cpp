@@ -205,7 +205,10 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 			if ((Index)m_memberar.back().end == sink.start())
 			{
 				// ... joining subsequent structure members to one
-				m_memberar.back().end = sink.end();
+				IndexRange joined( m_memberar.back().start, sink.end());
+				m_memberar.pop_back();
+				--m_structurear.back().membersSize,
+				addLastStructureMember( joined);
 				return;
 			}
 			else
@@ -235,6 +238,7 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 
 void StructBlockBuilder::append( Index docno, const IndexRange& src, const IndexRange& sink)
 {
+	std::cerr << "DOCNO " << (int)docno << std::endl;
 	if (docno <= 0)
 	{
 		throw std::runtime_error(_TXT("cannot add docno <= 0"));
@@ -349,22 +353,15 @@ void StructBlockBuilder::appendFromBlock( Index docno, const StructBlock& blk, c
 		int nofMembers;
 		const StructureMember* memberDefs = blk.members_at( cursor, structDefs+ni, nofMembers);
 		int mi = 0, me = nofMembers;
-		for (; mi != me; ++mi)
+		if (me)
 		{
-			if (memberDefs[ mi].start == StructureRepeat::ID)
-			{
-				if (m_structurear.empty() || m_structurear.back().membersSize < 1 || m_memberar.empty())
-				{
-					throw std::runtime_error(_TXT("corrupt index: repeat structure not following a member describing the structure area"));
-				}
-				m_memberar.push_back( memberDefs[ mi]);
-				++m_structurear.back().membersSize;
-			}
-			else
-			{
-				IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
-				append( docno, source, sink);
-			}
+			IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
+			append( docno, source, sink);
+		}
+		for (++mi; mi != me; ++mi)
+		{
+			m_memberar.push_back( memberDefs[ mi]);
+			++m_structurear.back().membersSize;
 		}
 	}
 }
