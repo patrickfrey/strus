@@ -44,6 +44,10 @@ public:
 			:start(start_),end(end_){}
 		StructureMember( const StructureMember& o)
 			:start(o.start),end(o.end){}
+		bool defined() const
+		{
+			return !!start;
+		}
 	};
 	struct StructureRepeat
 	{
@@ -94,7 +98,7 @@ public:
 	{
 		initFrame();
 	}
-	StructBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	StructBlock( Index id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
 	{
 		initFrame();
@@ -150,17 +154,17 @@ public:
 		return (int)size() >= Constants::maxStructBlockSize();
 	}
 	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( const Index& docno_, DocIndexNodeCursor& cursor) const
+	Index skipDoc( Index docno_, DocIndexNodeCursor& cursor) const
 	{
 		return m_docIndexNodeArray.skipDoc( docno_, cursor);
 	}
 
-	bool isThisBlockAddress( const Index& docno_) const
+	bool isThisBlockAddress( Index docno_) const
 	{
 		return (docno_ <= id() && m_docIndexNodeArray.size && docno_ > m_docIndexNodeArray.ar[ 0].base);
 	}
 	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
-	bool isFollowBlockAddress( const Index& docno_) const
+	bool isFollowBlockAddress( Index docno_) const
 	{
 		Index diff = id() - (m_docIndexNodeArray.size?m_docIndexNodeArray.ar[ 0].base:1);
 		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
@@ -188,10 +192,7 @@ public:
 		{
 			m_ar.init(0,0);
 		}
-		const StructureMember* current() const
-		{
-			return m_itr < m_ar.size() ? m_ar.at(m_itr) : 0;
-		}
+
 		bool next()
 		{
 			if (m_itr < m_ar.size())
@@ -202,20 +203,8 @@ public:
 			return false;
 		}
 
-		strus::IndexRange skip( const Index& pos)
-		{
-			if (m_itr >= m_ar.size())
-			{
-				if (m_itr == 0) return strus::IndexRange();
-				m_itr = 0;
-			}
-			if ((Index)m_ar[ m_itr].end <= pos)
-			{
-				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureMemberSearchCompare());
-				if (idx >= 0) m_itr = idx; else return strus::IndexRange();
-			}
-			return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
-		}
+		strus::IndexRange skip( Index pos);
+
 	private:
 		class AcceptNonRepeat
 		{
@@ -266,7 +255,7 @@ public:
 			return false;
 		}
 
-		strus::IndexRange skip( const Index& pos)
+		strus::IndexRange skip( Index pos)
 		{
 			if (m_itr >= m_ar.size())
 			{
@@ -344,7 +333,7 @@ public:
 	{
 		return m_id;
 	}
-	void setId( const Index& id_);
+	void setId( Index id_);
 
 	bool empty() const
 	{
@@ -366,17 +355,17 @@ public:
 		IndexRange src;
 		IndexRange sink;
 
-		StructDeclaration( const Index& docno_, const IndexRange& src_, const IndexRange& sink_)
+		StructDeclaration( Index docno_, const IndexRange& src_, const IndexRange& sink_)
 			:docno(docno_),src(src_),sink(sink_){}
 		StructDeclaration( const StructDeclaration& o)
 			:docno(o.docno),src(o.src),sink(o.sink){}
 	};
 
 	/// \brief Add a new structure relation to the block
-	void append( const Index& docno, const strus::IndexRange& src, const strus::IndexRange& sink);
+	void append( Index docno, const strus::IndexRange& src, const strus::IndexRange& sink);
 
 	/// \brief Add the structures of a document stored in another block 
-	void appendFromBlock( const Index& docno, const StructBlock& blk, const DocIndexNodeCursor& cursor);
+	void appendFromBlock( Index docno, const StructBlock& blk, const DocIndexNodeCursor& cursor);
 
 	bool fitsInto( std::size_t nofstructures) const;
 	bool full() const
@@ -434,7 +423,7 @@ public:
 	
 private:
 	bool addFittingRepeatMember( const strus::IndexRange& sink);
-	void addNewDocument( const Index& docno);
+	void addNewDocument( Index docno);
 	void addLastDocStructure( const strus::IndexRange& src);
 	void addLastStructureMember( const strus::IndexRange& sink);
 
@@ -458,101 +447,17 @@ private:
 		strus::Index repsize;
 	};
 
-	strus::Index currentMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		if (cursor.mbridx < cursor.mbrend)
-		{
-			src = strus::IndexRange(
-				m_structurear[ cursor.stuidx].header_start,
-				m_structurear[ cursor.stuidx].header_end);
-			if (cursor.repstart < cursor.repend)
-			{
-				sink = IndexRange( cursor.repstart, cursor.repsize);
-				cursor.repstart += cursor.repofs;
-				if (cursor.repstart >= cursor.repend)
-				{
-					cursor.repstart = 0;
-					cursor.repend = 0;
-					cursor.repofs = 0;
-					cursor.repsize = 0;
-				}
-			}
-			else
-			{
-				sink = strus::IndexRange(
-					m_memberar[ cursor.mbridx].start,
-					m_memberar[ cursor.mbridx].end);
-			}
-			return cursor.docno;
-		}
-		return 0;
-	}
-
-	strus::Index nextMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		++cursor.mbridx;
-		if (cursor.mbridx+1 < cursor.mbrend && m_memberar[ cursor.mbridx+1].start == StructureRepeat::ID)
-		{
-			cursor.repstart = m_memberar[ cursor.mbridx].start;
-			cursor.repend = m_memberar[ cursor.mbridx].end;
-			++cursor.mbridx;
-			const StructureRepeat* rep = (const StructureRepeat*)&m_memberar[ cursor.mbridx];
-			cursor.repofs = (Index)(int)(unsigned int)rep->ofs;
-			cursor.repsize = (Index)(int)(unsigned int)rep->size;
-		}
-		return currentMemberNode( cursor, src, sink);
-	}
-
-	strus::Index nextStructureFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		for (++cursor.stuidx; cursor.stuidx < cursor.stuend; ++cursor.stuidx)
-		{
-			cursor.mbridx = m_structurear[ cursor.stuidx].membersIdx;
-			cursor.mbrend = cursor.mbridx + m_structurear[ cursor.stuidx].membersSize;
-			if (cursor.mbridx < cursor.mbrend) return currentMemberNode( cursor, src, sink);
-		}
-		return 0;
-	}
-
-	strus::Index resolveDocFirstStructure( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		strus::Index ref = m_docIndexNodeArray[ cursor.aridx].ref[ cursor.docidx];
-		cursor.stuidx = m_structurelistar[ ref].idx;
-		cursor.stuend = cursor.stuidx + m_structurelistar[ ref].size;
-		--cursor.stuidx;
-		return nextStructureFirstNode( cursor, src, sink);
-	}
-
-	strus::Index nextDocFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		cursor.docno = m_docIndexNodeArray[ cursor.aridx].nextDoc( cursor.docidx);
-		return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
-	}
-
-	strus::Index nextIndexFirstDoc( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		for (++cursor.aridx; cursor.aridx < m_docIndexNodeArray.size(); ++cursor.aridx)
-		{
-			cursor.docno = m_docIndexNodeArray[ cursor.aridx].firstDoc( cursor.docidx);
-			return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
-		}
-		return 0;
-	}
-
-	strus::Index firstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		cursor.aridx = -1;
-		return nextIndexFirstDoc( cursor, src, sink);
-	}
-
-	strus::Index nextNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
-	{
-		if (nextMemberNode( cursor, src, sink)) return cursor.docno;
-		if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
-		if (nextDocFirstNode( cursor, src, sink)) return cursor.docno;
-		if (nextIndexFirstDoc( cursor, src, sink)) return cursor.docno;
-		return 0;
-	}
+	strus::Index currentRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index firstRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index currentMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextStructureFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index resolveDocFirstStructure( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextDocFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextIndexFirstDoc( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index firstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
+	strus::Index nextNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const;
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;

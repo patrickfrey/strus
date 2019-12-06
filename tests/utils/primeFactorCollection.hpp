@@ -217,6 +217,10 @@ public:
 					{
 						for (++fi; fi != fe && *fi > prev; prev=*fi,++fi){}
 						strus::IndexRange content( start, (fi-factors.begin())+1);
+						if (content.end() - content.start() > 1 && factors[ content.start()-1] == structidx+1)
+						{
+							content = strus::IndexRange( content.start()+1, content.end());
+						}
 						rt.push_back( StructureDef( nambuf, hdr, content));
 						start = content.end();
 					}

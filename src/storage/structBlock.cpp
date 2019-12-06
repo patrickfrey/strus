@@ -75,6 +75,57 @@ void StructBlock::initFrame()
 	}
 }
 
+strus::IndexRange StructBlock::MemberScanner::skip( Index pos)
+{
+	if (m_itr >= m_ar.size())
+	{
+		if (m_itr == 0) return strus::IndexRange();
+		m_itr = 0;
+	}
+	if ((Index)m_ar[ m_itr].start == StructureRepeat::ID)
+	{
+		++m_itr;
+		if (m_itr >= m_ar.size())
+		{
+			m_itr = 0;
+		}
+	}
+	if ((Index)m_ar[ m_itr].end <= pos)
+	{
+		int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureMemberSearchCompare());
+		if (idx >= 0) m_itr = idx; else return strus::IndexRange();
+	}
+	if (m_itr+1 < m_ar.size() && (Index)m_ar[ m_itr+1].start == StructureRepeat::ID)
+	{
+		const StructureRepeat* rep = (const StructureRepeat*)&m_ar[ m_itr+1];
+		Index start = m_ar[ m_itr].start;
+		Index rpos = (pos < start) ? 0 : (pos - start);
+		Index base = rpos - rpos % rep->ofs + start;
+		if (base + rep->size > pos)
+		{
+			return strus::IndexRange( base, base + rep->size);
+		}
+		else if (base + rep->ofs <= m_ar[ m_itr].end)
+		{
+			base += rep->ofs;
+			return strus::IndexRange( base, base + rep->size);
+		}
+		else if (m_itr+2 < m_ar.size())
+		{
+			m_itr += 2;
+			return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
+		}
+		else
+		{
+			return strus::IndexRange();
+		}
+	}
+	else
+	{
+		return strus::IndexRange( m_ar[ m_itr].start, m_ar[ m_itr].end);
+	}
+}
+
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
 	,m_lastDoc(0),m_id(0)
@@ -89,7 +140,7 @@ StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	m_id = o.id();
 }
 
-void StructBlockBuilder::addNewDocument( const Index& docno)
+void StructBlockBuilder::addNewDocument( Index docno)
 {
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
@@ -115,23 +166,28 @@ bool StructBlockBuilder::addFittingRepeatMember( const strus::IndexRange& sink)
 		if (m_structurear.back().membersSize < 2 || m_memberar.size() < 2) throw std::runtime_error(_TXT("corrupt index: repeat structure not following a member describing the structure area"));
 		StructureMember* mmb = (StructureMember*)&m_memberar[ m_memberar.size()-2];
 		const StructureRepeat* rep = (const StructureRepeat*)&m_memberar.back();
-		if (sink.end() - sink.start() == (Index)(int)(unsigned int)rep->size
-		&&  sink.end() - mmb->end == (Index)(int)(unsigned int)rep->ofs)
+		strus::Index membsize = sink.end() - sink.start();
+		strus::Index membofs = sink.end() - mmb->end;
+
+		if (membsize == (Index)(int)(unsigned int)rep->size
+		&&  membofs  == (Index)(int)(unsigned int)rep->ofs)
 		{
-			mmb->end = sink.end();
+			mmb->end += membofs;
 			return true;
 		}
 	}
 	else
 	{
-		if (m_memberar.back().end - m_memberar.back().start == sink.end() - sink.start()
-		&&  m_memberar.back().end - sink.end() < (Index)std::numeric_limits<unsigned char>::max()
-		&&  m_memberar.back().end - m_memberar.back().start < (Index)std::numeric_limits<unsigned char>::max())
+		strus::Index membsize = sink.end() - sink.start();
+		strus::Index membofs = sink.end() - m_memberar.back().end;
+
+		if (membsize == m_memberar.back().end - m_memberar.back().start
+		&&  membsize < (Index)std::numeric_limits<unsigned char>::max()
+		&&  membofs  < (Index)std::numeric_limits<unsigned char>::max())
 		{
-			StructureRepeat rep( m_memberar.back().end - sink.end(), m_memberar.back().end - m_memberar.back().start);
-			m_memberar.back().end = sink.end();
-			StructureMember* mmb = (StructureMember*)&rep;
-			m_memberar.push_back( *mmb);
+			StructureRepeat rep( membofs, membsize);
+			m_memberar.back().end += membofs;
+			m_memberar.push_back( *(StructureMember*)&rep);
 			++m_structurear.back().membersSize;
 			return true;
 		}
@@ -177,7 +233,7 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 	++m_structurelistar.back().size;
 }
 
-void StructBlockBuilder::append( const Index& docno, const IndexRange& src, const IndexRange& sink)
+void StructBlockBuilder::append( Index docno, const IndexRange& src, const IndexRange& sink)
 {
 	if (docno <= 0)
 	{
@@ -282,7 +338,7 @@ void StructBlockBuilder::merge(
 	merge_append( ei, ee, oldblk, newblk);
 }
 
-void StructBlockBuilder::appendFromBlock( const Index& docno, const StructBlock& blk, const DocIndexNodeCursor& cursor)
+void StructBlockBuilder::appendFromBlock( Index docno, const StructBlock& blk, const DocIndexNodeCursor& cursor)
 {
 	int nofStructs;
 	const StructureDef* structDefs = blk.structures_at( cursor, nofStructs);
@@ -451,7 +507,7 @@ StructBlock StructBlockBuilder::createBlock() const
 	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
 }
 
-void StructBlockBuilder::setId( const Index& id_)
+void StructBlockBuilder::setId( Index id_)
 {
 	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( _TXT("assigning illegal id to block"));
 	m_id = id_;
@@ -467,3 +523,139 @@ void StructBlockBuilder::clear()
 	m_id = 0;
 }
 
+strus::Index StructBlockBuilder::currentRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	src = strus::IndexRange(
+		m_structurear[ cursor.stuidx].header_start,
+		m_structurear[ cursor.stuidx].header_end);
+	sink = IndexRange( cursor.repstart, cursor.repstart + cursor.repsize);
+	return cursor.docno;
+}
+
+strus::Index StructBlockBuilder::firstRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	if (cursor.mbridx+1 < cursor.mbrend && m_memberar[ cursor.mbridx+1].start == StructureRepeat::ID)
+	{
+		cursor.repstart = m_memberar[ cursor.mbridx].start;
+		cursor.repend = m_memberar[ cursor.mbridx].end;
+		++cursor.mbridx;
+		const StructureRepeat* rep = (const StructureRepeat*)&m_memberar[ cursor.mbridx];
+		cursor.repofs = (Index)(int)(unsigned int)rep->ofs;
+		cursor.repsize = (Index)(int)(unsigned int)rep->size;
+		return currentRepeatNode( cursor, src, sink);
+	}
+	return 0;
+}
+
+strus::Index StructBlockBuilder::nextRepeatNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	if (cursor.repstart < cursor.repend)
+	{
+		cursor.repstart += cursor.repofs;
+		if (cursor.repstart >= cursor.repend)
+		{
+			cursor.repstart = 0;
+			cursor.repend = 0;
+			cursor.repofs = 0;
+			cursor.repsize = 0;
+		}
+		else
+		{
+			return currentRepeatNode( cursor, src, sink);
+		}
+	}
+	return 0;
+}
+
+strus::Index StructBlockBuilder::currentMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	if (cursor.mbridx >= cursor.mbrend)
+	{
+		return 0;
+	}
+	else
+	{
+		src = strus::IndexRange(
+			m_structurear[ cursor.stuidx].header_start,
+			m_structurear[ cursor.stuidx].header_end);
+		sink = strus::IndexRange(
+			m_memberar[ cursor.mbridx].start,
+			m_memberar[ cursor.mbridx].end);
+	}
+	return cursor.docno;
+}
+
+strus::Index StructBlockBuilder::nextMemberNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	++cursor.mbridx;
+	if (firstRepeatNode( cursor, src, sink))
+	{
+		return cursor.docno;
+	}
+	else
+	{
+		return currentMemberNode( cursor, src, sink);
+	}
+}
+
+strus::Index StructBlockBuilder::nextStructureFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	for (++cursor.stuidx; cursor.stuidx < cursor.stuend; ++cursor.stuidx)
+	{
+		cursor.mbridx = m_structurear[ cursor.stuidx].membersIdx;
+		cursor.mbrend = cursor.mbridx + m_structurear[ cursor.stuidx].membersSize;
+		if (cursor.mbridx < cursor.mbrend)
+		{
+			if (firstRepeatNode( cursor, src, sink))
+			{
+				return cursor.docno;
+			}
+			else
+			{
+				return currentMemberNode( cursor, src, sink);
+			}
+		}
+	}
+	return 0;
+}
+
+strus::Index StructBlockBuilder::resolveDocFirstStructure( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	strus::Index ref = m_docIndexNodeArray[ cursor.aridx].ref[ cursor.docidx];
+	cursor.stuidx = m_structurelistar[ ref].idx;
+	cursor.stuend = cursor.stuidx + m_structurelistar[ ref].size;
+	--cursor.stuidx;
+	return nextStructureFirstNode( cursor, src, sink);
+}
+
+strus::Index StructBlockBuilder::nextDocFirstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	cursor.docno = m_docIndexNodeArray[ cursor.aridx].nextDoc( cursor.docidx);
+	return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
+}
+
+strus::Index StructBlockBuilder::nextIndexFirstDoc( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	for (++cursor.aridx; cursor.aridx < m_docIndexNodeArray.size(); ++cursor.aridx)
+	{
+		cursor.docno = m_docIndexNodeArray[ cursor.aridx].firstDoc( cursor.docidx);
+		return cursor.docno ? resolveDocFirstStructure( cursor, src, sink) : 0;
+	}
+	return 0;
+}
+
+strus::Index StructBlockBuilder::firstNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	cursor.aridx = -1;
+	return nextIndexFirstDoc( cursor, src, sink);
+}
+
+strus::Index StructBlockBuilder::nextNode( Cursor& cursor, strus::IndexRange& src, strus::IndexRange& sink) const
+{
+	if (nextRepeatNode( cursor, src, sink)) return cursor.docno;
+	if (nextMemberNode( cursor, src, sink)) return cursor.docno;
+	if (nextStructureFirstNode( cursor, src, sink)) return cursor.docno;
+	if (nextDocFirstNode( cursor, src, sink)) return cursor.docno;
+	if (nextIndexFirstDoc( cursor, src, sink)) return cursor.docno;
+	return 0;
+}

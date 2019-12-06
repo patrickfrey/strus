@@ -31,6 +31,8 @@ public:
 		,m_storage(storage_)
 		,m_structureScanner()
 		,m_memberScanner()
+		,m_source(0,0)
+		,m_sink(0,0)
 		,m_structno(structno_){}
 	~StructIteratorImpl(){}
 
@@ -47,21 +49,19 @@ public:
 
 	IndexRange source() const
 	{
-		return m_structureScanner.initialized()
-			? IndexRange( m_structureScanner.current()->header_start, m_structureScanner.current()->header_end)
-			: IndexRange();
+		return m_source;
 	}
 	IndexRange sink() const
 	{
-		return m_memberScanner.initialized()
-			? IndexRange( m_memberScanner.current()->start, m_memberScanner.current()->end)
-			: IndexRange();
+		return m_sink;
 	}
 
 private:
 	const StorageClient* m_storage;
 	StructBlock::StructureScanner m_structureScanner;
 	StructBlock::MemberScanner m_memberScanner;
+	strus::IndexRange m_source;
+	strus::IndexRange m_sink;
 	Index m_structno;
 };
 

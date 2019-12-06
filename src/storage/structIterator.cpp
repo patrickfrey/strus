@@ -16,46 +16,38 @@ using namespace strus;
 
 IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 {
-	if (!docno()) return IndexRange(0,0);
-	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return IndexRange(0,0);
+	if (!docno()) return m_source = IndexRange(0,0);
+	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_source = IndexRange(0,0);
 
 	if (m_structureScanner.initialized())
 	{
 		const StructBlock::StructureDef* cur = m_structureScanner.current();
 		if (cur->header_start <= firstpos_ && cur->header_end > firstpos_)
 		{
-			return IndexRange( cur->header_start, cur->header_end);
+			return m_source = IndexRange( cur->header_start, cur->header_end);
 		}
 	}
 	else
 	{
 		m_structureScanner = currentBlock().structureScanner_at( currentBlockCursor());
-		if (!m_structureScanner.initialized()) return IndexRange(0,0);
+		if (!m_structureScanner.initialized()) return m_source = IndexRange(0,0);
 	}
 	m_memberScanner.clear();
-	return m_structureScanner.skip( firstpos_);
+	return m_source = m_structureScanner.skip( firstpos_);
 }
 
 IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 {
-	if (!docno()) return IndexRange(0,0);
-	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return IndexRange(0,0);
+	if (!docno()) return m_sink = IndexRange(0,0);
+	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_sink = IndexRange(0,0);
 
-	if (m_memberScanner.initialized())
+	if (!m_memberScanner.initialized())
 	{
-		const StructBlock::StructureMember* cur = m_memberScanner.current();
-		if (cur->start <= firstpos_ && cur->end > firstpos_)
-		{
-			return IndexRange( cur->start, cur->end);
-		}
-	}
-	else
-	{
-		if (!m_structureScanner.initialized()) return IndexRange(0,0);
+		if (!m_structureScanner.initialized()) return m_sink = IndexRange(0,0);
 		m_memberScanner = m_structureScanner.members();
-		if (!m_memberScanner.initialized()) return IndexRange(0,0);
+		if (!m_memberScanner.initialized()) return m_sink = IndexRange(0,0);
 	}
-	return m_memberScanner.skip( firstpos_);
+	return m_sink = m_memberScanner.skip( firstpos_);
 }
 
 

@@ -38,6 +38,9 @@ public:
 	explicit SkipScanArray( const ElementType* ar_, int size_)
 		:m_ar(ar_),m_size(size_)
 	{}
+	SkipScanArray( const SkipScanArray& o)
+		:m_ar(o.m_ar),m_size(o.m_size)
+	{}
 	~SkipScanArray(){}
 
 	void init( const ElementType* ar_, int size_)
