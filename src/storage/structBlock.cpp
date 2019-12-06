@@ -12,7 +12,6 @@
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
-#include <iostream>
 
 using namespace strus;
 
@@ -238,7 +237,6 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 
 void StructBlockBuilder::append( Index docno, const IndexRange& src, const IndexRange& sink)
 {
-	std::cerr << "DOCNO " << (int)docno << std::endl;
 	if (docno <= 0)
 	{
 		throw std::runtime_error(_TXT("cannot add docno <= 0"));
