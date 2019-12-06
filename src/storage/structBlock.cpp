@@ -484,8 +484,12 @@ StructBlock StructBlockBuilder::createBlock() const
 	int structofs = structlistofs + m_structurelistar.size() * sizeof( m_structurelistar[0]);
 	int memberofs = structofs + m_structurear.size() * sizeof( m_structurear[0]);
 	int blksize = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
-	if (blksize > std::numeric_limits<unsigned short>::max()) throw strus::runtime_error(_TXT("sizeof block (%d) exceeds maximum limit %d"), blksize, (int)std::numeric_limits<unsigned short>::max());
-
+	if (blksize > std::numeric_limits<unsigned short>::max())
+	{
+		int first_docno = m_docIndexNodeArray[0].firstDoc();
+		int last_docno = m_docIndexNodeArray.back().lastDoc();
+		throw strus::runtime_error(_TXT("sizeof block (%d) for documents [%d,%d] exceeds maximum limit %d"), blksize, first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
+	}
 	hdr.structlistidx = structlistofs;
 	hdr.structidx = structofs;
 	hdr.memberidx = memberofs;
