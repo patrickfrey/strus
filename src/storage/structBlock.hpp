@@ -30,10 +30,10 @@ public:
 
 	struct BlockHeader
 	{
-		unsigned short structlistidx;
-		unsigned short structidx;
-		unsigned short memberidx;
-		unsigned short _RESERVED;
+		strus::Index structlistidx;
+		strus::Index structidx;
+		strus::Index memberidx;
+		strus::Index _RESERVED;
 	};
 	struct StructureMember
 	{
