@@ -31,19 +31,19 @@ static StaticAsserts g_staticAsserts;
 
 
 template <typename Element>
-static const Element* getStructPtr( const void* dataPtr, unsigned short indexStart, unsigned short indexEnd)
+static const Element* getStructPtr( const char* name, const void* dataPtr, unsigned short indexStart, unsigned short indexEnd)
 {
 	if (indexStart % AlignmentBase != 0 || (indexEnd-indexStart) % sizeof(Element) != 0 || indexEnd < indexStart)
 	{
-		throw std::runtime_error( _TXT("data corruption in structure block"));
+		throw strus::runtime_error( _TXT("data corruption in structure block: misalignment of %s"), name);
 	}
 	return (Element*)((char*)dataPtr + indexStart);
 }
 
 template <typename Element>
-static int getStructSize( unsigned short indexStart, unsigned short indexEnd)
+static int getStructSize( const char* name, unsigned short indexStart, unsigned short indexEnd)
 {
-	if (0!=(indexEnd-indexStart) % sizeof(Element)) throw std::runtime_error(_TXT("data corruption in structure block"));
+	if (0!=(indexEnd-indexStart) % sizeof(Element)) throw strus::runtime_error(_TXT("data corruption in structure block: structure size of %s"), name);
 	return (indexEnd-indexStart) / sizeof(Element);
 }
 
@@ -61,16 +61,16 @@ void StructBlock::initFrame()
 		const BlockHeader* hdr = (const BlockHeader*)ptr();
 		unsigned short blockSize = (int)DataBlock::size();
 
-		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( ptr(), sizeof(BlockHeader), hdr->structlistidx);
-		int docIndexNodeSize = getStructSize<DocIndexNode>( sizeof(BlockHeader), hdr->structlistidx);
+		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( "document index nodes", ptr(), sizeof(BlockHeader), hdr->structlistidx);
+		int docIndexNodeSize = getStructSize<DocIndexNode>( "document index nodes", sizeof(BlockHeader), hdr->structlistidx);
 		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
-		m_structlistar = getStructPtr<StructureDefList>( ptr(), hdr->structlistidx, hdr->structidx);
-		m_structar = getStructPtr<StructureDef>( ptr(), hdr->structidx, hdr->memberidx);
-		m_memberar = getStructPtr<StructureMember>( ptr(), hdr->memberidx, blockSize);
+		m_structlistar = getStructPtr<StructureDefList>( "structure definition list", ptr(), hdr->structlistidx, hdr->structidx);
+		m_structar = getStructPtr<StructureDef>( "structure definitions", ptr(), hdr->structidx, hdr->memberidx);
+		m_memberar = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, blockSize);
 	}
 	else
 	{
-		throw std::runtime_error( _TXT("data corruption in structure block"));
+		throw strus::runtime_error( _TXT("data corruption in structure block: %s"), _TXT("no header defined"));
 	}
 }
 
