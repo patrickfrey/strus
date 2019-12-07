@@ -13,6 +13,7 @@
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include <vector>
+#include <cstring>
 
 namespace strus {
 
@@ -60,6 +61,17 @@ public:
 
 		unsigned char ofs;
 		unsigned char size;
+	};
+	struct StructureEnumeration
+	{
+		enum {NofOfs=3*sizeof(PositionType)};
+
+		PositionType base;
+		unsigned char ofs[ NofOfs];
+
+		explicit StructureEnumeration( PositionType base_=0);
+		StructureEnumeration( const StructureEnumeration& o);
+		bool push_back( PositionType pos);
 	};
 	struct StructureDefList
 	{

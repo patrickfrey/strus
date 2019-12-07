@@ -127,6 +127,37 @@ strus::IndexRange StructBlock::MemberScanner::skip( Index pos)
 	}
 }
 
+StructBlock::StructureEnumeration::StructureEnumeration( PositionType base_)
+	:base(base_)
+{
+	std::memset( ofs, 0, sizeof(ofs));
+}
+
+StructBlock::StructureEnumeration::StructureEnumeration( const StructureEnumeration& o)
+	:base(o.base)
+{
+	std::memcpy( ofs, o.ofs, sizeof(ofs));
+}
+
+bool StructBlock::StructureEnumeration::push_back( PositionType pos)
+{
+	if (base == 0)
+	{
+		base = pos;
+	}
+	else
+	{
+		PositionType accu = base;
+		int pi = 0, pe = NofOfs;
+		for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
+		if (pi == pe) return false;
+		if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
+		if (pos - accu > std::numeric_limits<unsigned char>::max()) throw std::runtime_error(_TXT("element gap exceeds limit for this type of structure"));
+		ofs[ pi] = pos - accu;
+		return true;
+	}
+}
+
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
 	,m_lastDoc(0),m_id(0)
