@@ -9,6 +9,7 @@
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
 #include "strus/base/static_assert.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
@@ -31,17 +32,18 @@ static StaticAsserts g_staticAsserts;
 
 
 template <typename Element>
-static const Element* getStructPtr( const char* name, const void* dataPtr, unsigned short indexStart, unsigned short indexEnd)
+static const Element* getStructPtr( const char* name, const void* dataPtr, int indexStart, int indexEnd)
 {
 	if (indexStart % AlignmentBase != 0 || (indexEnd-indexStart) % sizeof(Element) != 0 || indexEnd < indexStart)
 	{
-		throw strus::runtime_error( _TXT("data corruption in structure block: misalignment of %s"), name);
+		std::string dt = strus::string_format( "start: %d, end: %d, alignment base: %d, size of element: %d", indexStart, indexEnd, (int)AlignmentBase, (int)sizeof(Element));
+		throw strus::runtime_error( _TXT("data corruption in structure block: misalignment of %s, %s"), name, dt.c_str());
 	}
 	return (Element*)((char*)dataPtr + indexStart);
 }
 
 template <typename Element>
-static int getStructSize( const char* name, unsigned short indexStart, unsigned short indexEnd)
+static int getStructSize( const char* name, int indexStart, int indexEnd)
 {
 	if (0!=(indexEnd-indexStart) % sizeof(Element)) throw strus::runtime_error(_TXT("data corruption in structure block: structure size of %s"), name);
 	return (indexEnd-indexStart) / sizeof(Element);
@@ -59,7 +61,7 @@ void StructBlock::initFrame()
 	else if (size() >= sizeof(BlockHeader))
 	{
 		const BlockHeader* hdr = (const BlockHeader*)ptr();
-		unsigned short blockSize = (int)DataBlock::size();
+		int blockSize = (int)DataBlock::size();
 
 		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( "document index nodes", ptr(), sizeof(BlockHeader), hdr->structlistidx);
 		int docIndexNodeSize = getStructSize<DocIndexNode>( "document index nodes", sizeof(BlockHeader), hdr->structlistidx);
@@ -484,11 +486,23 @@ StructBlock StructBlockBuilder::createBlock() const
 	int structofs = structlistofs + m_structurelistar.size() * sizeof( m_structurelistar[0]);
 	int memberofs = structofs + m_structurear.size() * sizeof( m_structurear[0]);
 	int blksize = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
-	if (blksize > (int)std::numeric_limits<strus::Index>::max())
+	if (m_memberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
 	{
 		int first_docno = m_docIndexNodeArray[0].firstDoc();
 		int last_docno = m_docIndexNodeArray.back().lastDoc();
-		throw strus::runtime_error(_TXT("sizeof block (%d) for documents [%d,%d] exceeds maximum limit %d"), blksize, first_docno, last_docno, (int)std::numeric_limits<strus::Index>::max());
+		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_memberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+	}
+	if (m_structurear.size() > (std::size_t)std::numeric_limits<StructBlock::StructIdxType>::max())
+	{
+		int first_docno = m_docIndexNodeArray[0].firstDoc();
+		int last_docno = m_docIndexNodeArray.back().lastDoc();
+		throw strus::runtime_error(_TXT("number of structures (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurear.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::StructIdxType>::max());
+	}
+	if (m_structurelistar.size() > (std::size_t)std::numeric_limits<unsigned short>::max()/*element of DocIndexNode::ref*/)
+	{
+		int first_docno = m_docIndexNodeArray[0].firstDoc();
+		int last_docno = m_docIndexNodeArray.back().lastDoc();
+		throw strus::runtime_error(_TXT("number of structure lists (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurelistar.size(), first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
 	}
 	hdr.structlistidx = structlistofs;
 	hdr.structidx = structofs;

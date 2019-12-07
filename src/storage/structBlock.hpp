@@ -27,6 +27,7 @@ public:
 	};
 	typedef unsigned short PositionType;
 	typedef unsigned short MemberIdxType;
+	typedef unsigned short StructIdxType;
 
 	struct BlockHeader
 	{
@@ -62,8 +63,8 @@ public:
 	};
 	struct StructureDefList
 	{
-		unsigned short idx;
-		unsigned short size;
+		StructIdxType idx;
+		StructIdxType size;
 	};
 	struct StructureDef
 	{
