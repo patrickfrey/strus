@@ -13,6 +13,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include <string>
 #include <cstring>
+#include <limits>
 #include <set>
 
 using namespace strus;
@@ -25,6 +26,9 @@ StorageDocument::StorageDocument(
 	:m_transaction(transaction_)
 	,m_docid(docid_)
 	,m_docno(docno_)
+	,m_terms(),m_invs(),m_structures(),m_attributes(),m_metadata(),m_userlist()
+	,m_maxpos(0)
+	,m_nofStructuresIgnored(0)
 	,m_errorhnd(errorhnd_)
 {}
 
@@ -51,9 +55,16 @@ void StorageDocument::addSearchIndexTerm(
 		}
 		else
 		{
-			TermMapKey key( termMapKey( type_, value_));
-			TermMapValue& ref = m_terms[ key];
-			ref.pos.insert( position_);
+			if (position_ > m_maxpos)
+			{
+				m_maxpos = position_;
+			}
+			if (position_ <= (strus::Index)Constants::storage_max_position_info())
+			{
+				TermMapKey key( termMapKey( type_, value_));
+				TermMapValue& ref = m_terms[ key];
+				ref.pos.insert( position_);
+			}
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index term to document: %s"), *m_errorhnd);
@@ -72,8 +83,16 @@ void StorageDocument::addSearchIndexStructure(
 		}
 		else
 		{
-			Index structno = m_transaction->getOrCreateStructType( struct_);
-			m_structures.push_back( DocStructure( structno, source_, sink_));
+			if (source_.end() <= (strus::Index)Constants::storage_max_position_info()
+			&&  sink_.end() <= (strus::Index)Constants::storage_max_position_info())
+			{
+				Index structno = m_transaction->getOrCreateStructType( struct_);
+				m_structures.push_back( DocStructure( structno, source_, sink_));
+			}
+			else
+			{
+				m_nofStructuresIgnored += 1;
+			}
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index structure to document: %s"), *m_errorhnd);
@@ -92,8 +111,15 @@ void StorageDocument::addForwardIndexTerm(
 		}
 		else
 		{
-			Index typeno = m_transaction->getOrCreateTermType( type_);
-			m_invs[ InvMapKey( typeno, position_)] = value_;
+			if (position_ > m_maxpos)
+			{
+				m_maxpos = position_;
+			}
+			if (position_ <= (strus::Index)Constants::storage_max_position_info())
+			{
+				Index typeno = m_transaction->getOrCreateTermType( type_);
+				m_invs[ InvMapKey( typeno, position_)] = value_;
+			}
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
@@ -135,6 +161,10 @@ void StorageDocument::done()
 {
 	try
 	{
+		if (m_maxpos >= (strus::Index)Constants::storage_max_position_info())
+		{
+			m_errorhnd->info( _TXT("token positions are out of range (document too big, only %d of %d token positions assigned), %d structures dropped"), (int)(strus::Index)Constants::storage_max_position_info(), (int)m_maxpos, (int)m_nofStructuresIgnored);
+		}
 		//[1.1] Delete old metadata:
 		m_transaction->deleteMetaData( m_docno);
 		//[1.2] Delete old attributes:
@@ -152,14 +182,12 @@ void StorageDocument::done()
 		{
 			m_transaction->defineMetaData( m_docno, wi->name, wi->value);
 		}
-
 		//[2.2] Insert new attributes:
 		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 		for (; ai != ae; ++ai)
 		{
 			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
 		}
-
 		//[2.3] Insert new index elements (forward index, inverted index and structures):
 		TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 		for (; ti != te; ++ti)
@@ -174,7 +202,6 @@ void StorageDocument::done()
 		{
 			m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
 		}
-
 		m_transaction->openForwardIndexDocument( m_docno);
 		InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 		for (; ri != re; ++ri)
@@ -195,9 +222,12 @@ void StorageDocument::done()
 		//[3] Clear data:
 		m_terms.clear();
 		m_invs.clear();
+		m_structures.clear();
 		m_attributes.clear();
 		m_metadata.clear();
 		m_userlist.clear();
+		m_maxpos = 0;
+		m_nofStructuresIgnored = 0;
 	}
 	CATCH_ERROR_MAP( _TXT("error closing document in transaction: %s"), *m_errorhnd);
 }

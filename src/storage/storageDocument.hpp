@@ -99,6 +99,8 @@ private:
 	std::vector<DocAttribute> m_attributes;			///< attributes to add
 	std::vector<DocMetaData> m_metadata;			///< metadata to add
 	std::vector<Index> m_userlist;				///< users granted access to this document
+	Index m_maxpos;						///< maximum position inserted
+	int m_nofStructuresIgnored;				///< number of structures ignored
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 

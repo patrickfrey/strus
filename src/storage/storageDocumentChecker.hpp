@@ -156,6 +156,8 @@ private:
 	std::vector<std::string> m_userlist;	///< list of users
 	std::string m_docid;			///< document id
 	Index m_docno;				///< document number
+	Index m_maxpos;				///< maximum position inserted
+	int m_nofStructuresIgnored;		///< number of structures ignored
 	std::string m_logfile;			///< log file where to log errors detected
 	ErrorBufferInterface* m_errorhnd;	///< error buffer for exception free interface
 };

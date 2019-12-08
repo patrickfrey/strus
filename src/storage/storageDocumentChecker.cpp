@@ -38,8 +38,11 @@ StorageDocumentChecker::StorageDocumentChecker(
 		const std::string& logfile_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
+	,m_termMap(),m_invTermMap(),m_metaDataMap(),m_attributeMap(),m_structurelist(),m_userlist()
 	,m_docid(docid_)
 	,m_docno(storage_->documentNumber( docid_))
+	,m_maxpos(0)
+	,m_nofStructuresIgnored(0)
 	,m_logfile(logfile_)
 	,m_errorhnd(errorhnd_)
 {
@@ -60,17 +63,31 @@ void StorageDocumentChecker::addSearchIndexTerm(
 {
 	try
 	{
-		TermMap::iterator ti = m_termMap.find( Term( type_, value_));
-		TermAttributes* attributes = 0;
-		if (ti == m_termMap.end())
+		if (position_ <= 0)
 		{
-			attributes = &m_termMap[ Term( type_, value_)];
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
 		}
 		else
 		{
-			attributes = &ti->second;
+			if (position_ > m_maxpos)
+			{
+				m_maxpos = position_;
+			}
+			if (position_ <= (strus::Index)Constants::storage_max_position_info())
+			{
+				TermMap::iterator ti = m_termMap.find( Term( type_, value_));
+				TermAttributes* attributes = 0;
+				if (ti == m_termMap.end())
+				{
+					attributes = &m_termMap[ Term( type_, value_)];
+				}
+				else
+				{
+					attributes = &ti->second;
+				}
+				attributes->poset.insert( position_);
+			}
 		}
-		attributes->poset.insert( position_);
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index term: %s"), *m_errorhnd);
 }
@@ -82,8 +99,23 @@ void StorageDocumentChecker::addSearchIndexStructure(
 {
 	try
 	{
-		std::string structnam = strus::string_conv::tolower( struct_);
-		m_structurelist.insert( Structure( structnam, source_, sink_));
+		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
+		}
+		else
+		{
+			if (source_.end() <= (strus::Index)Constants::storage_max_position_info()
+			&&  sink_.end() <= (strus::Index)Constants::storage_max_position_info())
+			{
+				std::string structnam = strus::string_conv::tolower( struct_);
+				m_structurelist.insert( Structure( structnam, source_, sink_));
+			}
+			else
+			{
+				m_nofStructuresIgnored += 1;
+			}
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding search index term: %s"), *m_errorhnd);
 }
@@ -95,7 +127,21 @@ void StorageDocumentChecker::addForwardIndexTerm(
 {
 	try
 	{
-		m_invTermMap[ InvKey( type_, position_)] = value_;
+		if (position_ <= 0)
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
+		}
+		else
+		{
+			if (position_ > m_maxpos)
+			{
+				m_maxpos = position_;
+			}
+			if (position_ <= (strus::Index)Constants::storage_max_position_info())
+			{
+				m_invTermMap[ InvKey( type_, position_)] = value_;
+			}
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding forward index term: %s"), *m_errorhnd);
 }
@@ -416,6 +462,10 @@ void StorageDocumentChecker::done()
 {
 	try
 	{
+		if (m_maxpos >= (strus::Index)Constants::storage_max_position_info())
+		{
+			m_errorhnd->info( _TXT("token positions are out of range (document too big, only %d of %d token positions assigned), %d structures dropped"), (int)(strus::Index)Constants::storage_max_position_info(), (int)m_maxpos, (int)m_nofStructuresIgnored);
+		}
 		joinAdjacentStructureMembers( m_structurelist);
 		if (m_logfile == "-")
 		{
