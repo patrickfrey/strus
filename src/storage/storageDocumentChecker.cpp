@@ -173,14 +173,27 @@ static void logError(
 		std::ostream& logout, const std::string& docid,
 		const char* format, ...)
 {
-	char msgbuf[ 1024];
+	char msgbuf[ 2048];
 	va_list ap;
 	va_start(ap, format);
-	strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
-
-	logout << "error checking document '" << docid + "': ";
-	logout << msgbuf << std::endl;
-
+	int msglen = std::vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
+	logout << _TXT("error checking document") << " '" << docid + "': ";
+	if (msglen < 0)
+	{
+		logout << _TXT("format string error");
+	}
+	else
+	{
+		if (msglen >= (int)sizeof(msgbuf))
+		{
+			msgbuf[ msglen-3] = '.';
+			msgbuf[ msglen-2] = '.';
+			msgbuf[ msglen-1] = '.';
+			msgbuf[ msglen] = 0;
+		}
+		logout << msgbuf;
+	}
+	logout << std::endl;
 	va_end(ap);
 }
 
