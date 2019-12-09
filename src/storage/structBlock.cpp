@@ -155,7 +155,7 @@ bool StructBlock::StructureEnumeration::append( PositionType pos)
 		for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
 		if (pi == pe) return false;
 		if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
-		if (pos - accu > std::numeric_limits<unsigned char>::max()) throw std::runtime_error(_TXT("element gap exceeds limit for this type of structure"));
+		if (pos - accu > std::numeric_limits<unsigned char>::max()) return false;
 		ofs[ pi] = pos - accu;
 	}
 	return true;
