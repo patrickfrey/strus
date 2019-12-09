@@ -35,7 +35,7 @@ public:
 		strus::Index structlistidx;
 		strus::Index structidx;
 		strus::Index memberidx;
-		strus::Index _RESERVED;
+		strus::Index enumMemberidx;
 	};
 	struct StructureMember
 	{
@@ -71,7 +71,10 @@ public:
 
 		explicit StructureEnumeration( PositionType base_=0);
 		StructureEnumeration( const StructureEnumeration& o);
-		bool push_back( PositionType pos);
+
+		bool full() const {return !!ofs[NofOfs-1];}
+		bool append( PositionType pos);
+		PositionType skip( PositionType pos) const;
 	};
 	struct StructureDefList
 	{
@@ -82,7 +85,12 @@ public:
 	{
 		PositionType header_start;
 		PositionType header_end;
-		MemberIdxType membersSize;
+
+		enum {MaxMembersSize=(1<<14)};
+		enum StructureType {TypeRangeList,TypeEnumeration};
+
+		unsigned short structureType :2;
+		unsigned short membersSize :14;
 		MemberIdxType membersIdx;
 	};
 	struct StructureMemberSearchCompare
@@ -104,7 +112,7 @@ public:
 
 public:
 	explicit StructBlock()
-		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_structar(0),m_memberar(0)
+		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_structar(0),m_memberar(0),m_enumMemberar(0)
 	{}
 	StructBlock( const StructBlock& o)
 		:DataBlock(o)
@@ -318,6 +326,7 @@ private:
 	const StructureDefList* m_structlistar;
 	const StructureDef* m_structar;
 	const StructureMember* m_memberar;
+	const StructureEnumeration* m_enumMemberar;
 };
 
 
@@ -328,17 +337,19 @@ public:
 	typedef StructBlock::StructureDef StructureDef;
 	typedef StructBlock::StructureDefList StructureDefList;
 	typedef StructBlock::StructureRepeat StructureRepeat;
+	typedef StructBlock::StructureEnumeration StructureEnumeration;
 
 public:
 	StructBlockBuilder( const StructBlock& o);
 	StructBlockBuilder()
-		:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
+		:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar(),m_enumMemberar()
 		,m_lastDoc(0),m_id(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_docIndexNodeArray(o.m_docIndexNodeArray)
-		,m_memberar(o.m_memberar)
 		,m_structurelistar(o.m_structurelistar)
 		,m_structurear(o.m_structurear)
+		,m_memberar(o.m_memberar)
+		,m_enumMemberar(o.m_enumMemberar)
 		,m_lastDoc(o.m_lastDoc)
 		,m_id(o.m_id){}
 
@@ -395,19 +406,24 @@ public:
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
 	const std::vector<StructureMember>& memberArray() const			{return m_memberar;}
+	const std::vector<StructureEnumeration>& enumMemberArray() const	{return m_enumMemberar;}
 	const std::vector<StructureDefList>& structureListArray() const		{return m_structurelistar;}
 	const std::vector<StructureDef>& structureArray() const			{return m_structurear;}
 
-	StructBlock createBlock() const;
+	/// \brief Take the last structure defined and try to pack it into a enumeration structure if it gets smaller in size
+	bool tryMoveRangeListBlockMembersToEnumeration();
+
+	StructBlock createBlock();
 	void clear();
 
 	int size() const
 	{
 		int dd = m_docIndexNodeArray.size() * sizeof(DocIndexNode);
-		int mm = m_memberar.size() * sizeof(StructureMember);
 		int ll = m_structurelistar.size() * sizeof(StructureDefList);
 		int ss = m_structurear.size() * sizeof(StructureDef);
-		return dd + mm + ll + ss;
+		int mm = m_memberar.size() * sizeof(StructureMember);
+		int ee = m_enumMemberar.size() * sizeof(StructureEnumeration);
+		return dd + ll + ss + mm + ee;
 	}
 
 	static void merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk);
@@ -427,9 +443,10 @@ public:
 	void swap( StructBlockBuilder& o)
 	{
 		m_docIndexNodeArray.swap( o.m_docIndexNodeArray);
-		m_memberar.swap( o.m_memberar);
 		m_structurelistar.swap( o.m_structurelistar);
 		m_structurear.swap( o.m_structurear);
+		m_memberar.swap( o.m_memberar);
+		m_enumMemberar.swap( o.m_enumMemberar);
 		std::swap( m_lastDoc, o.m_lastDoc);
 		std::swap( m_id, o.m_id);
 	}
@@ -474,9 +491,10 @@ private:
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;
-	std::vector<StructureMember> m_memberar;
 	std::vector<StructureDefList> m_structurelistar;
 	std::vector<StructureDef> m_structurear;
+	std::vector<StructureMember> m_memberar;
+	std::vector<StructureEnumeration> m_enumMemberar;
 	Index m_lastDoc;
 	Index m_id;
 };

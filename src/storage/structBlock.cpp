@@ -25,6 +25,7 @@ struct StaticAsserts
 	StaticAsserts()
 	{
 		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureMember) == sizeof(StructBlock::StructureRepeat));
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureDef) == 2*sizeof(StructBlock::PositionType) + 2*sizeof(StructBlock::MemberIdxType));
 	}
 };
 }//anonymous namespace
@@ -57,6 +58,7 @@ void StructBlock::initFrame()
 		m_structlistar = 0;
 		m_structar = 0;
 		m_memberar = 0;
+		m_enumMemberar = 0;
 	}
 	else if (size() >= sizeof(BlockHeader))
 	{
@@ -68,7 +70,8 @@ void StructBlock::initFrame()
 		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
 		m_structlistar = getStructPtr<StructureDefList>( "structure definition list", ptr(), hdr->structlistidx, hdr->structidx);
 		m_structar = getStructPtr<StructureDef>( "structure definitions", ptr(), hdr->structidx, hdr->memberidx);
-		m_memberar = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, blockSize);
+		m_memberar = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, hdr->enumMemberidx);
+		m_enumMemberar = getStructPtr<StructureEnumeration>( "enumeration member definitions", ptr(), hdr->enumMemberidx, blockSize);
 	}
 	else
 	{
@@ -139,7 +142,7 @@ StructBlock::StructureEnumeration::StructureEnumeration( const StructureEnumerat
 	std::memcpy( ofs, o.ofs, sizeof(ofs));
 }
 
-bool StructBlock::StructureEnumeration::push_back( PositionType pos)
+bool StructBlock::StructureEnumeration::append( PositionType pos)
 {
 	if (base == 0)
 	{
@@ -154,12 +157,19 @@ bool StructBlock::StructureEnumeration::push_back( PositionType pos)
 		if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
 		if (pos - accu > std::numeric_limits<unsigned char>::max()) throw std::runtime_error(_TXT("element gap exceeds limit for this type of structure"));
 		ofs[ pi] = pos - accu;
-		return true;
 	}
+	return true;
+}
+
+StructBlock::PositionType StructBlock::StructureEnumeration::skip( PositionType pos) const
+{
+	PositionType accu = base;
+	for (int pi = 0; pi<NofOfs && ofs[pi] && accu < pos; accu+=ofs[pi],++pi){}
+	return accu < pos ? 0 : accu;
 }
 
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
-	:m_docIndexNodeArray(),m_memberar(),m_structurelistar(),m_structurear()
+	:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar(),m_enumMemberar()
 	,m_lastDoc(0),m_id(0)
 {
 	DocIndexNodeCursor cursor;
@@ -220,11 +230,46 @@ bool StructBlockBuilder::addFittingRepeatMember( const strus::IndexRange& sink)
 			StructureRepeat rep( membofs, membsize);
 			m_memberar.back().end += membofs;
 			m_memberar.push_back( *(StructureMember*)&rep);
+			if (m_structurear.back().membersSize >= StructureDef::MaxMembersSize)
+			{
+				throw std::runtime_error(_TXT("number of structure members exceeds maximum size"));
+			}
 			++m_structurear.back().membersSize;
 			return true;
 		}
 	}
 	return false;
+}
+
+bool StructBlockBuilder::tryMoveRangeListBlockMembersToEnumeration()
+{
+	if (m_structurear.empty()) return false;
+	StructureDef& st = m_structurear.back();
+	if (st.structureType != StructureDef::TypeRangeList) return false;
+	if ((std::size_t)st.membersIdx + st.membersSize != m_memberar.size()) return false;
+	StructBlock::MemberScanner mscan( m_memberar.data()+st.membersIdx, st.membersSize);
+	std::vector<StructureEnumeration> enumar;
+	std::size_t maxSize = (std::size_t)st.membersSize * sizeof(StructureMember);
+	strus::IndexRange rg = mscan.skip( 0);
+	for (; rg.defined(); rg = mscan.skip( rg.end()))
+	{
+		strus::Index ri = rg.start(), re = rg.end();
+		for (; ri < re; ++ri)
+		{
+			if (enumar.empty() || enumar.back().full())
+			{
+				enumar.push_back( StructureEnumeration());
+			}
+			if (!enumar.back().append( ri)) return false;
+		}
+		if (enumar.size() * sizeof(StructureEnumeration) >= maxSize) return false;
+		if (enumar.size() >= StructureDef::MaxMembersSize) return false;
+	}
+	st.structureType = StructureDef::TypeEnumeration;
+	st.membersIdx = m_enumMemberar.size();
+	st.membersSize = enumar.size();
+	m_enumMemberar.insert( m_enumMemberar.end(), enumar.begin(), enumar.end());
+	return true;
 }
 
 void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
@@ -252,6 +297,10 @@ void StructBlockBuilder::addLastStructureMember( const IndexRange& sink)
 		{
 			return;
 		}
+	}
+	if (m_structurear.back().membersSize >= StructureDef::MaxMembersSize)
+	{
+		throw std::runtime_error(_TXT("number of structure members exceeds maximum size"));
 	}
 	m_memberar.push_back( StructureMember( sink.start(), sink.end()));
 	++m_structurear.back().membersSize;
@@ -285,6 +334,8 @@ void StructBlockBuilder::append( Index docno, const IndexRange& src, const Index
 	if (m_lastDoc != docno)
 	{
 		if (m_id && m_id < docno) throw strus::runtime_error( _TXT("assigned illegal id to block"));
+
+		//[+](void)tryMoveRangeListBlockMembersToEnumeration();
 		addNewDocument( docno);
 	}
 	if (m_structurelistar.back().size)
@@ -506,9 +557,10 @@ bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 	return size() + estimatedConsumption <= Constants::maxStructBlockSize();
 }
 
-StructBlock StructBlockBuilder::createBlock() const
+StructBlock StructBlockBuilder::createBlock()
 {
 	if (empty()) throw strus::runtime_error( _TXT("tried to create empty structure block"));
+	//[+](void)tryMoveRangeListBlockMembersToEnumeration();
 
 	StructBlock::BlockHeader hdr;
 
@@ -516,29 +568,32 @@ StructBlock StructBlockBuilder::createBlock() const
 	int structlistofs = docindexofs + m_docIndexNodeArray.size() * sizeof( m_docIndexNodeArray[0]);
 	int structofs = structlistofs + m_structurelistar.size() * sizeof( m_structurelistar[0]);
 	int memberofs = structofs + m_structurear.size() * sizeof( m_structurear[0]);
-	int blksize = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
+	int enumMemberofs = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
+	int blksize = enumMemberofs + m_enumMemberar.size() * sizeof( m_enumMemberar[0]);
+
+	int first_docno = m_docIndexNodeArray[0].firstDoc();
+	int last_docno = m_docIndexNodeArray.back().lastDoc();
+
+	if (m_enumMemberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
+	{
+		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_enumMemberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+	}
 	if (m_memberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
 	{
-		int first_docno = m_docIndexNodeArray[0].firstDoc();
-		int last_docno = m_docIndexNodeArray.back().lastDoc();
 		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_memberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
 	}
 	if (m_structurear.size() > (std::size_t)std::numeric_limits<StructBlock::StructIdxType>::max())
 	{
-		int first_docno = m_docIndexNodeArray[0].firstDoc();
-		int last_docno = m_docIndexNodeArray.back().lastDoc();
 		throw strus::runtime_error(_TXT("number of structures (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurear.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::StructIdxType>::max());
 	}
 	if (m_structurelistar.size() > (std::size_t)std::numeric_limits<unsigned short>::max()/*element of DocIndexNode::ref*/)
 	{
-		int first_docno = m_docIndexNodeArray[0].firstDoc();
-		int last_docno = m_docIndexNodeArray.back().lastDoc();
 		throw strus::runtime_error(_TXT("number of structure lists (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurelistar.size(), first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
 	}
 	hdr.structlistidx = structlistofs;
 	hdr.structidx = structofs;
 	hdr.memberidx = memberofs;
-	hdr._RESERVED = 0;
+	hdr.enumMemberidx = enumMemberofs;
 
 	MemBlock blkmem( blksize);
 	char* dt = (char*)blkmem.ptr();
@@ -547,6 +602,7 @@ StructBlock StructBlockBuilder::createBlock() const
 	std::memcpy( dt+structlistofs, m_structurelistar.data(), m_structurelistar.size() * sizeof( m_structurelistar[0]));
 	std::memcpy( dt+structofs, m_structurear.data(), m_structurear.size() * sizeof( m_structurear[0]));
 	std::memcpy( dt+memberofs, m_memberar.data(), m_memberar.size() * sizeof( m_memberar[0]));
+	std::memcpy( dt+enumMemberofs, m_enumMemberar.data(), m_enumMemberar.size() * sizeof( m_enumMemberar[0]));
 
 	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
 }
@@ -563,6 +619,7 @@ void StructBlockBuilder::clear()
 	m_structurelistar.clear();
 	m_structurear.clear();
 	m_memberar.clear();
+	m_enumMemberar.clear();
 	m_lastDoc = 0;
 	m_id = 0;
 }
