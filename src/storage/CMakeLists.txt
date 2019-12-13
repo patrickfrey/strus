@@ -44,6 +44,7 @@ set( source_files
 	posinfoBlock.cpp
 	posinfoIterator.cpp
 	postingIterator.cpp
+	structBlockMemberEnum.cpp
 	structBlock.cpp
 	structBlockBatchWrite.cpp
 	structIndexMap.cpp

@@ -42,6 +42,8 @@ public:
 		:m_ar(o.m_ar),m_size(o.m_size)
 	{}
 	~SkipScanArray(){}
+	SkipScanArray& operator=( const SkipScanArray& o)
+		{m_ar=o.m_ar; m_size=o.m_size; return *this;}
 
 	void init( const ElementType* ar_, int size_)
 	{
