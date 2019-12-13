@@ -7,9 +7,9 @@
  */
 #ifndef _STRUS_STRUCTURE_BLOCK_MEMBER_ENUM_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_MEMBER_ENUM_HPP_INCLUDED
-#include "skipScanArray.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 
 namespace strus {
@@ -17,69 +17,86 @@ namespace strus {
 struct StructBlockMemberEnum
 {
 	typedef unsigned short PositionType;
+	typedef unsigned char OffsetType;
 	enum {NofOfs=3*sizeof(PositionType)};
 
 	PositionType base;
-	unsigned char ofs[ NofOfs];
+	OffsetType ofs[ NofOfs];
+
+	static PositionType positionCast( strus::Index pos)
+	{
+		return (pos <= (strus::Index)std::numeric_limits<PositionType>::max()) ? (PositionType)pos : 0;
+	}
+	static OffsetType offsetCast( strus::Index ofs)
+	{
+		return (ofs <= (strus::Index)std::numeric_limits<OffsetType>::max()) ? (OffsetType)pos : 0;
+	}
 
 	explicit StructBlockMemberEnum( PositionType base_=0);
 	StructBlockMemberEnum( const StructBlockMemberEnum& o);
 
 	bool full() const {return !!ofs[NofOfs-1];}
-	bool append( PositionType pos);
-
-	PositionType last() const {PositionType rt=base; for (int i=0; i<=NofOfs; rt += ofs[i]){} return rt;}
-
-	struct SearchCompare
+	bool append( PositionType pos)
 	{
-		SearchCompare(){}
-		bool operator()( const StructBlockMemberEnum& aa, const PositionType& bb) const
+		if (base == 0)
 		{
-			return aa.base <= bb;
+			base = pos;
 		}
-	};
-
-	struct Iterator
-	{
-		typedef SkipScanArray<StructBlockMemberEnum,strus::Index,StructBlockMemberEnum::SearchCompare> Ar;
-
-		struct Element
+		else
 		{
-			int aidx;
-			int eidx;
-			strus::Index cur;
+			PositionType accu = base;
+			int pi = 0, pe = NofOfs;
+			for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
+			if (pi == pe) return false;
+			if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
+			if (pos - accu > (PositionType)std::numeric_limits<OffsetType>::max()) return false;
+			ofs[ pi] = pos - accu;
+		}
+		return true;
+	}
 
-			Element() :aidx(0),eidx(-1),cur(0){}
-			Element( const Element& o) :aidx(o.aidx),eidx(o.eidx),cur(o.cur){}
-			Element& operator=( const Element& o) {aidx=o.aidx; eidx=o.eidx; cur=o.cur; return *this;}
+	PositionType last() const
+	{
+		PositionType rt=base;
+		for (int ii=0; ii<=NofOfs; rt+=ofs[ii],++ii){}
+		return rt;
+	}
 
-			strus::IndexRange skipPos( const Ar& ar, strus::Index pos);
+	strus::IndexRange skip( PositionType pos)
+	{
+		PositionType pi=base;
+		PositionType start=base;
+		int ii=0;
+		for (; ii<=NofOfs && pi < pos; pi+=ofs[ii],++ii)
+		{
+			if (1!=ofs[ii]) {start=pi+ofs[ii];}
+		}
+		if (pi >= pos)
+		{
+			PositionType end = pi+1;
+			for (; ii<=NofOfs && 1==ofs[ii]; ++end,++ii){}
+			return strus::IndexRange( start, end);
+		}
+		return strus::IndexRange();
+	}
 
-		private:
-			bool skipEnd( const Ar& ar);
-			bool skipStart( const Ar& ar);
-			strus::IndexRange range( const Ar& ar) const;
-			strus::IndexRange seekPos( const Ar& ar, strus::Index pos, int startidx, int endidx);
-		};
+	strus::Index expandEnd( strus::Index end)
+	{
+		if (end == base)
+		{
+			strus::Index rt = base+1;
+			for (int ii=0; ii<=NofOfs && 1==ofs[ii]; ++rt,++ii){}
+			return rt;
+		}
+		return end;
+	}
 
-		Ar ar;
-		Element element;
-		strus::IndexRange cur;
-
-		Iterator()
-			:ar(0,0),element(),cur(){}
-		Iterator( const StructBlockMemberEnum* ar_, std::size_t arsize_)
-			:ar(ar_,arsize_),element(),cur(){}
-		Iterator( const Iterator& o)
-			:ar(o.ar),element(o.element),cur(o.cur){}
-		Iterator& operator=( const Iterator& o)
-			{ar=o.ar; element=o.element; cur=o.cur; return *this;}
-
-		IndexRange next();
-		IndexRange current()	{return cur;}
-
-		strus::IndexRange skip( strus::Index pos);
-	};
+	strus::Index expandStart( strus::Index start)
+	{
+		for (int ii=NofOfs-1; ii>=0 && 0==ofs[ii]; --ii){}
+		for (int ii=NofOfs-1; ii>=0 && 1==ofs[ii]; --ii,--start){}
+		return start;
+	}
 };
 
 }//namespace
