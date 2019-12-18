@@ -56,7 +56,7 @@ void StructBlock::initFrame()
 	{
 		m_docIndexNodeArray.init( 0, 0);
 		m_structlistar = 0;
-		m_data.init( 0, 0, 0, 0, 0);
+		m_data.init();
 	}	
 	else if (size() >= sizeof(BlockHeader))
 	{
@@ -71,8 +71,10 @@ void StructBlock::initFrame()
 		const StructureMember* memberar_ = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, hdr->enumidx);
 		const StructBlockMemberEnum* enumar_ = getStructPtr<StructBlockMemberEnum>( "enum definitions", ptr(), hdr->enumidx, hdr->repeatidx);
 		const StructBlockMemberRepeat* repeatar_ = getStructPtr<StructBlockMemberRepeat>( "enumeration member definitions", ptr(), hdr->repeatidx, hdr->startidx);
-		const PositionType* startar_ = getStructPtr<PositionType>( "start definitions", ptr(), hdr->startidx, blockSize);
-		m_data.init( structar_, memberar_, enumar_, repeatar_, startar_);
+		const PositionType* startar_ = getStructPtr<PositionType>( "start definitions", ptr(), hdr->startidx, hdr->pkbyteidx);
+		const StructBlockMemberPackedByte* pkbytear_ = getStructPtr<StructBlockMemberPackedByte>( "packed (byte) member definitions", ptr(), hdr->pkbyteidx, hdr->pkshortidx);
+		const StructBlockMemberPackedShort* pkshortar_ = getStructPtr<StructBlockMemberPackedShort>( "packed (short) member definitions", ptr(), hdr->pkshortidx, blockSize);
+		m_data.init( structar_, memberar_, enumar_, repeatar_, startar_, pkbytear_, pkshortar_);
 	}
 	else
 	{
@@ -116,6 +118,12 @@ strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos
 		case MemberRepeatType:
 			m_cur = m_data->repeatar()[ ths.memberIdx()].skip( pos);
 			if (m_cur.end() > m_ar[ m_aridx].end()) m_cur = strus::IndexRange();
+			break;
+		case MemberPackedByteType:
+			m_cur = m_data->pkbytear()[ ths.memberIdx()].skip( pos);
+			break;
+		case MemberPackedShortType:
+			m_cur = m_data->pkshortar()[ ths.memberIdx()].skip( pos);
 			break;
 	}
 	return m_cur;
@@ -165,7 +173,8 @@ StructBlock::StructureMember::Iterator StructBlock::StructureDef::Iterator::memb
 
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
-	,m_enumar(),m_repeatar(),m_startar(),m_curmembers()
+	,m_enumar(),m_repeatar(),m_startar()
+	,m_pkbytear(),m_pkshortar(),m_curmembers()
 	,m_lastDoc(0),m_id(0),m_membersDropped(0)
 {
 	DocIndexNodeCursor cursor;
@@ -257,6 +266,52 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
 	return rt;
 }
 
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkbyte(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		StructBlockMemberPackedByte& pkb)
+{
+	MemberDim rt;
+	int nn = 0;
+	for (; si != se; ++si,++nn)
+	{
+		if (!pkb.append( *si)) break;
+		rt.end = si->end();
+	}
+	if (nn)
+	{
+		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
+				+ m_pkbytear.size() / StructureMember::MaxMemberIdx
+			) / 2;
+		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberPackedByte);
+		rt.elements = nn;
+	}
+	return rt;
+}
+
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkshort(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		StructBlockMemberPackedShort& pks)
+{
+	MemberDim rt;
+	int nn = 0;
+	for (; si != se; ++si,++nn)
+	{
+		if (!pks.append( *si)) break;
+		rt.end = si->end();
+	}
+	if (nn)
+	{
+		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
+				+ m_pkbytear.size() / StructureMember::MaxMemberIdx
+			) / 2;
+		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberPackedByte);
+		rt.elements = nn;
+	}
+	return rt;
+}
+
 void StructBlockBuilder::testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize)
 {
 	if (arsize < StructBlock::StructureMember::MaxMemberIdx)
@@ -303,6 +358,16 @@ void StructBlockBuilder::packCurrentMembers()
 			testPackMember( dim_repeat, maxweight, memberType,
 					StructBlock::MemberRepeatType, m_repeatar.size());
 
+			StructBlockMemberPackedByte pkb;
+			MemberDim dim_packedbyte = evaluateMemberDim_pkbyte( si, se, pkb);
+			testPackMember( dim_packedbyte, maxweight, memberType,
+					StructBlock::MemberPackedByteType, m_pkbytear.size());
+
+			StructBlockMemberPackedShort pks;
+			MemberDim dim_packedshort = evaluateMemberDim_pkshort( si, se, pks);
+			testPackMember( dim_packedshort, maxweight, memberType,
+					StructBlock::MemberPackedShortType, m_pkshortar.size());
+
 			if (maxweight > 0.0)
 			{
 				switch (memberType)
@@ -325,6 +390,16 @@ void StructBlockBuilder::packCurrentMembers()
 						m_memberar.push_back( StructureMember( dim_repeat.end, memberType, m_repeatar.size()));
 						m_repeatar.push_back( rep);
 						si += dim_repeat.elements;
+						break;
+					case StructBlock::MemberPackedByteType:
+						m_memberar.push_back( StructureMember( dim_packedbyte.end, memberType, m_pkbytear.size()));
+						m_pkbytear.push_back( pkb);
+						si += dim_packedbyte.elements;
+						break;
+					case StructBlock::MemberPackedShortType:
+						m_memberar.push_back( StructureMember( dim_packedshort.end, memberType, m_pkshortar.size()));
+						m_pkshortar.push_back( pks);
+						si += dim_packedshort.elements;
 						break;
 				}
 			}
@@ -661,34 +736,36 @@ StructBlock StructBlockBuilder::createBlock()
 	int enumofs = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
 	int repeatofs = enumofs + m_enumar.size() * sizeof( m_enumar[0]);
 	int startofs = repeatofs + m_repeatar.size() * sizeof( m_repeatar[0]);
-	int blksize = startofs + m_startar.size() * sizeof( m_startar[0]);
+	int pkbyteofs = startofs + m_startar.size() * sizeof( m_startar[0]);
+	int pkshortofs = pkbyteofs + m_pkbytear.size() * sizeof( m_pkbytear[0]);
+	int blksize = pkshortofs + m_pkshortar.size() * sizeof( m_pkshortar[0]);
 
 	int first_docno = m_docIndexNodeArray[0].firstDoc();
 	int last_docno = m_docIndexNodeArray.back().lastDoc();
 
 	if (m_startar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of start indirection members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_startar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
+		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			"indirection", (int)m_startar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
 	}
 	if (m_enumar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of enumeration members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_enumar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
+		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			"enum", (int)m_enumar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
 		std::vector<StructBlockMemberEnum>::const_iterator ei = m_enumar.begin(), ee = m_enumar.end();
 		for (; ei != ee; ++ei)
 		{
-			if (!ei->check()) throw strus::runtime_error(_TXT("corrupt block (enumeration members)"));
+			if (!ei->check()) throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(ei-m_enumar.begin()), "enum", first_docno, last_docno);
 		}
 	}
 	if (m_repeatar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of repeating structure members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_repeatar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
+		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			"repeat", (int)m_repeatar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
 		std::vector<StructBlockMemberRepeat>::const_iterator ri = m_repeatar.begin(), re = m_repeatar.end();
 		for (; ri != re; ++ri)
 		{
-			if (!ri->check()) throw strus::runtime_error(_TXT("corrupt block (enumeration members)"));
+			if (!ri->check()) throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(ri-m_repeatar.begin()), "repeat", first_docno, last_docno);
 		}
 	}
 	if (m_memberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
@@ -705,19 +782,31 @@ StructBlock StructBlockBuilder::createBlock()
 				case StructBlock::MemberIndexType:
 					if (mi->memberIdx() >= m_startar.size())
 					{
-						throw strus::runtime_error(_TXT("corrupt block (start indirections)"));
+						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/indirection", first_docno, last_docno);
 					}
 					break;
 				case StructBlock::MemberEnumType:
 					if (mi->memberIdx() >= m_enumar.size())
 					{
-						throw strus::runtime_error(_TXT("corrupt block (enumeration indirections)"));
+						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/enum", first_docno, last_docno);
 					}
 					break;
 				case StructBlock::MemberRepeatType:
 					if (mi->memberIdx() >= m_repeatar.size())
 					{
-						throw strus::runtime_error(_TXT("corrupt block (repeat indirections)"));
+						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/repeat", first_docno, last_docno);
+					}
+					break;
+				case StructBlock::MemberPackedByteType:
+					if (mi->memberIdx() >= m_pkbytear.size())
+					{
+						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/packbyte", first_docno, last_docno);
+					}
+					break;
+				case StructBlock::MemberPackedShortType:
+					if (mi->memberIdx() >= m_pkshortar.size())
+					{
+						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/packshort", first_docno, last_docno);
 					}
 					break;
 			}
@@ -739,6 +828,8 @@ StructBlock StructBlockBuilder::createBlock()
 	hdr.enumidx = enumofs;
 	hdr.repeatidx = repeatofs;
 	hdr.startidx = startofs;
+	hdr.pkbyteidx = pkbyteofs;
+	hdr.pkshortidx = pkshortofs;
 
 	MemBlock blkmem( blksize);
 	char* dt = (char*)blkmem.ptr();
@@ -750,6 +841,8 @@ StructBlock StructBlockBuilder::createBlock()
 	std::memcpy( dt+enumofs, m_enumar.data(), m_enumar.size() * sizeof( m_enumar[0]));
 	std::memcpy( dt+repeatofs, m_repeatar.data(), m_repeatar.size() * sizeof( m_repeatar[0]));
 	std::memcpy( dt+startofs, m_startar.data(), m_startar.size() * sizeof( m_startar[0]));
+	std::memcpy( dt+pkbyteofs, m_pkbytear.data(), m_pkbytear.size() * sizeof( m_pkbytear[0]));
+	std::memcpy( dt+pkshortofs, m_pkshortar.data(), m_pkshortar.size() * sizeof( m_pkshortar[0]));
 
 	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
 }

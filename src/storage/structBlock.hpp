@@ -37,10 +37,12 @@ public:
 	typedef unsigned short MemberSizeType;
 
 	enum MemberType {
-		MemberOffsetType = 0,
+		MemberOffsetType,
 		MemberIndexType,
 		MemberEnumType,
 		MemberRepeatType,
+		MemberPackedByteType,
+		MemberPackedShortType
 	};
 
 	struct BlockHeader
@@ -51,6 +53,8 @@ public:
 		strus::Index enumidx;
 		strus::Index repeatidx;
 		strus::Index startidx;
+		strus::Index pkbyteidx;
+		strus::Index pkshortidx;
 	};
 	class StructureDef;
 	class StructureMember;
@@ -65,23 +69,39 @@ public:
 				const StructureMember* memberar_,
 				const StructBlockMemberEnum* enumar_,
 				const StructBlockMemberRepeat* repeatar_,
-				const PositionType* startar_)
-			:m_structar(structar_),m_memberar(memberar_),m_enumar(enumar_),m_repeatar(repeatar_),m_startar(startar_){}
+				const PositionType* startar_,
+				const StructBlockMemberPackedByte* pkbytear_,
+				const StructBlockMemberPackedShort* pkshortar_)
+			:m_structar(structar_),m_memberar(memberar_)
+			,m_enumar(enumar_),m_repeatar(repeatar_),m_startar(startar_)
+			,m_pkbytear(pkbytear_),m_pkshortar(pkshortar_){}
 		BlockData( const BlockData& o)
-			:m_structar(o.m_structar),m_memberar(o.m_memberar),m_enumar(o.m_enumar),m_repeatar(o.m_repeatar),m_startar(o.m_startar){}
+			:m_structar(o.m_structar),m_memberar(o.m_memberar)
+			,m_enumar(o.m_enumar),m_repeatar(o.m_repeatar),m_startar(o.m_startar)
+			,m_pkbytear(o.m_pkbytear),m_pkshortar(o.m_pkshortar){}
+
 		void init(
 				const StructureDef* structar_, 
 				const StructureMember* memberar_,
 				const StructBlockMemberEnum* enumar_,
 				const StructBlockMemberRepeat* repeatar_,
-				const PositionType* startar_)
-			{m_structar=structar_; m_memberar=memberar_; m_enumar=enumar_; m_repeatar=repeatar_; m_startar=startar_;}
+				const PositionType* startar_,
+				const StructBlockMemberPackedByte* pkbytear_,
+				const StructBlockMemberPackedShort* pkshortar_)
+		{
+			m_structar=structar_; m_memberar=memberar_;
+			m_enumar=enumar_; m_repeatar=repeatar_; m_startar=startar_;
+			m_pkbytear=pkbytear_; m_pkshortar=pkshortar_;
+		}
+		void init() {init(0,0,0,0,0,0,0);}
 
-		const StructureDef* structar() const		{return m_structar;}
-		const StructureMember* memberar() const		{return m_memberar;}
-		const StructBlockMemberEnum* enumar() const	{return m_enumar;}
-		const StructBlockMemberRepeat* repeatar() const	{return m_repeatar;}
-		const PositionType* startar() const		{return m_startar;}
+		const StructureDef* structar() const			{return m_structar;}
+		const StructureMember* memberar() const			{return m_memberar;}
+		const StructBlockMemberEnum* enumar() const		{return m_enumar;}
+		const StructBlockMemberRepeat* repeatar() const		{return m_repeatar;}
+		const PositionType* startar() const			{return m_startar;}
+		const StructBlockMemberPackedByte* pkbytear() const	{return m_pkbytear;}
+		const StructBlockMemberPackedShort* pkshortar() const	{return m_pkshortar;}
 
 	private:
 		const StructureDef* m_structar;
@@ -89,6 +109,8 @@ public:
 		const StructBlockMemberEnum* m_enumar;
 		const StructBlockMemberRepeat* m_repeatar;
 		const PositionType* m_startar;
+		const StructBlockMemberPackedByte* m_pkbytear;
+		const StructBlockMemberPackedShort* m_pkshortar;
 	};
 
 	struct StructureMember
@@ -304,13 +326,15 @@ public:
 		return StructureDef::Iterator( &m_data, st, nofstructs);
 	}
 
-	const BlockData* data() const			{return &m_data;}
-	const StructureDefList* structlistar() const	{return m_structlistar;}
-	const StructureDef* structar() const		{return m_data.structar();}
-	const StructureMember* memberar() const		{return m_data.memberar();}
-	const StructBlockMemberEnum* enumar() const	{return m_data.enumar();}
-	const StructBlockMemberRepeat* repeatar() const	{return m_data.repeatar();}
-	const PositionType* startar() const		{return m_data.startar();}
+	const BlockData* data() const				{return &m_data;}
+	const StructureDefList* structlistar() const		{return m_structlistar;}
+	const StructureDef* structar() const			{return m_data.structar();}
+	const StructureMember* memberar() const			{return m_data.memberar();}
+	const StructBlockMemberEnum* enumar() const		{return m_data.enumar();}
+	const StructBlockMemberRepeat* repeatar() const		{return m_data.repeatar();}
+	const PositionType* startar() const			{return m_data.startar();}
+	const StructBlockMemberPackedByte* pkbytear() const	{return m_data.pkbytear();}
+	const StructBlockMemberPackedShort* pkshortar() const	{return m_data.pkshortar();}
 
 private:
 	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
@@ -341,7 +365,8 @@ public:
 	StructBlockBuilder( const StructBlock& o);
 	StructBlockBuilder()
 		:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
-		,m_enumar(),m_repeatar(),m_startar(),m_curmembers()
+		,m_enumar(),m_repeatar(),m_startar()
+		,m_pkbytear(),m_pkshortar(),m_curmembers()
 		,m_lastDoc(0),m_id(0),m_membersDropped(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_docIndexNodeArray(o.m_docIndexNodeArray)
@@ -351,6 +376,8 @@ public:
 		,m_enumar(o.m_enumar)
 		,m_repeatar(o.m_repeatar)
 		,m_startar(o.m_startar)
+		,m_pkbytear(o.m_pkbytear)
+		,m_pkshortar(o.m_pkshortar)
 		,m_curmembers(o.m_curmembers)
 		,m_lastDoc(o.m_lastDoc)
 		,m_id(o.m_id)
@@ -417,7 +444,9 @@ public:
 		int mm = m_memberar.size() * sizeof(m_memberar[0]);
 		int ee = m_enumar.size() * sizeof(m_enumar[0]);
 		int ii = m_startar.size() * sizeof(m_startar[0]);
-		return dd + ll + ss + mm + ee + ii;
+		int bb = m_pkbytear.size() * sizeof(m_pkbytear[0]);
+		int ww = m_pkshortar.size() * sizeof(m_pkshortar[0]);
+		return dd + ll + ss + mm + ee + ii + bb + ww;
 	}
 
 	static void merge(
@@ -446,6 +475,8 @@ public:
 		m_enumar.swap( o.m_enumar);
 		m_repeatar.swap( o.m_repeatar);
 		m_startar.swap( o.m_startar);
+		m_pkbytear.swap( o.m_pkbytear);
+		m_pkshortar.swap( o.m_pkshortar);
 		m_curmembers.swap( o.m_curmembers);
 		std::swap( m_lastDoc, o.m_lastDoc);
 		std::swap( m_id, o.m_id);
@@ -472,7 +503,9 @@ private:
 				builder.memberar().data(),
 				builder.enumar().data(),
 				builder.repeatar().data(),
-				builder.startar().data())
+				builder.startar().data(),
+				builder.pkbytear().data(),
+				builder.pkshortar().data())
 			,m_struitr()
 			,m_membitr()
 			,m_docno(0)
@@ -530,17 +563,27 @@ private:
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
 			StructBlockMemberRepeat& rep);
+	MemberDim evaluateMemberDim_pkbyte(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			StructBlockMemberPackedByte& pkb);
+	MemberDim evaluateMemberDim_pkshort(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			StructBlockMemberPackedShort& pks);
 
 	static void testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize);
 	void packCurrentMembers();
 
-	const std::vector<DocIndexNode>& docIndexNodeArray() const	{return m_docIndexNodeArray;}
-	const std::vector<StructureDefList>& structurelistar() const	{return m_structurelistar;}
-	const std::vector<StructureDef>& structurear() const		{return m_structurear;}
-	const std::vector<StructureMember>& memberar() const		{return m_memberar;}
-	const std::vector<StructBlockMemberEnum>& enumar() const	{return m_enumar;}
-	const std::vector<StructBlockMemberRepeat>& repeatar() const	{return m_repeatar;}
-	const std::vector<PositionType>& startar() const		{return m_startar;}
+	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
+	const std::vector<StructureDefList>& structurelistar() const		{return m_structurelistar;}
+	const std::vector<StructureDef>& structurear() const			{return m_structurear;}
+	const std::vector<StructureMember>& memberar() const			{return m_memberar;}
+	const std::vector<StructBlockMemberEnum>& enumar() const		{return m_enumar;}
+	const std::vector<StructBlockMemberRepeat>& repeatar() const		{return m_repeatar;}
+	const std::vector<PositionType>& startar() const			{return m_startar;}
+	const std::vector<StructBlockMemberPackedByte> pkbytear() const		{return m_pkbytear;}
+	const std::vector<StructBlockMemberPackedShort> pkshortar() const	{return m_pkshortar;}
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;
@@ -550,6 +593,8 @@ private:
 	std::vector<StructBlockMemberEnum> m_enumar;
 	std::vector<StructBlockMemberRepeat> m_repeatar;
 	std::vector<PositionType> m_startar;
+	std::vector<StructBlockMemberPackedByte> m_pkbytear;
+	std::vector<StructBlockMemberPackedShort> m_pkshortar;
 
 	std::vector<strus::IndexRange> m_curmembers;
 	Index m_lastDoc;

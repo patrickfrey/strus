@@ -98,7 +98,7 @@ struct StructBlockMemberEnum
 	PositionType last() const
 	{
 		PositionType rt=base;
-		for (int ii=0; ii<=NofOfs; rt+=ofs[ii],++ii){}
+		for (int ii=0; ii<=NofOfs && ofs[ii]; rt+=ofs[ii],++ii){}
 		return rt;
 	}
 	bool pop_back()
