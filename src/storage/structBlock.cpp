@@ -56,11 +56,7 @@ void StructBlock::initFrame()
 	{
 		m_docIndexNodeArray.init( 0, 0);
 		m_structlistar = 0;
-		m_structar = 0;
-		m_memberar = 0;
-		m_startar = 0;
-		m_enumar = 0;
-		m_repeatar = 0;
+		m_data.init( 0, 0, 0, 0, 0);
 	}	
 	else if (size() >= sizeof(BlockHeader))
 	{
@@ -71,11 +67,12 @@ void StructBlock::initFrame()
 		int docIndexNodeSize = getStructSize<DocIndexNode>( "document index nodes", sizeof(BlockHeader), hdr->structlistidx);
 		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
 		m_structlistar = getStructPtr<StructureDefList>( "structure definition list", ptr(), hdr->structlistidx, hdr->structidx);
-		m_structar = getStructPtr<StructureDef>( "structure definitions", ptr(), hdr->structidx, hdr->memberidx);
-		m_memberar = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, hdr->startidx);
-		m_enumar = getStructPtr<StructBlockMemberEnum>( "enum definitions", ptr(), hdr->enumidx, hdr->repeatidx);
-		m_repeatar = getStructPtr<StructBlockMemberRepeat>( "enumeration member definitions", ptr(), hdr->repeatidx, blockSize);
-		m_startar = getStructPtr<PositionType>( "start definitions", ptr(), hdr->startidx, hdr->enumidx);
+		const StructureDef* structar_ = getStructPtr<StructureDef>( "structure definitions", ptr(), hdr->structidx, hdr->memberidx);
+		const StructureMember* memberar_ = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, hdr->enumidx);
+		const StructBlockMemberEnum* enumar_ = getStructPtr<StructBlockMemberEnum>( "enum definitions", ptr(), hdr->enumidx, hdr->repeatidx);
+		const StructBlockMemberRepeat* repeatar_ = getStructPtr<StructBlockMemberRepeat>( "enumeration member definitions", ptr(), hdr->repeatidx, hdr->startidx);
+		const PositionType* startar_ = getStructPtr<PositionType>( "start definitions", ptr(), hdr->startidx, blockSize);
+		m_data.init( structar_, memberar_, enumar_, repeatar_, startar_);
 	}
 	else
 	{
@@ -85,50 +82,49 @@ void StructBlock::initFrame()
 
 strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos)
 {
-	strus::IndexRange rt;
-	if (pos < cur.end() && pos >= cur.start())
+	if (pos < m_cur.end() && pos >= m_cur.start())
 	{
-		return cur;
+		return m_cur;
 	}
-	if (aridx >= ar.size())
+	if (m_aridx >= m_ar.size())
 	{
-		if (aridx == 0) return cur = strus::IndexRange();
-		aridx = 0;
+		if (m_aridx == 0) return m_cur = strus::IndexRange();
+		m_aridx = 0;
 	}
-	if (ar[ aridx].end() <= pos)
+	if (m_ar[ m_aridx].end() <= pos)
 	{
-		int idx = ar.upperbound( pos, aridx+1, ar.size(), StructureMember::SearchCompare());
-		if (idx >= 0) aridx = idx; else return cur = strus::IndexRange();
+		int idx = m_ar.upperbound( pos, m_aridx+1, m_ar.size(), StructureMember::SearchCompare());
+		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
 	else
 	{
-		int idx = ar.upperbound( pos, 0, aridx, StructureMember::SearchCompare());
-		if (idx >= 0) aridx = idx; else return cur = strus::IndexRange();
+		int idx = m_ar.upperbound( pos, 0, m_aridx+1, StructureMember::SearchCompare());
+		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
-	const StructureMember& ths = ar[ aridx];
+	const StructureMember& ths = m_ar[ m_aridx];
 	switch (ths.memberType())
 	{
-		case StartOffsetType:
-			rt = strus::IndexRange( ths.end - ths.memberIdx(), ths.end);
+		case MemberOffsetType:
+			m_cur = strus::IndexRange( ths.end() - ths.memberIdx(), ths.end());
 			break;
 		case MemberIndexType:
-			rt = strus::IndexRange( block->startar()[ ths.memberIdx()], ths.end);
+			m_cur = strus::IndexRange( m_data->startar()[ ths.memberIdx()], ths.end());
 			break;
 		case MemberEnumType:
-			rt = block->enumar()[ ths.memberIdx()].skip( pos);
+			m_cur = m_data->enumar()[ ths.memberIdx()].skip( pos);
 			break;
 		case MemberRepeatType:
-			rt = block->repeatar()[ ths.memberIdx()].skip( pos);
-			if (rt.end() > ar[ aridx].end()) rt = strus::IndexRange();
+			m_cur = m_data->repeatar()[ ths.memberIdx()].skip( pos);
+			if (m_cur.end() > m_ar[ m_aridx].end()) m_cur = strus::IndexRange();
 			break;
 	}
-	return rt;
+	return m_cur;
 }
 
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
 	,m_enumar(),m_repeatar(),m_startar(),m_curmembers()
-	,m_lastDoc(0),m_id(0)
+	,m_lastDoc(0),m_id(0),m_membersDropped(0)
 {
 	DocIndexNodeCursor cursor;
 	strus::Index docno = o.firstDoc( cursor);
@@ -140,8 +136,186 @@ StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	m_id = o.id();
 }
 
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_offset(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		StructBlock::MemberIdxType& ofs)
+{
+	MemberDim rt;
+	if (si->end() - si->start() >= StructureMember::MaxMemberIdx) return rt;
+	rt.fill = (float)m_memberar.size() / StructBlock::MaxMemberIdxType;
+	rt.bytes = sizeof(StructureMember);
+	rt.elements = 1;
+	rt.end = si->end();
+	ofs = si->end() - si->start();
+	return rt;
+}
+
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_index(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		PositionType& start)
+{
+	MemberDim rt;
+	rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
+			+ m_startar.size() / StructureMember::MaxMemberIdx
+		) / 2;
+	rt.bytes = sizeof(StructureMember) + sizeof(PositionType);
+	rt.elements = 1;
+	rt.end = si->end();
+	start = si->start();
+	return rt;
+}
+
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_enum(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		StructBlockMemberEnum& enm)
+{
+	MemberDim rt;
+	int nn = 0;
+	for (; si != se; ++si,++nn)
+	{
+		strus::Index pi = si->start(), pe = si->end();
+		int mm = 0;
+		for (; pi != pe; ++pi,++mm)
+		{
+			if (!enm.append( pi))
+			{
+				while (mm--) enm.pop_back();
+				break;
+			}
+		}
+		if (pi != pe) break;
+		rt.end = si->end();
+	}
+	if (nn)
+	{
+		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
+				+ m_enumar.size() / StructureMember::MaxMemberIdx
+			) / 2;
+		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberEnum);
+		rt.elements = nn;
+	}
+	return rt;
+}
+
+StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se,
+		StructBlockMemberRepeat& rep)
+{
+	MemberDim rt;
+	if (si + 1 < se)
+	{
+		std::vector<strus::IndexRange>::const_iterator sn = si+1;
+		strus::Index end = sn->start();
+		int nn = 0;
+		for (; si != se && rep.append( end, *si); ++si,++nn){}
+		if (nn > 1)
+		{
+			rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
+					+ m_repeatar.size() / StructureMember::MaxMemberIdx
+				) / 2;
+			rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberRepeat);
+			rt.elements = nn;
+			rt.end = rep.lastMemberEnd( end);
+		}
+	}
+	return rt;
+}
+
+void StructBlockBuilder::testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize)
+{
+	if (arsize < StructBlock::StructureMember::MaxMemberIdx)
+	{
+		float weight = ((float)dim.elements / (float)dim.bytes) * (1.0 - dim.fill);
+		if (weight >= maxweight)
+		{
+			memberType = assignMemberType;
+			maxweight = weight;
+		}
+	}
+}
+
+void StructBlockBuilder::packCurrentMembers()
+{
+	if (m_curmembers.empty()) return;
+
+	std::vector<strus::IndexRange>::const_iterator
+		si = m_curmembers.begin(), se = m_curmembers.end();
+	while (si != se)
+	{
+		if (m_memberar.size() < StructBlock::MaxMemberIdxType)
+		{
+			StructBlock::MemberType memberType = StructBlock::MemberOffsetType;
+			float maxweight = 0.0;
+
+			StructBlock::MemberIdxType ofs;
+			MemberDim dim_offset = evaluateMemberDim_offset( si, se, ofs);
+			testPackMember( dim_offset, maxweight, memberType,
+					StructBlock::MemberOffsetType, 0);
+
+			PositionType start;
+			MemberDim dim_index = evaluateMemberDim_index( si, se, start);
+			testPackMember( dim_index, maxweight, memberType,
+					StructBlock::MemberIndexType, m_startar.size());
+
+			StructBlockMemberEnum enm;
+			MemberDim dim_enum = evaluateMemberDim_enum( si, se, enm);
+			testPackMember( dim_enum, maxweight, memberType,
+					StructBlock::MemberEnumType, m_enumar.size());
+
+			StructBlockMemberRepeat rep;
+			MemberDim dim_repeat = evaluateMemberDim_repeat( si, se, rep);
+			testPackMember( dim_repeat, maxweight, memberType,
+					StructBlock::MemberRepeatType, m_repeatar.size());
+
+			if (maxweight > 0.0)
+			{
+				switch (memberType)
+				{
+					case StructBlock::MemberOffsetType:
+						m_memberar.push_back( StructureMember( dim_offset.end, memberType, ofs));
+						si += dim_offset.elements;
+						break;
+					case StructBlock::MemberIndexType:
+						m_memberar.push_back( StructureMember( dim_index.end, memberType, m_startar.size()));
+						m_startar.push_back( start);
+						si += dim_index.elements;
+						break;
+					case StructBlock::MemberEnumType:
+						m_memberar.push_back( StructureMember( dim_enum.end, memberType, m_enumar.size()));
+						m_enumar.push_back( enm);
+						si += dim_enum.elements;
+						break;
+					case StructBlock::MemberRepeatType:
+						m_memberar.push_back( StructureMember( dim_repeat.end, memberType, m_repeatar.size()));
+						m_repeatar.push_back( rep);
+						si += dim_repeat.elements;
+						break;
+				}
+			}
+			else
+			{
+				++m_membersDropped;
+				++si;
+			}
+		}
+		else
+		{
+			++m_membersDropped;
+			++si;
+		}
+	}
+	m_structurear.back().membersSize = m_memberar.size() - m_structurear.back().membersIdx;
+	m_curmembers.clear();
+}
+
 void StructBlockBuilder::addNewDocument( Index docno)
 {
+	packCurrentMembers();
+
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
 	{
@@ -158,11 +332,6 @@ void StructBlockBuilder::addNewDocument( Index docno)
 	m_lastDoc = docno;
 }
 
-void StructBlockBuilder::packCurrentMembers()
-{
-	
-}
-
 void StructBlockBuilder::addLastStructureMemberRange( const IndexRange& sink)
 {
 	if (!m_curmembers.empty() && m_curmembers.back().end() >= sink.start())
@@ -171,7 +340,7 @@ void StructBlockBuilder::addLastStructureMemberRange( const IndexRange& sink)
 		{
 			m_curmembers.back() = strus::IndexRange( m_curmembers.back().start(), sink.end());
 		}
-		else
+		else if (m_curmembers.back() != sink)
 		{
 			throw strus::runtime_error( _TXT("overlaping sinks of structures not equal in structure block builder"));
 		}
@@ -179,7 +348,7 @@ void StructBlockBuilder::addLastStructureMemberRange( const IndexRange& sink)
 	}
 	else
 	{
-		m_curmembers.sinkar.push_back( sink);
+		m_curmembers.push_back( sink);
 	}
 }
 
@@ -187,15 +356,9 @@ void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
 {
 	packCurrentMembers();
 
-	StructureDef st;
-	st.header_start = src.start();
-	st.header_end = src.end();
-	st.membersIdx = m_memberar.size();
-	st.membersSize = 0;
+	StructureDef st( src.start(), src.end(), m_memberar.size(), 0);
 	m_structurear.push_back( st);
 	++m_structurelistar.back().size;
-
-	m_curmembers.init( m_lastDoc, src);
 }
 
 void StructBlockBuilder::append( Index docno, const IndexRange& src, const IndexRange& sink)
@@ -216,10 +379,11 @@ void StructBlockBuilder::append( Index docno, const IndexRange& src, const Index
 	{
 		if (m_id && m_id < docno) throw strus::runtime_error( _TXT("assigned illegal id to block"));
 
-		(void)tryMoveRangeListBlockMembersToEnumeration();
 		addNewDocument( docno);
+		addLastDocStructure( src);
+		addLastStructureMemberRange( sink);
 	}
-	if (m_structurelistar.back().size)
+	else if (m_structurelistar.back().size)
 	{
 		if (src.start() < (Index)m_structurear.back().header_start)
 		{
@@ -255,27 +419,39 @@ void StructBlockBuilder::append( Index docno, const IndexRange& src, const Index
 
 void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk)
 {
-	Cursor cursor1;
-	strus::IndexRange src1;
-	strus::IndexRange sink1;
-	strus::Index docno1 = blk1.firstNode( cursor1, src1, sink1);
-
-	Cursor cursor2;
-	strus::IndexRange src2;
-	strus::IndexRange sink2;
-	strus::Index docno2 = blk2.firstNode( cursor2, src2, sink2);
+	StructBlockBuilder::Iterator itr1 = blk1.getIterator();
+	StructBlockBuilder::Iterator itr2 = blk2.getIterator();
+	
+	strus::Index docno1 = itr1.skipDoc( 0/*docno*/);
+	strus::Index docno2 = itr2.skipDoc( 0/*docno*/);
 
 	while (docno1 && docno2)
 	{
 		if (docno1 < docno2)
 		{
-			newblk.append( docno1, src1, sink1);
-			docno1 = blk1.nextNode( cursor1, src1, sink1);
+			strus::Index dn = docno1;
+			strus::IndexRange src;
+			strus::IndexRange sink;
+
+			for (bool more=itr1.current( docno1, src, sink);
+				more && docno1 == dn;
+				more=itr1.next( docno1, src, sink))
+			{
+				newblk.append( docno1, src, sink);
+			}
 		}
 		else if (docno1 > docno2)
 		{
-			newblk.append( docno2, src2, sink2);
-			docno2 = blk2.nextNode( cursor2, src2, sink2);
+			strus::Index dn = docno2;
+			strus::IndexRange src;
+			strus::IndexRange sink;
+
+			for (bool more=itr1.current( docno2, src, sink);
+				more && docno2 == dn;
+				more=itr1.next( docno2, src, sink))
+			{
+				newblk.append( docno2, src, sink);
+			}
 		}
 		else/*(docno1 == docno2)*/
 		{
@@ -284,13 +460,27 @@ void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBloc
 	}
 	while (docno1)
 	{
-		newblk.append( docno1, src1, sink1);
-		docno1 = blk1.nextNode( cursor1, src1, sink1);
+		strus::IndexRange src;
+		strus::IndexRange sink;
+
+		for (bool more=itr1.current( docno1, src, sink);
+			more;
+			more=itr1.next( docno1, src, sink))
+		{
+			newblk.append( docno1, src, sink);
+		}
 	}
 	while (docno2)
 	{
-		newblk.append( docno2, src2, sink2);
-		docno2 = blk2.nextNode( cursor2, src2, sink2);
+		strus::IndexRange src;
+		strus::IndexRange sink;
+
+		for (bool more=itr2.current( docno2, src, sink);
+			more;
+			more=itr2.next( docno1, src, sink))
+		{
+			newblk.append( docno2, src, sink);
+		}
 	}
 }
 
@@ -307,42 +497,14 @@ void StructBlockBuilder::merge(
 
 void StructBlockBuilder::appendFromBlock( Index docno, const StructBlock& blk, const DocIndexNodeCursor& cursor)
 {
-	int nofStructs;
-	const StructureDef* structDefs = blk.structures_at( cursor, nofStructs);
-	int ni = 0, ne = nofStructs;
-	for (; ni != ne; ++ni)
+	StructureDef::Iterator sitr = blk.structureIterator( cursor);
+	strus::IndexRange source = sitr.next();
+	for (; source.defined(); source = sitr.next())
 	{
-		const StructureDef& stdef = structDefs[ ni];
-		IndexRange source( stdef.header_start, stdef.header_end);
-		switch (stdef.structureType)
+		StructureMember::Iterator mitr = sitr.memberIterator();
+		for (strus::IndexRange sink=mitr.next(); sink.defined(); sink=mitr.next())
 		{
-			case StructureDef::TypeRangeList:
-			{
-				int nofMembers = stdef.membersSize;
-				const StructureMemberRange* memberDefs = m_memberar.data() + stdef.membersIdx;
-				int mi = 0, me = nofMembers;
-				if (me)
-				{
-					IndexRange sink( memberDefs[ mi].start, memberDefs[ mi].end);
-					append( docno, source, sink);
-				}
-				for (++mi; mi != me; ++mi)
-				{
-					m_memberar.push_back( memberDefs[ mi]);
-					++m_structurear.back().membersSize;
-				}
-				break;
-			}
-			case StructureDef::TypeEnumList:
-			{
-				StructBlockMemberEnum::Iterator itr( m_enumMemberar.data() + stdef.membersIdx, stdef.membersSize);
-				strus::IndexRange sink = itr.next();
-				for (; sink.defined(); sink = itr.next())
-				{
-					append( docno, source, sink);
-				}
-				break;
-			}
+			append( docno, source, sink);
 		}
 	}
 }
@@ -413,14 +575,14 @@ void StructBlockBuilder::merge_append(
 void StructBlockBuilder::split( const StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2)
 {
 	std::vector<StructDeclaration> declar;
-	Cursor cursor;
 	strus::IndexRange src;
 	strus::IndexRange sink;
-	strus::Index docno = blk.firstNode( cursor, src, sink);
-	while (docno)
+	StructBlockBuilder::Iterator itr = blk.getIterator();
+	strus::Index docno = itr.skipDoc( 0/*docno*/);
+	bool more = itr.current( docno, src, sink);
+	for (; more; more = itr.next( docno, src, sink));
 	{
 		declar.push_back( StructDeclaration( docno, src, sink));
-		docno = blk.nextNode( cursor, src, sink);
 	}
 	newblk1.clear();
 	newblk2.clear();
@@ -452,7 +614,7 @@ void StructBlockBuilder::split( const StructBlockBuilder& blk, StructBlockBuilde
 
 bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 {
-	int estimatedConsumption = (m_curmembers.sinkar.size() + nofstructures) * sizeof(StructureMemberRange);
+	int estimatedConsumption = (m_curmembers.size() + nofstructures) * sizeof(StructureMember);
 	return size() + estimatedConsumption <= Constants::maxStructBlockSize();
 }
 
@@ -477,27 +639,70 @@ StructBlock StructBlockBuilder::createBlock()
 
 	if (m_startar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of start indirection members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_enumMemberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+		throw strus::runtime_error(_TXT("number of start indirection members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_startar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
 	}
 	if (m_enumar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of enumeration members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_enumMemberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+		throw strus::runtime_error(_TXT("number of enumeration members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_enumar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
+		std::vector<StructBlockMemberEnum>::const_iterator ei = m_enumar.begin(), ee = m_enumar.end();
+		for (; ei != ee; ++ei)
+		{
+			if (!ei->check()) throw strus::runtime_error(_TXT("corrupt block (enumeration members)"));
+		}
 	}
 	if (m_repeatar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
 	{
-		throw strus::runtime_error(_TXT("number of repeating structure members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_enumMemberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+		throw strus::runtime_error(_TXT("number of repeating structure members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_repeatar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
+		std::vector<StructBlockMemberRepeat>::const_iterator ri = m_repeatar.begin(), re = m_repeatar.end();
+		for (; ri != re; ++ri)
+		{
+			if (!ri->check()) throw strus::runtime_error(_TXT("corrupt block (enumeration members)"));
+		}
 	}
 	if (m_memberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
 	{
-		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_memberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_memberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
+		std::vector<StructureMember>::const_iterator mi = m_memberar.begin(), me = m_memberar.end();
+		for (; mi != me; ++mi)
+		{
+			switch (mi->memberType())
+			{
+				case StructBlock::MemberOffsetType:
+					break;
+				case StructBlock::MemberIndexType:
+					if (mi->memberIdx() >= m_startar.size())
+					{
+						throw strus::runtime_error(_TXT("corrupt block (start indirections)"));
+					}
+					break;
+				case StructBlock::MemberEnumType:
+					if (mi->memberIdx() >= m_enumar.size())
+					{
+						throw strus::runtime_error(_TXT("corrupt block (enumeration indirections)"));
+					}
+					break;
+				case StructBlock::MemberRepeatType:
+					if (mi->memberIdx() >= m_repeatar.size())
+					{
+						throw strus::runtime_error(_TXT("corrupt block (repeat indirections)"));
+					}
+					break;
+			}
+		}
 	}
 	if (m_structurear.size() > (std::size_t)std::numeric_limits<StructBlock::StructIdxType>::max())
 	{
-		throw strus::runtime_error(_TXT("number of structures (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurear.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::StructIdxType>::max());
+		throw strus::runtime_error(_TXT("number of structures (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_structurear.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::StructIdxType>::max());
 	}
 	if (m_structurelistar.size() > (std::size_t)std::numeric_limits<unsigned short>::max()/*element of DocIndexNode::ref*/)
 	{
-		throw strus::runtime_error(_TXT("number of structure lists (%d) for documents [%d,%d] exceeds maximum limit %d"), (int)m_structurelistar.size(), first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
+		throw strus::runtime_error(_TXT("number of structure lists (%d) for documents [%d,%d] exceeds maximum limit %d"),
+			(int)m_structurelistar.size(), first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
 	}
 	hdr.structlistidx = structlistofs;
 	hdr.structidx = structofs;
@@ -514,6 +719,7 @@ StructBlock StructBlockBuilder::createBlock()
 	std::memcpy( dt+structofs, m_structurear.data(), m_structurear.size() * sizeof( m_structurear[0]));
 	std::memcpy( dt+memberofs, m_memberar.data(), m_memberar.size() * sizeof( m_memberar[0]));
 	std::memcpy( dt+enumofs, m_enumar.data(), m_enumar.size() * sizeof( m_enumar[0]));
+	std::memcpy( dt+enumofs, m_repeatar.data(), m_repeatar.size() * sizeof( m_repeatar[0]));
 	std::memcpy( dt+startofs, m_startar.data(), m_startar.size() * sizeof( m_startar[0]));
 
 	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
@@ -537,5 +743,27 @@ void StructBlockBuilder::clear()
 	m_curmembers.clear();
 	m_lastDoc = 0;
 	m_id = 0;
+	m_membersDropped = 0;
+}
+
+std::string StructBlockBuilder::statisticsMessage() const
+{
+	return strus::string_format(
+		_TXT(
+		"dropped members: %d, "
+		"number of documents: %d, "
+		"number of structures: %d, "
+		"number of members: %d, "
+		"number of enums: %d, "
+		"number of repeats: %d, "
+		"number of indirections: %d"
+		),
+		m_membersDropped,
+		(int)m_structurelistar.size(),
+		(int)m_structurear.size(),
+		(int)m_memberar.size(),
+		(int)m_enumar.size(),
+		(int)m_repeatar.size(),
+		(int)m_startar.size());
 }
 

@@ -1034,7 +1034,7 @@ struct PrimeFactorDocumentBuilder
 			int expected_df = primeFactorCollection.frequency( ni);
 			std::string val( searchIndexFeatureValue( ni));
 			int df = storage->documentFrequency( searchIndexFeatureType(), val);
-			if (verbose)
+			if (verbose && df)
 			{
 				out << strus::string_format( "df %s = %d", val.c_str(), df) << std::endl;
 			}

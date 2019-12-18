@@ -74,6 +74,10 @@ public:
 	{
 		return (m_end == o.m_end && m_start == o.m_start);
 	}
+	bool operator != (const IndexRange& o) const
+	{
+		return (m_end != o.m_end || m_start != o.m_start);
+	}
 
 private:
 	Index m_start;

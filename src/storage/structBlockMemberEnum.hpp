@@ -23,17 +23,34 @@ struct StructBlockMemberEnum
 	PositionType base;
 	OffsetType ofs[ NofOfs];
 
+	bool check() const
+	{
+		int pi=0, pe=NofOfs;
+		for (; pi!=pe && ofs[pi]; ++pi){}
+		for (; pi!=pe && !ofs[pi]; ++pi){}
+		return !!base && pi == pe;
+	}
+
 	static PositionType positionCast( strus::Index pos)
 	{
 		return (pos <= (strus::Index)std::numeric_limits<PositionType>::max()) ? (PositionType)pos : 0;
 	}
 	static OffsetType offsetCast( strus::Index ofs)
 	{
-		return (ofs <= (strus::Index)std::numeric_limits<OffsetType>::max()) ? (OffsetType)pos : 0;
+		return (ofs <= (strus::Index)std::numeric_limits<OffsetType>::max()) ? (OffsetType)ofs : 0;
 	}
 
-	explicit StructBlockMemberEnum( PositionType base_=0);
-	StructBlockMemberEnum( const StructBlockMemberEnum& o);
+	explicit StructBlockMemberEnum( PositionType base_=0)
+		:base(base_)
+	{
+		std::memset( ofs, 0, sizeof(ofs));
+	}
+
+	StructBlockMemberEnum( const StructBlockMemberEnum& o)
+		:base(o.base)
+	{
+		std::memcpy( ofs, o.ofs, sizeof(ofs));
+	}
 
 	bool full() const {return !!ofs[NofOfs-1];}
 	bool append( PositionType pos)
@@ -61,8 +78,19 @@ struct StructBlockMemberEnum
 		for (int ii=0; ii<=NofOfs; rt+=ofs[ii],++ii){}
 		return rt;
 	}
+	bool pop_back()
+	{
+		int ii = NofOfs-1;
+		for (; ii>=0 && 0==ofs[ii]; --ii){}
+		if (ii>0 && ofs[ii])
+		{
+			ofs[ii] = 0;
+			return true;
+		}
+		return false;
+	}
 
-	strus::IndexRange skip( PositionType pos)
+	strus::IndexRange skip( PositionType pos) const
 	{
 		PositionType pi=base;
 		PositionType start=base;
@@ -93,8 +121,9 @@ struct StructBlockMemberEnum
 
 	strus::Index expandStart( strus::Index start)
 	{
-		for (int ii=NofOfs-1; ii>=0 && 0==ofs[ii]; --ii){}
-		for (int ii=NofOfs-1; ii>=0 && 1==ofs[ii]; --ii,--start){}
+		int ii = NofOfs-1;
+		for (; ii>=0 && 0==ofs[ii]; --ii){}
+		for (; ii>=0 && 1==ofs[ii]; --ii,--start){}
 		return start;
 	}
 };

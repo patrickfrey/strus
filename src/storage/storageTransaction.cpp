@@ -38,7 +38,7 @@ StorageTransaction::StorageTransaction(
 	,m_attributeMap(storage_->databaseClient())
 	,m_metaDataMap(storage_->databaseClient(),storage_->getMetaDataBlockCacheRef())
 	,m_invertedIndexMap(storage_->databaseClient())
-	,m_structIndexMap(storage_->databaseClient(),maxstructno_)
+	,m_structIndexMap(storage_->databaseClient(),maxstructno_,errorhnd_)
 	,m_forwardIndexMap(storage_->databaseClient(),maxtypeno_)
 	,m_userAclMap(storage_->databaseClient())
 	,m_termTypeMap(storage_->databaseClient(),DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())

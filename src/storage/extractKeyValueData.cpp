@@ -315,15 +315,15 @@ StructBlockData::StructBlockData( const strus::DatabaseCursorInterface::Slice& k
 
 	for (; dn; dn = blk.nextDoc( cursor))
 	{
-		StructBlock::StructureScanner stu = blk.structureScanner_at( cursor);
-		strus::IndexRange source = stu.skip( 0);
+		StructBlock::StructureDef::Iterator sitr = blk.structureIterator( cursor);
+		strus::IndexRange source = sitr.skip( 0);
 
-		for (; source.defined(); source = stu.skip( source.end()))
+		for (; source.defined(); source = sitr.skip( source.end()))
 		{
-			StructBlock::MemberScanner memb = stu.members();
-			strus::IndexRange sink = memb.skip( 0);
+			StructBlock::StructureMember::Iterator mitr = sitr.memberIterator();
+			strus::IndexRange sink = mitr.skip( 0);
 
-			for (; sink.defined(); sink = memb.skip( sink.end()))
+			for (; sink.defined(); sink = mitr.skip( sink.end()))
 			{
 				structures.push_back( Structure( dn, source, sink));
 			}

@@ -29,8 +29,8 @@ public:
 	StructIteratorImpl( const StorageClient* storage_, const DatabaseClientInterface* database_, Index structno_)
 		:DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock,DocIndexNodeCursor>( DatabaseAdapter_StructBlock::Cursor(database_,structno_))
 		,m_storage(storage_)
-		,m_structureScanner()
-		,m_memberScanner()
+		,m_structureIterator()
+		,m_memberIterator()
 		,m_source(0,0)
 		,m_sink(0,0)
 		,m_structno(structno_){}
@@ -39,8 +39,8 @@ public:
 	Index skipDoc( const Index& docno_)
 	{
 		if (docno() && docno_ == docno()) return docno_;
-		m_structureScanner.clear();
-		m_memberScanner.clear();
+		m_structureIterator.clear();
+		m_memberIterator.clear();
 		return DocumentBlockIteratorTemplate<DatabaseAdapter_StructBlock::Cursor,StructBlock,DocIndexNodeCursor>::skipDoc( docno_);
 	}
 
@@ -58,8 +58,8 @@ public:
 
 private:
 	const StorageClient* m_storage;
-	StructBlock::StructureScanner m_structureScanner;
-	StructBlock::MemberScanner m_memberScanner;
+	StructBlock::StructureDef::Iterator m_structureIterator;
+	StructBlock::StructureMember::Iterator m_memberIterator;
 	strus::IndexRange m_source;
 	strus::IndexRange m_sink;
 	Index m_structno;

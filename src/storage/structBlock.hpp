@@ -8,14 +8,15 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "structBlockMemberEnum.hpp"
 #include "structBlockMemberRepeat.hpp"
+#include "structBlockMemberEnum.hpp"
 #include "docIndexNode.hpp"
 #include "skipScanArray.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include <vector>
 #include <cstring>
+#include <string>
 
 namespace strus {
 
@@ -26,7 +27,8 @@ class StructBlock
 {
 public:
 	enum {
-		MaxBlockSize=1024
+		MaxBlockSize=1024,
+		MaxMemberIdxType=0xFFffU
 	};
 	typedef unsigned short PositionType;
 	typedef unsigned short StructIdxType;
@@ -34,7 +36,7 @@ public:
 	typedef unsigned short MemberSizeType;
 
 	enum MemberType {
-		StartOffsetType = 0,
+		MemberOffsetType = 0,
 		MemberIndexType,
 		MemberEnumType,
 		MemberRepeatType,
@@ -49,6 +51,44 @@ public:
 		strus::Index repeatidx;
 		strus::Index startidx;
 	};
+	class StructureDef;
+	class StructureMember;
+
+	class BlockData
+	{
+	public:
+		BlockData()
+			:m_structar(0),m_memberar(0),m_enumar(0),m_repeatar(0),m_startar(0){}
+		BlockData(
+				const StructureDef* structar_, 
+				const StructureMember* memberar_,
+				const StructBlockMemberEnum* enumar_,
+				const StructBlockMemberRepeat* repeatar_,
+				const PositionType* startar_)
+			:m_structar(structar_),m_memberar(memberar_),m_enumar(enumar_),m_repeatar(repeatar_),m_startar(startar_){}
+		BlockData( const BlockData& o)
+			:m_structar(o.m_structar),m_memberar(o.m_memberar),m_enumar(o.m_enumar),m_repeatar(o.m_repeatar),m_startar(o.m_startar){}
+		void init(
+				const StructureDef* structar_, 
+				const StructureMember* memberar_,
+				const StructBlockMemberEnum* enumar_,
+				const StructBlockMemberRepeat* repeatar_,
+				const PositionType* startar_)
+			{m_structar=structar_; m_memberar=memberar_; m_enumar=enumar_; m_repeatar=repeatar_; m_startar=startar_;}
+
+		const StructureDef* structar() const		{return m_structar;}
+		const StructureMember* memberar() const		{return m_memberar;}
+		const StructBlockMemberEnum* enumar() const	{return m_enumar;}
+		const StructBlockMemberRepeat* repeatar() const	{return m_repeatar;}
+		const PositionType* startar() const		{return m_startar;}
+
+	private:
+		const StructureDef* m_structar;
+		const StructureMember* m_memberar;
+		const StructBlockMemberEnum* m_enumar;
+		const StructBlockMemberRepeat* m_repeatar;
+		const PositionType* m_startar;
+	};
 
 	struct StructureMember
 	{
@@ -61,7 +101,7 @@ public:
 	public:
 		enum {MaxMemberIdx=(1<<13)-1};
 
-		strus::Index end() const	{return m_end();}
+		strus::Index end() const	{return m_end;}
 		MemberType memberType() const	{return (MemberType)m_type;}
 		MemberIdxType memberIdx() const	{return (MemberIdxType)m_idx;}
 
@@ -77,32 +117,46 @@ public:
 		struct SearchCompare
 		{
 			SearchCompare(){}
-			bool operator()( const StructureMemberRange& aa, const PositionType& bb) const
+			bool operator()( const StructureMember& aa, const PositionType& bb) const
 			{
 				return aa.m_end <= bb;
 			}
 		};
 
-		struct Iterator
+		class Iterator
 		{
-			const StructBlock* block;
-			SkipScanArray<StructureMember,strus::Index,StructureMember::SearchCompare> ar;
-			int aridx;
-			strus::IndexRange cur;
-
+		public:
 			Iterator()
-				:block(0),ar(0,0),aridx(0),cur(){}
-			Iterator( const StructBlock* block_, const StructureMember* ar_, std::size_t arsize_)
-				:block(block_),ar(ar_,arsize_),aridx(0),cur(){}
+				:m_data(0),m_ar(0,0),m_aridx(0),m_cur(){}
+			Iterator( const BlockData* data_, const StructureMember* ar_, std::size_t arsize_)
+				:m_data(data_),m_ar(ar_,arsize_),m_aridx(0),m_cur(){}
 			Iterator( const Iterator& o)
-				:block(o.block),ar(o.ar),aridx(o.aridx),cur(o.cur){}
+				:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_cur(o.m_cur){}
 			Iterator& operator=( const Iterator& o)
-				{block=o.block; ar=o.ar; aridx=o.aridx; cur = o.cur; return *this;}
+				{m_data=o.m_data; m_ar=o.m_ar; m_aridx=o.m_aridx; m_cur = o.m_cur; return *this;}
 
-			strus::IndexRange next()	{return skip( cur.end());}
-			strus::IndexRange current()	{return cur;}
+			bool initialized() const
+			{
+				return m_cur.defined();
+			}
+
+			strus::IndexRange next()	{return skip( m_cur.end());}
+			strus::IndexRange current()	{return m_cur;}
 
 			strus::IndexRange skip( Index pos);
+
+			void clear()
+			{
+				m_ar.init( 0, 0);
+				m_aridx = 0;
+				m_cur = strus::IndexRange();
+			}
+
+		private:
+			const BlockData* m_data;
+			SkipScanArray<StructureMember,strus::Index,StructureMember::SearchCompare> m_ar;
+			int m_aridx;
+			strus::IndexRange m_cur;
 		};
 	};
 
@@ -111,8 +165,14 @@ public:
 		StructIdxType idx;
 		StructIdxType size;
 	};
+
 	struct StructureDef
 	{
+		StructureDef( PositionType header_start_, PositionType header_end_, MemberIdxType membersIdx_, MemberSizeType membersSize_)
+			:header_start(header_start_),header_end(header_end_),membersIdx(membersIdx_),membersSize(membersSize_){}
+		StructureDef( const StructureDef& o)
+			:header_start(o.header_start),header_end(o.header_end),membersIdx(o.membersIdx),membersSize(o.membersSize){}
+
 		PositionType header_start;
 		PositionType header_end;
 		MemberIdxType membersIdx;
@@ -126,11 +186,85 @@ public:
 				return aa.header_end <= bb;
 			}
 		};
+
+		class Iterator
+		{
+		public:
+			Iterator()
+				:m_data(0),m_ar(0,0),m_aridx(0),m_cur(){}
+			Iterator( const StructBlock* block_, const StructureDef* ar_, int size_)
+				:m_data(block_->data()),m_ar(ar_,size_),m_aridx(0),m_cur(){}
+			Iterator( const BlockData* data_, const StructureDef* ar_, int size_)
+				:m_data(data_),m_ar(ar_,size_),m_aridx(0),m_cur(){}
+			Iterator( const Iterator& o)
+				:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_cur(){}
+
+			bool initialized() const
+			{
+				return !!m_ar.size();
+			}
+			void init( const StructureDef* ar_, int size_)
+			{
+				m_ar.init( ar_, size_);
+				m_cur = strus::IndexRange();
+			}
+			void clear()
+			{
+				m_ar.init(0,0);
+				m_aridx = 0;
+				m_cur = strus::IndexRange();
+			}
+			strus::IndexRange next()	{return m_cur=skip( m_cur.end());}
+			strus::IndexRange current()	{return m_cur;}
+			
+			strus::IndexRange skip( Index pos)
+			{
+				if (m_aridx >= m_ar.size())
+				{
+					if (m_aridx == 0) return m_cur=strus::IndexRange();
+					m_aridx = 0;
+				}
+				if ((Index)m_ar[ m_aridx].header_end <= pos)
+				{
+					int idx = m_ar.upperbound( pos, m_aridx, m_ar.size(), StructureDef::SearchCompare());
+					if (idx > 0) m_aridx = idx; else return m_cur=strus::IndexRange();
+					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+				}
+				else if ((Index)m_ar[ m_aridx].header_start <= pos)
+				{
+					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+				}
+				else
+				{
+					m_aridx = m_ar.upperbound( pos, 0, m_aridx+1, StructureDef::SearchCompare());
+					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+				}
+			}
+
+			StructureMember::Iterator memberIterator() const
+			{
+				if (m_aridx < m_ar.size())
+				{
+					const StructureDef& st = m_ar[ m_aridx];
+					return StructureMember::Iterator( m_data, m_data->memberar() + st.membersIdx, st.membersSize);
+				}
+				else
+				{
+					return StructureMember::Iterator();
+				}
+			}
+
+		private:
+			const BlockData* m_data;
+			SkipScanArray<StructureDef,Index,StructureDef::SearchCompare> m_ar;
+			int m_aridx;
+			strus::IndexRange m_cur;
+		};
 	};
 
 public:
 	explicit StructBlock()
-		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_structar(0),m_memberar(0),m_enumMemberar(0)
+		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_data()
 	{}
 	StructBlock( const StructBlock& o)
 		:DataBlock(o)
@@ -159,13 +293,6 @@ public:
 	Index docno_at( const DocIndexNodeCursor& cursor) const
 	{
 		return m_docIndexNodeArray.docno_at( cursor);
-	}
-	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
-	const StructureDef* structures_at( const DocIndexNodeCursor& cursor, int& nofstructs) const
-	{
-		const StructureDefList* lst = m_structlistar + m_docIndexNodeArray.ref_at( cursor);
-		nofstructs = lst->size;
-		return m_structar + lst->idx;
 	}
 	/// \brief Get the next document with the current cursor
 	Index nextDoc( DocIndexNodeCursor& cursor) const
@@ -202,185 +329,36 @@ public:
 		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
 	}
 
-	class MemberScanner
-	{
-	public:
-		MemberScanner()
-			:m_structureType(StructureDef::TypeRangeList)
-		{
-			m_itr.memberIterator=new (mem) StructureMemberRange::Iterator(0,0);
-		}
-		MemberScanner( const StructureMemberRange* ar_, int size_)
-			:m_structureType(StructureDef::TypeRangeList)
-		{
-			m_itr.memberIterator=new (mem) StructureMemberRange::Iterator(ar_,size_);
-		}
-		MemberScanner( const StructBlockMemberEnum* ar_, int size_)
-			:m_structureType(StructureDef::TypeEnumList)
-		{
-			m_itr.enumerationIterator=new (mem) StructBlockMemberEnum::Iterator(ar_,size_);
-		}
-		MemberScanner( const MemberScanner& o)
-			:m_structureType(o.m_structureType)
-		{
-			switch (m_structureType)
-			{
-				case StructureDef::TypeRangeList:
-					m_itr.memberIterator=new (mem) StructureMemberRange::Iterator(*o.m_itr.memberIterator);
-					break;
-				case StructureDef::TypeEnumList:
-					m_itr.enumerationIterator=new (mem) StructBlockMemberEnum::Iterator(*o.m_itr.enumerationIterator);
-					break;
-			}
-		}
-		void init( const StructureMemberRange* ar_, int size_)
-		{
-			m_structureType = StructureDef::TypeRangeList;
-			m_itr.memberIterator=new (mem) StructureMemberRange::Iterator(ar_,size_);
-		}
-		void init( const StructBlockMemberEnum* ar_, int size_)
-		{
-			m_structureType = StructureDef::TypeEnumList;
-			m_itr.enumerationIterator=new (mem) StructBlockMemberEnum::Iterator(ar_,size_);
-		}
-		IndexRange next()
-		{
-			switch (m_structureType)
-			{
-				case StructureDef::TypeRangeList:
-					return m_itr.memberIterator->next();
-				case StructureDef::TypeEnumList:
-					return m_itr.enumerationIterator->next();
-			}
-		}
-
-		strus::IndexRange skip( Index pos)
-		{
-			switch (m_structureType)
-			{
-				case StructureDef::TypeRangeList:
-					return m_itr.memberIterator->skip( pos);
-				case StructureDef::TypeEnumList:
-					return m_itr.enumerationIterator->skip( pos);
-			}
-			return strus::IndexRange();
-		}
-
-	private:
-		StructureDef::StructureType m_structureType;
-		union
-		{
-			StructureMemberRange::Iterator* memberIterator;
-			StructBlockMemberEnum::Iterator* enumerationIterator;
-		} m_itr;
-		int mem[ (sizeof(StructureMemberRange::Iterator) + sizeof(StructBlockMemberEnum::Iterator)) / sizeof(int)];
-	};
-
-	class StructureScanner
-	{
-	public:
-		StructureScanner()
-			:m_ar(0,0),m_itr(0),m_memberar(0){}
-		StructureScanner( const StructureDef* ar_, int size_, const StructureMemberRange* memberar_, const StructBlockMemberEnum* enumMemberar_)
-			:m_ar(ar_,size_),m_itr(0),m_memberar(memberar_),m_enumMemberar(enumMemberar_){}
-		StructureScanner( const StructureScanner& o)
-			:m_ar(o.m_ar),m_itr(o.m_itr),m_memberar(o.m_memberar),m_enumMemberar(o.m_enumMemberar){}
-
-		bool initialized() const
-		{
-			return !!m_ar.size();
-		}
-		void init( const StructureDef* ar_, int size_)
-		{
-			m_ar.init( ar_, size_);
-		}
-		void clear()
-		{
-			m_ar.init(0,0);
-		}
-		const StructureDef* current() const
-		{
-			return m_itr < m_ar.size() ? m_ar.at(m_itr) : 0;
-		}
-		bool next()
-		{
-			if (m_itr < m_ar.size())
-			{
-				++m_itr;
-				return true;
-			}
-			return false;
-		}
-
-		strus::IndexRange skip( Index pos)
-		{
-			if (m_itr >= m_ar.size())
-			{
-				if (m_itr == 0) return strus::IndexRange();
-				m_itr = 0;
-			}
-			if ((Index)m_ar[ m_itr].header_end <= pos)
-			{
-				int idx = m_ar.upperbound( pos, m_itr, m_ar.size(), StructureDef::SearchCompare());
-				if (idx > 0) m_itr = idx; else return strus::IndexRange();
-			}
-			return strus::IndexRange( m_ar[ m_itr].header_start, m_ar[ m_itr].header_end);
-		}
-
-		MemberScanner members() const
-		{
-			if (m_itr < m_ar.size())
-			{
-				const StructureDef& st = m_ar[ m_itr];
-				switch (st.structureType)
-				{
-					case StructureDef::TypeRangeList:
-						return MemberScanner( m_memberar + st.membersIdx, st.membersSize);
-					case StructureDef::TypeEnumList:
-						return MemberScanner( m_enumMemberar + st.membersIdx, st.membersSize);
-						break;
-				}
-				throw std::runtime_error(_TXT("index curruption: bad structure type"));
-			}
-			else
-			{
-				return MemberScanner();
-			}
-		}
-
-	private:
-		SkipScanArray<StructureDef,Index,StructureDef::SearchCompare> m_ar;
-		int m_itr;
-		const StructureMemberRange* m_memberar;
-		const StructBlockMemberEnum* m_enumMemberar;
-	};
-
-	StructureScanner structureScanner_at( const DocIndexNodeCursor& cursor) const
+	StructureDef::Iterator structureIterator( const DocIndexNodeCursor& cursor) const
 	{
 		int nofstructs;
 		const StructureDef* st = structures_at( cursor, nofstructs);
-		if (!st) return StructureScanner();
-		return StructureScanner( st, nofstructs, m_memberar, m_enumMemberar);
+		if (!st) return StructureDef::Iterator();
+		return StructureDef::Iterator( &m_data, st, nofstructs);
 	}
 
+	const BlockData* data() const			{return &m_data;}
 	const StructureDefList* structlistar() const	{return m_structlistar;}
-	const StructureDef* structar() const		{return m_structar;}
-	const StructureMember* memberar() const		{return m_memberar;}
-	const StructBlockMemberEnum* enumar() const	{return m_enumar;}
-	const StructBlockMemberRepeat* repeatar() const	{return m_repeatar;}
-	const PositionType* startar() const		{return m_startar;}
+	const StructureDef* structar() const		{return m_data.structar();}
+	const StructureMember* memberar() const		{return m_data.memberar();}
+	const StructBlockMemberEnum* enumar() const	{return m_data.enumar();}
+	const StructBlockMemberRepeat* repeatar() const	{return m_data.repeatar();}
+	const PositionType* startar() const		{return m_data.startar();}
 
 private:
+	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
+	const StructureDef* structures_at( const DocIndexNodeCursor& cursor, int& nofstructs) const
+	{
+		const StructureDefList* lst = m_structlistar + m_docIndexNodeArray.ref_at( cursor);
+		nofstructs = lst->size;
+		return m_data.structar() + lst->idx;
+	}
 	void initFrame();
 
 private:
 	DocIndexNodeArray m_docIndexNodeArray;
 	const StructureDefList* m_structlistar;
-	const StructureDef* m_structar;
-	const StructureMember* m_memberar;
-	const StructBlockMemberEnum* m_enumar;
-	const StructBlockMemberRepeat* m_repeatar;
-	const PositionType* m_startar;
+	BlockData m_data;
 };
 
 
@@ -397,7 +375,7 @@ public:
 	StructBlockBuilder()
 		:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
 		,m_enumar(),m_repeatar(),m_startar(),m_curmembers()
-		,m_lastDoc(0),m_id(0){}
+		,m_lastDoc(0),m_id(0),m_membersDropped(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_docIndexNodeArray(o.m_docIndexNodeArray)
 		,m_structurelistar(o.m_structurelistar)
@@ -408,7 +386,8 @@ public:
 		,m_startar(o.m_startar)
 		,m_curmembers(o.m_curmembers)
 		,m_lastDoc(o.m_lastDoc)
-		,m_id(o.m_id){}
+		,m_id(o.m_id)
+		,m_membersDropped(o.m_membersDropped){}
 
 	Index id() const
 	{
@@ -460,14 +439,6 @@ public:
 		return size() >= (int)(ratio * Constants::maxStructBlockSize());
 	}
 
-	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
-	const std::vector<StructureDefList>& structureListArray() const		{return m_structurelistar;}
-	const std::vector<StructureDef>& structureArray() const			{return m_structurear;}
-	const std::vector<StructureMemberRange>& memberArray() const		{return m_memberar;}
-	const std::vector<StructBlockMemberEnum>& enumar() const		{return m_enumar;}
-	const std::vector<StructBlockMemberRepeat>& repeatar() const		{return m_repeatar;}
-	const std::vector<PositionType>& startar() const			{return m_startar;}
-
 	StructBlock createBlock();
 	void clear();
 
@@ -508,68 +479,154 @@ public:
 		m_curmembers.swap( o.m_curmembers);
 		std::swap( m_lastDoc, o.m_lastDoc);
 		std::swap( m_id, o.m_id);
+		std::swap( m_membersDropped, o.m_membersDropped);
 	}
-	
+
+	int membersDropped() const			{return m_membersDropped;}
+	std::string statisticsMessage() const;
+
 private:
 	void addNewDocument( Index docno);
 	void addLastDocStructure( const strus::IndexRange& src);
 	void addLastStructureMemberRange( const strus::IndexRange& sink);
 
 private:
-	struct Cursor
+	struct Iterator
 	{
-		Cursor()
-			:aridx(0),docidx(0),docno(0)
-			,stuidx(0),stuend(0),stutype(StructureDef::TypeRangeList)
-			,mbridx(0),mbrend(0)
-			,repstart(0),repend(0),repofs(0),repsize(0){}
+		Iterator( const StructBlockBuilder& builder)
+			:m_builder(&builder)
+			,m_docar( builder.docIndexNodeArray().data(), builder.docIndexNodeArray().size())
+			,m_cursor()
+			,m_data(
+				builder.structurear().data(),
+				builder.memberar().data(),
+				builder.enumar().data(),
+				builder.repeatar().data(),
+				builder.startar().data())
+			,m_struitr()
+			,m_membitr()
+			,m_docno(0)
+		{}
 
-		std::size_t aridx;
-		unsigned short docidx;
-		strus::Index docno;
-		std::size_t stuidx;
-		std::size_t stuend;
-		StructureDef::StructureType stutype;
-		StructBlockMemberEnum::Iterator mitr;
-		std::size_t mbridx;
-		std::size_t mbrend;
-		strus::Index repstart;
-		strus::Index repend;
-		strus::Index repofs;
-		strus::Index repsize;
-	};
-
-private:
-	struct CurrentMembers
-	{
-		strus::Index docid;
-		strus::IndexRange src;
-		std::vector<strus::IndexRange> sinkar;
-
-		CurrentMembers() :docid(0),src(),sinkar(){}
-		CurrentMembers( const CurrentMembers& o) :docid(o.docid),src(o.src),sinkar(o.sinkar){}
-
-		void init( strus::Index docid_, const strus::IndexRange& src_)
+		strus::Index skipDoc( strus::Index docno)
 		{
-			docid = docid_;
-			src = src_;
-			sinkar.clear();
+			m_docno = m_docar.skipDoc( docno, m_cursor);
+			m_struitr.clear();
+			m_membitr.clear();
+			return m_docno;
 		}
+
+		bool current( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
+		{
+			if (!m_docno) return false;
+			src_ = m_struitr.current();
+			sink_ = m_membitr.current();
+			docno_ = m_docno;
+			return true;
+		}
+		bool next( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
+		{
+			sink_ = m_membitr.next();
+			if (sink_.defined())
+			{
+				src_ = m_struitr.current();
+				docno_ = m_docno;
+			}
+			else
+			{
+				src_ = m_struitr.next();
+				if (src_.defined())
+				{
+					m_membitr = m_struitr.memberIterator();
+					sink_ = m_membitr.next();
+					docno_ = m_docno;
+				}
+				else
+				{
+					m_docno = skipDoc( m_docno+1);
+					if (m_docno)
+					{
+						int ref = m_docar.ref_at( m_cursor);
+						int stuidx = m_builder->structurelistar()[ ref].idx;
+						int stusize = m_builder->structurelistar()[ ref].size;
+						m_struitr = StructureDef::Iterator( &m_data, m_builder->structurear().data() + stuidx, stusize);
+						m_membitr = m_struitr.memberIterator();
+						src_ = m_struitr.next();
+						sink_ = m_membitr.next();
+						docno_ = m_docno;
+					}
+					else
+					{
+						clear();
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
 		void clear()
 		{
-			docid = 0;
-			src = strus::IndexRange();
-			sinkar.clear();
+			m_struitr.clear();
+			m_membitr.clear();
+			m_docno = 0;
 		}
-		void swap( CurrentMembers& o)
-		{
-			std::swap( docid, o.docid);
-			std::swap( src, o.src);
-			sinkar.swap( o.sinkar);
-		}
+
+		const StructBlockBuilder* m_builder; 
+		DocIndexNodeArray m_docar;
+		DocIndexNodeCursor m_cursor;
+		StructBlock::BlockData m_data;
+		StructureDef::Iterator m_struitr;
+		StructureMember::Iterator m_membitr;
+		strus::Index m_docno;
 	};
 
+	Iterator getIterator() const
+	{
+		return Iterator( *this);
+	}
+
+private:
+	struct MemberDim
+	{
+		int elements;
+		int bytes;
+		float fill;
+		PositionType end;
+
+		MemberDim()			:elements(0),bytes(0),fill(0),end(0){}
+		MemberDim( const MemberDim& o)	:elements(o.elements),bytes(o.bytes),fill(o.fill),end(o.end){}
+
+		bool defined() const	{return elements&&bytes;}
+	};
+
+	MemberDim evaluateMemberDim_offset(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			StructBlock::MemberIdxType& ofs);
+	MemberDim evaluateMemberDim_index(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			PositionType& start);
+	MemberDim evaluateMemberDim_enum(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			StructBlockMemberEnum& enm);
+	MemberDim evaluateMemberDim_repeat(
+			std::vector<strus::IndexRange>::const_iterator si,
+			std::vector<strus::IndexRange>::const_iterator se,
+			StructBlockMemberRepeat& rep);
+
+	static void testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize);
 	void packCurrentMembers();
+
+	const std::vector<DocIndexNode>& docIndexNodeArray() const	{return m_docIndexNodeArray;}
+	const std::vector<StructureDefList>& structurelistar() const	{return m_structurelistar;}
+	const std::vector<StructureDef>& structurear() const		{return m_structurear;}
+	const std::vector<StructureMember>& memberar() const		{return m_memberar;}
+	const std::vector<StructBlockMemberEnum>& enumar() const	{return m_enumar;}
+	const std::vector<StructBlockMemberRepeat>& repeatar() const	{return m_repeatar;}
+	const std::vector<PositionType>& startar() const		{return m_startar;}
 
 private:
 	std::vector<DocIndexNode> m_docIndexNodeArray;
@@ -579,10 +636,11 @@ private:
 	std::vector<StructBlockMemberEnum> m_enumar;
 	std::vector<StructBlockMemberRepeat> m_repeatar;
 	std::vector<PositionType> m_startar;
-	
-	CurrentMembers m_curmembers;
+
+	std::vector<strus::IndexRange> m_curmembers;
 	Index m_lastDoc;
 	Index m_id;
+	int m_membersDropped;
 };
 }//namespace
 #endif

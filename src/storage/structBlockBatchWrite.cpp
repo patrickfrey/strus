@@ -8,6 +8,7 @@
 #include "structBlockBatchWrite.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/databaseClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include <set>
 using namespace strus;
@@ -31,7 +32,8 @@ void StructBlockBatchWrite::insertNewElements(
 		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
 		const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
 		StructBlockBuilder& newblk,
-		DatabaseTransactionInterface* transaction)
+		DatabaseTransactionInterface* transaction,
+		ErrorBufferInterface* errorhnd)
 {
 	while (ei != ee)
 	{
@@ -41,6 +43,11 @@ void StructBlockBatchWrite::insertNewElements(
 		if (!newblk.fitsInto( en-ei) && !newblk.empty())
 		{
 			if (!newblk.id()) newblk.setId( newblk.lastDoc());
+			if (newblk.membersDropped())
+			{
+				std::string msg = newblk.statisticsMessage();
+				errorhnd->info( _TXT("warning: structure block (id %d) exceeding maximum size stripped: %s"), (int)newblk.id(), msg.c_str());
+			}
 			dbadapter->store( transaction, newblk.createBlock());
 			newblk.clear();
 		}
@@ -60,6 +67,11 @@ void StructBlockBatchWrite::insertNewElements(
 	if (!newblk.empty())
 	{
 		if (!newblk.id()) newblk.setId( newblk.lastDoc());
+		if (newblk.membersDropped())
+		{
+			std::string msg = newblk.statisticsMessage();
+			errorhnd->info( _TXT("warning: structure block (id %d) exceeding maximum size stripped: %s"), (int)newblk.id(), msg.c_str());
+		}
 		dbadapter->store( transaction, newblk.createBlock());
 		newblk.clear();
 	}
@@ -70,7 +82,8 @@ void StructBlockBatchWrite::mergeNewElements(
 		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
 		const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
 		StructBlockBuilder& newblk,
-		DatabaseTransactionInterface* transaction)
+		DatabaseTransactionInterface* transaction,
+		ErrorBufferInterface* errorhnd)
 {
 	StructBlock blk;
 	if (ei != ee && !dbadapter->loadUpperBound( ei->docno, blk))
@@ -90,6 +103,11 @@ void StructBlockBatchWrite::mergeNewElements(
 			for (++en; en != ee && en->docno == ei->docno; ++en){}
 			if (!newblk.fitsInto( en-ei) && !newblk.empty())
 			{
+				if (newblk.membersDropped())
+				{
+					std::string msg = newblk.statisticsMessage();
+					errorhnd->info( _TXT("warning: structure block (id %d) exceeding maximum size stripped: %s"), (int)(newblk.id()?newblk.id():newblk.lastDoc()), msg.c_str());
+				}
 				// ... block is filled with an acceptable ratio, so we store it, for stopping cascading merges
 				dbadapter->store( transaction, newblk.createBlock());
 				newblk.clear();
@@ -115,6 +133,11 @@ void StructBlockBatchWrite::mergeNewElements(
 		{
 			if (newblk.filledWithRatio( Constants::minimumBlockFillRatio()))
 			{
+				if (newblk.membersDropped())
+				{
+					std::string msg = newblk.statisticsMessage();
+					errorhnd->info( _TXT("warning: structure block (id %d) exceeding maximum size stripped: %s"), (int)(newblk.id()?newblk.id():newblk.lastDoc()), msg.c_str());
+				}
 				// ... it is filled with an acceptable ratio, so we store it, for stopping cascading merges:
 				dbadapter->store( transaction, newblk.createBlock());
 				newblk.clear();
@@ -129,6 +152,12 @@ void StructBlockBatchWrite::mergeNewElements(
 				StructBlockBuilder newblk_merged = newblk;
 				newblk_merged.setId( 0);
 				StructBlockBuilder::merge_append( start, ei, blk, newblk_merged);
+
+				if (newblk_merged.membersDropped())
+				{
+					std::string msg = newblk_merged.statisticsMessage();
+					errorhnd->info( _TXT("warning: structure block (id %d) exceeding maximum size stripped: %s"), (int)(newblk_merged.id()?newblk_merged.id():newblk_merged.lastDoc()), msg.c_str());
+				}
 				if (!newblk_merged.filledWithRatio( Constants::minimumBlockFillRatio()))
 				{
 					// ... block still not big enough, continue joining

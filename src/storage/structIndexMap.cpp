@@ -17,8 +17,8 @@
 
 using namespace strus;
 
-StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructo_)
-	:m_database(database_),m_defar(),m_mapar(maxstructo_),m_docno(0)
+StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructo_, ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_),m_database(database_),m_defar(),m_mapar(maxstructo_),m_docno(0)
 {}
 
 #define DELETE_STRUCTURES -1
@@ -162,10 +162,10 @@ void StructIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			ei = declar.begin(), ee = declar.end();
 
 		// [1] Merge new elements with existing upper bound blocks:
-		StructBlockBatchWrite::mergeNewElements( &dbadapter, ei, ee, newblk, transaction);
+		StructBlockBatchWrite::mergeNewElements( &dbadapter, ei, ee, newblk, transaction, m_errorhnd);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		StructBlockBatchWrite::insertNewElements( &dbadapter, ei, ee, newblk, transaction);
+		StructBlockBatchWrite::insertNewElements( &dbadapter, ei, ee, newblk, transaction, m_errorhnd);
 	}
 }
 

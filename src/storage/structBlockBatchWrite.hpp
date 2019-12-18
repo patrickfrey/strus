@@ -18,6 +18,9 @@
 
 namespace strus {
 
+/// \brief Forward declaration
+class ErrorBufferInterface;
+
 /// \class StructBlockBatchWrite
 /// \brief Methods for merging and inserting structure blocks
 class StructBlockBatchWrite
@@ -30,14 +33,16 @@ public:
 			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
 			const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
 			StructBlockBuilder& newblk,
-			DatabaseTransactionInterface* transaction);
+			DatabaseTransactionInterface* transaction,
+			ErrorBufferInterface* errorhnd);
 
 	static void mergeNewElements(
 			DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
 			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
 			const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
 			StructBlockBuilder& newblk,
-			DatabaseTransactionInterface* transaction);
+			DatabaseTransactionInterface* transaction,
+			ErrorBufferInterface* errorhnd);
 };
 
 }//namespace

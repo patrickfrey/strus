@@ -23,11 +23,13 @@ namespace strus {
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class StructIndexMap
 {
 public:
-	StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructno_);
+	StructIndexMap( DatabaseClientInterface* database_, const Index& maxstructno_, ErrorBufferInterface* errorhnd_);
 
 	void defineStructure(
 		const Index& structno,
@@ -88,6 +90,7 @@ private:
 	bool fitsNofStructuresLeft( Map::const_iterator mi, const Map::const_iterator& me, int maxLimit) const;
 
 private:
+	ErrorBufferInterface* m_errorhnd;		///< error buffer interface
 	DatabaseClientInterface* m_database;		///< database client interface
 	std::vector<StructDefSet> m_defar;		///< vector doc index index -> structures
 	std::vector<Map> m_mapar;			///< array parallel to structures, map docno -> doc index or -1 (deleted)

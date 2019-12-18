@@ -19,21 +19,11 @@ IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 	if (!docno()) return m_source = IndexRange(0,0);
 	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_source = IndexRange(0,0);
 
-	if (m_structureScanner.initialized())
+	if (!m_structureIterator.initialized())
 	{
-		const StructBlock::StructureDef* cur = m_structureScanner.current();
-		if (cur->header_start <= firstpos_ && cur->header_end > firstpos_)
-		{
-			return m_source = IndexRange( cur->header_start, cur->header_end);
-		}
+		m_structureIterator = currentBlock().structureIterator( currentBlockCursor());
 	}
-	else
-	{
-		m_structureScanner = currentBlock().structureScanner_at( currentBlockCursor());
-		if (!m_structureScanner.initialized()) return m_source = IndexRange(0,0);
-	}
-	m_memberScanner.clear();
-	return m_source = m_structureScanner.skip( firstpos_);
+	return m_source = m_structureIterator.skip( firstpos_);
 }
 
 IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
@@ -41,13 +31,15 @@ IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 	if (!docno()) return m_sink = IndexRange(0,0);
 	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_sink = IndexRange(0,0);
 
-	if (!m_memberScanner.initialized())
+	if (!m_memberIterator.initialized())
 	{
-		if (!m_structureScanner.initialized()) return m_sink = IndexRange(0,0);
-		m_memberScanner = m_structureScanner.members();
-		if (!m_memberScanner.initialized()) return m_sink = IndexRange(0,0);
+		if (!m_structureIterator.initialized())
+		{
+			m_structureIterator = currentBlock().structureIterator( currentBlockCursor());
+		}
+		m_memberIterator = m_structureIterator.memberIterator();
 	}
-	return m_sink = m_memberScanner.skip( firstpos_);
+	return m_sink = m_memberIterator.skip( firstpos_);
 }
 
 
