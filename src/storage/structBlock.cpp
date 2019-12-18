@@ -121,6 +121,48 @@ strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos
 	return m_cur;
 }
 
+strus::IndexRange StructBlock::StructureDef::Iterator::skip( Index pos)
+{
+	if (m_cur.end() > pos && m_cur.start() <= pos)
+	{
+		return m_cur;
+	}
+	if (m_aridx >= m_ar.size())
+	{
+		if (m_aridx == 0) return m_cur=strus::IndexRange();
+		m_aridx = 0;
+	}
+	if ((Index)m_ar[ m_aridx].header_end <= pos)
+	{
+		int idx = m_ar.upperbound( pos, m_aridx, m_ar.size(), StructureDef::SearchCompare());
+		if (idx > 0) m_aridx = idx; else return m_cur=strus::IndexRange();
+		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+	}
+	else if ((Index)m_ar[ m_aridx].header_start <= pos)
+	{
+		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+	}
+	else
+	{
+		m_aridx = m_ar.upperbound( pos, 0, m_aridx+1, StructureDef::SearchCompare());
+		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
+	}
+}
+
+StructBlock::StructureMember::Iterator StructBlock::StructureDef::Iterator::memberIterator() const
+{
+	if (m_aridx < m_ar.size())
+	{
+		const StructureDef& st = m_ar[ m_aridx];
+		return StructureMember::Iterator( m_data, m_data->memberar() + st.membersIdx, st.membersSize);
+	}
+	else
+	{
+		return StructureMember::Iterator();
+	}
+}
+
+
 StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 	:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
 	,m_enumar(),m_repeatar(),m_startar(),m_curmembers()
@@ -176,17 +218,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_enum(
 	int nn = 0;
 	for (; si != se; ++si,++nn)
 	{
-		strus::Index pi = si->start(), pe = si->end();
-		int mm = 0;
-		for (; pi != pe; ++pi,++mm)
-		{
-			if (!enm.append( pi))
-			{
-				while (mm--) enm.pop_back();
-				break;
-			}
-		}
-		if (pi != pe) break;
+		if (!enm.append( *si)) break;
 		rt.end = si->end();
 	}
 	if (nn)
@@ -315,7 +347,6 @@ void StructBlockBuilder::packCurrentMembers()
 void StructBlockBuilder::addNewDocument( Index docno)
 {
 	packCurrentMembers();
-
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
 	{
@@ -417,40 +448,41 @@ void StructBlockBuilder::append( Index docno, const IndexRange& src, const Index
 	}
 }
 
-void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk)
+void StructBlockBuilder::merge( StructBlockBuilder& blk1, StructBlockBuilder& blk2, StructBlockBuilder& newblk)
 {
-	StructBlockBuilder::Iterator itr1 = blk1.getIterator();
-	StructBlockBuilder::Iterator itr2 = blk2.getIterator();
-	
+	blk1.packCurrentMembers();
+	blk2.packCurrentMembers();
+	newblk.packCurrentMembers();
+
+	StructBlockBuilder::Iterator itr1 = blk1.getIterator();	
 	strus::Index docno1 = itr1.skipDoc( 0/*docno*/);
+	strus::IndexRange src1;
+	strus::IndexRange sink1;
+	(void)itr1.scanNext( docno1, src1, sink1);
+
+	StructBlockBuilder::Iterator itr2 = blk2.getIterator();
 	strus::Index docno2 = itr2.skipDoc( 0/*docno*/);
+	strus::IndexRange src2;
+	strus::IndexRange sink2;
+	(void)itr2.scanNext( docno2, src2, sink2);
 
 	while (docno1 && docno2)
 	{
 		if (docno1 < docno2)
 		{
 			strus::Index dn = docno1;
-			strus::IndexRange src;
-			strus::IndexRange sink;
-
-			for (bool more=itr1.current( docno1, src, sink);
-				more && docno1 == dn;
-				more=itr1.next( docno1, src, sink))
+			for ( bool more=true; more && docno1 == dn; more=itr1.scanNext( docno1, src1, sink1))
 			{
-				newblk.append( docno1, src, sink);
+				newblk.append( docno1, src1, sink1);
 			}
 		}
 		else if (docno1 > docno2)
 		{
 			strus::Index dn = docno2;
-			strus::IndexRange src;
-			strus::IndexRange sink;
 
-			for (bool more=itr1.current( docno2, src, sink);
-				more && docno2 == dn;
-				more=itr1.next( docno2, src, sink))
+			for ( bool more=true; more && docno2 == dn; more=itr2.scanNext( docno2, src2, sink2))
 			{
-				newblk.append( docno2, src, sink);
+				newblk.append( docno2, src2, sink2);
 			}
 		}
 		else/*(docno1 == docno2)*/
@@ -460,26 +492,16 @@ void StructBlockBuilder::merge( const StructBlockBuilder& blk1, const StructBloc
 	}
 	while (docno1)
 	{
-		strus::IndexRange src;
-		strus::IndexRange sink;
-
-		for (bool more=itr1.current( docno1, src, sink);
-			more;
-			more=itr1.next( docno1, src, sink))
+		for ( bool more=true; more; more=itr1.scanNext( docno1, src1, sink1))
 		{
-			newblk.append( docno1, src, sink);
+			newblk.append( docno1, src1, sink1);
 		}
 	}
 	while (docno2)
 	{
-		strus::IndexRange src;
-		strus::IndexRange sink;
-
-		for (bool more=itr2.current( docno2, src, sink);
-			more;
-			more=itr2.next( docno1, src, sink))
+		for (bool more=true; more; more=itr2.scanNext( docno2, src2, sink2))
 		{
-			newblk.append( docno2, src, sink);
+			newblk.append( docno2, src2, sink2);
 		}
 	}
 }
@@ -507,6 +529,7 @@ void StructBlockBuilder::appendFromBlock( Index docno, const StructBlock& blk, c
 			append( docno, source, sink);
 		}
 	}
+	packCurrentMembers();
 }
 
 void StructBlockBuilder::merge_append(
@@ -518,6 +541,7 @@ void StructBlockBuilder::merge_append(
 	strus::IndexRange src;
 	strus::IndexRange sink;
 	DocIndexNodeCursor cursor;
+	appendblk.packCurrentMembers();
 
 	strus::Index docno = oldblk.firstDoc( cursor);
 	while (docno && ei != ee && ei->docno <= oldblk.id())
@@ -572,15 +596,17 @@ void StructBlockBuilder::merge_append(
 	}
 }
 
-void StructBlockBuilder::split( const StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2)
+void StructBlockBuilder::split( StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2)
 {
+	blk.packCurrentMembers();
+
 	std::vector<StructDeclaration> declar;
 	strus::IndexRange src;
 	strus::IndexRange sink;
 	StructBlockBuilder::Iterator itr = blk.getIterator();
 	strus::Index docno = itr.skipDoc( 0/*docno*/);
-	bool more = itr.current( docno, src, sink);
-	for (; more; more = itr.next( docno, src, sink));
+	bool more = itr.scanNext( docno, src, sink);
+	for (; more; more = itr.scanNext( docno, src, sink))
 	{
 		declar.push_back( StructDeclaration( docno, src, sink));
 	}
@@ -620,7 +646,10 @@ bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
 
 StructBlock StructBlockBuilder::createBlock()
 {
-	if (empty()) throw strus::runtime_error( _TXT("tried to create empty structure block"));
+	if (empty())
+	{
+		throw strus::runtime_error( _TXT("tried to create empty structure block"));
+	}
 	packCurrentMembers();
 
 	StructBlock::BlockHeader hdr;
@@ -719,7 +748,7 @@ StructBlock StructBlockBuilder::createBlock()
 	std::memcpy( dt+structofs, m_structurear.data(), m_structurear.size() * sizeof( m_structurear[0]));
 	std::memcpy( dt+memberofs, m_memberar.data(), m_memberar.size() * sizeof( m_memberar[0]));
 	std::memcpy( dt+enumofs, m_enumar.data(), m_enumar.size() * sizeof( m_enumar[0]));
-	std::memcpy( dt+enumofs, m_repeatar.data(), m_repeatar.size() * sizeof( m_repeatar[0]));
+	std::memcpy( dt+repeatofs, m_repeatar.data(), m_repeatar.size() * sizeof( m_repeatar[0]));
 	std::memcpy( dt+startofs, m_startar.data(), m_startar.size() * sizeof( m_startar[0]));
 
 	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
@@ -766,4 +795,68 @@ std::string StructBlockBuilder::statisticsMessage() const
 		(int)m_repeatar.size(),
 		(int)m_startar.size());
 }
+
+strus::Index StructBlockBuilder::Iterator::skipDoc( strus::Index docno)
+{
+	m_docno = m_docar.skipDoc( docno, m_cursor);
+	initNodeIterators();
+	return m_docno;
+}
+
+bool StructBlockBuilder::Iterator::scanNext( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
+{
+	sink_ = m_membitr.next();
+	if (sink_.defined())
+	{
+		src_ = m_struitr.current();
+		docno_ = m_docno;
+	}
+	else
+	{
+		src_ = m_struitr.next();
+		if (src_.defined())
+		{
+			m_membitr = m_struitr.memberIterator();
+			sink_ = m_membitr.next();
+			docno_ = m_docno;
+		}
+		else
+		{
+			m_docno = skipDoc( m_docno+1);
+			if (m_docno)
+			{
+				initNodeIterators();
+				src_ = m_struitr.current();
+				sink_ = m_membitr.next();
+				docno_ = m_docno;
+			}
+			else
+			{
+				clear();
+				docno_ = 0;
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void StructBlockBuilder::Iterator::clear()
+{
+	m_struitr.clear();
+	m_membitr.clear();
+	m_docno = 0;
+}
+
+void StructBlockBuilder::Iterator::initNodeIterators()
+{
+	int ref = m_docar.ref_at( m_cursor);
+	int stuidx = m_builder->structurelistar()[ ref].idx;
+	int stusize = m_builder->structurelistar()[ ref].size;
+	m_struitr = StructureDef::Iterator( &m_data, m_builder->structurear().data() + stuidx, stusize);
+	m_struitr.next();
+	m_membitr = m_struitr.memberIterator();
+}
+
+
 

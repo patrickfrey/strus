@@ -10,6 +10,7 @@
 #include "dataBlock.hpp"
 #include "structBlockMemberRepeat.hpp"
 #include "structBlockMemberEnum.hpp"
+#include "structBlockMemberPacked.hpp"
 #include "docIndexNode.hpp"
 #include "skipScanArray.hpp"
 #include "strus/constants.hpp"
@@ -217,42 +218,8 @@ public:
 			strus::IndexRange next()	{return m_cur=skip( m_cur.end());}
 			strus::IndexRange current()	{return m_cur;}
 			
-			strus::IndexRange skip( Index pos)
-			{
-				if (m_aridx >= m_ar.size())
-				{
-					if (m_aridx == 0) return m_cur=strus::IndexRange();
-					m_aridx = 0;
-				}
-				if ((Index)m_ar[ m_aridx].header_end <= pos)
-				{
-					int idx = m_ar.upperbound( pos, m_aridx, m_ar.size(), StructureDef::SearchCompare());
-					if (idx > 0) m_aridx = idx; else return m_cur=strus::IndexRange();
-					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-				}
-				else if ((Index)m_ar[ m_aridx].header_start <= pos)
-				{
-					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-				}
-				else
-				{
-					m_aridx = m_ar.upperbound( pos, 0, m_aridx+1, StructureDef::SearchCompare());
-					return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-				}
-			}
-
-			StructureMember::Iterator memberIterator() const
-			{
-				if (m_aridx < m_ar.size())
-				{
-					const StructureDef& st = m_ar[ m_aridx];
-					return StructureMember::Iterator( m_data, m_data->memberar() + st.membersIdx, st.membersSize);
-				}
-				else
-				{
-					return StructureMember::Iterator();
-				}
-			}
+			strus::IndexRange skip( Index pos);
+			StructureMember::Iterator memberIterator() const;
 
 		private:
 			const BlockData* m_data;
@@ -453,7 +420,10 @@ public:
 		return dd + ll + ss + mm + ee + ii;
 	}
 
-	static void merge( const StructBlockBuilder& blk1, const StructBlockBuilder& blk2, StructBlockBuilder& newblk);
+	static void merge(
+			StructBlockBuilder& blk1,
+			StructBlockBuilder& blk2,
+			StructBlockBuilder& newblk);
 
 	static void merge(
 			std::vector<StructDeclaration>::const_iterator ei,
@@ -465,7 +435,7 @@ public:
 			const std::vector<StructDeclaration>::const_iterator& ee,
 			const StructBlock& oldblk,
 			StructBlockBuilder& appendblk);
-	static void split( const StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2);
+	static void split( StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2);
 
 	void swap( StructBlockBuilder& o)
 	{
@@ -508,69 +478,13 @@ private:
 			,m_docno(0)
 		{}
 
-		strus::Index skipDoc( strus::Index docno)
-		{
-			m_docno = m_docar.skipDoc( docno, m_cursor);
-			m_struitr.clear();
-			m_membitr.clear();
-			return m_docno;
-		}
+		strus::Index skipDoc( strus::Index docno);
 
-		bool current( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
-		{
-			if (!m_docno) return false;
-			src_ = m_struitr.current();
-			sink_ = m_membitr.current();
-			docno_ = m_docno;
-			return true;
-		}
-		bool next( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
-		{
-			sink_ = m_membitr.next();
-			if (sink_.defined())
-			{
-				src_ = m_struitr.current();
-				docno_ = m_docno;
-			}
-			else
-			{
-				src_ = m_struitr.next();
-				if (src_.defined())
-				{
-					m_membitr = m_struitr.memberIterator();
-					sink_ = m_membitr.next();
-					docno_ = m_docno;
-				}
-				else
-				{
-					m_docno = skipDoc( m_docno+1);
-					if (m_docno)
-					{
-						int ref = m_docar.ref_at( m_cursor);
-						int stuidx = m_builder->structurelistar()[ ref].idx;
-						int stusize = m_builder->structurelistar()[ ref].size;
-						m_struitr = StructureDef::Iterator( &m_data, m_builder->structurear().data() + stuidx, stusize);
-						m_membitr = m_struitr.memberIterator();
-						src_ = m_struitr.next();
-						sink_ = m_membitr.next();
-						docno_ = m_docno;
-					}
-					else
-					{
-						clear();
-						return false;
-					}
-				}
-			}
-			return true;
-		}
+		bool scanNext( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_);
 
-		void clear()
-		{
-			m_struitr.clear();
-			m_membitr.clear();
-			m_docno = 0;
-		}
+		void clear();
+
+		void initNodeIterators();
 
 		const StructBlockBuilder* m_builder; 
 		DocIndexNodeArray m_docar;

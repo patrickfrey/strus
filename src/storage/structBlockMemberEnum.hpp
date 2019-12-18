@@ -53,6 +53,7 @@ struct StructBlockMemberEnum
 	}
 
 	bool full() const {return !!ofs[NofOfs-1];}
+
 	bool append( PositionType pos)
 	{
 		if (base == 0)
@@ -68,6 +69,28 @@ struct StructBlockMemberEnum
 			if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
 			if (pos - accu > (PositionType)std::numeric_limits<OffsetType>::max()) return false;
 			ofs[ pi] = pos - accu;
+		}
+		return true;
+	}
+
+	bool append( const strus::IndexRange& range)
+	{
+		strus::Index ri = range.start(), re = range.end();
+		if (base == 0)
+		{
+			base = ri++;
+			if (ri == re) return true;
+		}
+		PositionType accu = base;
+		int pi = 0, pe = NofOfs;
+		for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
+		if (pi + (re - ri) > pe) return false;
+		if (ri < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
+		if (ri - accu > (PositionType)std::numeric_limits<OffsetType>::max()) return false;
+		ofs[ pi++] = ri++ - accu;
+		for (; ri < re; ++ri,++pi)
+		{
+			ofs[pi] = 1;
 		}
 		return true;
 	}
@@ -106,25 +129,6 @@ struct StructBlockMemberEnum
 			return strus::IndexRange( start, end);
 		}
 		return strus::IndexRange();
-	}
-
-	strus::Index expandEnd( strus::Index end)
-	{
-		if (end == base)
-		{
-			strus::Index rt = base+1;
-			for (int ii=0; ii<=NofOfs && 1==ofs[ii]; ++rt,++ii){}
-			return rt;
-		}
-		return end;
-	}
-
-	strus::Index expandStart( strus::Index start)
-	{
-		int ii = NofOfs-1;
-		for (; ii>=0 && 0==ofs[ii]; --ii){}
-		for (; ii>=0 && 1==ofs[ii]; --ii,--start){}
-		return start;
 	}
 };
 

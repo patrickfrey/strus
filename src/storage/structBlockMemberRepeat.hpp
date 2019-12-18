@@ -13,7 +13,6 @@
 #include <cstring>
 #include <limits>
 #include <vector>
-/*[-]*/#include <iostream>
 
 namespace strus {
 
@@ -58,10 +57,6 @@ struct StructBlockMemberRepeat
 			base = positionCast( range.start());
 			size = sizeCast( range.end() - range.start());
 			ofs = offsetCast( enditr - range.start());
-			/*[-]*/if (!ofs) 
-			/*[-]*/{
-			/*[-]*/	std::cerr << "HALLY GALLY !" << std::endl;
-			/*[-]*/}
 			if (!base || !size || !ofs)
 			{
 				base = 0; size = 0; ofs = 0;
