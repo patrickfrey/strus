@@ -193,12 +193,12 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_offset(
 		StructBlock::MemberIdxType& ofs)
 {
 	MemberDim rt;
+	ofs = si->end() - si->start();
 	if (si->end() - si->start() >= StructureMember::MaxMemberIdx) return rt;
 	rt.fill = (float)m_memberar.size() / StructBlock::MaxMemberIdxType;
 	rt.bytes = sizeof(StructureMember);
 	rt.elements = 1;
 	rt.end = si->end();
-	ofs = si->end() - si->start();
 	return rt;
 }
 
