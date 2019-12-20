@@ -42,11 +42,11 @@ public:
 	/// \return a valid index range or {0,0}
 	virtual IndexRange skipPosSink( const Index& firstpos)=0;
 
-	/// \brief Return the last source index range retrieved with 'skipPosSource( const Index&)' withut calling 'skipDoc( const Index&)' thereafter.
+	/// \brief Return the last source index range retrieved with 'skipPosSource( const Index&)' without having called 'skipDoc( const Index&)' thereafter.
 	/// \return a valid index range or {0,0}
 	virtual IndexRange source() const=0;
 
-	/// \brief Return the last source index range retrieved with 'skipPosSink( const Index&)' withut calling 'skipPosSource( const Index&)' thereafter.
+	/// \brief Return the last source index range retrieved with 'skipPosSink( const Index&)' without having called 'skipPosSource( const Index&)' or 'skipDoc( const Index&)' thereafter.
 	/// \return a valid index range or {0,0}
 	virtual IndexRange sink() const=0;
 };

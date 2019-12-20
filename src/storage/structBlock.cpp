@@ -159,7 +159,7 @@ strus::IndexRange StructBlock::StructureDef::Iterator::skip( Index pos)
 
 StructBlock::StructureMember::Iterator StructBlock::StructureDef::Iterator::memberIterator() const
 {
-	if (m_aridx < m_ar.size())
+	if (m_cur.defined())
 	{
 		const StructureDef& st = m_ar[ m_aridx];
 		return StructureMember::Iterator( m_data, m_data->memberar() + st.membersIdx, st.membersSize);
@@ -252,7 +252,10 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
 		std::vector<strus::IndexRange>::const_iterator sn = si+1;
 		strus::Index end = sn->start();
 		int nn = 0;
-		for (; si != se && rep.append( end, *si); ++si,++nn){}
+		for (; si != se && rep.append( end, *si); ++si,++nn)
+		{
+			rt.end = si->end();
+		}
 		if (nn > 1)
 		{
 			rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
@@ -260,7 +263,6 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
 				) / 2;
 			rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberRepeat);
 			rt.elements = nn;
-			rt.end = rep.lastMemberEnd( end);
 		}
 	}
 	return rt;

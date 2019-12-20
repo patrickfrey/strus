@@ -16,18 +16,28 @@ using namespace strus;
 
 IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
 {
+	IndexRange rt;
 	if (!docno()) return m_source = IndexRange(0,0);
-	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_source = IndexRange(0,0);
-
+	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max())
+	{
+		m_memberIterator.clear();
+		return m_source = IndexRange(0,0);
+	}
 	if (!m_structureIterator.initialized())
 	{
 		m_structureIterator = currentBlock().structureIterator( currentBlockCursor());
 	}
-	return m_source = m_structureIterator.skip( firstpos_);
+	rt = m_structureIterator.skip( firstpos_);
+	if (rt != m_source || !rt.defined())
+	{
+		m_memberIterator.clear();
+	}
+	return rt;
 }
 
 IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 {
+	IndexRange rt;
 	if (!docno()) return m_sink = IndexRange(0,0);
 	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_sink = IndexRange(0,0);
 
@@ -39,9 +49,9 @@ IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
 		}
 		m_memberIterator = m_structureIterator.memberIterator();
 	}
-	return m_sink = m_memberIterator.skip( firstpos_);
+	rt = m_sink = m_memberIterator.skip( firstpos_);
+	return rt;
 }
-
 
 Index StructIterator::skipDoc( const Index& docno)
 {
@@ -51,6 +61,7 @@ Index StructIterator::skipDoc( const Index& docno)
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
+
 IndexRange StructIterator::skipPosSource( const Index& firstpos)
 {
 	try
@@ -59,6 +70,7 @@ IndexRange StructIterator::skipPosSource( const Index& firstpos)
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
 }
+
 IndexRange StructIterator::skipPosSink( const Index& firstpos)
 {
 	try
@@ -67,6 +79,7 @@ IndexRange StructIterator::skipPosSink( const Index& firstpos)
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip sink position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
 }
+
 IndexRange StructIterator::source() const
 {
 	try
@@ -75,6 +88,7 @@ IndexRange StructIterator::source() const
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current source: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
 }
+
 IndexRange StructIterator::sink() const
 {
 	try

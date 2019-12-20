@@ -118,14 +118,14 @@ struct StructBlockMemberEnum
 		PositionType pi=base;
 		PositionType start=base;
 		int ii=0;
-		for (; ii<=NofOfs && pi < pos; pi+=ofs[ii],++ii)
+		for (; ii<NofOfs && pi < pos; pi+=ofs[ii],++ii)
 		{
 			if (1!=ofs[ii]) {start=pi+ofs[ii];}
 		}
 		if (pi >= pos)
 		{
 			PositionType end = pi+1;
-			for (; ii<=NofOfs && 1==ofs[ii]; ++end,++ii){}
+			for (; ii<NofOfs && 1==ofs[ii]; ++end,++ii){}
 			return strus::IndexRange( start, end);
 		}
 		return strus::IndexRange();

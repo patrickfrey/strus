@@ -51,6 +51,7 @@ public:
 	{
 		return m_source;
 	}
+
 	IndexRange sink() const
 	{
 		return m_sink;

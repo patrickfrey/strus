@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2014 Patrick P. Frey
+ * Copyright (c) 2019 Patrick P. Frey
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include "primeFactorCollection.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -32,11 +33,11 @@
 #include "strus/valueIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/errorUtils.hpp"
-#include "primeFactorCollection.hpp"
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -46,37 +47,16 @@
 #include <set>
 #include <limits>
 #include <algorithm>
-#include <cmath>
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::FileLocatorInterface* g_fileLocator = 0;
 static bool g_verbose = false;
 static strus::PseudoRandom g_random;
-enum {MinRank=0, MaxNofRanks=100, MaxNofClasses=3};
 
 typedef strus::test::PrimeFactorCollection PrimeFactorCollection;
 typedef strus::test::PrimeFactorDocumentBuilder PrimeFactorDocumentBuilder;
 typedef strus::test::Storage Storage;
 typedef strus::test::Feature Feature;
-
-struct StorageDump
-{
-	struct Element
-	{
-		int id;
-		int pos;
-
-		Element( int id_, int pos_)
-			:id(id_),pos(pos_){}
-		Element( const Element& o)
-			:id(o.id),pos(o.pos){}
-
-		bool operator < (const Element& o) const
-		{
-			return (pos == o.pos) ? id < o.id : pos < o.pos;
-		}
-	};
-};
 
 static void buildObserved( PrimeFactorDocumentBuilder& documentBuilder, const std::string& observed)
 {
@@ -217,8 +197,11 @@ int main( int argc, const char* argv[])
 	try
 	{
 		std::string observed;
-		if (argi + 3 > argc) throw std::runtime_error( "too few arguments");
-
+		if (argi + 3 > argc)
+		{
+			printUsage();
+			throw std::runtime_error( "too few arguments");
+		}
 		int cycles = strus::numstring_conv::toint( argv[ argi+0], std::strlen(argv[ argi+0]), std::numeric_limits<int>::max());
 		int nofdocs = strus::numstring_conv::toint( argv[ argi+1], std::strlen(argv[ argi+1]), std::numeric_limits<int>::max());
 		int commitsize = strus::numstring_conv::toint( argv[ argi+2], std::strlen(argv[ argi+2]), std::numeric_limits<int>::max());

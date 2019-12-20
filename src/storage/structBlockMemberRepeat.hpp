@@ -88,11 +88,6 @@ struct StructBlockMemberRepeat
 		return ri == re ? rt : 0;
 	}
 
-	strus::Index lastMemberEnd( strus::Index enditr)
-	{
-		return enditr - ofs;
-	}
-
 	strus::IndexRange skip( PositionType pos) const
 	{
 		Index rpos = (pos < base) ? 0 : (pos - base);

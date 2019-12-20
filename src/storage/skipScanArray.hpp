@@ -46,26 +46,16 @@ public:
 		enum {NotFound=-1};
 
 		// Block search (fibonacci):
-		int fib1 = 1, fib2 = 1;
+		int fib1 = 1, fib2 = 0;
 		int bi = start;
 		while (bi < end && cmp( m_ar[ bi], needle))
 		{
-			bi = start + fib1;
 			fib2 = fib1 + fib2;
 			std::swap( fib1, fib2);
+			bi = start + fib1;
 		}
-		if (fib1 - fib2 > 1)
-		{
-			int ei = start + fib2;
-			int ee = start + fib1;
-			if (end > ee) ee = end;
-			for (; ei < ee && cmp( m_ar[ start+ei], needle); ++ei){}
-			return (ei == end) ? NotFound : ei;
-		}
-		else
-		{
-			return bi == end ? NotFound : bi;
-		}
+		for (bi=start+fib2; bi < end && cmp( m_ar[ bi], needle); ++bi){}
+		return (bi < end) ? bi : NotFound;
 	}
 
 	int upperbound( const IndexType& needle, const ComparatorFunctor& cmp) const

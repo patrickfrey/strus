@@ -19,7 +19,7 @@ struct StructBlockMemberPackedData
 {};
 
 template <>
-class StructBlockMemberPackedData<1>
+class StructBlockMemberPackedData<2>
 {
 public:
 	typedef unsigned short PositionType;
@@ -33,7 +33,7 @@ public:
 };
 
 template <>
-class StructBlockMemberPackedData<2>
+class StructBlockMemberPackedData<1>
 {
 public:
 	typedef unsigned short PositionType;
@@ -123,9 +123,9 @@ public:
 		}
 		else
 		{
-			PositionType accu = Parent::base;
+			PositionType accu = Parent::base + getEndOfs( Parent::ofs[0]);
 			int pi = 0, pe = NofOfs;
-			for (; pi<pe && Parent::ofs[pi]; accu += getEndOfs(Parent::ofs[pi]),++pi){}
+			for (; pi<pe && Parent::ofs[pi]; accu+=getEndOfs(Parent::ofs[++pi])){}
 			if (pi == pe) return false;
 			Parent::ofs[ pi] = packedRange( accu, range);
 			if (!Parent::ofs[ pi]) return false;
@@ -136,17 +136,22 @@ public:
 	PositionType end() const
 	{
 		PositionType rt=Parent::base;
-		for (int ii=0; ii<=NofOfs && Parent::ofs[ii]; rt+=getEndOfs(Parent::ofs[ii]),++ii){}
+		for (int ii=0; ii<=NofOfs && Parent::ofs[ii]; rt+=getEndOfs(Parent::ofs[++ii])){}
 		return rt;
 	}
 
 	strus::IndexRange skip( PositionType pos) const
 	{
-		PositionType rtend = Parent::base;
+		PositionType rtend = Parent::base + getEndOfs( Parent::ofs[0]);
 		int ii = 0;
-		for (; ii<=NofOfs && rtend < pos; rtend+=getEndOfs(Parent::ofs[ii]),++ii){}
-		if (rtend > pos) return strus::IndexRange( rtend - getSize( Parent::ofs[ii]), rtend);
-		return strus::IndexRange();
+		while (ii<=NofOfs && rtend <= pos && Parent::ofs[ii])
+		{
+			++ii;
+			rtend += getEndOfs( Parent::ofs[ii]);
+		}
+		return (rtend > pos)
+			? strus::IndexRange( rtend - getSize( Parent::ofs[ii]), rtend)
+			: strus::IndexRange();
 	}
 };
 
