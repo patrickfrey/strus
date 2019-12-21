@@ -28,6 +28,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/databaseClientUndefinedStub.hpp"
+#include "databaseKey.hpp"
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "storageTransaction.hpp"
@@ -197,6 +198,49 @@ StorageClient::~StorageClient()
 long StorageClient::diskUsage() const
 {
 	return m_database->diskUsage();
+}
+
+BlockStatistics StorageClient::blockStatistics() const
+{
+	try
+	{
+		strus::local_ptr<strus::DatabaseCursorInterface>
+			cursor( m_database->createCursor( strus::DatabaseOptions()));
+		if (!cursor.get()) throw strus::runtime_error( _TXT("failed to create database cursor: %s"), m_errorhnd->fetchError());
+
+		std::vector<BlockStatistics::Element> elements;
+		std::map<char,int64_t> bcmap;
+		std::map<const char*,int64_t> kemap;
+
+		strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
+		for (; key.defined(); key = cursor->seekNext())
+		{
+			if (key.size() == 0)
+			{
+				throw strus::runtime_error_ec( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
+			}
+			bcmap[ key.ptr()[0]] += key.size();
+		}
+		std::map<char,int64_t>::const_iterator
+			bi = bcmap.begin(), be = bcmap.end();
+		for (; bi != be; ++bi)
+		{
+			const char* type = DatabaseKey::keyPrefixName( (DatabaseKey::KeyPrefix)bi->first);
+			if (!type)
+			{
+				throw strus::runtime_error_ec( ErrorCodeDataCorruption, _TXT( "unknown block type found in storage: %c"), bi->first);
+			}
+			kemap[ type] = bi->second;
+		}
+		std::map<const char*,int64_t>::const_iterator
+			ki = kemap.begin(), ke = kemap.end();
+		for (; ki != ke; ++ki)
+		{
+			elements.push_back( BlockStatistics::Element( ki->first, ki->second));
+		}
+		return BlockStatistics( elements);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error listing block storage occupation statistics: %s"), *m_errorhnd, BlockStatistics());
 }
 
 std::string StorageClient::config() const

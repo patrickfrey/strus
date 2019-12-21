@@ -10,9 +10,9 @@
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/termStatistics.hpp"
 #include "strus/timeStamp.hpp"
 #include "strus/statisticsMessage.hpp"
+#include "strus/blockStatistics.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -66,6 +66,9 @@ public:
 
 	/// \brief Get the disk usage in kilo byte units (approximately) of the storage
 	virtual long diskUsage() const=0;
+
+	/// \brief Get the block type usage statistics
+	virtual BlockStatistics blockStatistics() const=0;
 
 	/// \brief Get the interpreted configuration this storage client was created with
 	/// \return the configuration as string

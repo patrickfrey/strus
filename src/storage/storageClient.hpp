@@ -171,6 +171,8 @@ public:
 	virtual void compaction();
 
 	virtual long diskUsage() const;
+	virtual BlockStatistics blockStatistics() const;
+
 	virtual std::string config() const;
 
 public:/*Storage (constructor)*/
