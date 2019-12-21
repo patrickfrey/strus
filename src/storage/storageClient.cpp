@@ -219,7 +219,8 @@ BlockStatistics StorageClient::blockStatistics() const
 			{
 				throw strus::runtime_error_ec( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
 			}
-			bcmap[ key.ptr()[0]] += key.size();
+			bcmap[ key.ptr()[0]] += key.size() + cursor->value().size();
+			//... Sum of key value is not accurate, but we do not know how to get a value otherwise
 		}
 		std::map<char,int64_t>::const_iterator
 			bi = bcmap.begin(), be = bcmap.end();
