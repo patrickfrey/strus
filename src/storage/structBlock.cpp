@@ -13,6 +13,7 @@
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
+#include <set>
 
 using namespace strus;
 
@@ -190,7 +191,7 @@ StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_offset(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlock::MemberIdxType& ofs)
+		StructBlock::MemberIdxType& ofs) const
 {
 	MemberDim rt;
 	ofs = si->end() - si->start();
@@ -205,7 +206,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_offset(
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_index(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		PositionType& start)
+		PositionType& start) const
 {
 	MemberDim rt;
 	rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
@@ -221,7 +222,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_index(
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_enum(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberEnum& enm)
+		StructBlockMemberEnum& enm) const
 {
 	MemberDim rt;
 	int nn = 0;
@@ -244,7 +245,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_enum(
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberRepeat& rep)
+		StructBlockMemberRepeat& rep) const
 {
 	MemberDim rt;
 	if (si + 1 < se)
@@ -271,7 +272,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkbyte(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberPackedByte& pkb)
+		StructBlockMemberPackedByte& pkb) const
 {
 	MemberDim rt;
 	int nn = 0;
@@ -294,7 +295,7 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkbyte(
 StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkshort(
 		std::vector<strus::IndexRange>::const_iterator si,
 		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberPackedShort& pks)
+		StructBlockMemberPackedShort& pks) const
 {
 	MemberDim rt;
 	int nn = 0;
@@ -314,17 +315,112 @@ StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkshort(
 	return rt;
 }
 
-void StructBlockBuilder::testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize)
+void StructBlockBuilder::testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, MemberType& memberType, const MemberType assignMemberType, std::size_t arsize)
 {
 	if (arsize < StructBlock::StructureMember::MaxMemberIdx)
 	{
-		float weight = ((float)dim.elements / (float)dim.bytes) * (1.0 - dim.fill);
+		float weight = dim.weight();
 		if (weight >= maxweight)
 		{
 			memberType = assignMemberType;
 			maxweight = weight;
 		}
 	}
+}
+
+struct PackingCandidate
+{
+	std::vector<strus::IndexRange>::const_iterator itr;
+	float weight;
+	int count;
+	StructBlock::MemberType type;
+
+	explicit PackingCandidate( std::vector<strus::IndexRange>::const_iterator itr_)
+		:itr(itr_),weight(0.0),count(0),type(StructBlock::MemberIndexType){}
+	PackingCandidate( std::vector<strus::IndexRange>::const_iterator itr_, float weight_, StructBlock::MemberType type_, int count_)
+		:itr(itr_),weight(weight_),count(count_),type(type_){}
+	PackingCandidate( const PackingCandidate& o)
+		:itr(o.itr),weight(o.weight),count(o.count),type(o.type){}
+
+	bool operator < (const PackingCandidate& o) const
+	{
+		return ((weight == o.weight)
+			? ((count == o.count)
+				? ((itr == o.itr)
+					? ((int)type < (int)o.type)
+					: (itr > o.itr))
+				: (count > o.count))
+			:(weight > o.weight));
+	}
+};
+
+StructBlock::MemberType StructBlockBuilder::getNextPackMemberType(
+	std::vector<strus::IndexRange>::const_iterator si,
+	std::vector<strus::IndexRange>::const_iterator se) const
+{
+	enum {MaxTryPackDepth=3};
+	std::set<PackingCandidate> cdset;
+	cdset.insert( PackingCandidate( si));
+
+	while (!cdset.empty())
+	{
+		std::set<PackingCandidate>::iterator ci = cdset.begin();
+		PackingCandidate cd = *ci;
+		cdset.erase( ci);
+
+		if (cd.count == MaxTryPackDepth || cd.itr == se) return cd.type;
+		else
+		{{
+			StructBlock::MemberIdxType ofs;
+			MemberDim dim = evaluateMemberDim_offset( cd.itr, se, ofs);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberOffsetType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}{
+			PositionType start;
+			MemberDim dim = evaluateMemberDim_index( cd.itr, se, start);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberIndexType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}{
+			StructBlockMemberEnum enm;
+			MemberDim dim = evaluateMemberDim_enum( si, se, enm);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberEnumType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}{
+			StructBlockMemberRepeat rep;
+			MemberDim dim = evaluateMemberDim_repeat( si, se, rep);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberRepeatType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}{
+			StructBlockMemberPackedByte pkb;
+			MemberDim dim = evaluateMemberDim_pkbyte( si, se, pkb);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberPackedByteType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}{
+			StructBlockMemberPackedShort pks;
+			MemberDim dim = evaluateMemberDim_pkshort( si, se, pks);
+			if (dim.defined())
+			{
+				MemberType memberType = cd.count ? cd.type : StructBlock::MemberPackedShortType;
+				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
+			}
+		}}
+	}
+	return StructBlock::MemberIndexType;
 }
 
 void StructBlockBuilder::packCurrentMembers()
@@ -337,78 +433,62 @@ void StructBlockBuilder::packCurrentMembers()
 	{
 		if (m_memberar.size() < StructBlock::MaxMemberIdxType)
 		{
-			StructBlock::MemberType memberType = StructBlock::MemberOffsetType;
-			float maxweight = 0.0;
-
-			StructBlock::MemberIdxType ofs;
-			MemberDim dim_offset = evaluateMemberDim_offset( si, se, ofs);
-			testPackMember( dim_offset, maxweight, memberType,
-					StructBlock::MemberOffsetType, 0);
-
-			PositionType start;
-			MemberDim dim_index = evaluateMemberDim_index( si, se, start);
-			testPackMember( dim_index, maxweight, memberType,
-					StructBlock::MemberIndexType, m_startar.size());
-
-			StructBlockMemberEnum enm;
-			MemberDim dim_enum = evaluateMemberDim_enum( si, se, enm);
-			testPackMember( dim_enum, maxweight, memberType,
-					StructBlock::MemberEnumType, m_enumar.size());
-
-			StructBlockMemberRepeat rep;
-			MemberDim dim_repeat = evaluateMemberDim_repeat( si, se, rep);
-			testPackMember( dim_repeat, maxweight, memberType,
-					StructBlock::MemberRepeatType, m_repeatar.size());
-
-			StructBlockMemberPackedByte pkb;
-			MemberDim dim_packedbyte = evaluateMemberDim_pkbyte( si, se, pkb);
-			testPackMember( dim_packedbyte, maxweight, memberType,
-					StructBlock::MemberPackedByteType, m_pkbytear.size());
-
-			StructBlockMemberPackedShort pks;
-			MemberDim dim_packedshort = evaluateMemberDim_pkshort( si, se, pks);
-			testPackMember( dim_packedshort, maxweight, memberType,
-					StructBlock::MemberPackedShortType, m_pkshortar.size());
-
-			if (maxweight > 0.0)
+			MemberType memberType = getNextPackMemberType( si, se);
+			switch (memberType)
 			{
-				switch (memberType)
+				case StructBlock::MemberOffsetType:
 				{
-					case StructBlock::MemberOffsetType:
-						m_memberar.push_back( StructureMember( dim_offset.end, memberType, ofs));
-						si += dim_offset.elements;
-						break;
-					case StructBlock::MemberIndexType:
-						m_memberar.push_back( StructureMember( dim_index.end, memberType, m_startar.size()));
-						m_startar.push_back( start);
-						si += dim_index.elements;
-						break;
-					case StructBlock::MemberEnumType:
-						m_memberar.push_back( StructureMember( dim_enum.end, memberType, m_enumar.size()));
-						m_enumar.push_back( enm);
-						si += dim_enum.elements;
-						break;
-					case StructBlock::MemberRepeatType:
-						m_memberar.push_back( StructureMember( dim_repeat.end, memberType, m_repeatar.size()));
-						m_repeatar.push_back( rep);
-						si += dim_repeat.elements;
-						break;
-					case StructBlock::MemberPackedByteType:
-						m_memberar.push_back( StructureMember( dim_packedbyte.end, memberType, m_pkbytear.size()));
-						m_pkbytear.push_back( pkb);
-						si += dim_packedbyte.elements;
-						break;
-					case StructBlock::MemberPackedShortType:
-						m_memberar.push_back( StructureMember( dim_packedshort.end, memberType, m_pkshortar.size()));
-						m_pkshortar.push_back( pks);
-						si += dim_packedshort.elements;
-						break;
+					StructBlock::MemberIdxType ofs;
+					MemberDim dim = evaluateMemberDim_offset( si, se, ofs);
+					m_memberar.push_back( StructureMember( dim.end, memberType, ofs));
+					si += dim.elements;
+					break;
 				}
-			}
-			else
-			{
-				++m_membersDropped;
-				++si;
+				case StructBlock::MemberIndexType:
+				{
+					PositionType start;
+					MemberDim dim = evaluateMemberDim_index( si, se, start);
+					m_memberar.push_back( StructureMember( dim.end, memberType, m_startar.size()));
+					m_startar.push_back( start);
+					si += dim.elements;
+					break;
+				}
+				case StructBlock::MemberEnumType:
+				{
+					StructBlockMemberEnum enm;
+					MemberDim dim = evaluateMemberDim_enum( si, se, enm);
+					m_memberar.push_back( StructureMember( dim.end, memberType, m_enumar.size()));
+					m_enumar.push_back( enm);
+					si += dim.elements;
+					break;
+				}
+				case StructBlock::MemberRepeatType:
+				{
+					StructBlockMemberRepeat rep;
+					MemberDim dim = evaluateMemberDim_repeat( si, se, rep);
+					m_memberar.push_back( StructureMember( dim.end, memberType, m_repeatar.size()));
+					m_repeatar.push_back( rep);
+					si += dim.elements;
+					break;
+				}
+				case StructBlock::MemberPackedByteType:
+				{
+					StructBlockMemberPackedByte pkb;
+					MemberDim dim = evaluateMemberDim_pkbyte( si, se, pkb);
+					m_memberar.push_back( StructureMember( dim.end, memberType, m_pkbytear.size()));
+					m_pkbytear.push_back( pkb);
+					si += dim.elements;
+					break;
+				}
+				case StructBlock::MemberPackedShortType:
+				{
+					StructBlockMemberPackedShort pks;
+					MemberDim dim = evaluateMemberDim_pkshort( si, se, pks);
+					m_memberar.push_back( StructureMember( dim.end, memberType, m_pkshortar.size()));
+					m_pkshortar.push_back( pks);
+					si += dim.elements;
+					break;
+				}
 			}
 		}
 		else

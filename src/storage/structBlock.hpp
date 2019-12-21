@@ -360,6 +360,7 @@ public:
 	typedef StructBlock::StructureMember StructureMember;
 	typedef StructBlock::StructureDef StructureDef;
 	typedef StructBlock::StructureDefList StructureDefList;
+	typedef StructBlock::MemberType MemberType;
 
 public:
 	StructBlockBuilder( const StructBlock& o);
@@ -544,35 +545,41 @@ private:
 		MemberDim()			:elements(0),bytes(0),fill(0),end(0){}
 		MemberDim( const MemberDim& o)	:elements(o.elements),bytes(o.bytes),fill(o.fill),end(o.end){}
 
+		float weight() const	{return ((float)elements / (float)bytes) * (1.0 - fill);}
 		bool defined() const	{return elements&&bytes;}
 	};
 
 	MemberDim evaluateMemberDim_offset(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			StructBlock::MemberIdxType& ofs);
+			StructBlock::MemberIdxType& ofs) const;
 	MemberDim evaluateMemberDim_index(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			PositionType& start);
+			PositionType& start) const;
 	MemberDim evaluateMemberDim_enum(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			StructBlockMemberEnum& enm);
+			StructBlockMemberEnum& enm) const;
 	MemberDim evaluateMemberDim_repeat(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			StructBlockMemberRepeat& rep);
+			StructBlockMemberRepeat& rep) const;
 	MemberDim evaluateMemberDim_pkbyte(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			StructBlockMemberPackedByte& pkb);
+			StructBlockMemberPackedByte& pkb) const;
 	MemberDim evaluateMemberDim_pkshort(
 			std::vector<strus::IndexRange>::const_iterator si,
 			std::vector<strus::IndexRange>::const_iterator se,
-			StructBlockMemberPackedShort& pks);
+			StructBlockMemberPackedShort& pks) const;
 
-	static void testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, StructBlock::MemberType& memberType, const StructBlock::MemberType assignMemberType, std::size_t arsize);
+	MemberType getNextPackMemberType(
+		std::vector<strus::IndexRange>::const_iterator si,
+		std::vector<strus::IndexRange>::const_iterator se) const;
+
+private:
+	static void testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, MemberType& memberType, const MemberType assignMemberType, std::size_t arsize);
 	void packCurrentMembers();
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}

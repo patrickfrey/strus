@@ -40,10 +40,10 @@ public:
 	typedef unsigned char PackType;
 
 	PositionType base;
-	PackType ofs[ 14];
+	PackType ofs[ 10];
 	//... NOTE: Packing is wasting 5 bits of first ofs that are redundant (equal size)
 
-	enum {OfsMask=(1<<5)-1, OfsShift=5, MaxOfs=(1<<5)-1, MaxSize=(1<<3)-1, NofOfs=14};
+	enum {OfsMask=(1<<5)-1, OfsShift=5, MaxOfs=(1<<5)-1, MaxSize=(1<<3)-1, NofOfs=10};
 };
 
 
