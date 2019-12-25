@@ -18,6 +18,7 @@
 #include <vector>
 #include <cstring>
 #include <string>
+#include <map>
 
 namespace strus {
 
@@ -365,24 +366,10 @@ public:
 public:
 	StructBlockBuilder( const StructBlock& o);
 	StructBlockBuilder()
-		:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
-		,m_enumar(),m_repeatar(),m_startar()
-		,m_pkbytear(),m_pkshortar(),m_curmembers()
-		,m_lastDoc(0),m_id(0),m_membersDropped(0){}
+		:m_ar(),m_id(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
-		:m_docIndexNodeArray(o.m_docIndexNodeArray)
-		,m_structurelistar(o.m_structurelistar)
-		,m_structurear(o.m_structurear)
-		,m_memberar(o.m_memberar)
-		,m_enumar(o.m_enumar)
-		,m_repeatar(o.m_repeatar)
-		,m_startar(o.m_startar)
-		,m_pkbytear(o.m_pkbytear)
-		,m_pkshortar(o.m_pkshortar)
-		,m_curmembers(o.m_curmembers)
-		,m_lastDoc(o.m_lastDoc)
-		,m_id(o.m_id)
-		,m_membersDropped(o.m_membersDropped){}
+		:m_ar(o.m_ar)
+		,m_id(o.m_id){}
 
 	Index id() const
 	{
@@ -392,15 +379,15 @@ public:
 
 	bool empty() const
 	{
-		return m_structurear.empty();
+		return m_ar.empty();
 	}
 	Index lastDoc() const
 	{
-		return m_docIndexNodeArray.empty() ? 0 : m_docIndexNodeArray.back().lastDoc();
+		return m_ar.empty() ? 0 : m_ar.back().docno;
 	}
 	Index firstDoc() const
 	{
-		return m_docIndexNodeArray.empty() ? 0 : m_docIndexNodeArray[ 0].firstDoc();
+		return m_ar.empty() ? 0 : m_ar[ 0].docno;
 	}
 
 	struct StructDeclaration
@@ -437,18 +424,7 @@ public:
 	StructBlock createBlock();
 	void clear();
 
-	int size() const
-	{
-		int dd = m_docIndexNodeArray.size() * sizeof(m_docIndexNodeArray[0]);
-		int ll = m_structurelistar.size() * sizeof(m_structurelistar[0]);
-		int ss = m_structurear.size() * sizeof(m_structurear[0]);
-		int mm = m_memberar.size() * sizeof(m_memberar[0]);
-		int ee = m_enumar.size() * sizeof(m_enumar[0]);
-		int ii = m_startar.size() * sizeof(m_startar[0]);
-		int bb = m_pkbytear.size() * sizeof(m_pkbytear[0]);
-		int ww = m_pkshortar.size() * sizeof(m_pkshortar[0]);
-		return dd + ll + ss + mm + ee + ii + bb + ww;
-	}
+	int size() const;
 
 	static void merge(
 			StructBlockBuilder& blk1,
@@ -469,19 +445,8 @@ public:
 
 	void swap( StructBlockBuilder& o)
 	{
-		m_docIndexNodeArray.swap( o.m_docIndexNodeArray);
-		m_structurelistar.swap( o.m_structurelistar);
-		m_structurear.swap( o.m_structurear);
-		m_memberar.swap( o.m_memberar);
-		m_enumar.swap( o.m_enumar);
-		m_repeatar.swap( o.m_repeatar);
-		m_startar.swap( o.m_startar);
-		m_pkbytear.swap( o.m_pkbytear);
-		m_pkshortar.swap( o.m_pkshortar);
-		m_curmembers.swap( o.m_curmembers);
-		std::swap( m_lastDoc, o.m_lastDoc);
+		m_ar.swap( o.m_ar);
 		std::swap( m_id, o.m_id);
-		std::swap( m_membersDropped, o.m_membersDropped);
 	}
 
 	int membersDropped() const			{return m_membersDropped;}
@@ -493,45 +458,115 @@ private:
 	void addLastStructureMemberRange( const strus::IndexRange& sink);
 
 private:
-	struct Iterator
+	struct DocStructureMap
 	{
-		Iterator( const StructBlockBuilder& builder)
-			:m_builder(&builder)
-			,m_docar( builder.docIndexNodeArray().data(), builder.docIndexNodeArray().size())
-			,m_cursor()
-			,m_data(
-				builder.structurear().data(),
-				builder.memberar().data(),
-				builder.enumar().data(),
-				builder.repeatar().data(),
-				builder.startar().data(),
-				builder.pkbytear().data(),
-				builder.pkshortar().data())
-			,m_struitr()
-			,m_membitr()
-			,m_docno(0)
-		{}
+		strus::Index docno;
+		std::map<strus::IndexRange,int> map;
 
-		strus::Index skipDoc( strus::Index docno);
+		DocStructureMap( strus::Index docno_, const std::map<strus::IndexRange,int>& map_)
+			:docno(docno_),map(map_){}
+		DocStructureMap( const DocStructureMap& o)
+			:docno(o.docno),map(o.map){}
 
-		bool scanNext( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_);
-
-		void clear();
-
-		void initNodeIterators();
-
-		const StructBlockBuilder* m_builder; 
-		DocIndexNodeArray m_docar;
-		DocIndexNodeCursor m_cursor;
-		StructBlock::BlockData m_data;
-		StructureDef::Iterator m_struitr;
-		StructureMember::Iterator m_membitr;
-		strus::Index m_docno;
+		struct SearchCompare
+		{
+			SearchCompare(){}
+			bool operator()( const DocStructureMap& aa, const strus::Index& docno) const
+			{
+				return aa.docno <= docno;
+			}
+		};
 	};
 
-	Iterator getIterator() const
+	struct DocStructureMapIterator
 	{
-		return Iterator( *this);
+		DocStructureMapIterator( const DocStructureMapIterator& o)
+			:m_ar(o.m_ar)
+			,m_aridx(o.m_aridx)
+			,m_itr(o.m_itr)
+			,m_itr_defined(o.m_itr_defined)
+		{}
+		DocStructureMapIterator( const StructBlockBuilder& builder)
+			:m_ar(&builder.m_ar.data(),builder.m_ar.size())
+			,m_aridx(0)
+			,m_itr()
+			,m_itr_defined(false)
+		{}
+
+		strus::Index skipDoc( strus::Index docno)
+		{
+			if (m_aridx >= (int)m_ar.size()) return 0;
+			int idx = 0;
+			if (docno <= m_ar[ m_aridx].docno)
+			{
+				if (docno == m_ar[ m_aridx].docno)
+				{
+					if (!m_itr_defined)
+					{
+						m_itr_defined = true;
+						m_itr = m_ar[ m_aridx].map.begin();
+					}
+					return docno;
+				}
+				idx = m_ar.upperbound( docno, 0, m_aridx+1);
+			}
+			else
+			{
+				idx = m_ar.upperbound( docno, m_aridx+1, m_ar.size());
+			}
+			if (true==(m_itr_defined = (idx >= 0)))
+			{
+				m_aridx = idx;
+				m_itr = m_ar[ m_aridx].map.begin();
+				return m_ar[ m_aridx].docno;
+			}
+			return 0;
+		}
+
+		bool scanNext( strus::Index& docno_, strus::IndexRange& range_, int& relid)
+		{
+			if (m_itr_defined)
+			{
+				range_ = m_itr->first;
+				relid_ = m_itr->second;
+				docno_ = m_ar[ m_aridx].docno;
+				if (++m_itr == m_ar[ m_aridx].map.end())
+				{
+					do
+					{
+						if (m_aridx+1 == m_ar.size())
+						{
+							m_itr_defined = false;
+							return false;
+						}
+						++m_aridx;
+						m_itr = m_ar[ m_aridx].map.begin();
+					}
+					while (m_itr == m_ar[ m_aridx].map.end());
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		void clear()
+		{
+			m_itr_defined = false;
+			m_aridx = 0;
+		}
+
+		SkipScanArray<DocStructureMap,strus::Index,DocStructureMap::SearchCompare> m_ar;
+		int m_aridx;
+		std::map<strus::IndexRange,int>::const_iterator m_itr;
+		bool m_itr_defined;
+	};
+
+	DocStructureMapIterator getDocStructureMapIterator() const
+	{
+		return DocStructureMapIterator( *this);
 	}
 
 private:
@@ -579,34 +614,8 @@ private:
 		std::vector<strus::IndexRange>::const_iterator se) const;
 
 private:
-	static void testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, MemberType& memberType, const MemberType assignMemberType, std::size_t arsize);
-	void packCurrentMembers();
-
-	const std::vector<DocIndexNode>& docIndexNodeArray() const		{return m_docIndexNodeArray;}
-	const std::vector<StructureDefList>& structurelistar() const		{return m_structurelistar;}
-	const std::vector<StructureDef>& structurear() const			{return m_structurear;}
-	const std::vector<StructureMember>& memberar() const			{return m_memberar;}
-	const std::vector<StructBlockMemberEnum>& enumar() const		{return m_enumar;}
-	const std::vector<StructBlockMemberRepeat>& repeatar() const		{return m_repeatar;}
-	const std::vector<PositionType>& startar() const			{return m_startar;}
-	const std::vector<StructBlockMemberPackedByte> pkbytear() const		{return m_pkbytear;}
-	const std::vector<StructBlockMemberPackedShort> pkshortar() const	{return m_pkshortar;}
-
-private:
-	std::vector<DocIndexNode> m_docIndexNodeArray;
-	std::vector<StructureDefList> m_structurelistar;
-	std::vector<StructureDef> m_structurear;
-	std::vector<StructureMember> m_memberar;
-	std::vector<StructBlockMemberEnum> m_enumar;
-	std::vector<StructBlockMemberRepeat> m_repeatar;
-	std::vector<PositionType> m_startar;
-	std::vector<StructBlockMemberPackedByte> m_pkbytear;
-	std::vector<StructBlockMemberPackedShort> m_pkshortar;
-
-	std::vector<strus::IndexRange> m_curmembers;
-	Index m_lastDoc;
-	Index m_id;
-	int m_membersDropped;
+	std::vector<DocStructureMap> m_ar;
+	strus::Index m_id;
 };
 }//namespace
 #endif

@@ -795,12 +795,6 @@ void StructBlockBuilder::split( StructBlockBuilder& blk, StructBlockBuilder& new
 	}
 }
 
-bool StructBlockBuilder::fitsInto( std::size_t nofstructures) const
-{
-	int estimatedConsumption = (m_curmembers.size() + nofstructures) * sizeof(StructureMember);
-	return size() + estimatedConsumption <= Constants::maxStructBlockSize();
-}
-
 StructBlock StructBlockBuilder::createBlock()
 {
 	if (empty())
@@ -935,19 +929,19 @@ void StructBlockBuilder::setId( Index id_)
 	m_id = id_;
 }
 
+int StructBlockBuilder::size() const
+{
+	int sz = 0;
+	std::vector<DocStructureMap>::const_iterator
+		ai = m_ar.begin(), ae = m_ar.end();
+	for (; ai != ae; ++ai) sz += ai->map.size();
+	return sz;
+}
+
 void StructBlockBuilder::clear()
 {
-	m_docIndexNodeArray.clear();
-	m_structurelistar.clear();
-	m_structurear.clear();
-	m_memberar.clear();
-	m_startar.clear();
-	m_enumar.clear();
-	m_repeatar.clear();
-	m_curmembers.clear();
-	m_lastDoc = 0;
+	m_ar.clear();
 	m_id = 0;
-	m_membersDropped = 0;
 }
 
 std::string StructBlockBuilder::statisticsMessage() const

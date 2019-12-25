@@ -63,21 +63,17 @@ public:
 		:m_start(o.m_start),m_end(o.m_end){}
 
 	bool operator < (const IndexRange& o) const
-	{
-		return (m_end == o.m_end) ? (m_start < o.m_start) : (m_end < o.m_end);
-	}
+		{return (m_end == o.m_end) ? (m_start < o.m_start) : (m_end < o.m_end);}
 	bool operator > (const IndexRange& o) const
-	{
-		return (m_end == o.m_end) ? (m_start > o.m_start) : (m_end > o.m_end);
-	}
+		{return (m_end == o.m_end) ? (m_start > o.m_start) : (m_end > o.m_end);}
+	bool operator <= (const IndexRange& o) const
+		{return (m_end == o.m_end) ? (m_start <= o.m_start) : (m_end <= o.m_end);}
+	bool operator >= (const IndexRange& o) const
+		{return (m_end == o.m_end) ? (m_start >= o.m_start) : (m_end >= o.m_end);}
 	bool operator == (const IndexRange& o) const
-	{
-		return (m_end == o.m_end && m_start == o.m_start);
-	}
+		{return (m_end == o.m_end && m_start == o.m_start);}
 	bool operator != (const IndexRange& o) const
-	{
-		return (m_end != o.m_end || m_start != o.m_start);
-	}
+		{return (m_end != o.m_end || m_start != o.m_start);}
 
 private:
 	Index m_start;

@@ -58,7 +58,7 @@ public:
 		return (bi < end) ? bi : NotFound;
 	}
 
-	int upperbound( const IndexType& needle, const ComparatorFunctor& cmp) const
+	int upperbound( const IndexType& needle, const ComparatorFunctor& cmp = ComparatorFunctor()) const
 	{
 		return upperbound( needle, 0, m_size, cmp);
 	}
