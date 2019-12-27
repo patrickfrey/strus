@@ -62,12 +62,9 @@ public:
 	/// \brief Add a new structure relation to the block
 	void append( Index docno, const strus::IndexRange& src, const strus::IndexRange& sink);
 
-	/// \brief Add the structures of a document stored in another block 
-	void appendFromBlock( Index docno, const StructBlock& blk, const DocIndexNodeCursor& cursor);
-
 	bool fitsInto( std::size_t nofNewStructures) const
 	{
-		int estimatedConsumption = (m_nofStructures + nofNewStructures) * sizeof(StructureMember);
+		int estimatedConsumption = (m_nofStructures + nofNewStructures) * sizeof(strus::IndexRange);
 		return estimatedConsumption <= Constants::maxStructBlockSize();
 	}
 
@@ -98,17 +95,10 @@ public:
 			StructBlockBuilder& blk2,
 			StructBlockBuilder& newblk);
 
-	static void merge(
-			std::vector<StructDeclaration>::const_iterator ei,
-			const std::vector<StructDeclaration>::const_iterator& ee,
-			const StructBlock& oldblk,
-			StructBlockBuilder& newblk);
-	static void merge_append(
-			std::vector<StructDeclaration>::const_iterator ei,
-			const std::vector<StructDeclaration>::const_iterator& ee,
-			const StructBlock& oldblk,
-			StructBlockBuilder& appendblk);
-	static void split( StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2);
+	static void split(
+			StructBlockBuilder& blk,
+			StructBlockBuilder& newblk1,
+			StructBlockBuilder& newblk2);
 
 	void swap( StructBlockBuilder& o)
 	{
@@ -141,38 +131,41 @@ private:
 				return aa.docno <= docno;
 			}
 		};
+
+		typedef std::map<strus::IndexRange,int>::const_iterator const_iterator;
+		typedef std::map<strus::IndexRange,int>::iterator iterator;
+
+		const_iterator begin() const	{return map.begin();}
+		iterator begin()		{return map.begin();}
+		const_iterator end() const	{return map.end();}
+		iterator end()			{return map.end();}
 	};
 
-	struct DocStructureMapIterator
+	class DocStructureScanner
 	{
-		DocStructureMapIterator( const DocStructureMapIterator& o)
+	public:
+		DocStructureScanner( const DocStructureScanner& o)
 			:m_ar(o.m_ar)
 			,m_aridx(o.m_aridx)
-			,m_itr(o.m_itr)
-			,m_itr_defined(o.m_itr_defined)
 		{}
-		DocStructureMapIterator( const StructBlockBuilder& builder)
+		DocStructureScanner( const StructBlockBuilder& builder)
 			:m_ar(&builder.m_ar.data(),builder.m_ar.size())
 			,m_aridx(0)
-			,m_itr()
-			,m_itr_defined(false)
 		{}
 
 		strus::Index skipDoc( strus::Index docno);
 
-		bool scanNext( strus::Index& docno_, strus::IndexRange& range_, int& relid);
+		DocStructureMap::const_iterator begin() const	{return m_aridx < m_ar.size() ? m_ar[ m_aridx].begin() : DocStructureMap::const_iterator();}
+		DocStructureMap::const_iterator end() const	{return m_aridx < m_ar.size() ? m_ar[ m_aridx].end() : DocStructureMap::const_iterator();}
 
-		void clear();
-
+	private:
 		SkipScanArray<DocStructureMap,strus::Index,DocStructureMap::SearchCompare> m_ar;
 		int m_aridx;
-		std::map<strus::IndexRange,int>::const_iterator m_itr;
-		bool m_itr_defined;
 	};
 
-	DocStructureMapIterator getDocStructureMapIterator() const
+	DocStructureScanner getDocStructureScanner() const
 	{
-		return DocStructureMapIterator( *this);
+		return Scanner( *this);
 	}
 
 private:

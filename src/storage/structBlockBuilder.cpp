@@ -12,7 +12,7 @@
 
 using namespace strus;
 
-strus::Index StructBlockBuilder::DocStructureMapIterator::skipDoc( strus::Index docno)
+strus::Index StructBlockBuilder::DocStructureMapScanner::skipDoc( strus::Index docno)
 {
 	if (m_aridx >= (int)m_ar.size()) return 0;
 	int idx = 0;
@@ -20,11 +20,6 @@ strus::Index StructBlockBuilder::DocStructureMapIterator::skipDoc( strus::Index 
 	{
 		if (docno == m_ar[ m_aridx].docno)
 		{
-			if (!m_itr_defined)
-			{
-				m_itr_defined = true;
-				m_itr = m_ar[ m_aridx].map.begin();
-			}
 			return docno;
 		}
 		idx = m_ar.upperbound( docno, 0, m_aridx+1);
@@ -33,47 +28,7 @@ strus::Index StructBlockBuilder::DocStructureMapIterator::skipDoc( strus::Index 
 	{
 		idx = m_ar.upperbound( docno, m_aridx+1, m_ar.size());
 	}
-	if (true==(m_itr_defined = (idx >= 0)))
-	{
-		m_aridx = idx;
-		m_itr = m_ar[ m_aridx].map.begin();
-		return m_ar[ m_aridx].docno;
-	}
-	return 0;
+	return (idx >= 0) ? m_ar[ m_aridx = idx].docno : 0;
 }
 
-bool StructBlockBuilder::DocStructureMapIterator::scanNext( strus::Index& docno_, strus::IndexRange& range_, int& relid)
-{
-	if (m_itr_defined)
-	{
-		range_ = m_itr->first;
-		relid_ = m_itr->second;
-		docno_ = m_ar[ m_aridx].docno;
-		if (++m_itr == m_ar[ m_aridx].map.end())
-		{
-			do
-			{
-				if (m_aridx+1 == m_ar.size())
-				{
-					m_itr_defined = false;
-					return false;
-				}
-				++m_aridx;
-				m_itr = m_ar[ m_aridx].map.begin();
-			}
-			while (m_itr == m_ar[ m_aridx].map.end());
-		}
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-void StructBlockBuilder::DocStructureMapIterator::clear()
-{
-	m_itr_defined = false;
-	m_aridx = 0;
-}
 
