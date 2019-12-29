@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STRUCTURE_BLOCK_MEMBER_ENUM_HPP_INCLUDED
-#define _STRUS_STRUCTURE_BLOCK_MEMBER_ENUM_HPP_INCLUDED
+#ifndef _STRUS_STRUCTURE_BLOCK_FIELD_ENUM_HPP_INCLUDED
+#define _STRUS_STRUCTURE_BLOCK_FIELD_ENUM_HPP_INCLUDED
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include "private/internationalization.hpp"
@@ -14,7 +14,7 @@
 
 namespace strus {
 
-struct StructBlockMemberEnum
+struct StructBlockFieldEnum
 {
 	typedef unsigned short PositionType;
 	typedef unsigned char OffsetType;
@@ -40,13 +40,13 @@ struct StructBlockMemberEnum
 		return (ofs <= (strus::Index)std::numeric_limits<OffsetType>::max()) ? (OffsetType)ofs : 0;
 	}
 
-	explicit StructBlockMemberEnum( PositionType base_=0)
+	explicit StructBlockFieldEnum( PositionType base_=0)
 		:base(base_)
 	{
 		std::memset( ofs, 0, sizeof(ofs));
 	}
 
-	StructBlockMemberEnum( const StructBlockMemberEnum& o)
+	StructBlockFieldEnum( const StructBlockFieldEnum& o)
 		:base(o.base)
 	{
 		std::memcpy( ofs, o.ofs, sizeof(ofs));

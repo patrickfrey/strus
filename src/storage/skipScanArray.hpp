@@ -41,7 +41,7 @@ public:
 		m_size = size_;
 	}
 
-	int upperbound( const IndexType& needle, int start, int end, const ComparatorFunctor& cmp) const
+	int upperbound( const IndexType& needle, int start, int end, const ComparatorFunctor& cmp = ComparatorFunctor()) const
 	{
 		enum {NotFound=-1};
 
@@ -74,6 +74,10 @@ public:
 	int size() const
 	{
 		return m_size;
+	}
+	bool empty() const
+	{
+		return m_size==0;
 	}
 
 private:

@@ -96,12 +96,12 @@ strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos
 	}
 	if (m_ar[ m_aridx].end() <= pos)
 	{
-		int idx = m_ar.upperbound( pos, m_aridx+1, m_ar.size(), StructureMember::SearchCompare());
+		int idx = m_ar.upperbound( pos, m_aridx+1, m_ar.size());
 		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
 	else
 	{
-		int idx = m_ar.upperbound( pos, 0, m_aridx+1, StructureMember::SearchCompare());
+		int idx = m_ar.upperbound( pos, 0, m_aridx+1);
 		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
 	const StructureMember& ths = m_ar[ m_aridx];
@@ -143,7 +143,7 @@ strus::IndexRange StructBlock::StructureDef::Iterator::skip( Index pos)
 	}
 	if ((Index)m_ar[ m_aridx].header_end <= pos)
 	{
-		int idx = m_ar.upperbound( pos, m_aridx, m_ar.size(), StructureDef::SearchCompare());
+		int idx = m_ar.upperbound( pos, m_aridx, m_ar.size());
 		if (idx > 0) m_aridx = idx; else return m_cur=strus::IndexRange();
 		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
 	}
@@ -153,7 +153,7 @@ strus::IndexRange StructBlock::StructureDef::Iterator::skip( Index pos)
 	}
 	else
 	{
-		m_aridx = m_ar.upperbound( pos, 0, m_aridx+1, StructureDef::SearchCompare());
+		m_aridx = m_ar.upperbound( pos, 0, m_aridx+1);
 		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
 	}
 }

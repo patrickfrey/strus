@@ -75,6 +75,10 @@ public:
 	bool operator != (const IndexRange& o) const
 		{return (m_end != o.m_end || m_start != o.m_start);}
 
+	bool overlap( const IndexRange& o) const
+	{
+		return !(m_start >= o.m_end || m_end <= o.m_start);
+	}
 private:
 	Index m_start;
 	Index m_end;

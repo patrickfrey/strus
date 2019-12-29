@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STRUCTURE_BLOCK_MEMBER_REPEAT_HPP_INCLUDED
-#define _STRUS_STRUCTURE_BLOCK_MEMBER_REPEAT_HPP_INCLUDED
+#ifndef _STRUS_STRUCTURE_BLOCK_FIELD_REPEAT_HPP_INCLUDED
+#define _STRUS_STRUCTURE_BLOCK_FIELD_REPEAT_HPP_INCLUDED
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include "private/internationalization.hpp"
@@ -16,7 +16,7 @@
 
 namespace strus {
 
-struct StructBlockMemberRepeat
+struct StructBlockFieldRepeat
 {
 	typedef unsigned short PositionType;
 	typedef unsigned char OffsetType;
@@ -43,11 +43,11 @@ struct StructBlockMemberRepeat
 		return (sz <= (strus::Index)std::numeric_limits<OffsetType>::max()) ? (OffsetType)sz : 0;
 	}
 
-	StructBlockMemberRepeat()
+	StructBlockFieldRepeat()
 		:base(0),ofs(0),size(0){}
-	explicit StructBlockMemberRepeat( PositionType base_, OffsetType ofs_, OffsetType size_)
+	explicit StructBlockFieldRepeat( PositionType base_, OffsetType ofs_, OffsetType size_)
 		:base(base_),ofs(ofs_),size(size_){}
-	StructBlockMemberRepeat( const StructBlockMemberRepeat& o)
+	StructBlockFieldRepeat( const StructBlockFieldRepeat& o)
 		:base(o.base),ofs(o.ofs),size(o.size){}
 
 	bool append( strus::Index& enditr, const strus::IndexRange& range)

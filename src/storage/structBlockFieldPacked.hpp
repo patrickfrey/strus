@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_STRUCTURE_BLOCK_MEMBER_PACKED_HPP_INCLUDED
-#define _STRUS_STRUCTURE_BLOCK_MEMBER_PACKED_HPP_INCLUDED
+#ifndef _STRUS_STRUCTURE_BLOCK_FIELD_PACKED_HPP_INCLUDED
+#define _STRUS_STRUCTURE_BLOCK_FIELD_PACKED_HPP_INCLUDED
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include "private/internationalization.hpp"
@@ -15,11 +15,11 @@
 namespace strus {
 
 template <int bytesize>
-struct StructBlockMemberPackedData
+struct StructBlockFieldPackedData
 {};
 
 template <>
-class StructBlockMemberPackedData<2>
+class StructBlockFieldPackedData<2>
 {
 public:
 	typedef unsigned short PositionType;
@@ -33,7 +33,7 @@ public:
 };
 
 template <>
-class StructBlockMemberPackedData<1>
+class StructBlockFieldPackedData<1>
 {
 public:
 	typedef unsigned short PositionType;
@@ -48,11 +48,11 @@ public:
 
 
 template <int bytesize>
-class StructBlockMemberPacked
-	:public StructBlockMemberPackedData<bytesize>
+class StructBlockFieldPacked
+	:public StructBlockFieldPackedData<bytesize>
 {
 public:
-	typedef StructBlockMemberPackedData<bytesize> Parent;
+	typedef StructBlockFieldPackedData<bytesize> Parent;
 	typedef typename Parent::PositionType PositionType;
 	typedef typename Parent::PackType PackType;
 	enum {OfsMask=Parent::OfsMask, OfsShift=Parent::OfsShift, MaxOfs=Parent::MaxOfs, MaxSize=Parent::MaxSize, NofOfs=Parent::NofOfs};
@@ -82,9 +82,9 @@ public:
 	}
 	PackType packedRange( PositionType prev, const strus::IndexRange& range)
 	{
-		if (range.start() < prev) throw std::runtime_error(_TXT("packed members not appended in ascending order"));
+		if (range.start() < prev) throw std::runtime_error(_TXT("packed fields not appended in ascending order"));
 		PositionType endpos = positionCast( range.end());
-		if (!endpos) throw std::runtime_error(_TXT("packed members position out of range"));
+		if (!endpos) throw std::runtime_error(_TXT("packed field position out of range"));
 		PositionType relend = offsetCast( endpos - prev);
 		PositionType diff = sizeCast( range.end() - range.start());
 		if (!relend || !diff) return 0;
@@ -99,13 +99,13 @@ public:
 		return pk >> OfsShift;
 	}
 
-	explicit StructBlockMemberPacked( PositionType base_=0)
+	explicit StructBlockFieldPacked( PositionType base_=0)
 	{
 		Parent::base = base_;
 		std::memset( Parent::ofs, 0, sizeof(Parent::ofs));
 	}
 
-	StructBlockMemberPacked( const StructBlockMemberPacked& o)
+	StructBlockFieldPacked( const StructBlockFieldPacked& o)
 	{
 		Parent::base = o.base;
 		std::memcpy( Parent::ofs, o.ofs, sizeof(Parent::ofs));
@@ -155,8 +155,8 @@ public:
 	}
 };
 
-typedef StructBlockMemberPacked<1> StructBlockMemberPackedByte;
-typedef StructBlockMemberPacked<2> StructBlockMemberPackedShort;
+typedef StructBlockFieldPacked<1> StructBlockFieldPackedByte;
+typedef StructBlockFieldPacked<2> StructBlockFieldPackedShort;
 
 }//namespace
 #endif
