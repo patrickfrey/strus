@@ -47,7 +47,7 @@ const char* ForwardIndexBlock::prevItem( const char* ref) const
 	return (rt >= charptr())?(rt+1):charptr();
 }
 
-const char* ForwardIndexBlock::upper_bound( const Index& pos_, const char* lowerbound) const
+const char* ForwardIndexBlock::upper_bound( strus::Index pos_, const char* lowerbound) const
 {
 	if (!lowerbound || lowerbound == charend()) return 0;
 
@@ -59,13 +59,13 @@ const char* ForwardIndexBlock::upper_bound( const Index& pos_, const char* lower
 	return rt;
 }
 
-const char* ForwardIndexBlock::find( const Index& pos_, const char* lowerbound) const
+const char* ForwardIndexBlock::find( strus::Index pos_, const char* lowerbound) const
 {
 	const char* rt = upper_bound( pos_, lowerbound);
 	return (pos_ == position_at( rt))?rt:0;
 }
 
-void ForwardIndexBlock::append( const Index& pos, const std::string& item)
+void ForwardIndexBlock::append( strus::Index pos, const std::string& item)
 {
 	char const* pp = prevItem( charend());
 	if (pp && position_at( pp) >= pos)
@@ -84,7 +84,7 @@ void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 	DataBlock::append( blk.c_str(), blk.size());
 }
 
-void ForwardIndexBlock::setId( const Index& id_)
+void ForwardIndexBlock::setId( strus::Index id_)
 {
 	if (id() == id_) return;
 	if (empty())

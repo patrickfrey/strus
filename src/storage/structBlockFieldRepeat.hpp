@@ -20,7 +20,6 @@ struct StructBlockFieldRepeat
 {
 	typedef unsigned short PositionType;
 	typedef unsigned char OffsetType;
-	enum {NofOfs=3*sizeof(PositionType)};
 
 	PositionType base;
 	OffsetType ofs;
@@ -88,17 +87,29 @@ struct StructBlockFieldRepeat
 		return ri == re ? rt : 0;
 	}
 
-	strus::IndexRange skip( PositionType pos) const
+	int nofMembers( PositionType end) const
 	{
-		Index rpos = (pos < base) ? 0 : (pos - base);
-		Index rmod = rpos - rpos % ofs + base;
-		if (rmod + size > pos)
+		return (end - base + (ofs - size)) / ofs;
+	}
+
+	std::pair<strus::IndexRange,int> skip( PositionType pos, PositionType end) const
+	{
+		strus::Index rpos = (pos < base) ? 0 : (pos - base);
+		strus::Index rmod = rpos % ofs;
+		strus::Index rcnt = rpos / ofs;
+		strus::Index rstart = rpos - rmod + base;
+
+		if (rstart + size > pos)
 		{
-			return strus::IndexRange( rmod, rmod + size);
+			return std::pair<strus::IndexRange,int>( strus::IndexRange( rstart, rstart + size), rcnt);
+		}
+		else if (rstart + ofs + size <= end)
+		{
+			return std::pair<strus::IndexRange,int>( strus::IndexRange( rstart + ofs, rstart + ofs + size), rcnt+1);
 		}
 		else
 		{
-			return strus::IndexRange( rmod + ofs, rmod + ofs + size);
+			return std::pair<strus::IndexRange,int>( strus::IndexRange(), -1);
 		}
 	}
 };

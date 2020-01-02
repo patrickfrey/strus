@@ -8,12 +8,15 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_BUILDER_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_BUILDER_HPP_INCLUDED
 #include "dataBlock.hpp"
+#include "structBlock.hpp"
+#include "structBlockDeclaration.hpp"
+#include "structBlockLink.hpp"
 #include "skipScanArray.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
-#include <vector>
 #include <cstring>
 #include <string>
+#include <vector>
 #include <map>
 #include <set>
 
@@ -22,179 +25,129 @@ namespace strus {
 class StructBlockBuilder
 {
 public:
-	struct StructureDeclaration
-	{
-		strus::Index docno;
-		strus::Index structno;
-		strus::IndexRange src;
-		strus::IndexRange sink;
-
-		StructureDeclaration( strus::Index docno_, strus::Index structno_, const strus::IndexRange& src_, const strus::IndexRange& sink_)
-			:docno(docno_),structno(structno_),src(src_),sink(sink_){}
-		StructureDeclaration( const StructureDeclaration& o)
-			:docno(o.docno),structno(o.structno),src(o.src),sink(o.sink){}
-	};
-
 	StructBlockBuilder()
-		:m_ar(),m_id(0),m_nofStructures(0),m_indexCount(0),m_lastSource(){}
+		:m_map(),m_docno(0),m_indexCount(0),m_lastSource(){}
 	StructBlockBuilder( const StructBlockBuilder& o)
-		:m_ar(o.m_ar)
-		,m_id(o.m_id)
-		,m_nofStructures(o.m_nofStructures)
+		:m_map(o.m_map)
+		,m_docno(o.m_docno)
 		,m_indexCount(o.m_indexCount)
 		,m_lastSource(o.m_lastSource){}
+	StructBlockBuilder( const StructBlock& blk);
 
-	StructBlockBuilder( const std::vector<StructureDeclaration>& declarations);
+	StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations);
 
-	Index id() const
+	Index docno() const
 	{
-		return m_id;
+		return m_docno;
 	}
-	void setId( Index id_);
+	void setDocno( Index docno_)
+	{
+		m_docno = docno_;
+	}
 
 	bool empty() const
 	{
-		return m_ar.empty();
-	}
-	Index lastDoc() const
-	{
-		return m_ar.empty() ? 0 : m_ar.back().docno;
-	}
-	Index firstDoc() const
-	{
-		return m_ar.empty() ? 0 : m_ar[ 0].docno;
-	}
-
-	struct StructureLink
-	{
-		bool head;
-		strus::Index structno;
-		int idx;
-
-		StructureLink()
-			:head(true),structno(0),idx(0){}
-		StructureLink( bool head_, strus::Index structno_, int idx_)
-			:head(head_),structno(structno_),idx(idx_){}
-		StructureLink( const StructureLink& o)
-			:head(o.head),structno(o.structno),idx(o.idx){}
-
-		bool operator < (const StructureLink& o) const
-		{
-			return head == o.head
-				? (structno == o.structno
-					? (idx < o.idx)
-					: (structno < o.structno))
-				: (head == true);
-		}
-		bool valid() const
-		{
-			return structno && idx;
-		}
-		bool operator==( const StructureLink& o) const
-		{
-			return head == o.head && structno == o.structno && idx == o.idx;
-		}
-	};
-
-	bool fitsInto( std::size_t nofNewStructures) const
-	{
-		int estimatedConsumption = (m_nofStructures + nofNewStructures) * sizeof(strus::IndexRange);
-		return estimatedConsumption <= Constants::maxStructBlockSize();
-	}
-
-	bool full() const
-	{
-		return (int)(m_nofStructures * sizeof(strus::IndexRange)) >= Constants::maxStructBlockSize();
-	}
-
-	/// \brief Eval if the block is filled with a given ratio
-	/// \param[in] ratio value between 0.0 and 1.0, reasonable is a value close to one
-	/// \note A small value leads to fragmentation, a value close to 1.0 leads to transactions slowing down
-	bool filledWithRatio( float ratio) const
-	{
-		return m_nofStructures >= (int)(ratio * Constants::maxStructBlockSize());
+		return m_map.empty();
 	}
 
 	void clear()
 	{
-		m_ar.clear();
-		m_id = 0;
-		m_nofStructures = 0;
+		m_map.clear();
+		m_docno = 0;
 		m_indexCount = 0;
 		m_lastSource = strus::IndexRange();
 	}
 
-	int size() const
+	std::size_t size() const
 	{
-		return m_nofStructures;
+		return m_map.size();
 	}
 
 	/// \brief Add a new relation to the block
-	bool append( strus::Index docno, strus::Index structno, const strus::IndexRange& src, const strus::IndexRange& sink);
-
-	static void merge(
-			StructBlockBuilder& blk1,
-			StructBlockBuilder& blk2,
-			StructBlockBuilder& newblk);
-
-	static void split(
-			StructBlockBuilder& blk,
-			StructBlockBuilder& newblk1,
-			StructBlockBuilder& newblk2);
+	bool append( strus::Index structno, const strus::IndexRange& src, const strus::IndexRange& sink);
 
 	void swap( StructBlockBuilder& o)
 	{
-		m_ar.swap( o.m_ar);
-		std::swap( m_id, o.m_id);
-		std::swap( m_nofStructures, o.m_nofStructures);
+		m_map.swap( o.m_map);
+		std::swap( m_docno, o.m_docno);
 		std::swap( m_indexCount, o.m_indexCount);
 		std::swap( m_lastSource, o.m_lastSource);
 	}
 
-	std::vector<StructureDeclaration> declarations() const;
+	std::vector<StructBlockDeclaration> declarations() const;
 
 	void check() const;
 
-private:
-	struct DocStructureMap
-	{
-		typedef std::pair<strus::IndexRange,StructureLink> MapElement;
-		typedef std::pair<StructureLink,strus::IndexRange> InvElement;
-		typedef std::set<MapElement> Map;
-		typedef std::set<InvElement> InvMap;
+	StructBlock createBlock();
 
-		strus::Index docno;
+public:/*local functions*/
+	struct IndexRangeLinkPair
+	{
+		strus::IndexRange range;
+		StructBlockLink link;
+
+		IndexRangeLinkPair( const strus::IndexRange& range_, const StructBlockLink& link_)
+			:range(range_),link(link_){}
+		IndexRangeLinkPair( const IndexRangeLinkPair& o)
+			:range(o.range),link(o.link){}
+
+		bool operator < (const IndexRangeLinkPair& o) const
+		{
+			return range == o.range ? link < o.link : range < o.range;
+		}
+	};
+
+	struct LinkIndexRangePair
+	{
+		StructBlockLink link;
+		strus::IndexRange range;
+
+		LinkIndexRangePair()
+			:link(),range(){}
+		LinkIndexRangePair( const StructBlockLink& link_, const strus::IndexRange& range_)
+			:link(link_),range(range_){}
+		LinkIndexRangePair( const IndexRangeLinkPair& o)
+			:link(o.link),range(o.range){}
+
+		bool operator < (const LinkIndexRangePair& o) const
+		{
+			return link == o.link ? range < o.range : link < o.link;
+		}
+	};
+
+	struct IndexRangeLinkMap
+	{
+		typedef std::set<IndexRangeLinkPair> Map;
+		typedef std::set<LinkIndexRangePair> InvMap;
+
 		Map map;
 		InvMap invmap;
 
-		explicit DocStructureMap( strus::Index docno_)
-			:docno(docno_),map(),invmap(){}
-		DocStructureMap( const DocStructureMap& o)
-			:docno(o.docno),map(o.map),invmap(o.invmap){}
+		explicit IndexRangeLinkMap()
+			:map(),invmap(){}
+		IndexRangeLinkMap( const IndexRangeLinkMap& o)
+			:map(o.map),invmap(o.invmap){}
 
-		struct SearchCompare
-		{
-			SearchCompare(){}
-			bool operator()( const DocStructureMap& aa, strus::Index docno) const
-			{
-				return aa.docno <= docno;
-			}
-		};
-
-		bool append( const strus::IndexRange& range, const StructureLink& link)
+		bool append( const strus::IndexRange& range, const StructBlockLink& link)
 		{
 			bool rt = false;
-			rt |= map.insert( MapElement( range, link)).second;
-			rt |= invmap.insert( InvElement( link, range)).second;
+			rt |= map.insert( IndexRangeLinkPair( range, link)).second;
+			rt |= invmap.insert( LinkIndexRangePair( link, range)).second;
 			return rt;
+		}
+
+		void erase( const strus::IndexRange& range, const StructBlockLink& link)
+		{
+			map.erase( IndexRangeLinkPair( range, link));
+			invmap.erase( LinkIndexRangePair( link, range));
 		}
 
 		bool headerExists( const strus::IndexRange& range, strus::Index structno)
 		{
 			Map::const_iterator ri = first( range), re = end();
-			for (; ri != re && ri->first == range; ++ri)
+			for (; ri != re && ri->range == range; ++ri)
 			{
-				if (ri->second.head && ri->second.structno == structno) return true;
+				if (ri->link.head && ri->link.structno == structno) return true;
 			}
 			return false;
 		}
@@ -203,9 +156,9 @@ private:
 		{
 			int maxidx = 0;
 			InvMap::const_iterator ri = inv_begin(), re = inv_end();
-			for (; ri != re && ri->first.head; ++ri)
+			for (; ri != re && ri->link.head; ++ri)
 			{
-				if (ri->first.idx > maxidx) maxidx = ri->first.idx;
+				if (ri->link.idx > maxidx) maxidx = ri->link.idx;
 			}
 			return maxidx;
 		}
@@ -214,8 +167,30 @@ private:
 		{
 			if (map.empty()) return strus::IndexRange();
 			Map::reverse_iterator ri = map.rend(), re = map.rbegin();
-			for (; ri != re && !ri->second.head; ++ri){}
-			return (ri != re) ? ri->first : strus::IndexRange();
+			for (; ri != re && !ri->link.head; ++ri){}
+			return (ri != re) ? ri->range : strus::IndexRange();
+		}
+
+		bool empty() const
+		{
+			return map.empty();
+		}
+
+		std::size_t size() const
+		{
+			return map.size();
+		}
+
+		void clear()
+		{
+			map.clear();
+			invmap.clear();
+		}
+
+		void swap( IndexRangeLinkMap& o)
+		{
+			map.swap( o.map);
+			invmap.swap( o.invmap);
 		}
 
 		typedef Map::const_iterator const_iterator;
@@ -228,47 +203,22 @@ private:
 
 		const_iterator first( const strus::IndexRange& range) const
 		{
-			return map.lower_bound( MapElement( range, StructureLink()));
+			return map.lower_bound( IndexRangeLinkPair( range, StructBlockLink()));
 		}
-		inv_iterator inv_first( const StructureLink& link) const
+		inv_iterator inv_first( const StructBlockLink& link) const
 		{
-			return invmap.lower_bound( InvElement( link, strus::IndexRange()));
+			return invmap.lower_bound( LinkIndexRangePair( link, strus::IndexRange()));
 		}
 	};
 
-	class DocStructureScanner
-	{
-	public:
-		DocStructureScanner( const DocStructureScanner& o)
-			:m_ar(o.m_ar)
-			,m_aridx(o.m_aridx)
-		{}
-		DocStructureScanner( const StructBlockBuilder& builder)
-			:m_ar(builder.m_ar.data(),builder.m_ar.size())
-			,m_aridx(0)
-		{}
-
-		strus::Index skipDoc( strus::Index docno);
-
-		DocStructureMap::const_iterator begin() const	{return !m_ar.empty() ? m_ar[ m_aridx].begin() : DocStructureMap::const_iterator();}
-		DocStructureMap::const_iterator end() const	{return !m_ar.empty() ? m_ar[ m_aridx].end() : DocStructureMap::const_iterator();}
-		DocStructureMap::inv_iterator inv_begin() const	{return !m_ar.empty() ? m_ar[ m_aridx].inv_begin() : DocStructureMap::inv_iterator();}
-		DocStructureMap::inv_iterator inv_end() const	{return !m_ar.empty() ? m_ar[ m_aridx].inv_end() : DocStructureMap::inv_iterator();}
-
-	private:
-		SkipScanArray<DocStructureMap,strus::Index,DocStructureMap::SearchCompare> m_ar;
-		int m_aridx;
-	};
-
-	DocStructureScanner getDocStructureScanner() const
-	{
-		return DocStructureScanner( *this);
-	}
+	typedef std::set<strus::IndexRange> FieldCover;
 
 private:
-	std::vector<DocStructureMap> m_ar;
-	strus::Index m_id;
-	int m_nofStructures;
+	std::vector<FieldCover> getFieldCovers() const;
+
+private:
+	IndexRangeLinkMap m_map;
+	strus::Index m_docno;
 	int m_indexCount;
 	strus::IndexRange m_lastSource;
 };

@@ -28,7 +28,7 @@ public:
 		:DataBlock(o),m_first(o.m_first)
 	{}
 
-	BooleanBlock( const Index& id_, const void* ptr_, std::size_t size_)
+	BooleanBlock( strus::Index id_, const void* ptr_, std::size_t size_)
 		:DataBlock( id_, ptr_, size_)
 	{
 		initFrame();
@@ -64,13 +64,13 @@ public:
 	Index getLast() const;
 	Index getLast( NodeCursor& cursor) const;
 	Index getNext( NodeCursor& cursor) const;
-	Index skip( const Index& elemno_, NodeCursor& cursor) const;
+	Index skip( strus::Index elemno_, NodeCursor& cursor) const;
 
 	bool getNextRange( NodeCursor& cursor, Index& from_, Index& to_) const;
 	bool getFirstRange( NodeCursor& cursor, Index& from_, Index& to_) const;
 
-	void defineElement( const Index& elemno);
-	void defineRange( const Index& elemno, const Index& rangesize);
+	void defineElement( strus::Index elemno);
+	void defineRange( strus::Index elemno, strus::Index rangesize);
 
 	bool full() const
 	{
@@ -85,24 +85,24 @@ public:
 	}
 
 	/// \brief Check if the address 'elemno_', if it exists, is in this block.
-	bool isThisBlockAddress( const Index& elemno_) const
+	bool isThisBlockAddress( strus::Index elemno_) const
 	{
 		return (elemno_ <= id() && elemno_ >= getFirstElem());
 	}
 
 	/// \brief Check if the address 'elemno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
-	bool isFollowBlockAddress( const Index& elemno_) const
+	bool isFollowBlockAddress( strus::Index elemno_) const
 	{
 		return (elemno_ > id() && elemno_ < id() + id() - getFirstElem());
 	}
 
 	struct MergeRange
 	{
-		Index from;
-		Index to;
+		strus::Index from;
+		strus::Index to;
 		bool isMember;
 
-		MergeRange( const Index& from_, const Index to_, bool isMember_)
+		MergeRange( strus::Index from_, strus::Index to_, bool isMember_)
 			:from(from_),to(to_),isMember(isMember_){}
 		MergeRange( const MergeRange& o)
 			:from(o.from),to(o.to),isMember(o.isMember){}
@@ -125,7 +125,7 @@ public:
 	void check() const;
 
 private:
-	static bool joinRange( Index& from_, Index& to_, const Index& addfrom_, const Index& addto_);
+	static bool joinRange( Index& from_, Index& to_, strus::Index addfrom_, strus::Index addto_);
 	void initFrame();
 
 private:
@@ -142,19 +142,19 @@ private:
 
 		Index getFirstElem() const;
 		Index getLastElem() const;
-		Index getNextElem( const Index& elemno_) const;
-		Index getUpperBound( const Index& elemno_) const;
-		bool matches( const Index& elemno_) const;
+		Index getNextElem( strus::Index elemno_) const;
+		Index getUpperBound( strus::Index elemno_) const;
+		bool matches( strus::Index elemno_) const;
 
 		void normalize();
-		bool tryAddElem( const Index& elemno_);
-		bool tryExpandRange( const Index& to_);
-		void init( const Index& from_, const Index& to_);
+		bool tryAddElem( strus::Index elemno_);
+		bool tryExpandRange( strus::Index to_);
+		void init( strus::Index from_, strus::Index to_);
 		void getLastRange( Index& from_, Index& to_) const;
 	};
 
 private:
-	Index m_first;
+	strus::Index m_first;
 };
 
 }//namespace

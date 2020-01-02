@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "structBlock.hpp"
+#include "structBlockBuilder.hpp"
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
 #include "strus/base/static_assert.hpp"
@@ -25,8 +26,7 @@ struct StaticAsserts
 {
 	StaticAsserts()
 	{
-		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureMember) == sizeof(StructBlock::PositionType)+ sizeof(unsigned short));
-		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureDef) == 2*sizeof(StructBlock::PositionType) + 2*sizeof(StructBlock::MemberIdxType));
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureField) == 2 * sizeof(unsigned short));
 	}
 };
 }//anonymous namespace
@@ -51,39 +51,235 @@ static int getStructSize( const char* name, int indexStart, int indexEnd)
 	return (indexEnd-indexStart) / sizeof(Element);
 }
 
+void StructBlock::BlockData::init(
+		const StructureFieldArray* fieldar_,
+		int fieldarsize_,
+		const LinkBasePointerArray* linkbasear_,
+		const LinkArray* linkar_,
+		const StructBlockFieldEnum* enumar_,
+		const StructBlockFieldRepeat* repeatar_,
+		const PositionType* startar_,
+		const StructBlockFieldPackedByte* pkbytear_,
+		const StructBlockFieldPackedShort* pkshortar_)
+{
+	if (fieldarsize_ >= MaxFieldLevels) throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)MaxFieldLevels);
+	std::memset( this, 0, sizeof(*this));
+	m_fieldarsize = fieldarsize_;
+	int ii;
+	for (ii=0; ii != m_fieldarsize; ++ii) m_fieldar[ii] = fieldar_[ii];
+	for (ii=0; ii != m_fieldarsize; ++ii) m_linkbasear[ii] = linkbasear_[ii];
+	for (ii=0; ii != MaxLinkWidth; ++ii) m_linkar[ii] = linkar_[ii];
+	m_enumar = enumar_; 
+	m_repeatar = repeatar_;
+	m_startar = startar_;
+	m_pkbytear = pkbytear_;
+	m_pkshortar = pkshortar_;
+}
+
+StructBlock::StructBlock(
+	strus::Index docno_,
+	const std::vector<std::vector<StructureField> >& fieldar_,
+	const std::vector<std::vector<LinkBasePointer> >& linkbasear_,
+	const std::vector<std::vector<StructBlockLink> >& linkar_,
+	const std::vector<StructBlockFieldEnum>& enumar_,
+	const std::vector<StructBlockFieldRepeat>& repeatar_,
+	const std::vector<PositionType>& startar_,
+	const std::vector<StructBlockFieldPackedByte>& pkbytear_,
+	const std::vector<StructBlockFieldPackedShort>& pkshortar_)
+{
+	BlockHeader hdr;
+	std::memset( &hdr, 0, sizeof( hdr));
+	if (fieldar_.size() > MaxFieldLevels) throw strus::runtime_error(_TXT("too many levels of fields defined (%d > maximum %d)"), (int)fieldar_.size(), (int)MaxFieldLevels);
+	if (linkbasear_.size() != fieldar_.size()) throw std::runtime_error(_TXT("link base array size is not equal to parallel field array"));
+	if (linkar_.size() > MaxLinkWidth) throw strus::runtime_error(_TXT("too many links defined defined per field (%d > maximum %d)"), (int)linkar_.size(), (int)MaxLinkWidth);
+
+	int pi = sizeof(hdr);
+	{
+		int fi = 0, fe = fieldar_.size();
+		for (; fi != fe; ++fi)
+		{
+			pi += fieldar_[fi].size() * sizeof(StructureField);
+			hdr.fieldidx[ fi] = pi;
+		}
+		for (; fi != MaxFieldLevels; ++fi)
+		{
+			hdr.fieldidx[ fi] = 0;
+		}
+	}{
+		int fi = 0, fe = linkbasear_.size();
+		for (; fi != fe; ++fi)
+		{
+			if (linkbasear_[fi].size() != fieldar_[fi].size())
+			{
+				throw strus::runtime_error(_TXT("link base array [%d] size is not equal to parallel field array"), fi);
+			}
+			pi += linkbasear_[fi].size() * sizeof(PackedLinkBasePointer);
+			hdr.linkbaseidx[ fi] = pi;
+		}
+		for (; fi != MaxFieldLevels; ++fi)
+		{
+			hdr.linkbaseidx[ fi] = 0;
+		}
+	}{
+		int fi = 0, fe = linkar_.size();
+		for (; fi != fe; ++fi)
+		{
+			pi += linkar_[fi].size() * sizeof(PackedStructBlockLink);
+			hdr.linkidx[ fi] = pi;
+		}
+		for (; fi != MaxLinkWidth; ++fi)
+		{
+			hdr.linkidx[ fi] = 0;
+		}
+	}
+	while (pi % AlignmentBase)
+	{
+		pi += 1;
+	}
+	hdr.enumidx = pi;
+	pi += enumar_.size() * sizeof( StructBlockFieldEnum);
+	hdr.repeatidx = pi;
+	pi += repeatar_.size() * sizeof( StructBlockFieldRepeat);
+	hdr.pkbyteidx = pi;
+	pi += pkbytear_.size() * sizeof( StructBlockFieldPackedByte);
+	hdr.pkshortidx = pi;
+	pi += pkshortar_.size() * sizeof( StructBlockFieldPackedShort);
+	hdr.startidx = pi;
+	pi += startar_.size() * sizeof( PositionType);
+	int blockSize = pi;
+
+	DataBlock blk( docno_, blockSize);
+	char* dt = blk.charptr();
+
+	int startidx = sizeof(hdr);
+	std::memcpy( dt, &hdr, sizeof(hdr));
+	{
+		int fi = 0, fe = MaxFieldLevels;
+		for (; fi != fe; ++fi)
+		{
+			int endidx = hdr.fieldidx[ fi];
+			if (endidx)
+			{
+				std::memcpy( dt + startidx, fieldar_[fi].data(), endidx-startidx);
+				startidx = endidx;
+			}
+		}
+	}{
+		int fi = 0, fe = MaxFieldLevels;
+		for (; fi != fe; ++fi)
+		{
+			int endidx = hdr.linkbaseidx[ fi];
+			if (endidx)
+			{
+				PackedStructBlockLink* ar = (PackedStructBlockLink*)(dt + startidx);
+				std::size_t li = 0, le = linkbasear_[fi].size();
+				for (; li != le; ++li)
+				{
+					ar[ li] = linkbasear_[ fi][ li].value();
+				}
+				startidx = endidx;
+			}
+		}
+	}{
+		int fi = 0, fe = MaxLinkWidth;
+		for (; fi != fe; ++fi)
+		{
+			int endidx = hdr.linkidx[ fi];
+			if (endidx)
+			{
+				PackedLinkBasePointer* ar = (PackedLinkBasePointer*)(dt + startidx);
+				std::size_t li = 0, le = linkar_[ fi].size();
+				for (; li != le; ++li)
+				{
+					ar[ li] = linkar_[ fi][ li].value();
+				}
+				startidx = endidx;
+			}
+		}
+	}
+	std::memcpy( dt + hdr.enumidx, enumar_.data(), hdr.repeatidx - hdr.enumidx);
+	std::memcpy( dt + hdr.repeatidx, enumar_.data(), hdr.pkbyteidx - hdr.repeatidx);
+	std::memcpy( dt + hdr.pkbyteidx, enumar_.data(), hdr.pkshortidx - hdr.pkbyteidx);
+	std::memcpy( dt + hdr.pkshortidx, enumar_.data(), hdr.startidx - hdr.pkshortidx);
+	std::memcpy( dt + hdr.startidx, enumar_.data(), blockSize - hdr.startidx);
+
+	this->swap( blk);
+}
+
 void StructBlock::initFrame()
 {
 	if (empty())
 	{
-		m_docIndexNodeArray.init( 0, 0);
-		m_structlistar = 0;
 		m_data.init();
-	}	
+	}
 	else if (size() >= sizeof(BlockHeader))
 	{
 		const BlockHeader* hdr = (const BlockHeader*)ptr();
 		int blockSize = (int)DataBlock::size();
 
-		const DocIndexNode* docIndexNodePtr = getStructPtr<DocIndexNode>( "document index nodes", ptr(), sizeof(BlockHeader), hdr->structlistidx);
-		int docIndexNodeSize = getStructSize<DocIndexNode>( "document index nodes", sizeof(BlockHeader), hdr->structlistidx);
-		m_docIndexNodeArray.init( docIndexNodePtr, docIndexNodeSize);
-		m_structlistar = getStructPtr<StructureDefList>( "structure definition list", ptr(), hdr->structlistidx, hdr->structidx);
-		const StructureDef* structar_ = getStructPtr<StructureDef>( "structure definitions", ptr(), hdr->structidx, hdr->memberidx);
-		const StructureMember* memberar_ = getStructPtr<StructureMember>( "member definitions", ptr(), hdr->memberidx, hdr->enumidx);
-		const StructBlockMemberEnum* enumar_ = getStructPtr<StructBlockMemberEnum>( "enum definitions", ptr(), hdr->enumidx, hdr->repeatidx);
-		const StructBlockMemberRepeat* repeatar_ = getStructPtr<StructBlockMemberRepeat>( "enumeration member definitions", ptr(), hdr->repeatidx, hdr->startidx);
-		const PositionType* startar_ = getStructPtr<PositionType>( "start definitions", ptr(), hdr->startidx, hdr->pkbyteidx);
-		const StructBlockMemberPackedByte* pkbytear_ = getStructPtr<StructBlockMemberPackedByte>( "packed (byte) member definitions", ptr(), hdr->pkbyteidx, hdr->pkshortidx);
-		const StructBlockMemberPackedShort* pkshortar_ = getStructPtr<StructBlockMemberPackedShort>( "packed (short) member definitions", ptr(), hdr->pkshortidx, blockSize);
-		m_data.init( structar_, memberar_, enumar_, repeatar_, startar_, pkbytear_, pkshortar_);
+		StructureFieldArray fieldar_[ MaxFieldLevels];
+		int fieldarsize_ = 0;
+		LinkBasePointerArray linkbasear_[ MaxFieldLevels];
+		LinkArray linkar_[ MaxLinkWidth];
+
+		int pi = sizeof(BlockHeader);
+		{
+			int fi = 0, fe = MaxFieldLevels;
+			for (; fi != fe && hdr->fieldidx[fi]; ++fi)
+			{
+				const StructureField* ar = getStructPtr<StructureField>( "field definitions", ptr(), pi, hdr->fieldidx[fi]);
+				int arsize = getStructSize<StructureField>( "field definitions", pi, hdr->fieldidx[fi]);
+				fieldar_[ fi].init( ar, arsize);
+				pi = hdr->fieldidx[fi];
+			}
+			fieldarsize_ = fi;
+			for (; fi != fe; ++fi)
+			{
+				fieldar_[ fi].init( 0, 0);
+			}
+		}{
+			int fi = 0, fe = MaxFieldLevels;
+			fi = 0;
+			for (; fi != fe && hdr->linkbaseidx[fi]; ++fi)
+			{
+				const PackedLinkBasePointer* ar = getStructPtr<PackedLinkBasePointer>( "link base pointer definitions", ptr(), pi, hdr->linkbaseidx[fi]);
+				int arsize = getStructSize<PackedLinkBasePointer>( "link base pointer definitions", pi, hdr->linkbaseidx[fi]);
+				linkbasear_[ fi].init( ar, arsize);
+				pi = hdr->linkbaseidx[fi];
+			}
+			for (; fi != fe; ++fi)
+			{
+				linkbasear_[ fi].init( 0, 0);
+			}
+		}{
+			int fi = 0, fe = MaxLinkWidth;
+			for (; fi != fe && hdr->linkidx[ fi]; ++fi)
+			{
+				const PackedStructBlockLink* ar = getStructPtr<PackedStructBlockLink>( "link definitions", ptr(), pi, hdr->linkidx[fi]);
+				int arsize = getStructSize<PackedStructBlockLink>( "link definitions", pi, hdr->linkidx[fi]);
+				linkar_[ fi].init( ar, arsize);
+				pi = hdr->linkbaseidx[fi];
+			}
+			for (; fi != fe; ++fi)
+			{
+				linkar_[ fi].init( 0, 0);
+			}
+		}
+		const StructBlockFieldEnum* enumar_ = getStructPtr<StructBlockFieldEnum>( "enumeration definitions", ptr(), hdr->enumidx, hdr->repeatidx);
+		const StructBlockFieldRepeat* repeatar_ = getStructPtr<StructBlockFieldRepeat>( "repeating field definitions", ptr(), hdr->repeatidx, hdr->pkbyteidx);
+		const StructBlockFieldPackedByte* pkbytear_ = getStructPtr<StructBlockFieldPackedByte>( "packed (byte) field definitions", ptr(), hdr->pkbyteidx, hdr->pkshortidx);
+		const StructBlockFieldPackedShort* pkshortar_ = getStructPtr<StructBlockFieldPackedShort>( "packed (short) field definitions", ptr(), hdr->pkshortidx, hdr->startidx);
+		const PositionType* startar_ = getStructPtr<PositionType>( "big field start definitions", ptr(), hdr->startidx, blockSize);
+
+		m_data.init( fieldar_, fieldarsize_, linkbasear_, linkar_, enumar_, repeatar_, startar_, pkbytear_, pkshortar_);
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("data corruption in structure block: %s"), _TXT("header not defined defined"));
+		throw strus::runtime_error( _TXT("data corruption in structure block: %s"), _TXT("header size does not match"));
 	}
 }
 
-strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos)
+strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 {
 	if (pos < m_cur.end() && pos >= m_cur.start())
 	{
@@ -104,928 +300,39 @@ strus::IndexRange StructBlock::StructureMember::Iterator::skip( strus::Index pos
 		int idx = m_ar.upperbound( pos, 0, m_aridx+1);
 		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
-	const StructureMember& ths = m_ar[ m_aridx];
-	switch (ths.memberType())
+	const StructureField& ths = m_ar[ m_aridx];
+	std::pair<strus::IndexRange,int> loc;
+
+	switch (ths.fieldType())
 	{
-		case MemberOffsetType:
-			m_cur = strus::IndexRange( ths.end() - ths.memberIdx(), ths.end());
+		case FieldTypeOffset:
+			loc.first = strus::IndexRange( ths.end() - ths.fieldIdx(), ths.end());
+			loc.second = 0;
 			break;
-		case MemberIndexType:
-			m_cur = strus::IndexRange( m_data->startar()[ ths.memberIdx()], ths.end());
+		case FieldTypeIndex:
+			loc.first = strus::IndexRange( m_data->startar()[ ths.fieldIdx()], ths.end());
+			loc.second = 0;
 			break;
-		case MemberEnumType:
-			m_cur = m_data->enumar()[ ths.memberIdx()].skip( pos);
+		case FieldTypeEnum:
+			loc = m_data->enumar()[ ths.fieldIdx()].skip( pos);
 			break;
-		case MemberRepeatType:
-			m_cur = m_data->repeatar()[ ths.memberIdx()].skip( pos);
-			if (m_cur.end() > m_ar[ m_aridx].end()) m_cur = strus::IndexRange();
+		case FieldTypeRepeat:
+			loc = m_data->repeatar()[ ths.fieldIdx()].skip( pos, ths.end());
 			break;
-		case MemberPackedByteType:
-			m_cur = m_data->pkbytear()[ ths.memberIdx()].skip( pos);
+		case FieldTypePackedByte:
+			loc = m_data->pkbytear()[ ths.fieldIdx()].skip( pos);
 			break;
-		case MemberPackedShortType:
-			m_cur = m_data->pkshortar()[ ths.memberIdx()].skip( pos);
+		case FieldTypePackedShort:
+			loc = m_data->pkshortar()[ ths.fieldIdx()].skip( pos);
 			break;
 	}
+	m_cur = loc.first;
+	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
+	int li = linkbase.index + (loc.second * linkbase.width);
+	int wi = 0, we = linkbase.width;
+	for (; wi != we; ++wi) m_linkar[ wi].setValue( m_data->linkar( linkbase.width-1)[ li]);
+	m_linksize = linkbase.width;
 	return m_cur;
 }
-
-strus::IndexRange StructBlock::StructureDef::Iterator::skip( Index pos)
-{
-	if (m_cur.end() > pos && m_cur.start() <= pos)
-	{
-		return m_cur;
-	}
-	if (m_aridx >= m_ar.size())
-	{
-		if (m_aridx == 0) return m_cur=strus::IndexRange();
-		m_aridx = 0;
-	}
-	if ((Index)m_ar[ m_aridx].header_end <= pos)
-	{
-		int idx = m_ar.upperbound( pos, m_aridx, m_ar.size());
-		if (idx > 0) m_aridx = idx; else return m_cur=strus::IndexRange();
-		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-	}
-	else if ((Index)m_ar[ m_aridx].header_start <= pos)
-	{
-		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-	}
-	else
-	{
-		m_aridx = m_ar.upperbound( pos, 0, m_aridx+1);
-		return m_cur=strus::IndexRange( m_ar[ m_aridx].header_start, m_ar[ m_aridx].header_end);
-	}
-}
-
-StructBlock::StructureMember::Iterator StructBlock::StructureDef::Iterator::memberIterator() const
-{
-	if (m_cur.defined())
-	{
-		const StructureDef& st = m_ar[ m_aridx];
-		return StructureMember::Iterator( m_data, m_data->memberar() + st.membersIdx, st.membersSize);
-	}
-	else
-	{
-		return StructureMember::Iterator();
-	}
-}
-
-
-StructBlockBuilder::StructBlockBuilder( const StructBlock& o)
-	:m_docIndexNodeArray(),m_structurelistar(),m_structurear(),m_memberar()
-	,m_enumar(),m_repeatar(),m_startar()
-	,m_pkbytear(),m_pkshortar(),m_curmembers()
-	,m_lastDoc(0),m_id(0),m_membersDropped(0)
-{
-	DocIndexNodeCursor cursor;
-	strus::Index docno = o.firstDoc( cursor);
-	while (docno)
-	{
-		appendFromBlock( docno, o, cursor);
-		docno = o.nextDoc( cursor);
-	}
-	m_id = o.id();
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_offset(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlock::MemberIdxType& ofs) const
-{
-	MemberDim rt;
-	ofs = si->end() - si->start();
-	if (si->end() - si->start() >= StructureMember::MaxMemberIdx) return rt;
-	rt.fill = (float)m_memberar.size() / StructBlock::MaxMemberIdxType;
-	rt.bytes = sizeof(StructureMember);
-	rt.elements = 1;
-	rt.end = si->end();
-	return rt;
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_index(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		PositionType& start) const
-{
-	MemberDim rt;
-	rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
-			+ m_startar.size() / StructureMember::MaxMemberIdx
-		) / 2;
-	rt.bytes = sizeof(StructureMember) + sizeof(PositionType);
-	rt.elements = 1;
-	rt.end = si->end();
-	start = si->start();
-	return rt;
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_enum(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberEnum& enm) const
-{
-	MemberDim rt;
-	int nn = 0;
-	for (; si != se; ++si,++nn)
-	{
-		if (!enm.append( *si)) break;
-		rt.end = si->end();
-	}
-	if (nn)
-	{
-		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
-				+ m_enumar.size() / StructureMember::MaxMemberIdx
-			) / 2;
-		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberEnum);
-		rt.elements = nn;
-	}
-	return rt;
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_repeat(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberRepeat& rep) const
-{
-	MemberDim rt;
-	if (si + 1 < se)
-	{
-		std::vector<strus::IndexRange>::const_iterator sn = si+1;
-		strus::Index end = sn->start();
-		int nn = 0;
-		for (; si != se && rep.append( end, *si); ++si,++nn)
-		{
-			rt.end = si->end();
-		}
-		if (nn > 1)
-		{
-			rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
-					+ m_repeatar.size() / StructureMember::MaxMemberIdx
-				) / 2;
-			rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberRepeat);
-			rt.elements = nn;
-		}
-	}
-	return rt;
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkbyte(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberPackedByte& pkb) const
-{
-	MemberDim rt;
-	int nn = 0;
-	for (; si != se; ++si,++nn)
-	{
-		if (!pkb.append( *si)) break;
-		rt.end = si->end();
-	}
-	if (nn)
-	{
-		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
-				+ m_pkbytear.size() / StructureMember::MaxMemberIdx
-			) / 2;
-		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberPackedByte);
-		rt.elements = nn;
-	}
-	return rt;
-}
-
-StructBlockBuilder::MemberDim StructBlockBuilder::evaluateMemberDim_pkshort(
-		std::vector<strus::IndexRange>::const_iterator si,
-		std::vector<strus::IndexRange>::const_iterator se,
-		StructBlockMemberPackedShort& pks) const
-{
-	MemberDim rt;
-	int nn = 0;
-	for (; si != se; ++si,++nn)
-	{
-		if (!pks.append( *si)) break;
-		rt.end = si->end();
-	}
-	if (nn)
-	{
-		rt.fill = ((float)m_memberar.size() / StructBlock::MaxMemberIdxType
-				+ m_pkbytear.size() / StructureMember::MaxMemberIdx
-			) / 2;
-		rt.bytes = sizeof(StructureMember) + sizeof(StructBlockMemberPackedByte);
-		rt.elements = nn;
-	}
-	return rt;
-}
-
-void StructBlockBuilder::testPackMember( const StructBlockBuilder::MemberDim& dim, float& maxweight, MemberType& memberType, const MemberType assignMemberType, std::size_t arsize)
-{
-	if (arsize < StructBlock::StructureMember::MaxMemberIdx)
-	{
-		float weight = dim.weight();
-		if (weight >= maxweight)
-		{
-			memberType = assignMemberType;
-			maxweight = weight;
-		}
-	}
-}
-
-struct PackingCandidate
-{
-	std::vector<strus::IndexRange>::const_iterator itr;
-	float weight;
-	int count;
-	StructBlock::MemberType type;
-
-	explicit PackingCandidate( std::vector<strus::IndexRange>::const_iterator itr_)
-		:itr(itr_),weight(0.0),count(0),type(StructBlock::MemberIndexType){}
-	PackingCandidate( std::vector<strus::IndexRange>::const_iterator itr_, float weight_, StructBlock::MemberType type_, int count_)
-		:itr(itr_),weight(weight_),count(count_),type(type_){}
-	PackingCandidate( const PackingCandidate& o)
-		:itr(o.itr),weight(o.weight),count(o.count),type(o.type){}
-
-	bool operator < (const PackingCandidate& o) const
-	{
-		return ((weight == o.weight)
-			? ((count == o.count)
-				? ((itr == o.itr)
-					? ((int)type < (int)o.type)
-					: (itr > o.itr))
-				: (count > o.count))
-			:(weight > o.weight));
-	}
-};
-
-StructBlock::MemberType StructBlockBuilder::getNextPackMemberType(
-	std::vector<strus::IndexRange>::const_iterator si,
-	std::vector<strus::IndexRange>::const_iterator se) const
-{
-	enum {MaxTryPackDepth=3};
-	std::set<PackingCandidate> cdset;
-	cdset.insert( PackingCandidate( si));
-
-	while (!cdset.empty())
-	{
-		std::set<PackingCandidate>::iterator ci = cdset.begin();
-		PackingCandidate cd = *ci;
-		cdset.erase( ci);
-
-		if (cd.count == MaxTryPackDepth || cd.itr == se) return cd.type;
-		else
-		{{
-			StructBlock::MemberIdxType ofs;
-			MemberDim dim = evaluateMemberDim_offset( cd.itr, se, ofs);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberOffsetType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}{
-			PositionType start;
-			MemberDim dim = evaluateMemberDim_index( cd.itr, se, start);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberIndexType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}{
-			StructBlockMemberEnum enm;
-			MemberDim dim = evaluateMemberDim_enum( si, se, enm);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberEnumType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}{
-			StructBlockMemberRepeat rep;
-			MemberDim dim = evaluateMemberDim_repeat( si, se, rep);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberRepeatType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}{
-			StructBlockMemberPackedByte pkb;
-			MemberDim dim = evaluateMemberDim_pkbyte( si, se, pkb);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberPackedByteType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}{
-			StructBlockMemberPackedShort pks;
-			MemberDim dim = evaluateMemberDim_pkshort( si, se, pks);
-			if (dim.defined())
-			{
-				MemberType memberType = cd.count ? cd.type : StructBlock::MemberPackedShortType;
-				cdset.insert( PackingCandidate( si+dim.elements, cd.weight + dim.weight(), memberType, cd.count+1));
-			}
-		}}
-	}
-	return StructBlock::MemberIndexType;
-}
-
-void StructBlockBuilder::packCurrentMembers()
-{
-	if (m_curmembers.empty()) return;
-
-	std::vector<strus::IndexRange>::const_iterator
-		si = m_curmembers.begin(), se = m_curmembers.end();
-	while (si != se)
-	{
-		if (m_memberar.size() < StructBlock::MaxMemberIdxType)
-		{
-			MemberType memberType = getNextPackMemberType( si, se);
-			switch (memberType)
-			{
-				case StructBlock::MemberOffsetType:
-				{
-					StructBlock::MemberIdxType ofs;
-					MemberDim dim = evaluateMemberDim_offset( si, se, ofs);
-					m_memberar.push_back( StructureMember( dim.end, memberType, ofs));
-					si += dim.elements;
-					break;
-				}
-				case StructBlock::MemberIndexType:
-				{
-					PositionType start;
-					MemberDim dim = evaluateMemberDim_index( si, se, start);
-					m_memberar.push_back( StructureMember( dim.end, memberType, m_startar.size()));
-					m_startar.push_back( start);
-					si += dim.elements;
-					break;
-				}
-				case StructBlock::MemberEnumType:
-				{
-					StructBlockMemberEnum enm;
-					MemberDim dim = evaluateMemberDim_enum( si, se, enm);
-					m_memberar.push_back( StructureMember( dim.end, memberType, m_enumar.size()));
-					m_enumar.push_back( enm);
-					si += dim.elements;
-					break;
-				}
-				case StructBlock::MemberRepeatType:
-				{
-					StructBlockMemberRepeat rep;
-					MemberDim dim = evaluateMemberDim_repeat( si, se, rep);
-					m_memberar.push_back( StructureMember( dim.end, memberType, m_repeatar.size()));
-					m_repeatar.push_back( rep);
-					si += dim.elements;
-					break;
-				}
-				case StructBlock::MemberPackedByteType:
-				{
-					StructBlockMemberPackedByte pkb;
-					MemberDim dim = evaluateMemberDim_pkbyte( si, se, pkb);
-					m_memberar.push_back( StructureMember( dim.end, memberType, m_pkbytear.size()));
-					m_pkbytear.push_back( pkb);
-					si += dim.elements;
-					break;
-				}
-				case StructBlock::MemberPackedShortType:
-				{
-					StructBlockMemberPackedShort pks;
-					MemberDim dim = evaluateMemberDim_pkshort( si, se, pks);
-					m_memberar.push_back( StructureMember( dim.end, memberType, m_pkshortar.size()));
-					m_pkshortar.push_back( pks);
-					si += dim.elements;
-					break;
-				}
-			}
-		}
-		else
-		{
-			++m_membersDropped;
-			++si;
-		}
-	}
-	m_structurear.back().membersSize = m_memberar.size() - m_structurear.back().membersIdx;
-	m_curmembers.clear();
-}
-
-void StructBlockBuilder::addNewDocument( Index docno)
-{
-	packCurrentMembers();
-	if (m_docIndexNodeArray.empty()
-	||  !m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
-	{
-		m_docIndexNodeArray.push_back( DocIndexNode());
-		if (!m_docIndexNodeArray.back().addDocument( docno, m_structurelistar.size()))
-		{
-			throw std::runtime_error( _TXT("corrupt structure in structure block builder"));
-		}
-	}
-	StructureDefList lst;
-	lst.idx = m_structurear.size();
-	lst.size = 0;
-	m_structurelistar.push_back( lst);
-	m_lastDoc = docno;
-}
-
-void StructBlockBuilder::addLastStructureMemberRange( const IndexRange& sink)
-{
-	if (!m_curmembers.empty() && m_curmembers.back().end() >= sink.start())
-	{
-		if (m_curmembers.back().end() == sink.start())
-		{
-			m_curmembers.back() = strus::IndexRange( m_curmembers.back().start(), sink.end());
-		}
-		else if (m_curmembers.back() != sink)
-		{
-			throw strus::runtime_error( _TXT("overlaping sinks of structures not equal in structure block builder"));
-		}
-		
-	}
-	else
-	{
-		m_curmembers.push_back( sink);
-	}
-}
-
-void StructBlockBuilder::addLastDocStructure( const IndexRange& src)
-{
-	packCurrentMembers();
-
-	StructureDef st( src.start(), src.end(), m_memberar.size(), 0);
-	m_structurear.push_back( st);
-	++m_structurelistar.back().size;
-}
-
-void StructBlockBuilder::append( Index docno, const IndexRange& src, const IndexRange& sink)
-{
-	if (docno <= 0)
-	{
-		throw std::runtime_error(_TXT("cannot add docno <= 0"));
-	}
-	if (src.start() >= src.end() || sink.start() >= sink.end())
-	{
-		throw std::runtime_error(_TXT("adding empty structures not allowed"));
-	}
-	if (m_lastDoc > docno)
-	{
-		throw strus::runtime_error(_TXT("documents not added in ascending order (%d > %d)"), (int)m_lastDoc, (int)docno);
-	}
-	if (m_lastDoc != docno)
-	{
-		if (m_id && m_id < docno) throw strus::runtime_error( _TXT("assigned illegal id to block"));
-
-		addNewDocument( docno);
-		addLastDocStructure( src);
-		addLastStructureMemberRange( sink);
-	}
-	else if (m_structurelistar.back().size)
-	{
-		if (src.start() < (Index)m_structurear.back().header_start)
-		{
-			throw strus::runtime_error( _TXT("structures in structure block builder not appended in ascending order"));
-		}
-		else if (src.start() == (Index)m_structurear.back().header_start)
-		{
-			if (src.end() == (Index)m_structurear.back().header_end)
-			{
-				addLastStructureMemberRange( sink);
-			}
-			else
-			{
-				throw strus::runtime_error( _TXT("overlaping sources of structures not equal in structure block builder"));
-			}
-		}
-		else if (src.start() < (Index)m_structurear.back().header_end)
-		{
-			throw strus::runtime_error( _TXT("overlaping sources of structures not equal in structure block builder"));
-		}
-		else
-		{
-			addLastDocStructure( src);
-			addLastStructureMemberRange( sink);
-		}
-	}
-	else
-	{
-		addLastDocStructure( src);
-		addLastStructureMemberRange( sink);
-	}
-}
-
-void StructBlockBuilder::merge( StructBlockBuilder& blk1, StructBlockBuilder& blk2, StructBlockBuilder& newblk)
-{
-	blk1.packCurrentMembers();
-	blk2.packCurrentMembers();
-	newblk.packCurrentMembers();
-
-	StructBlockBuilder::Iterator itr1 = blk1.getIterator();	
-	strus::Index docno1 = itr1.skipDoc( 0/*docno*/);
-	strus::IndexRange src1;
-	strus::IndexRange sink1;
-	(void)itr1.scanNext( docno1, src1, sink1);
-
-	StructBlockBuilder::Iterator itr2 = blk2.getIterator();
-	strus::Index docno2 = itr2.skipDoc( 0/*docno*/);
-	strus::IndexRange src2;
-	strus::IndexRange sink2;
-	(void)itr2.scanNext( docno2, src2, sink2);
-
-	while (docno1 && docno2)
-	{
-		if (docno1 < docno2)
-		{
-			strus::Index dn = docno1;
-			for ( bool more=true; more && docno1 == dn; more=itr1.scanNext( docno1, src1, sink1))
-			{
-				newblk.append( docno1, src1, sink1);
-			}
-		}
-		else if (docno1 > docno2)
-		{
-			strus::Index dn = docno2;
-
-			for ( bool more=true; more && docno2 == dn; more=itr2.scanNext( docno2, src2, sink2))
-			{
-				newblk.append( docno2, src2, sink2);
-			}
-		}
-		else/*(docno1 == docno2)*/
-		{
-			throw std::runtime_error(_TXT("cannot merge structure blocks with overlapping document references"));
-		}
-	}
-	while (docno1)
-	{
-		for ( bool more=true; more; more=itr1.scanNext( docno1, src1, sink1))
-		{
-			newblk.append( docno1, src1, sink1);
-		}
-	}
-	while (docno2)
-	{
-		for (bool more=true; more; more=itr2.scanNext( docno2, src2, sink2))
-		{
-			newblk.append( docno2, src2, sink2);
-		}
-	}
-}
-
-void StructBlockBuilder::merge(
-		std::vector<StructDeclaration>::const_iterator ei,
-		const std::vector<StructDeclaration>::const_iterator& ee,
-		const StructBlock& oldblk,
-		StructBlockBuilder& newblk)
-{
-	newblk.clear();
-	newblk.setId( oldblk.id());
-	merge_append( ei, ee, oldblk, newblk);
-}
-
-void StructBlockBuilder::appendFromBlock( Index docno, const StructBlock& blk, const DocIndexNodeCursor& cursor)
-{
-	StructureDef::Iterator sitr = blk.structureIterator( cursor);
-	strus::IndexRange source = sitr.next();
-	for (; source.defined(); source = sitr.next())
-	{
-		StructureMember::Iterator mitr = sitr.memberIterator();
-		for (strus::IndexRange sink=mitr.next(); sink.defined(); sink=mitr.next())
-		{
-			append( docno, source, sink);
-		}
-	}
-	packCurrentMembers();
-}
-
-void StructBlockBuilder::merge_append(
-		std::vector<StructDeclaration>::const_iterator ei,
-		const std::vector<StructDeclaration>::const_iterator& ee,
-		const StructBlock& oldblk,
-		StructBlockBuilder& appendblk)
-{
-	strus::IndexRange src;
-	strus::IndexRange sink;
-	DocIndexNodeCursor cursor;
-	appendblk.packCurrentMembers();
-
-	strus::Index docno = oldblk.firstDoc( cursor);
-	while (docno && ei != ee && ei->docno <= oldblk.id())
-	{
-		if (ei->docno < docno)
-		{
-			strus::Index first_docno = ei->docno;
-			while (ei != ee && ei->docno == first_docno)
-			{
-				if (ei->sink.defined() || ei->src.defined())
-				{
-					appendblk.append( ei->docno, ei->src, ei->sink);
-				}
-				ei++;
-			}
-		}
-		else if (ei->docno > docno)
-		{
-			appendblk.appendFromBlock( docno, oldblk, cursor);
-			docno = oldblk.nextDoc( cursor);
-		}
-		else/*(ei->docno == docno)*/
-		{
-			strus::Index first_docno = ei->docno;
-			while (ei != ee && ei->docno == first_docno)
-			{
-				if (ei->sink.defined() || ei->src.defined())
-				{
-					appendblk.append( ei->docno, ei->src, ei->sink);
-				}
-				ei++;
-			}
-			while (docno == first_docno)
-			{
-				// ... skip old block elements, they are replaced
-				docno = oldblk.nextDoc( cursor);
-			}
-		}
-	}
-	while (docno)
-	{
-		appendblk.appendFromBlock( docno, oldblk, cursor);
-		docno = oldblk.nextDoc( cursor);
-	}
-	while (ei != ee)
-	{
-		if (ei->sink.defined() || ei->src.defined())
-		{
-			appendblk.append( ei->docno, ei->src, ei->sink);
-		}
-		++ei;
-	}
-}
-
-void StructBlockBuilder::split( StructBlockBuilder& blk, StructBlockBuilder& newblk1, StructBlockBuilder& newblk2)
-{
-	blk.packCurrentMembers();
-
-	std::vector<StructDeclaration> declar;
-	strus::IndexRange src;
-	strus::IndexRange sink;
-	StructBlockBuilder::Iterator itr = blk.getIterator();
-	strus::Index docno = itr.skipDoc( 0/*docno*/);
-	bool more = itr.scanNext( docno, src, sink);
-	for (; more; more = itr.scanNext( docno, src, sink))
-	{
-		declar.push_back( StructDeclaration( docno, src, sink));
-	}
-	newblk1.clear();
-	newblk2.clear();
-	if (declar.empty()) return;
-
-	std::size_t splitidx = declar.size() / 2 - declar.size() / 16;
-	docno = declar[ splitidx].docno;
-	while (splitidx < declar.size() && declar[splitidx].docno == docno) {++splitidx;}
-	if (splitidx == declar.size())
-	{
-		while (splitidx > 0 && declar[splitidx-1].docno == docno) {--splitidx;}
-		if (splitidx == 0)
-		{
-			newblk1 = blk;
-			return;
-		}
-	}
-	std::vector<StructDeclaration>::const_iterator di = declar.begin(), de = declar.begin()+splitidx;
-	for (; di != de; ++di)
-	{
-		newblk1.append( di->docno, di->src, di->sink);
-	}
-	di = declar.begin()+splitidx, de = declar.end();
-	for (; di != de; ++di)
-	{
-		newblk2.append( di->docno, di->src, di->sink);
-	}
-}
-
-StructBlock StructBlockBuilder::createBlock()
-{
-	if (empty())
-	{
-		throw strus::runtime_error( _TXT("tried to create empty structure block"));
-	}
-	packCurrentMembers();
-
-	StructBlock::BlockHeader hdr;
-
-	int docindexofs = sizeof( StructBlock::BlockHeader);
-	int structlistofs = docindexofs + m_docIndexNodeArray.size() * sizeof( m_docIndexNodeArray[0]);
-	int structofs = structlistofs + m_structurelistar.size() * sizeof( m_structurelistar[0]);
-	int memberofs = structofs + m_structurear.size() * sizeof( m_structurear[0]);
-	int enumofs = memberofs + m_memberar.size() * sizeof( m_memberar[0]);
-	int repeatofs = enumofs + m_enumar.size() * sizeof( m_enumar[0]);
-	int startofs = repeatofs + m_repeatar.size() * sizeof( m_repeatar[0]);
-	int pkbyteofs = startofs + m_startar.size() * sizeof( m_startar[0]);
-	int pkshortofs = pkbyteofs + m_pkbytear.size() * sizeof( m_pkbytear[0]);
-	int blksize = pkshortofs + m_pkshortar.size() * sizeof( m_pkshortar[0]);
-
-	int first_docno = m_docIndexNodeArray[0].firstDoc();
-	int last_docno = m_docIndexNodeArray.back().lastDoc();
-
-	if (m_startar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
-	{
-		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			"indirection", (int)m_startar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
-	}
-	if (m_enumar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
-	{
-		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			"enum", (int)m_enumar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
-		std::vector<StructBlockMemberEnum>::const_iterator ei = m_enumar.begin(), ee = m_enumar.end();
-		for (; ei != ee; ++ei)
-		{
-			if (!ei->check()) throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(ei-m_enumar.begin()), "enum", first_docno, last_docno);
-		}
-	}
-	if (m_repeatar.size() > (std::size_t)StructBlock::StructureMember::MaxMemberIdx)
-	{
-		throw strus::runtime_error(_TXT("number of %s members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			"repeat", (int)m_repeatar.size(), first_docno, last_docno, (int)StructBlock::StructureMember::MaxMemberIdx);
-		std::vector<StructBlockMemberRepeat>::const_iterator ri = m_repeatar.begin(), re = m_repeatar.end();
-		for (; ri != re; ++ri)
-		{
-			if (!ri->check()) throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(ri-m_repeatar.begin()), "repeat", first_docno, last_docno);
-		}
-	}
-	if (m_memberar.size() > (std::size_t)std::numeric_limits<StructBlock::MemberIdxType>::max())
-	{
-		throw strus::runtime_error(_TXT("number of members (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_memberar.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::MemberIdxType>::max());
-		std::vector<StructureMember>::const_iterator mi = m_memberar.begin(), me = m_memberar.end();
-		for (; mi != me; ++mi)
-		{
-			switch (mi->memberType())
-			{
-				case StructBlock::MemberOffsetType:
-					break;
-				case StructBlock::MemberIndexType:
-					if (mi->memberIdx() >= m_startar.size())
-					{
-						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/indirection", first_docno, last_docno);
-					}
-					break;
-				case StructBlock::MemberEnumType:
-					if (mi->memberIdx() >= m_enumar.size())
-					{
-						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/enum", first_docno, last_docno);
-					}
-					break;
-				case StructBlock::MemberRepeatType:
-					if (mi->memberIdx() >= m_repeatar.size())
-					{
-						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/repeat", first_docno, last_docno);
-					}
-					break;
-				case StructBlock::MemberPackedByteType:
-					if (mi->memberIdx() >= m_pkbytear.size())
-					{
-						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/packbyte", first_docno, last_docno);
-					}
-					break;
-				case StructBlock::MemberPackedShortType:
-					if (mi->memberIdx() >= m_pkshortar.size())
-					{
-						throw strus::runtime_error(_TXT("corrupt block %d (%s) for documents [%d,%d]"), (int)(mi-m_memberar.begin()), "member/packshort", first_docno, last_docno);
-					}
-					break;
-			}
-		}
-	}
-	if (m_structurear.size() > (std::size_t)std::numeric_limits<StructBlock::StructIdxType>::max())
-	{
-		throw strus::runtime_error(_TXT("number of structures (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_structurear.size(), first_docno, last_docno, (int)std::numeric_limits<StructBlock::StructIdxType>::max());
-	}
-	if (m_structurelistar.size() > (std::size_t)std::numeric_limits<unsigned short>::max()/*element of DocIndexNode::ref*/)
-	{
-		throw strus::runtime_error(_TXT("number of structure lists (%d) for documents [%d,%d] exceeds maximum limit %d"),
-			(int)m_structurelistar.size(), first_docno, last_docno, (int)std::numeric_limits<unsigned short>::max());
-	}
-	hdr.structlistidx = structlistofs;
-	hdr.structidx = structofs;
-	hdr.memberidx = memberofs;
-	hdr.enumidx = enumofs;
-	hdr.repeatidx = repeatofs;
-	hdr.startidx = startofs;
-	hdr.pkbyteidx = pkbyteofs;
-	hdr.pkshortidx = pkshortofs;
-
-	MemBlock blkmem( blksize);
-	char* dt = (char*)blkmem.ptr();
-	std::memcpy( dt, &hdr, sizeof(hdr));
-	std::memcpy( dt+docindexofs, m_docIndexNodeArray.data(), m_docIndexNodeArray.size() * sizeof( m_docIndexNodeArray[0]));
-	std::memcpy( dt+structlistofs, m_structurelistar.data(), m_structurelistar.size() * sizeof( m_structurelistar[0]));
-	std::memcpy( dt+structofs, m_structurear.data(), m_structurear.size() * sizeof( m_structurear[0]));
-	std::memcpy( dt+memberofs, m_memberar.data(), m_memberar.size() * sizeof( m_memberar[0]));
-	std::memcpy( dt+enumofs, m_enumar.data(), m_enumar.size() * sizeof( m_enumar[0]));
-	std::memcpy( dt+repeatofs, m_repeatar.data(), m_repeatar.size() * sizeof( m_repeatar[0]));
-	std::memcpy( dt+startofs, m_startar.data(), m_startar.size() * sizeof( m_startar[0]));
-	std::memcpy( dt+pkbyteofs, m_pkbytear.data(), m_pkbytear.size() * sizeof( m_pkbytear[0]));
-	std::memcpy( dt+pkshortofs, m_pkshortar.data(), m_pkshortar.size() * sizeof( m_pkshortar[0]));
-
-	return StructBlock( m_id?m_id:m_lastDoc, blkmem.ptr(), blksize, true);
-}
-
-void StructBlockBuilder::setId( Index id_)
-{
-	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( _TXT("assigning illegal id to block"));
-	m_id = id_;
-}
-
-int StructBlockBuilder::size() const
-{
-	int sz = 0;
-	std::vector<DocStructureMap>::const_iterator
-		ai = m_ar.begin(), ae = m_ar.end();
-	for (; ai != ae; ++ai) sz += ai->map.size();
-	return sz;
-}
-
-void StructBlockBuilder::clear()
-{
-	m_ar.clear();
-	m_id = 0;
-}
-
-std::string StructBlockBuilder::statisticsMessage() const
-{
-	return strus::string_format(
-		_TXT(
-		"dropped members: %d, "
-		"number of documents: %d, "
-		"number of structures: %d, "
-		"number of members: %d, "
-		"number of enums: %d, "
-		"number of repeats: %d, "
-		"number of indirections: %d"
-		),
-		m_membersDropped,
-		(int)m_structurelistar.size(),
-		(int)m_structurear.size(),
-		(int)m_memberar.size(),
-		(int)m_enumar.size(),
-		(int)m_repeatar.size(),
-		(int)m_startar.size());
-}
-
-strus::Index StructBlockBuilder::Iterator::skipDoc( strus::Index docno)
-{
-	m_docno = m_docar.skipDoc( docno, m_cursor);
-	initNodeIterators();
-	return m_docno;
-}
-
-bool StructBlockBuilder::Iterator::scanNext( strus::Index& docno_, strus::IndexRange& src_, strus::IndexRange& sink_)
-{
-	sink_ = m_membitr.next();
-	if (sink_.defined())
-	{
-		src_ = m_struitr.current();
-		docno_ = m_docno;
-	}
-	else
-	{
-		src_ = m_struitr.next();
-		if (src_.defined())
-		{
-			m_membitr = m_struitr.memberIterator();
-			sink_ = m_membitr.next();
-			docno_ = m_docno;
-		}
-		else
-		{
-			m_docno = skipDoc( m_docno+1);
-			if (m_docno)
-			{
-				initNodeIterators();
-				src_ = m_struitr.current();
-				sink_ = m_membitr.next();
-				docno_ = m_docno;
-			}
-			else
-			{
-				clear();
-				docno_ = 0;
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-void StructBlockBuilder::Iterator::clear()
-{
-	m_struitr.clear();
-	m_membitr.clear();
-	m_docno = 0;
-}
-
-void StructBlockBuilder::Iterator::initNodeIterators()
-{
-	int ref = m_docar.ref_at( m_cursor);
-	int stuidx = m_builder->structurelistar()[ ref].idx;
-	int stusize = m_builder->structurelistar()[ ref].size;
-	m_struitr = StructureDef::Iterator( &m_data, m_builder->structurear().data() + stuidx, stusize);
-	m_struitr.next();
-	m_membitr = m_struitr.memberIterator();
-}
-
 
 

@@ -22,13 +22,13 @@ public:
 		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{}
 
-	DataBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	DataBlock( strus::Index id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( id_, ptr_, size_, allocated_?size_:0);
 	}
 
-	DataBlock( const Index& id_, std::size_t size_)
+	DataBlock( strus::Index id_, std::size_t size_)
 		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( id_, size_);
@@ -58,16 +58,18 @@ public:
 	void clear()			{m_size=0;}
 	bool empty() const		{return !m_size;}
 	Index id() const		{return m_id;}
-	void setId( const Index& id_)	{m_id = id_;}
+	void setId( strus::Index id_)	{m_id = id_;}
 	std::size_t size() const	{return m_size;}
 	const void* end() const		{return m_ptr + m_size;}
 	const void* ptr() const		{return m_ptr;}
+	void* ptr()			{return m_ptr;}
 	const char* charptr() const	{return (const char*)m_ptr;}
+	char* charptr()			{return (char*)m_ptr;}
 	const char* charend() const	{return (const char*)m_ptr + m_size;}
 	const void* data_at( int idx)	{return (const void*)((const char*)m_ptr + idx);}
 
-	void init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
-	void init( const Index& id_, std::size_t allocsize_);
+	void init( strus::Index id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
+	void init( strus::Index id_, std::size_t allocsize_);
 
 	void append( const void* data, std::size_t datasize);
 	void fill( char ch, std::size_t datasize);

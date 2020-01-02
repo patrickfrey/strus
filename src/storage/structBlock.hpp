@@ -11,7 +11,9 @@
 #include "structBlockFieldRepeat.hpp"
 #include "structBlockFieldEnum.hpp"
 #include "structBlockFieldPacked.hpp"
+#include "structBlockLink.hpp"
 #include "docIndexNode.hpp"
+#include "staticIntrusiveArray.hpp"
 #include "skipScanArray.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
@@ -29,27 +31,31 @@ class StructBlock
 {
 public:
 	enum {
-		MaxBlockSize=1024,
-		MaxFieldIdxType=0xFFffU
+		MaxFieldLevels=8,
+		MaxNofStructNo=16,
+		MaxNofStructIdx=2048,
+		MaxFieldIdx=(1<<13)-1,
+		MaxFieldType=7,
+		MaxLinkWidth=4
 	};
 	typedef unsigned short PositionType;
-	typedef unsigned short LinkIdxType;
-	typedef unsigned short FieldIdxType;
-	typedef unsigned short FieldSizeType;
+	typedef unsigned short FieldIdx;
+	typedef unsigned short PackedLinkBasePointer;
 
 	enum FieldType {
-		FieldOffsetType,
-		FieldIndexType,
-		FieldEnumType,
-		FieldRepeatType,
-		FieldPackedByteType,
-		FieldPackedShortType
+		FieldTypeOffset,
+		FieldTypeIndex,
+		FieldTypeEnum,
+		FieldTypeRepeat,
+		FieldTypePackedByte,
+		FieldTypePackedShort
 	};
 
 	struct BlockHeader
 	{
-		strus::Index linkidx;
-		strus::Index fieldidx;
+		strus::Index fieldidx[ MaxFieldLevels];
+		strus::Index linkbaseidx[ MaxFieldLevels];
+		strus::Index linkidx[ MaxLinkWidth];
 		strus::Index enumidx;
 		strus::Index repeatidx;
 		strus::Index startidx;
@@ -57,56 +63,69 @@ public:
 		strus::Index pkshortidx;
 		strus::Index _;
 	};
-	class StructureLink;
 	class StructureField;
+	typedef StaticIntrusiveArray<StructureField> StructureFieldArray;
+	typedef StaticIntrusiveArray<PackedLinkBasePointer> LinkBasePointerArray;
+	typedef StaticIntrusiveArray<PackedStructBlockLink> LinkArray;
 
 	class BlockData
 	{
 	public:
 		BlockData()
-			:m_linkar(0),m_fieldar(0),m_enumar(0),m_repeatar(0),m_startar(0){}
-		BlockData(
-				const StructureLink* linkar_, 
-				const StructureField* fieldar_,
-				const StructBlockFieldEnum* enumar_,
-				const StructBlockFieldRepeat* repeatar_,
-				const PositionType* startar_,
-				const StructBlockFieldPackedByte* pkbytear_,
-				const StructBlockFieldPackedShort* pkshortar_)
-			:m_linkar(linkar_),m_fieldar(fieldar_)
-			,m_enumar(enumar_),m_repeatar(repeatar_),m_startar(startar_)
-			,m_pkbytear(pkbytear_),m_pkshortar(pkshortar_){}
-		BlockData( const BlockData& o)
-			:m_linkar(o.m_linkar),m_fieldar(o.m_fieldar)
-			,m_enumar(o.m_enumar),m_repeatar(o.m_repeatar),m_startar(o.m_startar)
-			,m_pkbytear(o.m_pkbytear),m_pkshortar(o.m_pkshortar){}
+		{
+			init(0,0,0,0,0,0,0,0,0);
+		}
 
-		void init(
-				const StructureLink* linkar_, 
-				const StructureField* fieldar_,
+		BlockData(
+				const StructureFieldArray* fieldar_,
+				int fieldarsize_,
+				const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
+				const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth]
 				const StructBlockFieldEnum* enumar_,
 				const StructBlockFieldRepeat* repeatar_,
 				const PositionType* startar_,
 				const StructBlockFieldPackedByte* pkbytear_,
 				const StructBlockFieldPackedShort* pkshortar_)
 		{
-			m_linkar=linkar_; m_fieldar=fieldar_;
-			m_enumar=enumar_; m_repeatar=repeatar_; m_startar=startar_;
-			m_pkbytear=pkbytear_; m_pkshortar=pkshortar_;
+			init( fieldar_,fieldarsize_,linkbasear_,linkar_,enumar_,repeatar_,startar_,pkbytear_,pkshortar_);
 		}
-		void init() {init(0,0,0,0,0,0,0);}
 
-		const StructureLink* linkar() const			{return m_linkar;}
-		const StructureField* fieldar() const			{return m_fieldar;}
-		const StructBlockFieldEnum* enumar() const		{return m_enumar;}
-		const StructBlockFieldRepeat* repeatar() const		{return m_repeatar;}
-		const PositionType* startar() const			{return m_startar;}
-		const StructBlockFieldPackedByte* pkbytear() const	{return m_pkbytear;}
-		const StructBlockFieldPackedShort* pkshortar() const	{return m_pkshortar;}
+		BlockData( const BlockData& o)
+		{
+			std::memcpy( this, &o, sizeof(*this));
+		}
+
+		void init()
+		{
+			init(0,0,0,0,0,0,0,0,0);
+		}
+
+		void init(
+			const StructureFieldArray* fieldar_,
+			int fieldarsize_,
+			const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
+			const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth]
+			const StructBlockFieldEnum* enumar_,
+			const StructBlockFieldRepeat* repeatar_,
+			const PositionType* startar_,
+			const StructBlockFieldPackedByte* pkbytear_,
+			const StructBlockFieldPackedShort* pkshortar_);
+
+		const StructureFieldArray& fieldar( int idx) const		{return m_fieldar[ idx];}
+		int fieldarsize() const						{return m_fieldarsize;}
+		const LinkBasePointerArray& linkbasear( int idx) const		{return m_linkbasear[ idx];}
+		const LinkArray& linkar( int idx) const				{return m_linkar[ idx];}
+		const StructBlockFieldEnum* enumar() const			{return m_enumar;}
+		const StructBlockFieldRepeat* repeatar() const			{return m_repeatar;}
+		const PositionType* startar() const				{return m_startar;}
+		const StructBlockFieldPackedByte* pkbytear() const		{return m_pkbytear;}
+		const StructBlockFieldPackedShort* pkshortar() const		{return m_pkshortar;}
 
 	private:
-		const StructureLink* m_linkar;
-		const StructureField* m_fieldar;
+		StructureFieldArray m_fieldar[ MaxFieldLevels];
+		int m_fieldarsize;
+		LinkBasePointerArray m_linkbasear[ MaxFieldLevels];
+		LinkArray m_linkar[ MaxLinkWidth];
 		const StructBlockFieldEnum* m_enumar;
 		const StructBlockFieldRepeat* m_repeatar;
 		const PositionType* m_startar;
@@ -119,26 +138,18 @@ public:
 	private:
 		PositionType m_end;
 
-		unsigned short m_type:3;
-		unsigned short m_idx:13;
-		LinkIdxType m_linkidx;
-		LinkIdxType m_linksize;
+		unsigned short m_type:3;	//... bound to MaxFieldType=7
+		unsigned short m_idx:13;	//... bound to MaxFieldIdx=(1<<13)-1
 
 	public:
-		enum {MaxFieldIdx=(1<<13)-1};
-
 		strus::Index end() const	{return m_end;}
 		FieldType fieldType() const	{return (FieldType)m_type;}
-		FieldIdxType fieldidx() const	{return (FieldIdxType)m_idx;}
-		LinkIdxType linkidx() const	{return m_linkidx;}
-		LinkIdxType linksize() const	{return m_linksize;}
+		FieldIdx fieldIdx() const	{return (FieldIdx)m_idx;}
 
-		void addLink()			{++m_linksize;}
-
-		StructureField( PositionType end_, FieldType type_, FieldIdxType idx_, LinkIdxType linkidx_, LinkIdxType linksize_)
-			:m_end(end_),m_type(type_),m_idx(idx_),m_linkidx(linkidx_),m_linksize(linksize_){}
+		StructureField( PositionType end_, FieldType type_, FieldIdx idx_)
+			:m_end(end_),m_type(type_),m_idx(idx_){}
 		StructureField( const StructureField& o)
-			:m_end(o.m_end),m_type(o.m_type),m_idx(o.m_idx),m_linkidx(o.m_linkidx),m_linksize(o.m_linksize){}
+			:m_end(o.m_end),m_type(o.m_type),m_idx(o.m_idx){}
 
 		bool defined() const
 		{
@@ -147,64 +158,91 @@ public:
 		struct SearchCompare
 		{
 			SearchCompare(){}
-			bool operator()( const StructureField& aa, PositionType bb) const
+			bool operator()( const StructureField& aa, strus::Index bb) const
 			{
-				return aa.m_end <= bb;
+				return (strus::Index)(unsigned int)aa.m_end <= bb;
 			}
 		};
+	}
+#if defined(__GNUC__) || defined(__clang__)
+	__attribute__((__packed__))
+#endif
+	;
 
-		class Iterator
+	class FieldScanner
+	{
+	public:
+		FieldScanner()
+			:m_data(0),m_ar(0,0),m_aridx(0),m_fieldLevel(0),m_cur(),m_linkar(),m_linksize(0){}
+		FieldScanner( const BlockData* data_, const StructureFieldArray& fields, int fieldLevel_)
+			:m_data(data_),m_ar(fields.ar,fields.size),m_aridx(0),m_fieldLevel(fieldLevel_),m_cur(),m_linkar(),m_linksize(0){}
+		FieldScanner( const FieldScanner& o)
+			:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_fieldLevel(o.m_fieldLevel),m_cur(o.m_cur),m_linksize(o.m_linksize)
 		{
-		public:
-			Iterator()
-				:m_data(0),m_ar(0,0),m_aridx(0),m_cur(){}
-			Iterator( const BlockData* data_, const StructureField* ar_, std::size_t arsize_)
-				:m_data(data_),m_ar(ar_,arsize_),m_aridx(0),m_cur(){}
-			Iterator( const Iterator& o)
-				:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_cur(o.m_cur){}
-			Iterator& operator=( const Iterator& o)
-				{m_data=o.m_data; m_ar=o.m_ar; m_aridx=o.m_aridx; m_cur = o.m_cur; return *this;}
+			for (int ii=0; ii<o.m_linksize; ++ii) m_linkar[ii] = o.m_linkar[ii];
+		}
+		FieldScanner& operator=( const FieldScanner& o)
+			{m_data=o.m_data; m_ar=o.m_ar; m_aridx=o.m_aridx; m_fieldLevel=o.m_fieldLevel; m_cur = o.m_cur; m_linksize = o.m_linksize; for (int ii=0; ii<o.m_linksize; ++ii) m_linkar[ii] = o.m_linkar[ii]; return *this;}
 
-			bool initialized() const
-			{
-				return m_cur.defined();
-			}
+		bool initialized() const
+		{
+			return m_cur.defined();
+		}
 
-			strus::IndexRange next()	{return skip( m_cur.end());}
-			strus::IndexRange current()	{return m_cur;}
+		strus::IndexRange next()				{return skip( m_cur.end());}
+		strus::IndexRange current()				{return m_cur;}
 
-			strus::IndexRange skip( Index pos);
+		const StructBlockLink* links() const			{return m_linkar;}
+		int noflinks() const					{return m_linksize;}
 
-			void clear()
-			{
-				m_ar.init( 0, 0);
-				m_aridx = 0;
-				m_cur = strus::IndexRange();
-			}
+		strus::IndexRange skip( strus::Index pos);
 
-		private:
-			const BlockData* m_data;
-			SkipScanArray<StructureField,strus::Index,StructureField::SearchCompare> m_ar;
-			int m_aridx;
-			strus::IndexRange m_cur;
-		};
+		void reset()
+		{
+			m_aridx = 0;
+			m_cur = strus::IndexRange();
+			m_linksize = 0;
+		}
+
+	private:
+		const BlockData* m_data;
+		SkipScanArray<StructureField,strus::Index,StructureField::SearchCompare> m_ar;
+		int m_aridx;
+		int m_fieldLevel;
+		strus::IndexRange m_cur;
+		StructBlockLink m_linkar[ MaxLinkWidth];
+		int m_linksize;
 	};
 
-	struct StructureLink
+	struct LinkBasePointer
 	{
-		StructureLink( strus::Index structno_, bool head_, int idx_)
-			:structno(structno_),head(head_),idx(idx_){}
-		StructureLink( const StructureLink& o)
-			:structno(o.structno),head(o.head),idx(o.idx){}
+		LinkBasePointer()
+			:index(0),width(0){}
+		LinkBasePointer( const PackedLinkBasePointer& pp)
+			{setValue(pp);}
+		LinkBasePointer( int index_, int width_)
+			:index(index_),width(width_){}
+		LinkBasePointer( const LinkBasePointer& o)
+			:index(o.index),width(o.width){}
 
-		unsigned char structno;
-		unsigned short head:1;
-		unsigned short idx:15;
+		int index;		//...index of the first link (14 bits)
+		int width;		//...number links per element (0->1,2->2,3->4, 2 bits, bound to MaxLinkWidth=4)
+
+		PackedLinkBasePointer value() const
+		{
+			return ((width & 0x3) << 14) + (index & 0x3fFF);
+		}
+
+		void setValue( PackedLinkBasePointer vv)
+		{
+			width = ((vv & 15) != 0);
+			index = vv & 0x3fFF;
+		}
 	};
 
 public:
 	explicit StructBlock()
-		:DataBlock(),m_docIndexNodeArray(),m_structlistar(0),m_data()
+		:DataBlock(),m_data()
 	{}
 	StructBlock( const StructBlock& o)
 		:DataBlock(o)
@@ -216,6 +254,17 @@ public:
 	{
 		initFrame();
 	}
+
+	StructBlock(
+		strus::Index docno_,
+		const std::vector<std::vector<StructureField> >& fieldar_,
+		const std::vector<std::vector<LinkBasePointer> >& linkbasear_,
+		const std::vector<std::vector<StructBlockLink> >& linkar_,
+		const std::vector<StructBlockFieldEnum>& enumar_,
+		const std::vector<StructBlockFieldRepeat>& repeatar_,
+		const std::vector<PositionType>& startar_,
+		const std::vector<StructBlockFieldPackedByte>& pkbytear_,
+		const std::vector<StructBlockFieldPackedShort>& pkshortar_);
 
 	StructBlock& operator=( const StructBlock& o)
 	{
@@ -229,77 +278,22 @@ public:
 		initFrame();
 	}
 
-	/// \brief Get the document number of the current DocIndexNodeCursor
-	Index docno_at( const DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.docno_at( cursor);
-	}
-	/// \brief Get the next document with the current cursor
-	Index nextDoc( DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.nextDoc( cursor);
-	}
-	/// \brief Get the first document with the current cursor
-	Index firstDoc( DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.firstDoc( cursor);
-	}
-	Index lastDoc() const
-	{
-		return m_docIndexNodeArray.lastDoc();
-	}
-	bool full() const
-	{
-		return (int)size() >= Constants::maxStructBlockSize();
-	}
-	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( Index docno_, DocIndexNodeCursor& cursor) const
-	{
-		return m_docIndexNodeArray.skipDoc( docno_, cursor);
-	}
-
-	bool isThisBlockAddress( Index docno_) const
-	{
-		return (docno_ <= id() && m_docIndexNodeArray.size && docno_ > m_docIndexNodeArray.ar[ 0].base);
-	}
-	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
-	bool isFollowBlockAddress( Index docno_) const
-	{
-		Index diff = id() - (m_docIndexNodeArray.size?m_docIndexNodeArray.ar[ 0].base:1);
-		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
-	}
-
-	StructureDef::Iterator structureIterator( const DocIndexNodeCursor& cursor) const
-	{
-		int nofstructs;
-		const StructureDef* st = structures_at( cursor, nofstructs);
-		if (!st) return StructureDef::Iterator();
-		return StructureDef::Iterator( &m_data, st, nofstructs);
-	}
-
-	const BlockData* data() const				{return &m_data;}
-	const StructureDefList* structlistar() const		{return m_structlistar;}
-	const StructureDef* structar() const			{return m_data.structar();}
-	const StructureMember* fieldar() const			{return m_data.fieldar();}
-	const StructBlockFieldEnum* enumar() const		{return m_data.enumar();}
-	const StructBlockFieldRepeat* repeatar() const		{return m_data.repeatar();}
-	const PositionType* startar() const			{return m_data.startar();}
-	const StructBlockFieldPackedByte* pkbytear() const	{return m_data.pkbytear();}
-	const StructBlockFieldPackedShort* pkshortar() const	{return m_data.pkshortar();}
+	const BlockData* data() const					{return &m_data;}
+	const StructureFieldArray& fieldar( int idx) const		{return m_data.fieldar( idx);}
+	FieldScanner fieldscanner( int levelidx) const			{return FieldScanner( &m_data, m_data.fieldar( levelidx), levelidx);}
+	int fieldarsize() const						{return m_data.fieldarsize();}
+	const LinkBasePointerArray& linkbasear( int levelidx) const	{return m_data.linkbasear( levelidx);}
+	const LinkArray& linkar( int idx) const				{return m_data.linkar( idx);}
+	const StructBlockFieldEnum* enumar() const			{return m_data.enumar();}
+	const StructBlockFieldRepeat* repeatar() const			{return m_data.repeatar();}
+	const PositionType* startar() const				{return m_data.startar();}
+	const StructBlockFieldPackedByte* pkbytear() const		{return m_data.pkbytear();}
+	const StructBlockFieldPackedShort* pkshortar() const		{return m_data.pkshortar();}
 
 private:
-	/// \brief Get the internal representation of the postions of the current DocIndexNodeCursor
-	const StructureDef* structures_at( const DocIndexNodeCursor& cursor, int& nofstructs) const
-	{
-		const StructureDefList* lst = m_structlistar + m_docIndexNodeArray.ref_at( cursor);
-		nofstructs = lst->size;
-		return m_data.structar() + lst->idx;
-	}
 	void initFrame();
 
 private:
-	DocIndexNodeArray m_docIndexNodeArray;
-	const StructureDefList* m_structlistar;
 	BlockData m_data;
 };
 

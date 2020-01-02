@@ -40,10 +40,10 @@ public:
 	typedef unsigned char PackType;
 
 	PositionType base;
-	PackType ofs[ 10];
+	PackType ofs[ 14];
 	//... NOTE: Packing is wasting 5 bits of first ofs that are redundant (equal size)
 
-	enum {OfsMask=(1<<5)-1, OfsShift=5, MaxOfs=(1<<5)-1, MaxSize=(1<<3)-1, NofOfs=10};
+	enum {OfsMask=(1<<5)-1, OfsShift=5, MaxOfs=(1<<5)-1, MaxSize=(1<<3)-1, NofOfs=14};
 };
 
 
@@ -119,7 +119,11 @@ public:
 		{
 			Parent::base = range.start();
 			Parent::ofs[ 0] = packedRange( Parent::base, range);
-			if (!Parent::ofs[ 0]) return false;
+			if (!Parent::ofs[ 0])
+			{
+				Parent::base = 0;
+				return false;
+			}
 		}
 		else
 		{
@@ -140,7 +144,7 @@ public:
 		return rt;
 	}
 
-	strus::IndexRange skip( PositionType pos) const
+	std::pair<strus::IndexRange,int> skip( PositionType pos) const
 	{
 		PositionType rtend = Parent::base + getEndOfs( Parent::ofs[0]);
 		int ii = 0;
@@ -150,8 +154,20 @@ public:
 			rtend += getEndOfs( Parent::ofs[ii]);
 		}
 		return (rtend > pos)
-			? strus::IndexRange( rtend - getSize( Parent::ofs[ii]), rtend)
-			: strus::IndexRange();
+			? std::pair<strus::IndexRange,int>( strus::IndexRange( rtend - getSize( Parent::ofs[ii]), rtend), ii)
+			: std::pair<strus::IndexRange,int>( strus::IndexRange(), -1);
+	}
+
+	int nofMembers() const
+	{
+		int rt = 0;
+		if (Parent::base)
+		{
+			int ii=0;
+			for (; ii<NofOfs && Parent::ofs[ii]; ++ii){}
+			return ii;
+		}
+		return rt;
 	}
 };
 

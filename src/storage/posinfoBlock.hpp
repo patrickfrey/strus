@@ -30,7 +30,7 @@ public:
 	PosinfoBlock( const PosinfoBlock& o)
 		:DataBlock(o)
 		{initFrame();}
-	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+	PosinfoBlock( strus::Index id_, const void* ptr_, std::size_t size_, bool allocated_=false)
 		:DataBlock( id_, ptr_, size_, allocated_)
 		{initFrame();}
 
@@ -73,17 +73,17 @@ public:
 		return m_docIndexNodeArray.firstDoc( cursor);
 	}
 	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( const Index& docno_, DocIndexNodeCursor& cursor) const
+	Index skipDoc( strus::Index docno_, DocIndexNodeCursor& cursor) const
 	{
 		return m_docIndexNodeArray.skipDoc( docno_, cursor);
 	}
 
-	bool isThisBlockAddress( const Index& docno_) const
+	bool isThisBlockAddress( strus::Index docno_) const
 	{
 		return (docno_ <= id() && m_docIndexNodeArray.size && docno_ > m_docIndexNodeArray.ar[ 0].base);
 	}
 	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
-	bool isFollowBlockAddress( const Index& docno_) const
+	bool isFollowBlockAddress( strus::Index docno_) const
 	{
 		Index diff = id() - (m_docIndexNodeArray.size?m_docIndexNodeArray.ar[ 0].base:1);
 		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
@@ -125,7 +125,7 @@ public:
 		void clear()						{init(0);}
 
 		Index curpos() const					{return (m_itr<m_size)?m_ar[m_itr]:0;}
-		Index skip( const Index& pos);
+		Index skip( strus::Index pos);
 
 	private:
 		const PositionType* m_ar;
@@ -184,14 +184,14 @@ public:
 		,m_id(o.m_id){}
 #endif
 	Index id() const						{return m_id;}
-	void setId( const Index& id_);
+	void setId( strus::Index id_);
 
 	bool empty() const						{return m_docIndexNodeArray.empty();}
 
 	/// \brief Append document position info
 	/// \param[in] docno document number
 	/// \param[in] posar pointer to posinfo encoded as: posar[0]=length, posar[1..]=posinfo array
-	void append( const Index& docno, const PositionType* posar);
+	void append( strus::Index docno, const PositionType* posar);
 
 	bool fitsInto( std::size_t nofpos) const;
 	bool fitsIntoApproximately( std::size_t nofpos, float acceptedFillRatio) const;

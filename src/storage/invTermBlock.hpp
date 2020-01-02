@@ -21,16 +21,16 @@ class InvTermBlock
 public:
 	struct Element
 	{
-		Index typeno;
-		Index termno;
-		Index ff;
-		Index firstpos;
+		strus::Index typeno;
+		strus::Index termno;
+		strus::Index ff;
+		strus::Index firstpos;
 
 		Element()
 			:typeno(0),termno(0),ff(0),firstpos(0){}
 		Element( const Element& o)
 			:typeno(o.typeno),termno(o.termno),ff(o.ff),firstpos(o.firstpos){}
-		Element( const Index& typeno_, const Index& termno_, const Index& ff_, const Index& firstpos_)
+		Element( strus::Index typeno_, strus::Index termno_, strus::Index ff_, strus::Index firstpos_)
 			:typeno(typeno_),termno(termno_),ff(ff_),firstpos(firstpos_){}
 	};
 
@@ -41,7 +41,7 @@ public:
 	{
 		initFrame();
 	}
-	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated=false)
+	InvTermBlock( strus::Index id_, const void* ptr_, std::size_t size_, bool allocated=false)
 		:DataBlock( id_, ptr_, size_, allocated)
 	{
 		initFrame();
@@ -72,7 +72,7 @@ public:
 
 	const char* next( const char* ref) const;
 
-	void append( const Index& typeno, const Index& termno, const Index& ff, const Index& firstpos);
+	void append( strus::Index typeno, strus::Index termno, strus::Index ff, strus::Index firstpos);
 
 	void initFrame(){}
 };

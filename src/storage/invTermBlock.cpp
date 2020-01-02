@@ -33,7 +33,7 @@ const char* InvTermBlock::next( const char* ref) const
 	return ri;
 }
 
-void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& ff, const Index& firstpos)
+void InvTermBlock::append( strus::Index typeno, strus::Index termno, strus::Index ff, strus::Index firstpos)
 {
 	std::string elem;
 	packIndex( elem, typeno);

@@ -21,7 +21,7 @@ DataBlock::~DataBlock()
 	if (m_allocsize) std::free( m_ptr);
 }
 
-void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_)
+void DataBlock::init( strus::Index id_, const void* ptr_, std::size_t size_, std::size_t allocsize_)
 {
 	if (allocsize_)
 	{
@@ -45,7 +45,7 @@ void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std
 	m_id = id_;
 }
 
-void DataBlock::init( const Index& id_, std::size_t size_)
+void DataBlock::init( strus::Index id_, std::size_t size_)
 {
 	std::size_t mm = BLOCK_ALLOC_SIZE( size_);
 	void* newptr = std::malloc( mm);

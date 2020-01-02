@@ -12,7 +12,7 @@
 
 using namespace strus;
 
-void BooleanBlock::Node::init( const Index& from_, const Index& to_)
+void BooleanBlock::Node::init( strus::Index from_, strus::Index to_)
 {
 	if (from_ == to_)
 	{
@@ -48,7 +48,7 @@ void BooleanBlock::Node::normalize()
 	}
 }
 
-bool BooleanBlock::Node::matches( const Index& elemno_) const
+bool BooleanBlock::Node::matches( strus::Index elemno_) const
 {
 	switch (type)
 	{
@@ -60,7 +60,7 @@ bool BooleanBlock::Node::matches( const Index& elemno_) const
 	return false;
 }
 
-bool BooleanBlock::Node::tryExpandRange( const Index& to_)
+bool BooleanBlock::Node::tryExpandRange( strus::Index to_)
 {
 	switch (type)
 	{
@@ -84,7 +84,7 @@ bool BooleanBlock::Node::tryExpandRange( const Index& to_)
 	return false;
 }
 
-bool BooleanBlock::Node::tryAddElem( const Index& elemno_)
+bool BooleanBlock::Node::tryAddElem( strus::Index elemno_)
 {
 	switch (type)
 	{
@@ -147,7 +147,7 @@ Index BooleanBlock::Node::getLastElem() const
 	return elemno;
 }
 
-Index BooleanBlock::Node::getNextElem( const Index& elemno_) const
+Index BooleanBlock::Node::getNextElem( strus::Index elemno_) const
 {
 	switch (type)
 	{
@@ -167,7 +167,7 @@ Index BooleanBlock::Node::getNextElem( const Index& elemno_) const
 	return 0;
 }
 
-Index BooleanBlock::Node::getUpperBound( const Index& elemno_) const
+Index BooleanBlock::Node::getUpperBound( strus::Index elemno_) const
 {
 	switch (type)
 	{
@@ -305,7 +305,7 @@ bool BooleanBlock::getNextRange( NodeCursor& cursor, Index& from_, Index& to_) c
 	return false;
 }
 
-Index BooleanBlock::skip( const Index& elemno_, NodeCursor& cursor) const
+Index BooleanBlock::skip( strus::Index elemno_, NodeCursor& cursor) const
 {
 	std::size_t nodearsize = (size() / sizeof(Node));
 	Node const* nd = ((Node const*)ptr()) + cursor.idx;
@@ -362,13 +362,13 @@ Index BooleanBlock::skip( const Index& elemno_, NodeCursor& cursor) const
 	}
 }
 
-void BooleanBlock::defineElement( const Index& elemno)
+void BooleanBlock::defineElement( strus::Index elemno)
 {
 	defineRange( elemno, 0);
 }
 
 
-bool BooleanBlock::joinRange( Index& from_, Index& to_, const Index& from2_, const Index& to2_)
+bool BooleanBlock::joinRange( Index& from_, Index& to_, strus::Index from2_, strus::Index to2_)
 {
 	if (from_ <= from2_)
 	{
@@ -438,7 +438,7 @@ bool BooleanBlock::joinRange( Index& from_, Index& to_, const Index& from2_, con
 	}
 }
 
-void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
+void BooleanBlock::defineRange( strus::Index elemno, strus::Index rangesize)
 {
 	Index from_ = 0;
 	Index to_ = 0;

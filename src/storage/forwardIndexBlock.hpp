@@ -28,7 +28,7 @@ public:
 	ForwardIndexBlock(){}
 	ForwardIndexBlock( const ForwardIndexBlock& o)
 		:DataBlock(o){}
-	ForwardIndexBlock( const Index& id_, const void* ptr_, std::size_t size_)
+	ForwardIndexBlock( strus::Index id_, const void* ptr_, std::size_t size_)
 		:DataBlock( id_, ptr_, size_)
 	{
 		initFrame();
@@ -46,20 +46,20 @@ public:
 		initFrame();
 	}
 
-	void setId( const Index& id_);
+	void setId( strus::Index id_);
 	Index position_at( const char* ref) const;
 	std::string value_at( const char* ref) const;
 
-	Index relativeIndexFromPosition( const Index& pos_) const {return id()-pos_+1;}
-	Index positionFromRelativeIndex( const Index& rel_) const {return id()-rel_+1;}
+	Index relativeIndexFromPosition( strus::Index pos_) const {return id()-pos_+1;}
+	Index positionFromRelativeIndex( strus::Index rel_) const {return id()-rel_+1;}
 
 	const char* nextItem( const char* ref) const;
 	const char* prevItem( const char* ref) const;
 
-	const char* find( const Index& pos_, const char* lowerbound) const;
-	const char* upper_bound( const Index& pos_, const char* lowerbound) const;
+	const char* find( strus::Index pos_, const char* lowerbound) const;
+	const char* upper_bound( strus::Index pos_, const char* lowerbound) const;
 
-	void append( const Index& pos, const std::string& item);
+	void append( strus::Index pos, const std::string& item);
 
 	class const_iterator
 	{

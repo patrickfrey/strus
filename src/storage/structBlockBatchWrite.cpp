@@ -29,15 +29,15 @@ void StructBlockBatchWrite::checkBlocks( DatabaseAdapter_StructBlock::WriteCurso
 
 void StructBlockBatchWrite::insertNewElements(
 		DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
-		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
-		const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
+		std::vector<StructBlockDeclaration>::const_iterator& ei,
+		const std::vector<StructBlockDeclaration>::const_iterator& ee,
 		StructBlockBuilder& newblk,
 		DatabaseTransactionInterface* transaction,
 		ErrorBufferInterface* errorhnd)
 {
 	while (ei != ee)
 	{
-		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator
+		std::vector<StructBlockDeclaration>::const_iterator
 			en = ei;
 		for (++en; en != ee && en->docno == ei->docno; ++en){}
 		if (!newblk.fitsInto( en-ei) && !newblk.empty())
@@ -79,8 +79,8 @@ void StructBlockBatchWrite::insertNewElements(
 
 void StructBlockBatchWrite::mergeNewElements(
 		DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
-		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
-		const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
+		std::vector<StructBlockDeclaration>::const_iterator& ei,
+		const std::vector<StructBlockDeclaration>::const_iterator& ee,
 		StructBlockBuilder& newblk,
 		DatabaseTransactionInterface* transaction,
 		ErrorBufferInterface* errorhnd)
@@ -98,7 +98,7 @@ void StructBlockBatchWrite::mergeNewElements(
 		}
 		while (ei != ee)
 		{
-			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator
+			std::vector<StructBlockDeclaration>::const_iterator
 				en = ei;
 			for (++en; en != ee && en->docno == ei->docno; ++en){}
 			if (!newblk.fitsInto( en-ei) && !newblk.empty())
@@ -125,7 +125,7 @@ void StructBlockBatchWrite::mergeNewElements(
 	{
 		if (!newblk.empty()) throw strus::runtime_error(_TXT("logic error: unexpected %s upperbound exists with block not cleared"), "structure block");
 
-		std::vector<StructBlockBuilder::StructDeclaration>::const_iterator start = ei;
+		std::vector<StructBlockDeclaration>::const_iterator start = ei;
 		for (; ei != ee && ei->docno <= blk.id(); ++ei){}
 
 		StructBlockBuilder::merge( start, ei, blk, newblk);

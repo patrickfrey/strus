@@ -66,7 +66,7 @@ struct StructBlockFieldEnum
 			int pi = 0, pe = NofOfs;
 			for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
 			if (pi == pe) return false;
-			if (pos < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
+			if (pos <= accu) throw std::runtime_error(_TXT("structure elements not added in strictly ascending order"));
 			if (pos - accu > (PositionType)std::numeric_limits<OffsetType>::max()) return false;
 			ofs[ pi] = pos - accu;
 		}
@@ -75,24 +75,8 @@ struct StructBlockFieldEnum
 
 	bool append( const strus::IndexRange& range)
 	{
-		strus::Index ri = range.start(), re = range.end();
-		if (base == 0)
-		{
-			base = ri++;
-			if (ri == re) return true;
-		}
-		PositionType accu = base;
-		int pi = 0, pe = NofOfs;
-		for (; pi<pe && ofs[pi]; accu+=ofs[pi],++pi){}
-		if (pi + (re - ri) > pe) return false;
-		if (ri < accu) throw std::runtime_error(_TXT("structure elements not added in ascending order"));
-		if (ri - accu > (PositionType)std::numeric_limits<OffsetType>::max()) return false;
-		ofs[ pi++] = ri++ - accu;
-		for (; ri < re; ++ri,++pi)
-		{
-			ofs[pi] = 1;
-		}
-		return true;
+		if (range.start()+1 != range.end()) return false;
+		return append( range.start());
 	}
 
 	PositionType last() const
@@ -101,34 +85,47 @@ struct StructBlockFieldEnum
 		for (int ii=0; ii<=NofOfs && ofs[ii]; rt+=ofs[ii],++ii){}
 		return rt;
 	}
+
 	bool pop_back()
 	{
 		int ii = NofOfs-1;
 		for (; ii>=0 && 0==ofs[ii]; --ii){}
-		if (ii>0 && ofs[ii])
+		if (ii < 0)
+		{
+			base = 0;
+		}
+		else
 		{
 			ofs[ii] = 0;
-			return true;
 		}
-		return false;
+		return true;
 	}
 
-	strus::IndexRange skip( PositionType pos) const
+	std::pair<strus::IndexRange,int> skip( PositionType pos) const
 	{
 		PositionType pi=base;
-		PositionType start=base;
 		int ii=0;
-		for (; ii<NofOfs && pi < pos; pi+=ofs[ii],++ii)
-		{
-			if (1!=ofs[ii]) {start=pi+ofs[ii];}
-		}
+		for (; ii<NofOfs && pi < pos && ofs[ii]; pi+=ofs[ii],++ii){}
 		if (pi >= pos)
 		{
-			PositionType end = pi+1;
-			for (; ii<NofOfs && 1==ofs[ii]; ++end,++ii){}
-			return strus::IndexRange( start, end);
+			return std::pair<strus::IndexRange,int>( strus::IndexRange( pi, pi+1), ii);
 		}
-		return strus::IndexRange();
+		else
+		{
+			return std::pair<strus::IndexRange,int>( strus::IndexRange(), -1);
+		}
+	}
+
+	int nofMembers() const
+	{
+		int rt = 0;
+		if (base)
+		{
+			int ii=0;
+			for (; ii<NofOfs && ofs[ii]; ++ii){}
+			return ii+1;
+		}
+		return rt;
 	}
 };
 

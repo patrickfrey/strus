@@ -9,6 +9,8 @@
 #define _STRUS_STORAGE_STRUCTURE_BLOCK_BATCH_WRITE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "structBlock.hpp"
+#include "structBlockBuilder.hpp"
+#include "structBlockDeclaration.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseCursorInterface.hpp"
@@ -30,16 +32,16 @@ public:
 	
 	static void insertNewElements(
 			DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
-			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
-			const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
+			std::vector<StructBlockDeclaration>::const_iterator& ei,
+			const std::vector<StructBlockDeclaration>::const_iterator& ee,
 			StructBlockBuilder& newblk,
 			DatabaseTransactionInterface* transaction,
 			ErrorBufferInterface* errorhnd);
 
 	static void mergeNewElements(
 			DatabaseAdapter_StructBlock::WriteCursor* dbadapter,
-			std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ei,
-			const std::vector<StructBlockBuilder::StructDeclaration>::const_iterator& ee,
+			std::vector<StructBlockDeclaration>::const_iterator& ei,
+			const std::vector<StructBlockDeclaration>::const_iterator& ee,
 			StructBlockBuilder& newblk,
 			DatabaseTransactionInterface* transaction,
 			ErrorBufferInterface* errorhnd);

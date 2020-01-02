@@ -36,7 +36,7 @@ unsigned int PosinfoBlock::frequency_at( const DocIndexNodeCursor& cursor) const
 	return m_posinfoptr[ nd.ref[ cursor.docidx]];
 }
 
-Index PosinfoBlock::PositionScanner::skip( const Index& pos)
+Index PosinfoBlock::PositionScanner::skip( strus::Index pos)
 {
 	if ((Index)m_ar[ m_itr] >= pos)
 	{
@@ -92,7 +92,7 @@ PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 	while (!!(docno=o.nextDoc( idx)));
 }
 
-void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
+void PosinfoBlockBuilder::append( strus::Index docno, const PositionType* posar)
 {
 	if (m_id && m_id < docno) throw std::runtime_error(_TXT("assigned illegal id to block"));
 
@@ -226,7 +226,7 @@ void PosinfoBlockBuilder::clear()
 	m_id = 0;
 }
 
-void PosinfoBlockBuilder::setId( const Index& id_)
+void PosinfoBlockBuilder::setId( strus::Index id_)
 {
 	if (id_ && id_ < m_lastDoc) throw std::runtime_error(_TXT("assigning illegal id to block"));
 	m_id = id_;
