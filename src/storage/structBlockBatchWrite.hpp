@@ -18,6 +18,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include <vector>
 
+#error DEPRECATED
 namespace strus {
 
 /// \brief Forward declaration

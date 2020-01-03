@@ -579,15 +579,14 @@ struct DatabaseAdapter_FfBlock
 struct DatabaseAdapter_StructBlock
 {
 	typedef DatabaseAdapter_TypedDataBlock<
-			DatabaseKey::StructBlockPrefix, StructBlock, true> Parent;
+			DatabaseKey::StructBlockPrefix, StructBlock, false/*don't use cache*/> Parent;
 
 	class Reader
 		:public Parent::Reader
 	{
 	public:
-		Reader( const DatabaseClientInterface* database_,
-			const Index& structno_)
-			:Parent::Reader( database_, BlockKey(structno_)){}
+		Reader( const DatabaseClientInterface* database_)
+			:Parent::Reader( database_, BlockKey()){}
 		Reader( const Reader& o)
 			:Parent::Reader(o){}
 	};
@@ -595,9 +594,8 @@ struct DatabaseAdapter_StructBlock
 		:public Parent::Writer
 	{
 	public:
-		Writer( DatabaseClientInterface* database_,
-			const Index& structno_)
-			:Parent::Writer( database_, BlockKey(structno_)){}
+		Writer( DatabaseClientInterface* database_)
+			:Parent::Writer( database_, BlockKey()){}
 		Writer( const Writer& o)
 			:Parent::Writer(o){}
 	};
@@ -605,9 +603,8 @@ struct DatabaseAdapter_StructBlock
 		:public Parent::Cursor
 	{
 	public:
-		Cursor( const DatabaseClientInterface* database_,
-			const Index& structno_)
-			:Parent::Cursor( database_, BlockKey(structno_)){}
+		Cursor( const DatabaseClientInterface* database_)
+			:Parent::Cursor( database_, BlockKey()){}
 		Cursor( const Cursor& o)
 			:Parent::Cursor(o){}
 	};
@@ -617,10 +614,9 @@ struct DatabaseAdapter_StructBlock
 		,public Writer
 	{
 	public:
-		WriteCursor( DatabaseClientInterface* database_, 
-				const Index& structno_)
-			:Cursor(database_,structno_)
-			,Writer(database_,structno_){}
+		WriteCursor( DatabaseClientInterface* database_)
+			:Cursor(database_)
+			,Writer(database_){}
 		WriteCursor( const WriteCursor& o)
 			:Cursor(o),Writer(o){}
 	};
@@ -630,7 +626,7 @@ struct DatabaseAdapter_StructBlock
 struct DatabaseAdapter_InverseTerm
 {
 	typedef DatabaseAdapter_TypedDataBlock<
-			DatabaseKey::InverseTermPrefix, InvTermBlock, false> Parent;
+			DatabaseKey::InverseTermPrefix, InvTermBlock, false/*don't use cache*/> Parent;
 
 	class Reader
 		:public Parent::Reader

@@ -7,6 +7,7 @@
  */
 #include "structIterator.hpp"
 #include "storageClient.hpp"
+#include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
 #include "strus/errorBufferInterface.hpp"
 
@@ -14,88 +15,111 @@
 
 using namespace strus;
 
-IndexRange StructIteratorImpl::skipPosSource( const Index& firstpos_)
-{
-	IndexRange rt;
-	if (!docno()) return m_source = IndexRange(0,0);
-	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max())
-	{
-		m_memberIterator.clear();
-		return m_source = IndexRange(0,0);
-	}
-	if (!m_structureIterator.initialized())
-	{
-		m_structureIterator = currentBlock().structureIterator( currentBlockCursor());
-	}
-	rt = m_structureIterator.skip( firstpos_);
-	if (rt != m_source || !rt.defined())
-	{
-		m_memberIterator.clear();
-	}
-	return rt;
-}
+StructIterator::StructIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_)
+	,m_database(database_)
+	,m_dbadapter()
+	,m_curblock()
+	,m_docno(0)
+	,m_errorhnd(errorhnd_){}
 
-IndexRange StructIteratorImpl::skipPosSink( const Index& firstpos_)
-{
-	IndexRange rt;
-	if (!docno()) return m_sink = IndexRange(0,0);
-	if (firstpos_ > (Index)std::numeric_limits<StructBlock::PositionType>::max()) return m_sink = IndexRange(0,0);
+StructIterator::~StructIterator(){}
 
-	if (!m_memberIterator.initialized())
+void StructIterator::skipDoc( const Index& docno_)
+{
+	try
 	{
-		if (!m_structureIterator.initialized())
+		if (docno_ <= 0) throw std::runtime_error(_TXT("called skipDoc with an invalid document number"));
+		if (docno_ == m_docno) return;
+		if (!m_dbadapter.get())
 		{
-			m_structureIterator = currentBlock().structureIterator( currentBlockCursor());
+			m_dbadapter.reset( new DatabaseAdapter_StructBlock::Reader( m_database));
 		}
-		m_memberIterator = m_structureIterator.memberIterator();
+		if (m_dbadapter->load( docno_, m_curblock))
+		{
+			m_docno = docno_;
+			m_levels = m_curblock.fieldarsize();
+			int li = 0;
+			for (; li < m_levels; ++li)
+			{
+				m_scanner[ li] = m_curblock.fieldscanner( li);
+			}
+			for (; li < StructBlock::MaxFieldLevels; ++li)
+			{
+				m_scanner[ li] = StructBlock::FieldScanner();
+			}
+		}
+		else
+		{
+			m_docno = 0;
+			m_levels = 0;
+			int li = 0;
+			for (; li < StructBlock::MaxFieldLevels; ++li)
+			{
+				m_scanner[ li] = StructBlock::FieldScanner();
+			}
+		}
 	}
-	rt = m_sink = m_memberIterator.skip( firstpos_);
-	return rt;
+	CATCH_ERROR_ARG1_MAP( _TXT("error in %s skip doc: %s"), INTERFACE_NAME, *m_errorhnd);
 }
 
-Index StructIterator::skipDoc( const Index& docno)
+int StructIterator::levels() const
 {
-	try
-	{
-		return m_impl.skipDoc( docno);
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, 0);
+	return m_levels;
 }
 
-IndexRange StructIterator::skipPosSource( const Index& firstpos)
+Index StructIterator::docno() const
 {
-	try
-	{
-		return m_impl.skipPosSource( firstpos);
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip source position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+	return m_docno;
 }
 
-IndexRange StructIterator::skipPosSink( const Index& firstpos)
+IndexRange StructIterator::skipPos( int level, const Index& firstpos)
 {
+	strus::IndexRange rt;
 	try
 	{
-		return m_impl.skipPosSink( firstpos);
+		if (level >= 0 && level < m_levels)
+		{
+			rt = m_scanner[ level].skip( firstpos);
+		}
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip sink position: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s skip pos: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
-IndexRange StructIterator::source() const
+IndexRange StructIterator::field( int level) const
 {
+	strus::IndexRange rt;
 	try
 	{
-		return m_impl.source();
+		if (level >= 0 && level < m_levels)
+		{
+			rt = m_scanner[ level].current();
+		}
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current source: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current field: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
-IndexRange StructIterator::sink() const
+StructIteratorInterface::StructureLinkArray StructIterator::links( int level) const
 {
+	StructIteratorInterface::StructureLinkArray rt;
 	try
 	{
-		return m_impl.sink();
+		if (level >= 0 && level < m_levels)
+		{
+			StructureLink lnk[ StructIteratorInterface::StructureLinkArray::MaxNofLinks];
+			int li=0, le = m_scanner[ level].noflinks();
+			const StructBlockLink* lnkp = m_scanner[ level].links();
+			for (; li != le; ++li)
+			{
+				lnk[ li].init( lnkp[ li].structno, lnkp[ li].head, lnkp[ li].idx);
+			}
+			rt.init( lnk, le);
+		}
+		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current sink: %s"), INTERFACE_NAME, *m_errorhnd, IndexRange(0,0));
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current links: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
 

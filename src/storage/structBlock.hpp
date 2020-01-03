@@ -190,7 +190,7 @@ public:
 		}
 
 		strus::IndexRange next()				{return skip( m_cur.end());}
-		strus::IndexRange current()				{return m_cur;}
+		strus::IndexRange current() const			{return m_cur;}
 
 		const StructBlockLink* links() const			{return m_linkar;}
 		int noflinks() const					{return m_linksize;}

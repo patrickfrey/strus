@@ -83,8 +83,7 @@ public:
 			const std::string& termid) const;
 
 	virtual StructIteratorInterface*
-		createStructIterator(
-			const std::string& structstr) const;
+		createStructIterator() const;
 	
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(
@@ -139,6 +138,8 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual Index structTypeNumber( const std::string& structname) const;
+
 	virtual Index termTypeNumber( const std::string& type) const;
 
 	virtual Index termValueNumber( const std::string& value) const;
@@ -179,7 +180,7 @@ public:/*Storage (constructor)*/
 	/// \param[in] termnomap_source end of line separated list of terms to define first
 	void loadTermnoMap( const char* termnomap_source);
 
-public:/*QueryEval,AttributeReader,documentTermIterator*/
+public:/*QueryEval,AttributeReader,documentTermIterator,structIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getStructType( const std::string& name) const;

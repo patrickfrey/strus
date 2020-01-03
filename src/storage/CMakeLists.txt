@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set( source_files
-	structBlockBuilder.cpp
 	attributeMap.cpp
 	attributeReader.cpp
 	aclReader.cpp
@@ -46,7 +45,7 @@ set( source_files
 	posinfoIterator.cpp
 	postingIterator.cpp
 	structBlock.cpp
-	structBlockBatchWrite.cpp
+	structBlockBuilder.cpp
 	structIndexMap.cpp
 	structIterator.cpp
 	storageMetaDataTableUpdate.cpp

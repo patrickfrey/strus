@@ -98,12 +98,10 @@ public:
 			const std::string& type,
 			const std::string& value) const=0;
 
-	/// \brief Create an iterator on the structures (relations of ordinal position ranges) of a defined type
-	/// \param[in] structname name of the structure to get the iterator on
+	/// \brief Create an iterator on the structures (relations of ordinal position ranges with a structure name)
 	/// \return the created iterator reference (with ownership)
 	virtual StructIteratorInterface*
-		createStructIterator(
-			const std::string& structname) const=0;
+		createStructIterator() const=0;
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.
@@ -164,6 +162,10 @@ public:
 	/// \param[in] docid document id of the document inserted
 	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
+
+	/// \brief Get the number assigned to a structure name
+	/// \return the structure number >= 1 or 0 if undefined
+	virtual Index structTypeNumber( const std::string& structname) const=0;
 
 	/// \brief Get the local internal term type number
 	/// \param[in] type term type name

@@ -466,15 +466,11 @@ PostingIteratorInterface*
 }
 
 StructIteratorInterface*
-	StorageClient::createStructIterator(
-		const std::string& structstr) const
+	StorageClient::createStructIterator() const
 {
 	try
 	{
-		Index structno = getStructType( structstr);
-		if (!structno) return new NullStructIterator();
-
-		return new StructIterator( this, m_database.get(), structno, m_errorhnd);
+		return new StructIterator( this, m_database.get(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating structure iterator: %s"), *m_errorhnd, 0);
 }
@@ -883,6 +879,11 @@ Index StorageClient::maxDocumentNumber() const
 Index StorageClient::documentNumber( const std::string& docid) const
 {
 	return getDocno( docid);
+}
+
+Index StorageClient::structTypeNumber( const std::string& structname) const
+{
+	return getStructType( structname);
 }
 
 Index StorageClient::termTypeNumber( const std::string& type) const

@@ -8,6 +8,7 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #include "strus/index.hpp"
+#include <iostream>
 
 namespace strus {
 
@@ -55,6 +56,12 @@ struct StructBlockLink
 	bool operator==( const StructBlockLink& o) const
 	{
 		return head == o.head && structno == o.structno && idx == o.idx;
+	}
+
+	void print( std::ostream& out) const
+	{
+		const char* dir = head ? "->" : "<-";
+		out << "[" << structno << "," << idx << "] " << dir;
 	}
 };
 

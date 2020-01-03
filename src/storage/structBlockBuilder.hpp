@@ -25,8 +25,8 @@ namespace strus {
 class StructBlockBuilder
 {
 public:
-	StructBlockBuilder()
-		:m_map(),m_docno(0),m_indexCount(0),m_lastSource(){}
+	explicit StructBlockBuilder( strus::Index docno_=0)
+		:m_map(),m_docno(docno_),m_indexCount(0),m_lastSource(){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
 		,m_docno(o.m_docno)
@@ -79,6 +79,8 @@ public:
 	void check() const;
 
 	StructBlock createBlock();
+
+	void print( std::ostream& out) const;
 
 public:/*local functions*/
 	struct IndexRangeLinkPair

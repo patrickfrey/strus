@@ -33,7 +33,7 @@ public:
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
 		FfBlockPrefix='o',	///< [typeno,termno,docno]     ->  [ff]
-		StructBlockPrefix='s',	///< [structno,docno]          ->  [struct]*
+		StructBlockPrefix='s',	///< [docno]                   ->  [struct]*
 		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff,firstpos]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*

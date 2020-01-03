@@ -703,6 +703,16 @@ StructBlock StructBlockBuilder::createBlock()
 	return 	StructBlock( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar);
 }
 
+void StructBlockBuilder::print( std::ostream& out) const
+{
+	out << "docno " << m_docno << ":" << std::endl;
+	IndexRangeLinkMap::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		mi->link.print( out);
+		out << " [" << mi->range.start() << "," << mi->range.end() << "]" << std::endl;
+	}
+}
 
 
 

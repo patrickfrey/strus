@@ -13,6 +13,8 @@
 #include <set>
 using namespace strus;
 
+#error DEPRECATED
+
 void StructBlockBatchWrite::checkBlocks( DatabaseAdapter_StructBlock::WriteCursor* dbadapter)
 {
 	StructBlock blk;
