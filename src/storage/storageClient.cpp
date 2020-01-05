@@ -583,7 +583,7 @@ StorageTransactionInterface*
 {
 	try
 	{
-		return new StorageTransaction( this, m_next_typeno.value(), m_next_structno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_next_typeno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
@@ -1162,6 +1162,7 @@ struct CheckHistory
 };
 
 static void checkKeyValue(
+		const strus::StorageClient* storage,
 		const strus::DatabaseClientInterface* database,
 		const strus::DatabaseCursorInterface::Slice& key,
 		const strus::DatabaseCursorInterface::Slice& value,
@@ -1255,11 +1256,30 @@ static void checkKeyValue(
 			case strus::DatabaseKey::StructBlockPrefix:
 			{
 				strus::StructBlockData data( key, value);
-				if (data.structures.empty() || history.elemid >= data.structures[0].docno)
+				if (data.structures.empty())
 				{
-					throw strus::runtime_error(_TXT("corrupt index: empty or overlapping %s blocks"), "structure");
+					throw strus::runtime_error(_TXT("corrupt index: empty %s block"), "structure");
 				}
-				history.elemid = data.docno;
+				else
+				{
+					std::vector<strus::StructBlockData::Structure>::const_iterator
+						di = data.structures.begin(), de = data.structures.end();
+					for (; di != de; ++di)
+					{
+						if (di->structno <= 0 || di->structno > storage->maxStructTypeNo())
+						{
+							throw strus::runtime_error(_TXT("corrupt index: unknown or bad id of %s"), "structure");
+						}
+						if (di->source.start() <= 0 || di->source.end() <= 0)
+						{
+							throw strus::runtime_error(_TXT("corrupt index: bad header of %s"), "structure");
+						}
+						if (di->sink.start() <= 0 || di->sink.end() <= 0)
+						{
+							throw strus::runtime_error(_TXT("corrupt index: bad content of %s"), "structure");
+						}
+					}
+				}
 				break;
 			}
 			case strus::DatabaseKey::InverseTermPrefix:
@@ -1364,7 +1384,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 				m_errorhnd->report( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
 				return false;
 			}
-			checkKeyValue( m_database.get(), key, cursor->value(), history, errorlog);
+			checkKeyValue( this, m_database.get(), key, cursor->value(), history, errorlog);
 		}
 		return true;
 	}

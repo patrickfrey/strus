@@ -60,7 +60,7 @@ TermTypeData::TermTypeData( const strus::DatabaseCursorInterface::Slice& key, co
 	typeno = strus::unpackIndex( vi, ve);/*[typeno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term type number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "term type index");
 	}
 }
 
@@ -80,7 +80,7 @@ StructTypeData::StructTypeData( const strus::DatabaseCursorInterface::Slice& key
 	structno = strus::unpackIndex( vi, ve);/*[structno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of struct type number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "structure type index");
 	}
 }
 
@@ -160,7 +160,7 @@ TermValueData::TermValueData( const strus::DatabaseCursorInterface::Slice& key, 
 	valueno = strus::unpackIndex( vi, ve);/*[valueno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term value number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "term index");
 	}
 }
 
@@ -186,7 +186,7 @@ DocIdData::DocIdData( const strus::DatabaseCursorInterface::Slice& key, const st
 	docno = strus::unpackIndex( vi, ve);/*[docno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of document number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "document identifier index");
 	}
 }
 
@@ -212,7 +212,7 @@ UserNameData::UserNameData( const strus::DatabaseCursorInterface::Slice& key, co
 	userno = strus::unpackIndex( vi, ve);/*[userno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of user number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "user index");
 	}
 }
 
@@ -237,7 +237,7 @@ TermTypeInvData::TermTypeInvData( const strus::DatabaseCursorInterface::Slice& k
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term type number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "term type");
 	}
 }
 
@@ -262,7 +262,7 @@ TermValueInvData::TermValueInvData( const strus::DatabaseCursorInterface::Slice&
 	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "term value inverse index");
 	}
 }
 
@@ -287,7 +287,7 @@ StructTypeInvData::StructTypeInvData( const strus::DatabaseCursorInterface::Slic
 	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "structure type inverse index");
 	}
 }
 
@@ -303,41 +303,27 @@ StructBlockData::StructBlockData( const strus::DatabaseCursorInterface::Slice& k
 	char const* vi = value.ptr();
 	char const* ve = value.ptr()+value.size();
 
-	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "structure index");
 	}
 	StructBlock blk( docno, vi, ve-vi);
-	DocIndexNodeCursor cursor;
-	Index dn = blk.firstDoc( cursor);
-
-	for (; dn; dn = blk.nextDoc( cursor))
+	std::vector<StructBlockDeclaration> declist = blk.declarations();
+	std::vector<StructBlockDeclaration>::const_iterator di = declist.begin(), de = declist.end();
+	for (; di != de; ++di)
 	{
-		StructBlock::StructureDef::Iterator sitr = blk.structureIterator( cursor);
-		strus::IndexRange source = sitr.skip( 0);
-
-		for (; source.defined(); source = sitr.skip( source.end()))
-		{
-			StructBlock::StructureMember::Iterator mitr = sitr.memberIterator();
-			strus::IndexRange sink = mitr.skip( 0);
-
-			for (; sink.defined(); sink = mitr.skip( sink.end()))
-			{
-				structures.push_back( Structure( dn, source, sink));
-			}
-		}
+		structures.push_back( Structure( di->structno, di->src, di->sink));
 	}
 }
 
 void StructBlockData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::StructBlockPrefix << ' ' << valueno << ' ' << structures.size();
+	out << (char)DatabaseKey::StructBlockPrefix << ' ' << docno << ' ' << structures.size();
 	std::vector<Structure>::const_iterator itr = structures.begin(), end = structures.end();
 	for (; itr != end; ++itr)
 	{
-		out << ' ' << itr->docno << ":" << itr->source.start() << "," << itr->source.end()
+		out << ' ' << itr->structno << ":" << itr->source.start() << "," << itr->source.end()
 			<< "->" << itr->sink.start() << "," << itr->sink.end();
 	}
 	out << std::endl;
@@ -355,7 +341,7 @@ FfBlockData::FfBlockData( const strus::DatabaseCursorInterface::Slice& key, cons
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "ff index");
 	}
 	FfBlock blk( docno, vi, ve-vi);
 
@@ -412,7 +398,7 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 	pos = strus::unpackIndex( ki, ke);/*[pos]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of forward index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "forward index");
 	}
 	ForwardIndexBlock blk( pos, vi, ve-vi);
 	const char* bi = blk.charptr();
@@ -478,7 +464,7 @@ VariableData::VariableData( const strus::DatabaseCursorInterface::Slice& key, co
 	valueno = strus::unpackIndex( vi, ve);/*[value]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of variable value"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "variable index");
 	}
 }	
 
@@ -502,7 +488,7 @@ DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const st
 	blockno = strus::unpackIndex( ki, ke);/*[blockno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of metadata block key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "metadata");
 	}
 	block.init( metadescr, blockno, vi, ve-vi);
 	descr = metadescr;
@@ -574,12 +560,12 @@ DocFrequencyData::DocFrequencyData( const strus::DatabaseCursorInterface::Slice&
 	termno = strus::unpackIndex( ki, ke);/*[valueno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term document frequency key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "term document frequency");
 	}
 	df = strus::unpackIndex( vi, ve);/*[df]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of df value"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "term document frequency");
 	}
 }
 
@@ -601,7 +587,7 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "term index");
 	}
 	PosinfoBlock blk( docno, vi, ve-vi);
 	DocIndexNodeCursor cursor;
@@ -721,7 +707,7 @@ DocListBlockData::DocListBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "document list");
 	}
 	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::DocListBlockPrefix, docno, vi, ve);
 }
@@ -747,9 +733,8 @@ InverseTermData::InverseTermData( const strus::DatabaseCursorInterface::Slice& k
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of inverse term index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "inverse term index");
 	}
-
 	InvTermBlock block( docno, vi, ve-vi);
 	char const* ii = block.begin();
 	const char* ie = block.end();
@@ -782,7 +767,7 @@ UserAclBlockData::UserAclBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of user index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "user index");
 	}
 	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::UserAclBlockPrefix, docno, vi, ve);
 }
@@ -806,7 +791,7 @@ AclBlockData::AclBlockData( const strus::DatabaseCursorInterface::Slice& key, co
 	userno = strus::unpackIndex( ki, ke);/*[userno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of docno index key"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s key"), "docno index");
 	}
 	userrangelist = getRangeListFromBooleanBlock( DatabaseKey::AclBlockPrefix, userno, vi, ve);
 }
@@ -835,7 +820,7 @@ AttributeKeyData::AttributeKeyData( const strus::DatabaseCursorInterface::Slice&
 	valueno = strus::unpackIndex( vi, ve);/*[value]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( _TXT( "unexpected extra bytes at end of attribute number"));
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of %s value"), "attribute index");
 	}
 }
 

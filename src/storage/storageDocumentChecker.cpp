@@ -12,6 +12,7 @@
 #include "storage.hpp"
 #include "indexSetIterator.hpp"
 #include "uintCompaction.hpp"
+#include "structBlockDeclaration.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -279,25 +280,75 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		{
 			logError( logout, m_docid, _TXT("failed to fetch structure names: %s"), m_errorhnd->fetchError());
 		}
-		std::vector<std::string>::const_iterator si = structnamear.begin(), se = structnamear.end();
-		for (; si != se; ++si)
+		std::map<strus::Index,std::string> structIdMap;
 		{
-			strus::local_ptr<StructIteratorInterface> stitr( m_storage->createStructIterator( *si));
-			if (!stitr.get())
+			std::vector<std::string>::const_iterator si = structnamear.begin(), se = structnamear.end();
+			for (; si != se; ++si)
 			{
-				logError( logout, m_docid, _TXT("failed to create structure iterator: %s"), m_errorhnd->fetchError());
-				break;
+				structIdMap[ m_storage->structTypeNumber( *si)] = *si;
 			}
-			if (m_docno == stitr->skipDoc( m_docno))
+		}
+		strus::local_ptr<StructIteratorInterface> stitr( m_storage->createStructIterator());
+		if (!stitr.get())
+		{
+			logError( logout, m_docid, _TXT("failed to create structure iterator: %s"), m_errorhnd->fetchError());
+		}
+		stitr->skipDoc( m_docno);
+		{
+			typedef std::pair<strus::Index,int> StructKey;
+			typedef std::pair<strus::IndexRange,strus::IndexRange> StructRelation;
+			typedef std::vector<StructRelation> StructRelationList;
+			typedef std::map<StructKey, StructRelationList> StructMap;
+			StructMap structMap;
+
+			int li = 0, le = stitr->levels();
+			for (; li != le; ++li)
 			{
-				IndexRange source = stitr->skipPosSource( 0);
-				for (; source.defined(); source = stitr->skipPosSource( source.end()))
+				IndexRange field = stitr->skipPos( li, 0);
+				StructIteratorInterface::StructureLinkArray lnka = stitr->links( li);
+				int ai = 0, ae = lnka.nofLinks();
+				for (; ai != ae; ++ai)
 				{
-					IndexRange sink = stitr->skipPosSink( 0);
-					for (; sink.defined(); sink = stitr->skipPosSink( sink.end()))
+					StructKey key( lnka.link( ai).structno(), lnka.link( ai).index());
+					std::pair<StructMap::iterator,bool> ins = structMap.insert( StructMap::value_type( key, StructRelationList()));
+					StructRelationList rlist = ins.first->second;
+					if (lnka.link( ai).header())
 					{
-						structures.insert( Structure( *si, source, sink));
+						if (rlist.empty())
+						{
+							rlist.push_back( StructRelation( field, strus::IndexRange()));
+						}
+						else
+						{
+							StructRelationList::iterator ri = rlist.begin(), re = rlist.end();
+							for (; ri != re; ++ri)
+							{
+								if (ri->first.defined()) throw std::runtime_error(_TXT("corrupt index: structure with more than one header element"));
+								ri->first = field;
+							}
+						}
 					}
+					else
+					{
+						if (rlist.empty())
+						{
+							rlist.push_back( StructRelation( strus::IndexRange(), field));
+						}
+						else
+						{
+							rlist.push_back( StructRelation( rlist.back().first, field));
+						}
+					}
+				}
+			}
+			StructMap::const_iterator si = structMap.begin(), se = structMap.end();
+			for (; si != se; ++si)
+			{
+				std::string structName = structIdMap[ si->first.first];
+				StructRelationList::const_iterator ri = si->second.begin(), re = si->second.end();
+				for (; ri != re; ++ri)
+				{
+					structures.insert( Structure( structName, ri->first, ri->second));
 				}
 			}
 		}

@@ -23,7 +23,8 @@ StorageDocumentUpdate::StorageDocumentUpdate(
 		ErrorBufferInterface* errorhnd_)
 	:m_transaction(transaction_)
 	,m_docno(docno_)
-	,m_doClearUserlist(false)
+	,m_doClearUserList(false)
+	,m_doClearStructureList(false)
 	,m_errorhnd(errorhnd_)
 {}
 
@@ -74,7 +75,7 @@ void StorageDocumentUpdate::addSearchIndexStructure(
 		{
 			Index structno = m_transaction->getOrCreateStructType( struct_);
 			m_structures.push_back( DocStructure( structno, source_, sink_));
-			m_delete_search_structnolist.insert( structno);
+			m_doClearStructureList = false;
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure '%s' to document: %s"), struct_.c_str(), *m_errorhnd);
@@ -112,15 +113,14 @@ void StorageDocumentUpdate::clearSearchIndexTerm(
 	CATCH_ERROR_MAP( _TXT("error removing occurrencies of search index term type from document: %s"), *m_errorhnd);
 }
 
-void StorageDocumentUpdate::clearSearchIndexStructure(
-		const std::string& struct_)
+void StorageDocumentUpdate::clearSearchIndexStructures()
 {
 	try
 	{
-		Index structno = m_transaction->getOrCreateStructType( struct_);
-		m_delete_search_structnolist.insert( structno);
+		m_structures.clear();
+		m_doClearStructureList = true;
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error removing structure '%s' from search index: %s"), struct_.c_str(), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error removing structures from search index: %s"), *m_errorhnd);
 }
 
 void StorageDocumentUpdate::clearForwardIndexTerm(
@@ -218,7 +218,7 @@ void StorageDocumentUpdate::clearUserAccessRights()
 	{
 		m_add_userlist.clear();
 		m_del_userlist.clear();
-		m_doClearUserlist = true;
+		m_doClearUserList = true;
 	}
 	CATCH_ERROR_MAP( _TXT("error clear all user access rights of document: %s"), *m_errorhnd);
 }
@@ -241,10 +241,9 @@ void StorageDocumentUpdate::done()
 				m_transaction->deleteDocForwardIndexType( m_docno, *fi);
 			}
 		}{
-			std::set<Index>::const_iterator si = m_delete_search_structnolist.begin(), se = m_delete_search_structnolist.end();
-			for (; si != se; ++si)
+			if (m_doClearStructureList || !m_structures.empty())
 			{
-				m_transaction->deleteStructure( *si, m_docno);
+				m_transaction->deleteStructures( m_docno);
 			}
 		}{
 			//[2.1] Update metadata:
@@ -294,7 +293,7 @@ void StorageDocumentUpdate::done()
 			}
 		}{
 			//[2.4] Update document access rights:
-			if (m_doClearUserlist)
+			if (m_doClearUserList)
 			{
 				m_transaction->deleteAcl( m_docno);
 			}
@@ -314,13 +313,12 @@ void StorageDocumentUpdate::done()
 		m_invs.clear();
 		m_delete_search_typenolist.clear();
 		m_delete_forward_typenolist.clear();
-		m_delete_search_structnolist.clear();
 		m_structures.clear();
 		m_attributes.clear();
 		m_metadata.clear();
 		m_add_userlist.clear();
 		m_del_userlist.clear();
-		m_doClearUserlist = false;
+		m_doClearUserList = false;
 	}
 	CATCH_ERROR_MAP( _TXT("error closing document update in transaction: %s"), *m_errorhnd);
 }

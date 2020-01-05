@@ -32,13 +32,12 @@ using namespace strus;
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		const Index& maxtypeno_,
-		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_attributeMap(storage_->databaseClient())
 	,m_metaDataMap(storage_->databaseClient(),storage_->getMetaDataBlockCacheRef())
 	,m_invertedIndexMap(storage_->databaseClient())
-	,m_structIndexMap(storage_->databaseClient(),maxstructno_,errorhnd_)
+	,m_structIndexMap(storage_->databaseClient(),errorhnd_)
 	,m_forwardIndexMap(storage_->databaseClient(),maxtypeno_)
 	,m_userAclMap(storage_->databaseClient())
 	,m_termTypeMap(storage_->databaseClient(),DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())
@@ -154,11 +153,6 @@ void StorageTransaction::definePosinfoPosting(
 {
 	m_invertedIndexMap.definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
-}
-
-void StorageTransaction::deleteStructure( const Index& structno, const Index& docno)
-{
-	m_structIndexMap.deleteIndex( docno, structno);
 }
 
 void StorageTransaction::deleteStructures( const Index& docno)
@@ -345,7 +339,7 @@ StorageCommitResult StorageTransaction::commit_contentTransaction()
 	m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
 
 	m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
-	m_structIndexMap.renameNewNumbers( docnoUnknownMap);
+	m_structIndexMap.renameNewDocNumbers( docnoUnknownMap);
 
 	DocumentFrequencyCache::Batch dfbatch;
 
@@ -463,7 +457,7 @@ void StorageTransaction::reset()
 	m_metaDataMap.reset( m_storage->getMetaDataBlockCacheRef());
 
 	m_invertedIndexMap.clear();
-	m_structIndexMap.reset();
+	m_structIndexMap.clear();
 	m_forwardIndexMap.reset( m_storage->maxTermTypeNo());
 	m_userAclMap.clear();
 

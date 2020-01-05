@@ -12,6 +12,7 @@
 #include "structBlockFieldEnum.hpp"
 #include "structBlockFieldPacked.hpp"
 #include "structBlockLink.hpp"
+#include "structBlockDeclaration.hpp"
 #include "docIndexNode.hpp"
 #include "staticIntrusiveArray.hpp"
 #include "skipScanArray.hpp"
@@ -289,6 +290,8 @@ public:
 	const PositionType* startar() const				{return m_data.startar();}
 	const StructBlockFieldPackedByte* pkbytear() const		{return m_data.pkbytear();}
 	const StructBlockFieldPackedShort* pkshortar() const		{return m_data.pkshortar();}
+
+	std::vector<StructBlockDeclaration> declarations() const;
 
 private:
 	void initFrame();

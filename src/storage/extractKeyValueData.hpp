@@ -195,19 +195,18 @@ struct PosinfoBlockData
 
 struct StructBlockData
 {
-	Index valueno;
 	Index docno;
-	
+
 	struct Structure
 	{
-		Index docno;
+		Index structno;
 		IndexRange source;
 		IndexRange sink;
 
-		Structure( const Index& docno_, const IndexRange& source_, const IndexRange& sink_)
-			:docno(docno_),source(source_),sink(sink_){}
+		Structure( const Index& structno_, const IndexRange& source_, const IndexRange& sink_)
+			:structno(structno_),source(source_),sink(sink_){}
 		Structure( const Structure& o)
-			:docno(o.docno),source(o.source),sink(o.sink){}
+			:structno(o.structno),source(o.source),sink(o.sink){}
 	};
 	std::vector<Structure> structures;
 

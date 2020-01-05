@@ -51,11 +51,10 @@ class StorageTransaction
 public:
 	///\param[in] storage_ storage to call refresh after commit or rollback
 	///\param[in] maxtypeno_ maximum type number
-	///\param[in] maxstructno_ maximum structure number
+	///\param[in] errorhnd_ error buffer interface
 	StorageTransaction( 
 		StorageClient* storage_,
 		const Index& maxtypeno_,
-		const Index& maxstructno_,
 		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
@@ -114,7 +113,6 @@ public:/*Document,DocumentUpdate*/
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
 
-	void deleteStructure( const Index& structno, const Index& docno);
 	void deleteStructures( const Index& docno);
 	void defineStructure(
 		const Index& structno,

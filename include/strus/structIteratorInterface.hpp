@@ -20,6 +20,9 @@ namespace strus
 class StructIteratorInterface
 {
 public:
+	/// \brief Get the mamimum number of levels for structures (maximum value 'levels()' can return
+	enum {MaxStructLevels=8};
+
 	/// \brief Destructor
 	virtual ~StructIteratorInterface(){}
 

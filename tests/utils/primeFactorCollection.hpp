@@ -602,17 +602,6 @@ struct PrimeFactorDocumentBuilder
 		return rt;
 	}
 
-	void clearStructures( strus::StorageClientInterface* storage, strus::StorageDocumentUpdateInterface* doc)
-	{
-		strus::local_ptr<strus::ValueIteratorInterface> vitr( storage->createStructTypeIterator());
-		std::vector<std::string> values = vitr->fetchValues( std::numeric_limits<int>::max());
-		std::vector<std::string>::const_iterator vi = values.begin(), ve = values.end();
-		for (; vi != ve; ++vi)
-		{
-			doc->clearSearchIndexStructure( *vi);
-		}
-	}
-
 	enum WriteMode {InsertMode, UpdateMode, InsertAlteredMode, UpdateAlteredMode};
 	void insertCollection( strus::StorageClientInterface* storage, PseudoRandom& random, int commitSize, WriteMode mode, bool isLast)
 	{
@@ -661,7 +650,7 @@ struct PrimeFactorDocumentBuilder
 					strus::local_ptr<strus::StorageDocumentUpdateInterface>
 						doc( transaction->createDocumentUpdate( docno));
 					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
-					if (isLast) clearStructures( storage, doc.get());
+					if (isLast) doc->clearSearchIndexStructures();
 					buildDocument( doc.get(), feats, structs);
 					break;
 				}

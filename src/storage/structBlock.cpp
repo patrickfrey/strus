@@ -335,4 +335,72 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	return m_cur;
 }
 
+std::vector<StructBlockDeclaration> StructBlock::declarations() const
+{
+	std::vector<StructBlockDeclaration> rt;
+	typedef std::map<StructBlockKey,std::vector<StructBlockDeclaration> > DeclMap;
+	DeclMap declmap;
+
+	int fi = 0, fe = fieldarsize();
+	for (; fi != fe; ++fi)
+	{
+		StructBlock::FieldScanner scanner = fieldscanner( fi);
+		int idx = 0;
+		strus::IndexRange field = scanner.next();
+		for (; field.defined(); field = scanner.next(),++idx)
+		{
+			const StructBlockLink* links = scanner.links();
+			int li = 0, le = scanner.noflinks();
+			for (; li != le; ++li)
+			{
+				StructBlockKey key( links[ li].structno, links[ li].idx);
+				DeclMap::iterator di = declmap.find( key);
+				if (di == declmap.end())
+				{
+					di = declmap.insert( DeclMap::value_type( key, std::vector<StructBlockDeclaration>())).first;
+				}
+				if (links[ li].head)
+				{
+					if (di->second.empty())
+					{
+						di->second.push_back( StructBlockDeclaration( key.structno, field, strus::IndexRange()));
+					}
+					else if (di->second.back().src.defined())
+					{
+						if (di->second.back().src != field) throw std::runtime_error(_TXT("currupt index: overlapping duplicate structure key"));
+					}
+					else
+					{
+						std::vector<StructBlockDeclaration>::iterator
+							ei = di->second.begin(), ee = di->second.end();
+						for (; ei != ee; ++ei)
+						{
+							ei->src = field;
+						}
+					}
+				}
+				else
+				{
+					if (di->second.empty())
+					{
+						di->second.push_back( StructBlockDeclaration( key.structno, strus::IndexRange(), field));
+					}
+					else
+					{
+						di->second.push_back( StructBlockDeclaration( key.structno, di->second.back().src, field));
+					}
+				}
+			}
+		}
+	}
+	DeclMap::iterator mi = declmap.begin(), me = declmap.end();
+	for (; mi != me; ++mi)
+	{
+		std::vector<StructBlockDeclaration>& declist = mi->second;
+		std::sort( declist.begin(), declist.end());
+
+		rt.insert( rt.end(), declist.begin(), declist.end());
+	}
+	return rt;
+}
 

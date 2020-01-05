@@ -62,11 +62,9 @@ public:
 	virtual void clearSearchIndexTerm(
 			const std::string& type_)=0;
 
-	/// \brief Clear all previous occurrencies of a structure in a document in the search index
-	/// \param[in] struct_ type name of the structures to erase
-	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
-	virtual void clearSearchIndexStructure(
-			const std::string& struct_)=0;
+	/// \brief Clear all structures previously declared for a document in the search index
+	/// \note The call of this function happens implicitely, if one or more structures are added to the update
+	virtual void clearSearchIndexStructures()=0;
 
 	/// \brief Clear all previous occurrencies of a term type in a document in the forward index
 	/// \param[in] type_ type name of the terms to erase

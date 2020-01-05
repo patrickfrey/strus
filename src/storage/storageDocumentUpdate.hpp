@@ -58,9 +58,8 @@ public:
 	virtual void clearSearchIndexTerm(
 			const std::string& type_);
 
-	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexStructure( const std::string&);
-	virtual void clearSearchIndexStructure(
-			const std::string& struct_);
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexStructures();
+	virtual void clearSearchIndexStructures();
 
 	/// \brief Implementation of StorageDocumentUpdateInterface::clearForwardIndexTerm( const std::string&);
 	virtual void clearForwardIndexTerm(
@@ -108,13 +107,13 @@ private:
 	InvMap m_invs;						///< map of all forward index terms added
 	std::set<Index> m_delete_search_typenolist;		///< set with typeno of types to remove from the search index
 	std::set<Index> m_delete_forward_typenolist;		///< set with typeno of types to remove from the forward index
-	std::set<Index> m_delete_search_structnolist;		///< set with structno of types to remove from the search index
 	std::vector<DocStructure> m_structures;			///< structures to add
 	std::vector<DocAttribute> m_attributes;			///< attributes to update
 	std::vector<DocMetaData> m_metadata;			///< metadata to update
 	std::vector<Index> m_add_userlist;			///< list of users to add to this document access
 	std::vector<Index> m_del_userlist;			///< list of users to remove from this document access
-	bool m_doClearUserlist;					///< true if the list of all users should be cleared before this transaction
+	bool m_doClearUserList;					///< true if the list of all users should be cleared before this transaction
+	bool m_doClearStructureList;				///< true if the list of all structures should be cleared before this transaction
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 

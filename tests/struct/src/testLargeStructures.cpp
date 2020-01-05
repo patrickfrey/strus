@@ -335,13 +335,14 @@ struct Collection
 	struct Query
 	{
 		std::string docid;
+		strus::Index structno;
 		strus::Index headerpos;
 		strus::Index contentpos;
 
 		Query( const std::string& docid_, strus::Index headerpos_, strus::Index contentpos_)
-			:docid(docid_),headerpos(headerpos_),contentpos(contentpos_){}
+			:docid(docid_),structno(1),headerpos(headerpos_),contentpos(contentpos_){}
 		Query( const Query& o)
-			:docid(o.docid),headerpos(o.headerpos),contentpos(o.contentpos){}
+			:docid(o.docid),structno(o.structno),headerpos(o.headerpos),contentpos(o.contentpos){}
 	};
 
 	struct QueryAnswerPair
@@ -444,15 +445,77 @@ struct Collection
 	}
 };
 
+static std::pair<strus::IndexRange,int> findQuerySource( strus::StructIteratorInterface* sitr, strus::Index structno, strus::Index pos)
+{
+	std::pair<strus::IndexRange,int> rt;
+	int li = 0, le = sitr->levels();
+	for (; li != le; ++li)
+	{
+		strus::IndexRange source = sitr->skipPos( li, pos);
+		while (source.defined())
+		{
+			strus::StructIteratorInterface::StructureLinkArray lnkar = sitr->links( li);
+			int si = 0, se = lnkar.nofLinks();
+			for (; si != se; ++si)
+			{
+				strus::StructIteratorInterface::StructureLink lnk = lnkar.link( si);
+				if (lnk.header() == true && lnk.structno() == structno)
+				{
+					if (!rt.first.defined() || (source.defined() && rt.first.end() < source.end()))
+					{
+						rt.first = source;
+						rt.second = lnk.index();
+						break;
+					}
+				}
+			}
+			source = sitr->skipPos( li, pos = source.end());
+		}
+	}
+	return rt;
+}
+
+static strus::IndexRange findQuerySink( strus::StructIteratorInterface* sitr, strus::Index structno, int structidx, strus::Index pos)
+{
+	int li = 0, le = sitr->levels();
+	for (; li != le; ++li)
+	{
+		strus::IndexRange sink = sitr->skipPos( li, pos);
+		while (sink.defined())
+		{
+			strus::StructIteratorInterface::StructureLinkArray lnkar = sitr->links( li);
+			int si = 0, se = lnkar.nofLinks();
+			for (; si != se; ++si)
+			{
+				strus::StructIteratorInterface::StructureLink lnk = lnkar.link( si);
+				if (lnk.header() == false && lnk.structno() == structno && lnk.index() == structidx)
+				{
+					return sink;
+				}
+			}
+			sink = sitr->skipPos( li, pos = sink.end());
+		}
+	}
+	return strus::IndexRange();
+}
+
 static void verifyQueryAnswer( Storage& storage, strus::StructIteratorInterface* sitr, const Collection::QueryAnswerPair& qa)
 {
 	strus::Index docno = storage.sci->documentNumber( qa.query.docid);
 	if (!docno) throw strus::runtime_error("document id unknown: %s", qa.query.docid.c_str());
-	if (docno != sitr->skipDoc( docno))
+	sitr->skipDoc( docno);
+
+	std::pair<strus::IndexRange,int> stu = findQuerySource( sitr, qa.query.structno, qa.query.headerpos);
+
+	strus::Index structno = qa.query.structno;
+	int structidx = stu.second;
+	strus::IndexRange source = stu.first;
+	strus::IndexRange sink;
+
+	if (source.defined())
 	{
-		throw strus::runtime_error("search document %d (docid %s) failed", docno, qa.query.docid.c_str());
+		sink = findQuerySink( sitr, structno, structidx, qa.query.contentpos);
 	}
-	strus::IndexRange source = sitr->skipPosSource( qa.query.headerpos);
 	if (source != qa.answer.header)
 	{
 		throw strus::runtime_error(
@@ -463,7 +526,6 @@ static void verifyQueryAnswer( Storage& storage, strus::StructIteratorInterface*
 			(int)qa.query.headerpos, docno, qa.query.docid.c_str(),
 			(int)qa.answer.header.start(), (int)qa.answer.header.end());
 	}
-	strus::IndexRange sink = sitr->skipPosSink( qa.query.contentpos);
 	if (sink != qa.answer.content)
 	{
 		throw strus::runtime_error(
@@ -496,7 +558,7 @@ static void testLargeStructures( int nofCycles, int nofDocuments, int nofStructu
 	if (g_dumpCollection) collection.dump( std::cout);
 
 	int qi = 0, qe = nofQueryies;
-	strus::local_ptr<strus::StructIteratorInterface> sitr( storage.sci->createStructIterator( g_structureName));
+	strus::local_ptr<strus::StructIteratorInterface> sitr( storage.sci->createStructIterator());
 	if (!sitr.get()) throw std::runtime_error("failed to create structure iterator");
 
 	if (g_verbose) {fprintf( stderr, "\n"); fflush( stderr);}
