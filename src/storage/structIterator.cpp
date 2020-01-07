@@ -108,14 +108,7 @@ StructIteratorInterface::StructureLinkArray StructIterator::links( int level) co
 	{
 		if (level >= 0 && level < m_levels)
 		{
-			StructureLink lnk[ StructIteratorInterface::StructureLinkArray::MaxNofLinks];
-			int li=0, le = m_scanner[ level].noflinks();
-			const StructBlockLink* lnkp = m_scanner[ level].links();
-			for (; li != le; ++li)
-			{
-				lnk[ li].init( lnkp[ li].structno, lnkp[ li].head, lnkp[ li].idx);
-			}
-			rt.init( lnk, le);
+			rt = m_scanner[ level].links();
 		}
 		return rt;
 	}

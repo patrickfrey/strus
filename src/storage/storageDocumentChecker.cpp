@@ -305,38 +305,46 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			for (; li != le; ++li)
 			{
 				IndexRange field = stitr->skipPos( li, 0);
-				StructIteratorInterface::StructureLinkArray lnka = stitr->links( li);
-				int ai = 0, ae = lnka.nofLinks();
-				for (; ai != ae; ++ai)
+				for (; field.defined(); field = stitr->skipPos( li, field.end()))
 				{
-					StructKey key( lnka.link( ai).structno(), lnka.link( ai).index());
-					std::pair<StructMap::iterator,bool> ins = structMap.insert( StructMap::value_type( key, StructRelationList()));
-					StructRelationList rlist = ins.first->second;
-					if (lnka.link( ai).header())
+					StructIteratorInterface::StructureLinkArray lnka = stitr->links( li);
+					int ai = 0, ae = lnka.nofLinks();
+					for (; ai != ae; ++ai)
 					{
-						if (rlist.empty())
+						const StructIteratorInterface::StructureLink& link = lnka[ ai];
+						StructKey key( link.structno(), link.index());
+						std::pair<StructMap::iterator,bool> ins = structMap.insert( StructMap::value_type( key, StructRelationList()));
+						StructRelationList& rlist = ins.first->second;
+						if (link.header())
 						{
-							rlist.push_back( StructRelation( field, strus::IndexRange()));
-						}
-						else
-						{
-							StructRelationList::iterator ri = rlist.begin(), re = rlist.end();
-							for (; ri != re; ++ri)
+							if (rlist.empty())
 							{
-								if (ri->first.defined()) throw std::runtime_error(_TXT("corrupt index: structure with more than one header element"));
-								ri->first = field;
+								rlist.push_back( StructRelation( field, strus::IndexRange()));
+							}
+							else
+							{
+								StructRelationList::iterator ri = rlist.begin(), re = rlist.end();
+								for (; ri != re; ++ri)
+								{
+									if (ri->first.defined()) throw std::runtime_error(_TXT("corrupt index: structure with more than one header element"));
+									ri->first = field;
+								}
 							}
 						}
-					}
-					else
-					{
-						if (rlist.empty())
-						{
-							rlist.push_back( StructRelation( strus::IndexRange(), field));
-						}
 						else
 						{
-							rlist.push_back( StructRelation( rlist.back().first, field));
+							if (rlist.empty())
+							{
+								rlist.push_back( StructRelation( strus::IndexRange(), field));
+							}
+							else if (rlist.back().second.defined())
+							{
+								rlist.push_back( StructRelation( rlist.back().first, field));
+							}
+							else
+							{
+								rlist.back().second = field;
+							}
 						}
 					}
 				}

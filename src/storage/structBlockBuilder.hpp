@@ -26,11 +26,12 @@ class StructBlockBuilder
 {
 public:
 	explicit StructBlockBuilder( strus::Index docno_=0)
-		:m_map(),m_docno(docno_),m_indexCount(0),m_lastSource(){}
+		:m_map(),m_docno(docno_),m_indexCount(0),m_lastStructno(0),m_lastSource(){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
 		,m_docno(o.m_docno)
 		,m_indexCount(o.m_indexCount)
+		,m_lastStructno(o.m_lastStructno)
 		,m_lastSource(o.m_lastSource){}
 	StructBlockBuilder( const StructBlock& blk);
 
@@ -55,6 +56,7 @@ public:
 		m_map.clear();
 		m_docno = 0;
 		m_indexCount = 0;
+		m_lastStructno = 0;
 		m_lastSource = strus::IndexRange();
 	}
 
@@ -71,6 +73,7 @@ public:
 		m_map.swap( o.m_map);
 		std::swap( m_docno, o.m_docno);
 		std::swap( m_indexCount, o.m_indexCount);
+		std::swap( m_lastStructno, o.m_lastStructno);
 		std::swap( m_lastSource, o.m_lastSource);
 	}
 
@@ -138,10 +141,10 @@ public:/*local functions*/
 			return rt;
 		}
 
-		void erase( const strus::IndexRange& range, const StructBlockLink& link)
+		void erase( Map::const_iterator mi)
 		{
-			map.erase( IndexRangeLinkPair( range, link));
-			invmap.erase( LinkIndexRangePair( link, range));
+			map.erase( IndexRangeLinkPair( mi->range, mi->link));
+			invmap.erase( LinkIndexRangePair( mi->link, mi->range));
 		}
 
 		bool headerExists( const strus::IndexRange& range, strus::Index structno)
@@ -222,6 +225,7 @@ private:
 	IndexRangeLinkMap m_map;
 	strus::Index m_docno;
 	int m_indexCount;
+	strus::Index m_lastStructno;
 	strus::IndexRange m_lastSource;
 };
 }//namespace

@@ -93,7 +93,7 @@ public:
 		/// \brief Get the number of links defined {0..MaxNofLinks-1}
 		int nofLinks() const				{return m_nofLinks;}
 		/// \brief Get the link addressed by index {0..MaxNofLinks-1}
-		const StructureLink& link( int idx) const	{return m_links[idx];}
+		const StructureLink& operator[]( int idx) const	{return m_links[idx];}
 
 		/// \brief Default constructor
 		StructureLinkArray()
@@ -109,6 +109,8 @@ public:
 			{m_nofLinks=o.m_nofLinks; for (int ai=0; ai < o.m_nofLinks; ++ai) {m_links[ ai] = o.m_links[ ai];}; return *this;}
 		void init( StructureLink* links_, int size_)
 			{m_nofLinks=size_; for (int ai=0; ai < size_; ++ai) {m_links[ ai] = links_[ ai];}}
+		void reset()
+			{m_nofLinks=0;}
 
 	private:
 		StructureLink m_links[ MaxNofLinks];

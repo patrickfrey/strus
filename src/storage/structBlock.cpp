@@ -26,7 +26,8 @@ struct StaticAsserts
 {
 	StaticAsserts()
 	{
-		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureField) == 2 * sizeof(unsigned short));
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureField) == 4);
+		STRUS_STATIC_ASSERT( sizeof(StructBlockLink) == 3);
 	}
 };
 }//anonymous namespace
@@ -66,9 +67,9 @@ void StructBlock::BlockData::init(
 	std::memset( this, 0, sizeof(*this));
 	m_fieldarsize = fieldarsize_;
 	int ii;
-	for (ii=0; ii != m_fieldarsize; ++ii) m_fieldar[ii] = fieldar_[ii];
-	for (ii=0; ii != m_fieldarsize; ++ii) m_linkbasear[ii] = linkbasear_[ii];
-	for (ii=0; ii != MaxLinkWidth; ++ii) m_linkar[ii] = linkar_[ii];
+	if (fieldar_) for (ii=0; ii != m_fieldarsize; ++ii) m_fieldar[ii] = fieldar_[ii];
+	if (linkbasear_) for (ii=0; ii != m_fieldarsize; ++ii) m_linkbasear[ii] = linkbasear_[ii];
+	if (linkar_) for (ii=0; ii != MaxLinkWidth; ++ii) m_linkar[ii] = linkar_[ii];
 	m_enumar = enumar_; 
 	m_repeatar = repeatar_;
 	m_startar = startar_;
@@ -124,7 +125,7 @@ StructBlock::StructBlock(
 		int fi = 0, fe = linkar_.size();
 		for (; fi != fe; ++fi)
 		{
-			pi += linkar_[fi].size() * sizeof(PackedStructBlockLink);
+			pi += linkar_[fi].size() * sizeof(StructBlockLink);
 			hdr.linkidx[ fi] = pi;
 		}
 		for (; fi != MaxLinkWidth; ++fi)
@@ -171,7 +172,7 @@ StructBlock::StructBlock(
 			int endidx = hdr.linkbaseidx[ fi];
 			if (endidx)
 			{
-				PackedStructBlockLink* ar = (PackedStructBlockLink*)(dt + startidx);
+				PackedLinkBasePointer* ar = (PackedLinkBasePointer*)(dt + startidx);
 				std::size_t li = 0, le = linkbasear_[fi].size();
 				for (; li != le; ++li)
 				{
@@ -187,21 +188,21 @@ StructBlock::StructBlock(
 			int endidx = hdr.linkidx[ fi];
 			if (endidx)
 			{
-				PackedLinkBasePointer* ar = (PackedLinkBasePointer*)(dt + startidx);
+				StructBlockLink* ar = (StructBlockLink*)(dt + startidx);
 				std::size_t li = 0, le = linkar_[ fi].size();
 				for (; li != le; ++li)
 				{
-					ar[ li] = linkar_[ fi][ li].value();
+					ar[ li] = linkar_[ fi][ li];
 				}
 				startidx = endidx;
 			}
 		}
 	}
 	std::memcpy( dt + hdr.enumidx, enumar_.data(), hdr.repeatidx - hdr.enumidx);
-	std::memcpy( dt + hdr.repeatidx, enumar_.data(), hdr.pkbyteidx - hdr.repeatidx);
-	std::memcpy( dt + hdr.pkbyteidx, enumar_.data(), hdr.pkshortidx - hdr.pkbyteidx);
-	std::memcpy( dt + hdr.pkshortidx, enumar_.data(), hdr.startidx - hdr.pkshortidx);
-	std::memcpy( dt + hdr.startidx, enumar_.data(), blockSize - hdr.startidx);
+	std::memcpy( dt + hdr.repeatidx, repeatar_.data(), hdr.pkbyteidx - hdr.repeatidx);
+	std::memcpy( dt + hdr.pkbyteidx, pkbytear_.data(), hdr.pkshortidx - hdr.pkbyteidx);
+	std::memcpy( dt + hdr.pkshortidx, pkshortar_.data(), hdr.startidx - hdr.pkshortidx);
+	std::memcpy( dt + hdr.startidx, startar_.data(), blockSize - hdr.startidx);
 
 	this->swap( blk);
 }
@@ -255,10 +256,10 @@ void StructBlock::initFrame()
 			int fi = 0, fe = MaxLinkWidth;
 			for (; fi != fe && hdr->linkidx[ fi]; ++fi)
 			{
-				const PackedStructBlockLink* ar = getStructPtr<PackedStructBlockLink>( "link definitions", ptr(), pi, hdr->linkidx[fi]);
-				int arsize = getStructSize<PackedStructBlockLink>( "link definitions", pi, hdr->linkidx[fi]);
+				const StructBlockLink* ar = getStructPtr<StructBlockLink>( "link definitions", ptr(), pi, hdr->linkidx[fi]);
+				int arsize = getStructSize<StructBlockLink>( "link definitions", pi, hdr->linkidx[fi]);
 				linkar_[ fi].init( ar, arsize);
-				pi = hdr->linkbaseidx[fi];
+				pi = hdr->linkidx[fi];
 			}
 			for (; fi != fe; ++fi)
 			{
@@ -295,9 +296,13 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 		int idx = m_ar.upperbound( pos, m_aridx+1, m_ar.size());
 		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
+	else if (m_aridx == 0 || m_ar[ m_aridx-1].end() <= pos)
+	{
+		//... index m_aridx stays as it is
+	}
 	else
 	{
-		int idx = m_ar.upperbound( pos, 0, m_aridx+1);
+		int idx = m_ar.upperbound( pos, 0, m_aridx);
 		if (idx >= 0) m_aridx = idx; else return m_cur = strus::IndexRange();
 	}
 	const StructureField& ths = m_ar[ m_aridx];
@@ -330,8 +335,9 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
 	int li = linkbase.index + (loc.second * linkbase.width);
 	int wi = 0, we = linkbase.width;
-	for (; wi != we; ++wi) m_linkar[ wi].setValue( m_data->linkar( linkbase.width-1)[ li]);
-	m_linksize = linkbase.width;
+	StructIteratorInterface::StructureLink lar[ MaxLinkWidth];
+	for (; wi != we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width-1)[ li].unpacked();
+	m_linkar.init( lar, we);
 	return m_cur;
 }
 
@@ -345,21 +351,23 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 	for (; fi != fe; ++fi)
 	{
 		StructBlock::FieldScanner scanner = fieldscanner( fi);
-		int idx = 0;
 		strus::IndexRange field = scanner.next();
-		for (; field.defined(); field = scanner.next(),++idx)
+		for (; field.defined(); field = scanner.next())
 		{
-			const StructBlockLink* links = scanner.links();
-			int li = 0, le = scanner.noflinks();
+			const StructIteratorInterface::StructureLinkArray& links = scanner.links();
+			int li = 0, le = links.nofLinks();
 			for (; li != le; ++li)
 			{
-				StructBlockKey key( links[ li].structno, links[ li].idx);
-				DeclMap::iterator di = declmap.find( key);
-				if (di == declmap.end())
+				const StructIteratorInterface::StructureLink& link = links[ li];
+				if (link.structno() <= 0)
 				{
-					di = declmap.insert( DeclMap::value_type( key, std::vector<StructBlockDeclaration>())).first;
+					throw std::runtime_error(_TXT("corrupt index: illegal structure number"));
 				}
-				if (links[ li].head)
+				StructBlockKey key( link.structno(), link.index());
+				std::pair<DeclMap::iterator,bool> ins = declmap.insert( DeclMap::value_type( key, std::vector<StructBlockDeclaration>()));
+				DeclMap::iterator di = ins.first;
+
+				if (link.header())
 				{
 					if (di->second.empty())
 					{
@@ -367,7 +375,10 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 					}
 					else if (di->second.back().src.defined())
 					{
-						if (di->second.back().src != field) throw std::runtime_error(_TXT("currupt index: overlapping duplicate structure key"));
+						if (di->second.back().src != field)
+						{
+							throw std::runtime_error(_TXT("corrupt index: overlapping duplicate structure key"));
+						}
 					}
 					else
 					{
@@ -385,9 +396,13 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 					{
 						di->second.push_back( StructBlockDeclaration( key.structno, strus::IndexRange(), field));
 					}
-					else
+					else if (di->second.back().sink.defined())
 					{
 						di->second.push_back( StructBlockDeclaration( key.structno, di->second.back().src, field));
+					}
+					else
+					{
+						di->second.back().sink = field;
 					}
 				}
 			}

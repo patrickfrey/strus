@@ -30,6 +30,14 @@ struct StructBlockDeclaration
 				: src < o.src)
 			: (structno < o.structno);
 	}
+	bool operator == ( const StructBlockDeclaration& o) const
+	{
+		return (structno == o.structno && src == o.src && sink == o.sink);
+	}
+	bool operator != ( const StructBlockDeclaration& o) const
+	{
+		return !operator==(o);
+	}
 };
 
 }//namespace

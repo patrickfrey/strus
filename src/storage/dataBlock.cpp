@@ -55,7 +55,7 @@ void DataBlock::init( strus::Index id_, std::size_t size_)
 
 	m_ptr = (char*)newptr;
 	m_allocsize = mm;
-	m_size = 0;
+	m_size = size_;
 	m_id = id_;
 }
 

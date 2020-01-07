@@ -85,7 +85,7 @@ void StructIndexMap::renameNewDocNumbers( const std::map<strus::Index,strus::Ind
 		if (KeyMap::isUnknown( ai->first/*docno*/))
 		{
 			std::map<strus::Index,strus::Index>::const_iterator
-			ri = docnoUnknownMap.find( ai->first/*docno*/);
+				ri = docnoUnknownMap.find( ai->first/*docno*/);
 			if (ri == docnoUnknownMap.end())
 			{
 				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "struct map");
@@ -97,6 +97,21 @@ void StructIndexMap::renameNewDocNumbers( const std::map<strus::Index,strus::Ind
 			new_docno = ai->first/*docno*/;
 		}
 		docnomap_new[ new_docno] = ai->second;
+	}
+	std::vector<StructBlockBuilder>::iterator
+		bi = m_builderar.begin(), be = m_builderar.end();
+	for (; bi != be; ++bi)
+	{
+		if (KeyMap::isUnknown( bi->docno()))
+		{
+			std::map<strus::Index,strus::Index>::const_iterator
+				ri = docnoUnknownMap.find( bi->docno());
+			if (ri == docnoUnknownMap.end())
+			{
+				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "struct map");
+			}
+			bi->setDocno( ri->second);
+		}
 	}
 	m_docnomap.swap( docnomap_new);
 }

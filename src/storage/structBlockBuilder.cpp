@@ -13,6 +13,7 @@
 #include <limits>
 #include <algorithm>
 
+#define STRUS_LOWLEVEL_DEBUG
 using namespace strus;
 
 StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_)
@@ -47,9 +48,18 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 	{
 		throw strus::runtime_error(_TXT("relation with bad structure id added to structure block"));
 	}
-	if (src != m_lastSource)
+	if (structno > StructBlock::MaxNofStructNo)
+	{
+		throw strus::runtime_error(_TXT("structure number (%d), out of range, only %d different structure types allowed"), (int)structno, (int)StructBlock::MaxNofStructNo);
+	}
+	if (src != m_lastSource || structno != m_lastStructno)
 	{
 		++m_indexCount;
+		if (m_indexCount >= StructBlock::MaxNofStructIdx)
+		{
+			throw strus::runtime_error(_TXT("number of structures (%d), out of range, only %d different structure types allowed"), (int)m_indexCount, (int)StructBlock::MaxNofStructIdx);
+		}
+		m_lastStructno = structno;
 		m_lastSource = src;
 		if (m_map.headerExists( src, structno))
 		{
@@ -60,19 +70,19 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 	{
 		strus::IndexRange pred_range( 0, sink.start());
 		IndexRangeLinkMap::const_iterator pi = m_map.first( pred_range), pe = m_map.end();
-		for (; pi != pe && pi->range.end() == pred_range.end(); ++pi)
+		for (; pi != pe && pi->range.end() == sink.start(); ++pi)
 		{
 			if (pi->link.structno == structno && pi->link.idx == m_indexCount && pi->link.head == false)
 			{
 				strus::IndexRange sink_expanded( pi->range.start(), sink.end());
-				m_map.erase( sink, StructBlockLink( false, structno, m_indexCount));
-				(void)m_map.append( sink_expanded, StructBlockLink( false, structno, m_indexCount));
+				m_map.erase( pi);
+				return m_map.append( sink_expanded, StructBlockLink( structno, false/*head*/, m_indexCount));
 			}
 		}
 	}
 	bool rt = false;
-	rt |= m_map.append( src, StructBlockLink( true, structno, m_indexCount));
-	rt |= m_map.append( sink, StructBlockLink( false, structno, m_indexCount));
+	rt |= m_map.append( src, StructBlockLink( structno, true/*head*/, m_indexCount));
+	rt |= m_map.append( sink, StructBlockLink( structno, false/*head*/, m_indexCount));
 	return rt;
 }
 
@@ -82,9 +92,9 @@ std::vector<StructBlockDeclaration> StructBlockBuilder::declarations() const
 	IndexRangeLinkMap::inv_iterator si = m_map.inv_begin(), se = m_map.inv_end();
 	for (; si != se && si->link.head; ++si)
 	{
-		StructBlockLink memberLink( false, si->link.structno, si->link.idx);
+		StructBlockLink memberLink( si->link.structno, false/*head*/, si->link.idx);
 		IndexRangeLinkMap::inv_iterator mi = m_map.inv_first( memberLink);
-		for (; si->link == memberLink; ++si)
+		for (; mi->link == memberLink; ++mi)
 		{
 			rt.push_back( StructBlockDeclaration( si->link.structno, si->range/*src*/, mi->range/*sink*/));
 		}
@@ -158,11 +168,12 @@ static void separateFieldCover( FieldCover& rest, FieldCover& cur, const FieldLi
 		strus::Index cend = getter( *fi).end();
 		for (; fi != fe && getter( *fi).end() == cend; ++fi)
 		{
-			candidates.push_back( getter( *fi));
+			strus::IndexRange cd = getter( *fi);
+			if (candidates.empty() || candidates.back() != cd) candidates.push_back( cd);
 		}
 		strus::IndexRange lastCandidate = candidates.back();
 		candidates.pop_back();
-	
+
 		std::vector<strus::IndexRange>::const_iterator ci = candidates.begin(), ce = candidates.end();
 		for (; ci != ce; ++ci)
 		{
@@ -250,7 +261,6 @@ static bool joinAdjacentFields( FieldCover& upfield, FieldCover& downfield)
 	}
 	for (; ui != ue; ++ui)
 	{
-		changed = true;
 		upfield_new.insert( *ui);
 	}
 	if (upfield_new.size() + downfield_new.size() != upfield.size() + downfield.size())
@@ -294,10 +304,11 @@ std::vector<FieldCover> StructBlockBuilder::getFieldCovers() const
 			throw std::runtime_error(_TXT("overlapping structures of same type detected building structure block"));
 		}
 	}
-	bool changed = false;
+	bool changed;
 	do
 	{
-		std::size_t ri = rt.size()-1;
+		changed = false;
+		int ri = rt.size()-1;
 		for (; ri > 0; --ri)
 		{
 			changed |= joinAdjacentFields( rt[ ri], rt[ ri-1]);
@@ -369,7 +380,7 @@ struct FieldPackingDim
 		:elements(0),bytes(0),end(0){}
 	FieldPackingDim( int elements_, int unitsize, int width, StructBlock::PositionType end_)
 		:elements(elements_)
-		,bytes(unitsize + sizeof(StructBlock::StructureField) + (width * sizeof(PackedStructBlockLink)) + sizeof(StructBlock::PackedLinkBasePointer))
+		,bytes(unitsize + sizeof(StructBlock::StructureField) + (elements_ * width * sizeof(StructBlockLink)) + sizeof(StructBlock::PackedLinkBasePointer))
 		,end(end_){}
 	FieldPackingDim( const FieldPackingDim& o)
 		:elements(o.elements),bytes(o.bytes),end(o.end){}
@@ -383,6 +394,7 @@ static FieldPackingDim evaluateFieldPackingDim_offset(
 		std::vector<LinkDef>::const_iterator se,
 		StructBlock::FieldIdx& ofs)
 {
+	ofs = si->range.end() - si->range.start();
 	if (si->range.end() - si->range.start() >= StructBlock::MaxFieldIdx) return FieldPackingDim();
 	int width = si->width;
 	return FieldPackingDim( 1/*elements*/, 0/*unitsize*/, width, si->range.end());
@@ -576,8 +588,9 @@ StructBlock StructBlockBuilder::createBlock()
 			{
 				throw std::runtime_error( _TXT("found range not assigned to structure"));
 			}
-			linkdefs.push_back( LinkDef( mi->range, width, linkar[ width-1].size()));
-			linkar[ width-1].insert( linkar[ width-1].end(), lnkset.begin(), lnkset.end());
+			std::vector<StructBlockLink>& ths_linkar = linkar[ width-1];
+			linkdefs.push_back( LinkDef( *fi, width, ths_linkar.size()));
+			ths_linkar.insert( ths_linkar.end(), lnkset.begin(), lnkset.end());
 		}
 		// Compress and store the fields:
 		std::vector<LinkDef>::const_iterator li = linkdefs.begin(), le = linkdefs.end();
@@ -640,7 +653,19 @@ StructBlock StructBlockBuilder::createBlock()
 			li += dim.elements;
 		}
 	}
-	return 	StructBlock( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar);
+	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar);
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::vector<StructBlockDeclaration> declist_build = this->declarations();
+	std::vector<StructBlockDeclaration> declist_block = rt.declarations();
+	std::vector<StructBlockDeclaration>::const_iterator ui = declist_build.begin(), ue = declist_build.end();
+	std::vector<StructBlockDeclaration>::const_iterator li = declist_block.begin(), le = declist_block.end();
+	for (; li != le && ui != ue; ++li,++ui)
+	{
+		if (*ui != *li) throw std::runtime_error(_TXT("structures built are currupt"));
+	}
+	if (li != le || ui != ue) throw std::runtime_error(_TXT("structures built are currupt"));
+#endif
+	return rt;
 }
 
 void StructBlockBuilder::print( std::ostream& out) const

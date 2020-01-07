@@ -458,7 +458,7 @@ static std::pair<strus::IndexRange,int> findQuerySource( strus::StructIteratorIn
 			int si = 0, se = lnkar.nofLinks();
 			for (; si != se; ++si)
 			{
-				strus::StructIteratorInterface::StructureLink lnk = lnkar.link( si);
+				const strus::StructIteratorInterface::StructureLink& lnk = lnkar[ si];
 				if (lnk.header() == true && lnk.structno() == structno)
 				{
 					if (!rt.first.defined() || (source.defined() && rt.first.end() < source.end()))
@@ -487,7 +487,7 @@ static strus::IndexRange findQuerySink( strus::StructIteratorInterface* sitr, st
 			int si = 0, se = lnkar.nofLinks();
 			for (; si != se; ++si)
 			{
-				strus::StructIteratorInterface::StructureLink lnk = lnkar.link( si);
+				const strus::StructIteratorInterface::StructureLink& lnk = lnkar[ si];
 				if (lnk.header() == false && lnk.structno() == structno && lnk.index() == structidx)
 				{
 					return sink;

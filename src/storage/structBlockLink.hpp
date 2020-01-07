@@ -8,38 +8,26 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/structIteratorInterface.hpp"
+#include "strus/base/packed.h"
 #include <iostream>
 
 namespace strus {
 
-typedef unsigned short PackedStructBlockLink;
-
-struct StructBlockLink
+PACKED_STRUCT( StructBlockLink)
 {
 	StructBlockLink()
-		:head(0),structno(0),idx(0){}
-	StructBlockLink( strus::Index structno_, bool head_, int idx_)
+		:head(true),structno(0),idx(0){}
+	StructBlockLink( strus::Index structno_, bool head_, unsigned short idx_)
 		:head(head_),structno(structno_),idx(idx_){}
 	StructBlockLink( const StructBlockLink& o)
 		:head(o.head),structno(o.structno),idx(o.idx){}
 	StructBlockLink& operator=( const StructBlockLink& o)
 		{head=o.head; structno=o.structno; idx=o.idx; return *this;}
 
-	bool head;			//...bit 15
-	strus::Index structno;		//...bits 11 12 13 14, bound to MaxNofStructNo=16
-	int idx;			//...rest bits 0..10, bound to MaxNofStructIdx=2048
-
-	PackedStructBlockLink value() const
-	{
-		return ((head?1:0) << 15) + ((structno & 0xF) << 11) + ((idx & 2047));
-	}
-
-	void setValue( PackedStructBlockLink vv)
-	{
-		head = ((vv & (1 << 15)) != 0);
-		structno = (vv >> 11) & 0xF;
-		idx = vv & 2047;
-	}
+	unsigned int head:1;		//...bit 15
+	unsigned int structno:7;	//...bits 11 12 13 14, bound to StructBlock::MaxNofStructNo=15
+	unsigned int idx:16;		//...rest bits 0..10, bound to StructBlock::MaxNofStructIdx=2047
 
 	bool operator < (const StructBlockLink& o) const
 	{
@@ -57,7 +45,10 @@ struct StructBlockLink
 	{
 		return head == o.head && structno == o.structno && idx == o.idx;
 	}
-
+	StructIteratorInterface::StructureLink unpacked() const
+	{
+		return StructIteratorInterface::StructureLink( (strus::Index)structno, (bool)head, (int)idx);
+	}
 	void print( std::ostream& out) const
 	{
 		const char* dir = head ? "->" : "<-";
