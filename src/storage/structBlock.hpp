@@ -189,7 +189,7 @@ public:
 			{return skip( m_cur.end());}
 		strus::IndexRange current() const
 			{return m_cur;}
-		const StructIteratorInterface::StructureLinkArray& links() const
+		const StructureLinkArray& links() const
 			{return m_linkar;}
 
 		strus::IndexRange skip( strus::Index pos);
@@ -207,13 +207,11 @@ public:
 		int m_aridx;
 		int m_fieldLevel;
 		strus::IndexRange m_cur;
-		StructIteratorInterface::StructureLinkArray m_linkar;
+		StructureLinkArray m_linkar;
 	};
 
 	struct LinkBasePointer
 	{
-		LinkBasePointer()
-			:index(0),width(0){}
 		LinkBasePointer( const PackedLinkBasePointer& pp)
 			{setValue(pp);}
 		LinkBasePointer( int index_, int width_)
@@ -222,16 +220,16 @@ public:
 			:index(o.index),width(o.width){}
 
 		int index;		//...index of the first link (14 bits)
-		int width;		//...number links per element (0->1,2->2,3->4, 2 bits, bound to MaxLinkWidth=4)
+		int width;		//...number links per element (>=1), bound to MaxLinkWidth=4)
 
 		PackedLinkBasePointer value() const
 		{
-			return ((width & 0x3) << 14) + (index & 0x3fFF);
+			return (((width-1) & 0x3) << 14) + (index & 0x3fFF);
 		}
 
 		void setValue( PackedLinkBasePointer vv)
 		{
-			width = (vv >> 14);
+			width = (vv >> 14)+1;
 			index = vv & 0x3fFF;
 		}
 	};

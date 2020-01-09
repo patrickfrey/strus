@@ -45,9 +45,9 @@ PACKED_STRUCT( StructBlockLink)
 	{
 		return head == o.head && structno == o.structno && idx == o.idx;
 	}
-	StructIteratorInterface::StructureLink unpacked() const
+	StructureLink unpacked() const
 	{
-		return StructIteratorInterface::StructureLink( (strus::Index)structno, (bool)head, (int)idx);
+		return StructureLink( (strus::Index)structno, (bool)head, (int)idx);
 	}
 	void print( std::ostream& out) const
 	{

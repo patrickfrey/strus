@@ -26,13 +26,11 @@ class StructBlockBuilder
 {
 public:
 	explicit StructBlockBuilder( strus::Index docno_=0)
-		:m_map(),m_docno(docno_),m_indexCount(0),m_lastStructno(0),m_lastSource(){}
+		:m_map(),m_docno(docno_),m_indexCount(0){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
 		,m_docno(o.m_docno)
-		,m_indexCount(o.m_indexCount)
-		,m_lastStructno(o.m_lastStructno)
-		,m_lastSource(o.m_lastSource){}
+		,m_indexCount(o.m_indexCount){}
 	StructBlockBuilder( const StructBlock& blk);
 
 	StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations);
@@ -56,8 +54,6 @@ public:
 		m_map.clear();
 		m_docno = 0;
 		m_indexCount = 0;
-		m_lastStructno = 0;
-		m_lastSource = strus::IndexRange();
 	}
 
 	std::size_t size() const
@@ -73,8 +69,6 @@ public:
 		m_map.swap( o.m_map);
 		std::swap( m_docno, o.m_docno);
 		std::swap( m_indexCount, o.m_indexCount);
-		std::swap( m_lastStructno, o.m_lastStructno);
-		std::swap( m_lastSource, o.m_lastSource);
 	}
 
 	std::vector<StructBlockDeclaration> declarations() const;
@@ -147,14 +141,14 @@ public:/*local functions*/
 			invmap.erase( LinkIndexRangePair( mi->link, mi->range));
 		}
 
-		bool headerExists( const strus::IndexRange& range, strus::Index structno)
+		int findStructureHeader( const strus::IndexRange& range, strus::Index structno)
 		{
 			Map::const_iterator ri = first( range), re = end();
 			for (; ri != re && ri->range == range; ++ri)
 			{
-				if (ri->link.head && ri->link.structno == structno) return true;
+				if (ri->link.head && ri->link.structno == structno) return ri->link.idx;
 			}
-			return false;
+			return -1;
 		}
 
 		int maxIndex() const
@@ -214,6 +208,19 @@ public:/*local functions*/
 		{
 			return invmap.lower_bound( LinkIndexRangePair( link, strus::IndexRange()));
 		}
+		std::vector<strus::IndexRange> fields() const
+		{
+			std::vector<strus::IndexRange> rt;
+			const_iterator mi = map.begin(), me = map.end();
+			for (; mi != me; ++mi)
+			{
+				if (rt.empty() || rt.back() != mi->range)
+				{
+					rt.push_back( mi->range);
+				}
+			}
+			return rt;
+		}
 	};
 
 	typedef std::set<strus::IndexRange> FieldCover;
@@ -225,8 +232,6 @@ private:
 	IndexRangeLinkMap m_map;
 	strus::Index m_docno;
 	int m_indexCount;
-	strus::Index m_lastStructno;
-	strus::IndexRange m_lastSource;
 };
 }//namespace
 #endif

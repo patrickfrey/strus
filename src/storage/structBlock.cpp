@@ -63,7 +63,10 @@ void StructBlock::BlockData::init(
 		const StructBlockFieldPackedByte* pkbytear_,
 		const StructBlockFieldPackedShort* pkshortar_)
 {
-	if (fieldarsize_ >= MaxFieldLevels) throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)MaxFieldLevels);
+	if (fieldarsize_ > MaxFieldLevels)
+	{
+		throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)MaxFieldLevels);
+	}
 	std::memset( this, 0, sizeof(*this));
 	m_fieldarsize = fieldarsize_;
 	int ii;
@@ -335,7 +338,7 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
 	int li = linkbase.index + (loc.second * linkbase.width);
 	int wi = 0, we = linkbase.width;
-	StructIteratorInterface::StructureLink lar[ MaxLinkWidth];
+	StructureLink lar[ MaxLinkWidth];
 	for (; wi != we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width-1)[ li].unpacked();
 	m_linkar.init( lar, we);
 	return m_cur;
@@ -354,11 +357,11 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 		strus::IndexRange field = scanner.next();
 		for (; field.defined(); field = scanner.next())
 		{
-			const StructIteratorInterface::StructureLinkArray& links = scanner.links();
+			const StructureLinkArray& links = scanner.links();
 			int li = 0, le = links.nofLinks();
 			for (; li != le; ++li)
 			{
-				const StructIteratorInterface::StructureLink& link = links[ li];
+				const StructureLink& link = links[ li];
 				if (link.structno() <= 0)
 				{
 					throw std::runtime_error(_TXT("corrupt index: illegal structure number"));

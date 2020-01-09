@@ -72,7 +72,16 @@ struct Constants
 	{
 		return 65535;
 	}
-
+	/// \brief Get the mamimum number of levels for structures, determines how structure fields can overlap
+	static inline int storage_max_struct_levels()
+	{
+		return 8;
+	}
+	/// \brief Get the mamimum number of links for structure fields
+	static inline int storage_max_struct_field_links()
+	{
+		return 4;
+	}
 	/// \brief Defines the minimum value the fraction of the document frequency related to the collection size a feature must have to be considered as a "stopword". The categorization as stopword leads to some decicions about algorithms or data structures to use for the term.
 	static inline float stopwordDfFactor()
 	{

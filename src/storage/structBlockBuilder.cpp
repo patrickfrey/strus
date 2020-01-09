@@ -8,16 +8,18 @@
 #include "structBlockBuilder.hpp"
 #include "structBlock.hpp"
 #include "structBlockLink.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
 #include <algorithm>
+#include <list>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 using namespace strus;
 
 StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_)
-	:m_map(),m_docno(docno_),m_indexCount(0),m_lastSource()
+	:m_map(),m_docno(docno_),m_indexCount(0)
 {
 	std::vector<StructBlockDeclaration>::const_iterator di = declarations_.begin(), de = declarations_.end();
 	for (; di != de; ++di)
@@ -27,6 +29,7 @@ StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<S
 }
 
 StructBlockBuilder::StructBlockBuilder( const StructBlock& blk)
+	:m_map(),m_docno(blk.id()),m_indexCount(0)
 {
 	std::vector<StructBlockDeclaration> declist = blk.declarations();
 	std::vector<StructBlockDeclaration>::const_iterator
@@ -52,38 +55,35 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 	{
 		throw strus::runtime_error(_TXT("structure number (%d), out of range, only %d different structure types allowed"), (int)structno, (int)StructBlock::MaxNofStructNo);
 	}
-	if (src != m_lastSource || structno != m_lastStructno)
-	{
-		++m_indexCount;
-		if (m_indexCount >= StructBlock::MaxNofStructIdx)
-		{
-			throw strus::runtime_error(_TXT("number of structures (%d), out of range, only %d different structure types allowed"), (int)m_indexCount, (int)StructBlock::MaxNofStructIdx);
-		}
-		m_lastStructno = structno;
-		m_lastSource = src;
-		if (m_map.headerExists( src, structno))
-		{
-			throw strus::runtime_error(_TXT("members of relation not appended to structure block after header"));
-		}
-	}
-	else
+	int structidx = m_map.findStructureHeader( src, structno);
+	if (structidx > 0)
 	{
 		strus::IndexRange pred_range( 0, sink.start());
 		IndexRangeLinkMap::const_iterator pi = m_map.first( pred_range), pe = m_map.end();
 		for (; pi != pe && pi->range.end() == sink.start(); ++pi)
 		{
-			if (pi->link.structno == structno && pi->link.idx == m_indexCount && pi->link.head == false)
+			if (pi->link.structno == structno && pi->link.idx == structidx && pi->link.head == false)
 			{
 				strus::IndexRange sink_expanded( pi->range.start(), sink.end());
+				StructBlockLink lnk( structno, false/*head*/, structidx);
 				m_map.erase( pi);
-				return m_map.append( sink_expanded, StructBlockLink( structno, false/*head*/, m_indexCount));
+				return m_map.append( sink_expanded, lnk);
 			}
 		}
+		return m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
 	}
-	bool rt = false;
-	rt |= m_map.append( src, StructBlockLink( structno, true/*head*/, m_indexCount));
-	rt |= m_map.append( sink, StructBlockLink( structno, false/*head*/, m_indexCount));
-	return rt;
+	else
+	{
+		structidx = ++m_indexCount;
+		if (m_indexCount >= StructBlock::MaxNofStructIdx)
+		{
+			throw strus::runtime_error(_TXT("number of structures (%d), out of range, only %d different structure types allowed"), (int)m_indexCount, (int)StructBlock::MaxNofStructIdx);
+		}
+		bool rt = false;
+		rt |= m_map.append( src, StructBlockLink( structno, true/*head*/, structidx));
+		rt |= m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
+		return rt;
+	}
 }
 
 std::vector<StructBlockDeclaration> StructBlockBuilder::declarations() const
@@ -156,38 +156,171 @@ public:
 	}
 };
 
-template <class FieldList, class FieldAccessFunctor>
-static void separateFieldCover( FieldCover& rest, FieldCover& cur, const FieldList& flist)
+struct IndexRangeTreeNode
 {
-	FieldAccessFunctor getter;
-	typename FieldList::const_iterator fi = flist.begin(), fe = flist.end();
+	strus::IndexRange range;
+	std::list<IndexRangeTreeNode> chld;
 
-	while (fi != fe)
+	IndexRangeTreeNode( const strus::IndexRange& range_)
+		:range(range_),chld(){}
+	IndexRangeTreeNode( const IndexRangeTreeNode& o)
+		:range(o.range),chld(o.chld){}
+
+	void add( const IndexRangeTreeNode& nd)
+		{chld.push_back(nd);}
+	void swap( IndexRangeTreeNode& nd)
 	{
-		std::vector<strus::IndexRange> candidates;
-		strus::Index cend = getter( *fi).end();
-		for (; fi != fe && getter( *fi).end() == cend; ++fi)
-		{
-			strus::IndexRange cd = getter( *fi);
-			if (candidates.empty() || candidates.back() != cd) candidates.push_back( cd);
-		}
-		strus::IndexRange lastCandidate = candidates.back();
-		candidates.pop_back();
+		chld.swap( nd.chld);
+		std::swap( range, nd.range);
+	}
+};
 
-		std::vector<strus::IndexRange>::const_iterator ci = candidates.begin(), ce = candidates.end();
-		for (; ci != ce; ++ci)
+struct IndexRangeLevelAssingment
+{
+	strus::IndexRange range;
+	int level;
+
+	IndexRangeLevelAssingment( const strus::IndexRange& range_, int level_)
+		:range(range_),level(level_){}
+	IndexRangeLevelAssingment( const IndexRangeLevelAssingment& o)
+		:range(o.range),level(o.level){}
+
+	bool operator < (const IndexRangeLevelAssingment& o) const
+	{
+		return (level == o.level) ? (range < o.range) : (level < o.level);
+	}
+};
+
+static bool addIndexRangeTreeNode( IndexRangeTreeNode& tree, const strus::IndexRange& elem)
+{
+	if (elem.overlap( tree.range))
+	{
+		if (elem.cover( tree.range))
 		{
-			rest.insert( *ci);
+			return false;
 		}
-		if (cur.empty() || cur.rbegin()->end() <= lastCandidate.start())
+		else if (tree.range.cover( elem))
 		{
-			cur.insert( lastCandidate);
-		}
-		else
-		{
-			rest.insert( lastCandidate);
+			std::list<IndexRangeTreeNode>::iterator ci = tree.chld.begin(), ce = tree.chld.end();
+			for (; ci != ce; ++ci)
+			{
+				if (elem.cover( ci->range))
+				{
+					if (elem == ci->range) return true;
+
+					IndexRangeTreeNode covernode( elem);
+					covernode.add( *ci);
+					ci = tree.chld.erase( ci);
+					ce = tree.chld.end();
+					while (ci != ce)
+					{
+						if (covernode.range.cover( ci->range))
+						{
+							covernode.add( *ci);
+							ci = tree.chld.erase( ci);
+							ce = tree.chld.end();
+						}
+						else
+						{
+							++ci;
+						}
+					}
+					tree.add( covernode);
+					return true;
+				}
+				else if (addIndexRangeTreeNode( *ci, elem))
+				{
+					return true;
+				}
+			}
+			tree.add( elem);
+			return true;
 		}
 	}
+	return false;
+}
+
+static std::vector<IndexRangeTreeNode> buildIndexRangeTrees( std::vector<strus::IndexRange>& rest, const std::vector<strus::IndexRange>& llist)
+{
+	std::vector<IndexRangeTreeNode> rt;
+	if (llist.empty()) return rt;
+
+	std::vector<strus::IndexRange>::const_iterator
+		li = llist.begin(), le = llist.end();
+	for (; li != le; ++li)
+	{
+		bool added = false;
+		std::vector<IndexRangeTreeNode>::iterator
+			ri = rt.begin(), re = rt.end();
+		while (ri != re && !added)
+		{
+			if (addIndexRangeTreeNode( *ri, *li))
+			{
+				added = true;
+			}
+			else if (*li == ri->range)
+			{
+				added = true;
+			}
+			else if (li->cover( ri->range))
+			{
+				IndexRangeTreeNode covernode( *li);
+				covernode.add( *ri);
+				ri = rt.erase( ri);
+				re = rt.end();
+				while (ri != re)
+				{
+					if (covernode.range.cover( ri->range))
+					{
+						covernode.add( *ri);
+						ri = rt.erase( ri);
+						re = rt.end();
+					}
+					else
+					{
+						++ri;
+					}
+				}
+				rt.push_back( covernode);
+				added = true;
+			}
+			else if (li->overlap( ri->range))
+			{
+				rest.push_back( *li);
+				added = true;
+			}
+			else
+			{
+				++ri;
+			}
+		}
+		if (!added)
+		{
+			rt.push_back( *li);
+		}
+	}
+	return rt;
+}
+
+static void collectIndexRangeTreeLevelAssignments( std::set<IndexRangeLevelAssingment>& result, const IndexRangeTreeNode& node, int depth)
+{
+	result.insert( IndexRangeLevelAssingment( node.range, depth));
+	std::list<IndexRangeTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
+	for (; ci != ce; ++ci)
+	{
+		collectIndexRangeTreeLevelAssignments( result, *ci, depth+1);
+	}
+}
+
+static std::set<IndexRangeLevelAssingment> getIndexRangeTreeLevelAssignments( const std::vector<IndexRangeTreeNode>& trees)
+{
+	std::set<IndexRangeLevelAssingment> rt;
+	std::vector<IndexRangeTreeNode>::const_iterator ni = trees.begin(), ne = trees.end();
+	for (; ni != ne; ++ni)
+	{
+		collectIndexRangeTreeLevelAssignments( rt, *ni, 0);
+	}
+	return rt;
 }
 
 static bool hasOverlappingFields( const FieldCover& field)
@@ -202,133 +335,78 @@ static bool hasOverlappingFields( const FieldCover& field)
 	return false;
 }
 
-static bool joinAdjacentFields( FieldCover& upfield, FieldCover& downfield)
+
+static std::vector<FieldCover> getFieldCovers_( const std::vector<strus::IndexRange>& fields, std::vector<strus::IndexRange>& rest)
 {
-	bool changed = false;
-	FieldCover upfield_new;
-	FieldCover downfield_new;
+	std::vector<FieldCover> rt;
+	if (fields.empty()) return rt;
 
-	if (upfield.empty())
-	{
-		upfield.swap( downfield);
-		return true;
-	}
-	if (downfield.empty())
-	{
-		return false;
-	}
-	FieldCover::const_iterator ui = upfield.begin(), ue = upfield.end();
-	FieldCover::const_iterator di = downfield.begin(), de = downfield.end();
+	std::vector<IndexRangeTreeNode>
+		treelist = buildIndexRangeTrees( rest, fields);
+	std::set<IndexRangeLevelAssingment>
+		rangeLevelAssignments = getIndexRangeTreeLevelAssignments( treelist);
 
-	while (ui != ue && di != de)
+	std::set<IndexRangeLevelAssingment>::const_iterator
+		ai = rangeLevelAssignments.begin(), ae = rangeLevelAssignments.end();
+	for (; ai != ae; ++ai)
 	{
-		if (di->end() <= ui->start())
+		while (ai->level >= (int)rt.size()) rt.push_back( FieldCover());
+		rt[ ai->level].insert( ai->range);
+	}
+	std::vector<FieldCover>::const_iterator ri = rt.begin(), re = rt.end();
+	for (; ri != re; ++ri)
+	{
+		if (ri->empty())
 		{
-			changed = true;
-			upfield_new.insert( *di); ++di;
+			throw std::runtime_error(_TXT("logic error: got empty field cover after separation of overlaps to different levels"));
 		}
-		else if (di->start() >= ui->end())
+		if (hasOverlappingFields( *ri))
 		{
-			upfield_new.insert( *ui); ++ui;
-			if (ui == upfield.end() || ui->start() >= di->end())
-			{
-				changed = true;
-				upfield_new.insert( *di); ++di;
-			}
-			else
-			{
-				downfield_new.insert( *di); ++di;
-			}
-		}
-		else
-		{
-			//... U & D are overlapping
-			downfield_new.insert( *di); ++di;
+			throw std::runtime_error(_TXT("logic error: got overlapping fields after separation of overlaps to different levels"));
 		}
 	}
-	strus::Index uend = upfield.rend()->end();
-	for (; di != de; ++di)
-	{
-		if (di->start() > uend)
-		{
-			changed = true;
-			upfield_new.insert( *di);
-		}
-		else
-		{
-			downfield_new.insert( *di);
-		}
-	}
-	for (; ui != ue; ++ui)
-	{
-		upfield_new.insert( *ui);
-	}
-	if (upfield_new.size() + downfield_new.size() != upfield.size() + downfield.size())
-	{
-		throw std::runtime_error(_TXT("logic error: lost elements when rearranging field covers"));
-	}
-	if (hasOverlappingFields( upfield_new) || hasOverlappingFields( downfield_new))
-	{
-		throw std::runtime_error(_TXT("logic error: got overlaps when rearranging field covers"));
-	}
-	upfield.swap( upfield_new);
-	downfield.swap( downfield_new);
-	return changed;
+	return rt;
 }
 
 std::vector<FieldCover> StructBlockBuilder::getFieldCovers() const
 {
-	std::vector<FieldCover> rt;
-	FieldCover cur;
-	FieldCover rest;
-	FieldCover plist;
-
-	if (m_map.empty()) return rt;
-	separateFieldCover<IndexRangeLinkMap,FieldAccessFunctor_MapElement>( rest, cur, m_map);
-
-	rt.push_back( FieldCover());
-	rt.back().swap( cur);
-
+	std::vector<strus::IndexRange> rest;
+	std::vector<FieldCover> add;
+	std::vector<FieldCover> rt = getFieldCovers_( m_map.fields(), rest);
 	while (!rest.empty())
 	{
-		std::size_t restsize = rest.size();
-		plist.swap( rest);
-
-		separateFieldCover<FieldCover,FieldAccessFunctor_IndexRange>( rest, cur, plist);
-		plist.clear();
-
-		rt.push_back( FieldCover());
-		rt.back().swap( cur);
-		if (restsize == rest.size())
+		std::vector<strus::IndexRange> fields;
+		fields.swap( rest);
+		std::vector<FieldCover> restcovers = getFieldCovers_( fields, rest);
+		add.insert( add.end(), restcovers.begin(), restcovers.end());
+	}
+	std::vector<FieldCover>::iterator
+		ai = add.begin(), ae = add.end();
+	while (ai != ae)
+	{
+		std::vector<FieldCover>::iterator
+			ri = rt.begin(), re = rt.end();
+		for (; ri != re; ++ri)
 		{
-			throw std::runtime_error(_TXT("overlapping structures of same type detected building structure block"));
+			FieldCover join = *ri;
+			join.insert( ai->begin(), ai->end());
+			if (!hasOverlappingFields( join))
+			{
+				*ri = join;
+				break;
+			}
+		}
+		if (ri != re)
+		{
+			add.erase( ai);
+			ae = add.end();
+		}
+		else
+		{
+			++ai;
 		}
 	}
-	bool changed;
-	do
-	{
-		changed = false;
-		int ri = rt.size()-1;
-		for (; ri > 0; --ri)
-		{
-			changed |= joinAdjacentFields( rt[ ri], rt[ ri-1]);
-		}
-		ri = rt.size()-1;
-		while (ri >= 0)
-		{
-			if (rt[ ri].empty())
-			{
-				changed = true;
-				rt.erase( rt.begin() + ri);
-			}
-			else
-			{
-				--ri;
-			}
-		}
-	} while (changed);
-
-	std::reverse( rt.begin(), rt.end());
+	rt.insert( rt.end(), add.begin(), add.end());
 	return rt;
 }
 
@@ -553,8 +631,10 @@ StructBlock StructBlockBuilder::createBlock()
 {
 	if (docno() <= 0) throw std::runtime_error(_TXT("docno not set when calling create block"));
 	std::vector<FieldCover> covers = getFieldCovers();
-	if (covers.size() >= StructBlock::MaxFieldLevels) throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)covers.size(), (int)StructBlock::MaxFieldLevels);
-
+	if (covers.size() > StructBlock::MaxFieldLevels)
+	{
+		throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)covers.size(), (int)StructBlock::MaxFieldLevels);
+	}
 	std::vector<std::vector<StructBlock::StructureField> > fieldar( covers.size());
 	std::vector<std::vector<StructBlock::LinkBasePointer> > linkbasear( covers.size());
 	std::vector<std::vector<StructBlockLink> > linkar( StructBlock::MaxLinkWidth);

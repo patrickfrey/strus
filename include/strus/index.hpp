@@ -79,6 +79,20 @@ public:
 	{
 		return !(m_start >= o.m_end || m_end <= o.m_start);
 	}
+	bool cover( const IndexRange& o) const
+	{
+		return m_start <= o.m_start && m_end >= o.m_end;
+	}
+	bool contain( Index e) const
+	{
+		return m_start <= e && m_end > e;
+	}
+	void clear()
+	{
+		m_start = 0;
+		m_end = 0;
+	}
+
 private:
 	Index m_start;
 	Index m_end;

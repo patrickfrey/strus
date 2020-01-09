@@ -101,9 +101,9 @@ IndexRange StructIterator::field( int level) const
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current field: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
-StructIteratorInterface::StructureLinkArray StructIterator::links( int level) const
+StructureLinkArray StructIterator::links( int level) const
 {
-	StructIteratorInterface::StructureLinkArray rt;
+	StructureLinkArray rt;
 	try
 	{
 		if (level >= 0 && level < m_levels)

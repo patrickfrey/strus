@@ -77,7 +77,7 @@ static void buildObserved( PrimeFactorDocumentBuilder& documentBuilder, const st
 	}
 }
 
-static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std::string& observed)
+static void testInsert( int nofNumbers, int commitSize, const std::string& observed)
 {
 	Storage storage( g_fileLocator, g_errorhnd);
 	storage.open( "path=storage", true);
@@ -89,25 +89,7 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 	if (g_verbose) std::cerr << "* inserting/updating documents of generated collection" << std::endl;
 	documentBuilder.insertCollection(
 		storage.sci.get(), g_random, commitSize, 
-		nofCycles == 1
-			? PrimeFactorDocumentBuilder::InsertMode
-			: PrimeFactorDocumentBuilder::InsertAlteredMode,
-			nofCycles == 1/*is last*/);
-	int ci = 1, ce = nofCycles-1;
-	for (; ci < ce; ++ci)
-	{
-		PrimeFactorDocumentBuilder::WriteMode
-			writeMode = (PrimeFactorDocumentBuilder::WriteMode)g_random.get( 1, 4);
-		documentBuilder.insertCollection(
-			storage.sci.get(), g_random, commitSize, writeMode, false/*is last*/);
-	}
-	if (nofCycles > 1)
-	{
-		documentBuilder.insertCollection(
-			storage.sci.get(), g_random, commitSize,
-			PrimeFactorDocumentBuilder::UpdateMode,
-			true/*is last*/);
-	}
+		PrimeFactorDocumentBuilder::InsertMode, true/*is last*/);
 	if (g_verbose)
 	{
 		if (nofNumbers)
@@ -133,7 +115,7 @@ static void testInsert( int nofCycles, int nofNumbers, int commitSize, const std
 
 static void printUsage()
 {
-	std::cerr << "usage: testInsert [options] <cycles> <nofdocs> <commitsize> {<observed>}" << std::endl;
+	std::cerr << "usage: testInsert [options] <nofdocs> <commitsize> {<observed>}" << std::endl;
 	std::cerr << "description: Inserts a collection of documents representing numbers" << std::endl;
 	std::cerr << "             with their prime factors as features. Verify the stored" << std::endl;
 	std::cerr << "             data at the end of the test." << std::endl;
@@ -141,7 +123,6 @@ static void printUsage()
 	std::cerr << "  -h             :print usage" << std::endl;
 	std::cerr << "  -V             :verbose output" << std::endl;
 	std::cerr << "  -K             :keep artefacts, do not clean up" << std::endl;
-	std::cerr << "<cycles>      :number of (re-)insert cycles" << std::endl;
 	std::cerr << "<nofdocs>     :number of documents inserted in each (re-)insert cycle" << std::endl;
 	std::cerr << "<commitsize>  :number of documents inserted per transaction" << std::endl;
 	std::cerr << "<observed>    :list of ':' separated docid:value pairs describing" << std::endl;
@@ -197,21 +178,20 @@ int main( int argc, const char* argv[])
 	try
 	{
 		std::string observed;
-		if (argi + 3 > argc)
+		if (argi + 2 > argc)
 		{
 			printUsage();
 			throw std::runtime_error( "too few arguments");
 		}
-		int cycles = strus::numstring_conv::toint( argv[ argi+0], std::strlen(argv[ argi+0]), std::numeric_limits<int>::max());
-		int nofdocs = strus::numstring_conv::toint( argv[ argi+1], std::strlen(argv[ argi+1]), std::numeric_limits<int>::max());
-		int commitsize = strus::numstring_conv::toint( argv[ argi+2], std::strlen(argv[ argi+2]), std::numeric_limits<int>::max());
-		int ai = argi+3, ae = argc;
-		for (; ai != ae; ++ai)
+		int nofdocs = strus::numstring_conv::toint( argv[ argi+0], std::strlen(argv[ argi+0]), std::numeric_limits<int>::max());
+		int commitsize = strus::numstring_conv::toint( argv[ argi+1], std::strlen(argv[ argi+1]), std::numeric_limits<int>::max());
+		int ai = argi+2, ae = argc;
+		for (; ai < ae; ++ai)
 		{
 			observed.push_back( ' ');
 			observed.append( argv[ ai]);
 		}
-		testInsert( cycles, nofdocs, commitsize, observed);
+		testInsert( nofdocs, commitsize, observed);
 		std::cerr << "OK" << std::endl;
 	}
 	catch (const std::bad_alloc&)

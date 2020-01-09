@@ -33,6 +33,8 @@ namespace test {
 class StructureDef
 {
 public:
+	StructureDef()
+		:m_name(),m_header(),m_content(){}
 	StructureDef( const std::string& name_, const IndexRange& header_, const IndexRange& content_)
 		:m_name(name_),m_header(header_),m_content(content_){}
 	StructureDef( const StructureDef& o)

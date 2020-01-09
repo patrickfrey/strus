@@ -307,11 +307,11 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				IndexRange field = stitr->skipPos( li, 0);
 				for (; field.defined(); field = stitr->skipPos( li, field.end()))
 				{
-					StructIteratorInterface::StructureLinkArray lnka = stitr->links( li);
+					StructureLinkArray lnka = stitr->links( li);
 					int ai = 0, ae = lnka.nofLinks();
 					for (; ai != ae; ++ai)
 					{
-						const StructIteratorInterface::StructureLink& link = lnka[ ai];
+						const StructureLink& link = lnka[ ai];
 						StructKey key( link.structno(), link.index());
 						std::pair<StructMap::iterator,bool> ins = structMap.insert( StructMap::value_type( key, StructRelationList()));
 						StructRelationList& rlist = ins.first->second;
