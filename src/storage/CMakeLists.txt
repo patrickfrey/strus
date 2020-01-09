@@ -125,6 +125,10 @@ target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_le
 # ------------------------------
 # INSTALLATION
 # ------------------------------
+install( TARGETS strus_structs
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
+	   RUNTIME DESTINATION bin )
+
 install( TARGETS strus_storage
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
 	   RUNTIME DESTINATION bin )
