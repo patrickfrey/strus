@@ -49,9 +49,8 @@ public:
 		int m_index;
 	};
 
-	typedef std::pair<strus::IndexRange,strus::IndexRange> FieldRelation;
-	typedef std::vector<FieldRelation> FieldRelationList;
-	typedef std::map<Key, FieldRelationList> Map;
+	typedef std::pair<strus::IndexRange,std::vector<strus::IndexRange> > FieldRelation;
+	typedef std::map<Key, FieldRelation> Map;
 	typedef Map::const_iterator const_iterator;
 
 	/// \brief Constructor

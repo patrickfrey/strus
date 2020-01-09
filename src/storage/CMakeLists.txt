@@ -85,8 +85,18 @@ link_directories(
 # ------------------------------
 add_cppcheck( strus_storage_static ${source_files} libstrus_storage.cpp )
 
+add_library( strus_structs SHARED libstrus_structs.cpp )
+target_link_libraries( strus_structs ${Boost_LIBRARIES} strus_private_utils strus_base )
+set_target_properties(
+    strus_structs
+    PROPERTIES
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
+
 add_library( strus_storage_static STATIC ${source_files} )
-target_link_libraries( strus_storage_static strus_private_utils strus_base )
+target_link_libraries( strus_storage_static strus_private_utils strus_base strus_structs )
 set_property( TARGET strus_storage_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_storage SHARED libstrus_storage.cpp )

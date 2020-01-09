@@ -35,38 +35,19 @@ DLL_PUBLIC StorageStructMap::StorageStructMap( StructIteratorInterface* stitr, s
 				{
 					const StructureLink& link = lnka[ ai];
 					Key key( link.structno(), link.index());
-					std::pair<Map::iterator,bool> ins = m_map.insert( Map::value_type( key, FieldRelationList()));
-					FieldRelationList& rlist = ins.first->second;
+					std::pair<Map::iterator,bool> ins = m_map.insert( Map::value_type( key, FieldRelation()));
+					FieldRelation& rel= ins.first->second;
 					if (link.header())
 					{
-						if (rlist.empty())
+						if (rel.first.defined())
 						{
-							rlist.push_back( FieldRelation( field, strus::IndexRange()));
+							throw strus::runtime_error(_TXT("corrupt index: structure with more than one header"));
 						}
-						else
-						{
-							FieldRelationList::iterator ri = rlist.begin(), re = rlist.end();
-							for (; ri != re; ++ri)
-							{
-								if (ri->first.defined()) throw std::runtime_error(_TXT("corrupt index: structure with more than one header element"));
-								ri->first = field;
-							}
-						}
+						rel.first = field;
 					}
 					else
 					{
-						if (rlist.empty())
-						{
-							rlist.push_back( FieldRelation( strus::IndexRange(), field));
-						}
-						else if (rlist.back().second.defined())
-						{
-							rlist.push_back( FieldRelation( rlist.back().first, field));
-						}
-						else
-						{
-							rlist.back().second = field;
-						}
+						rel.second.push_back( field);
 					}
 				}
 			}

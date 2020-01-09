@@ -13,6 +13,7 @@
 #include "indexSetIterator.hpp"
 #include "uintCompaction.hpp"
 #include "structBlockDeclaration.hpp"
+#include "strus/lib/structs.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -295,68 +296,15 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 		stitr->skipDoc( m_docno);
 		{
-			typedef std::pair<strus::Index,int> StructKey;
-			typedef std::pair<strus::IndexRange,strus::IndexRange> StructRelation;
-			typedef std::vector<StructRelation> StructRelationList;
-			typedef std::map<StructKey, StructRelationList> StructMap;
-			StructMap structMap;
-
-			int li = 0, le = stitr->levels();
-			for (; li != le; ++li)
-			{
-				IndexRange field = stitr->skipPos( li, 0);
-				for (; field.defined(); field = stitr->skipPos( li, field.end()))
-				{
-					StructureLinkArray lnka = stitr->links( li);
-					int ai = 0, ae = lnka.nofLinks();
-					for (; ai != ae; ++ai)
-					{
-						const StructureLink& link = lnka[ ai];
-						StructKey key( link.structno(), link.index());
-						std::pair<StructMap::iterator,bool> ins = structMap.insert( StructMap::value_type( key, StructRelationList()));
-						StructRelationList& rlist = ins.first->second;
-						if (link.header())
-						{
-							if (rlist.empty())
-							{
-								rlist.push_back( StructRelation( field, strus::IndexRange()));
-							}
-							else
-							{
-								StructRelationList::iterator ri = rlist.begin(), re = rlist.end();
-								for (; ri != re; ++ri)
-								{
-									if (ri->first.defined()) throw std::runtime_error(_TXT("corrupt index: structure with more than one header element"));
-									ri->first = field;
-								}
-							}
-						}
-						else
-						{
-							if (rlist.empty())
-							{
-								rlist.push_back( StructRelation( strus::IndexRange(), field));
-							}
-							else if (rlist.back().second.defined())
-							{
-								rlist.push_back( StructRelation( rlist.back().first, field));
-							}
-							else
-							{
-								rlist.back().second = field;
-							}
-						}
-					}
-				}
-			}
-			StructMap::const_iterator si = structMap.begin(), se = structMap.end();
+			StorageStructMap structMap( stitr.get(), m_docno, m_errorhnd);
+			StorageStructMap::const_iterator si = structMap.begin(), se = structMap.end();
 			for (; si != se; ++si)
 			{
-				std::string structName = structIdMap[ si->first.first];
-				StructRelationList::const_iterator ri = si->second.begin(), re = si->second.end();
+				std::string structName = structIdMap[ si->first.structno()];
+				std::vector<strus::IndexRange>::const_iterator ri = si->second.second.begin(), re = si->second.second.end();
 				for (; ri != re; ++ri)
 				{
-					structures.insert( Structure( structName, ri->first, ri->second));
+					structures.insert( Structure( structName, si->second.first, *ri));
 				}
 			}
 		}
