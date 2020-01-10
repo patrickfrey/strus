@@ -195,16 +195,30 @@ static std::set<IndexRangeLevelAssingment> getFieldTreeLevelAssignments( const s
 	return rt;
 }
 
-static bool hasOverlappingFields( const FieldCover& field)
+static std::pair<strus::IndexRange,strus::IndexRange> overlappingFields( const FieldCover& field)
 {
-	if (field.empty()) return true;
 	FieldCover::const_iterator fi = field.begin(), fe = field.end(), fn = field.begin();
 	++fn;
 	for (; fn != fe; ++fi,++fn)
 	{
-		if (fi->end() > fn->start()) return true;
+		if (fi->end() > fn->start()) return std::pair<strus::IndexRange,strus::IndexRange>(*fi,*fn);
 	}
-	return false;
+	return std::pair<strus::IndexRange,strus::IndexRange>(strus::IndexRange(),strus::IndexRange());
+}
+
+static void checkCoverValidity( const FieldCover& cover)
+{
+	if (cover.empty())
+	{
+		throw std::runtime_error(_TXT("logic error: got empty field after separation of overlaps to different levels"));
+	}
+	std::pair<strus::IndexRange,strus::IndexRange> ovl = overlappingFields( cover);
+	if (ovl.first.defined())
+	{
+		throw strus::runtime_error(_TXT("logic error: got overlapping fields [%d,%d] and [%d,%d] after separation of overlaps to different levels"), 
+				(int)ovl.first.start(),(int)ovl.first.end(),
+				(int)ovl.second.start(),(int)ovl.second.end());
+	}
 }
 
 static std::vector<FieldCover> getFieldCovers_( const std::vector<strus::IndexRange>& fields, std::vector<strus::IndexRange>& rest)
@@ -228,14 +242,7 @@ static std::vector<FieldCover> getFieldCovers_( const std::vector<strus::IndexRa
 	std::vector<FieldCover>::const_iterator ri = rt.begin(), re = rt.end();
 	for (; ri != re; ++ri)
 	{
-		if (ri->empty())
-		{
-			throw std::runtime_error(_TXT("logic error: got empty field cover after separation of overlaps to different levels"));
-		}
-		if (hasOverlappingFields( *ri))
-		{
-			throw std::runtime_error(_TXT("logic error: got overlapping fields after separation of overlaps to different levels"));
-		}
+		checkCoverValidity( *ri);
 	}
 	return rt;
 }
@@ -262,7 +269,7 @@ std::vector<FieldCover> StructBlockBuilder::getFieldCovers() const
 		{
 			FieldCover join = *ri;
 			join.insert( ai->begin(), ai->end());
-			if (!hasOverlappingFields( join))
+			if (!overlappingFields( join).first.defined())
 			{
 				*ri = join;
 				break;
