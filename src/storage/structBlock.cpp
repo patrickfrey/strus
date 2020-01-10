@@ -422,3 +422,19 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 	return rt;
 }
 
+void StructBlock::print( std::ostream& out) const
+{
+	out << "docno " << id() << ":" << std::endl;
+
+	std::vector<StructBlockDeclaration> decl = declarations();
+	std::vector<StructBlockDeclaration>::const_iterator di = decl.begin(), de = decl.end();
+	for (; di != de; ++di)
+	{
+		out << strus::string_format( "%d [%d,%d] -> [%d,%d]",
+					(int)di->structno,
+					(int)di->src.start(), (int)di->src.end(),
+					(int)di->sink.start(), (int)di->sink.end()) << std::endl;
+	}
+}
+
+

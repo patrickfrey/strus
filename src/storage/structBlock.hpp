@@ -286,6 +286,14 @@ public:
 
 	std::vector<StructBlockDeclaration> declarations() const;
 
+	void print( std::ostream& out) const;
+
+	void clear()
+	{
+		DataBlock::clear();
+		m_data.init();
+	}
+
 private:
 	void initFrame();
 

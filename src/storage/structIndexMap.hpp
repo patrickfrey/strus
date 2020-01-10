@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_STRUCTURE_INDEX_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_STRUCTURE_INDEX_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "structBlockBuilder.hpp"
+#include "structBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
@@ -31,11 +31,7 @@ class StructIndexMap
 public:
 	StructIndexMap( DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_);
 
-	void defineStructure(
-		strus::Index structno,
-		strus::Index docno,
-		const IndexRange& source,
-		const IndexRange& sink);
+	void defineStructureBlock( strus::Index docno, const StructBlock& blk);
 
 	void deleteIndex( strus::Index docno);
 
@@ -53,8 +49,8 @@ private:
 private:
 	ErrorBufferInterface* m_errorhnd;		///< error buffer interface
 	DatabaseClientInterface* m_database;		///< database client interface
-	std::vector<StructBlockBuilder> m_builderar;	///< vector doc index index -> structures
-	DocnoMap m_docnomap;				///< map docno -> int (-1, deleted, else index to m_builderar)
+	std::vector<StructBlock> m_blockar;		///< vector of blocks
+	DocnoMap m_docnomap;				///< map docno -> int (-1, deleted, else index to m_blockar)
 };
 
 }

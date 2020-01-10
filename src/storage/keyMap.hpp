@@ -70,6 +70,8 @@ public:
 	void print( std::ostream& out);
 	void clear();
 
+	std::map<Index,const char*> getInvMap() const;
+
 private:
 	void deleteAllFromDeletedList( DatabaseTransactionInterface* transaction);
 

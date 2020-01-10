@@ -18,44 +18,29 @@
 using namespace strus;
 
 StructIndexMap::StructIndexMap( DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_),m_database(database_),m_builderar(),m_docnomap()
+	:m_errorhnd(errorhnd_),m_database(database_),m_blockar(),m_docnomap()
 {}
 
 #define DELETE_STRUCTURES -1
 
 void StructIndexMap::clear()
 {
-	m_builderar.clear();
+	m_blockar.clear();
 	m_docnomap.clear();
 }
 
-void StructIndexMap::defineStructure(
-	strus::Index structno,
-	strus::Index docno,
-	const IndexRange& source,
-	const IndexRange& sink)
+void StructIndexMap::defineStructureBlock( strus::Index docno, const StructBlock& blk)
 {
-	if (structno <= 0) throw strus::runtime_error(_TXT("internal: '%s' not defined"), "structno");
-	if (docno <= 0) throw strus::runtime_error(_TXT("internal: invalid '%s'"), "docno");
-	if (!source.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "source");
-	if (!sink.defined()) throw strus::runtime_error(_TXT("try to add structure with empty %s"), "sink");
-	if (source.end() > std::numeric_limits<StructBlock::PositionType>::max()) throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "source");
-	if (sink.end() > std::numeric_limits<StructBlock::PositionType>::max()) throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "sink");
-
-	StructBlockBuilder* builder = 0;
 	DocnoMap::iterator mi = m_docnomap.find( docno);
-
 	if (mi == m_docnomap.end() || mi->second == DELETE_STRUCTURES)
 	{
-		m_docnomap[ docno] = m_builderar.size();
-		m_builderar.push_back( StructBlockBuilder( docno));
-		builder = &m_builderar.back();
+		m_docnomap[ docno] = m_blockar.size();
+		m_blockar.push_back( blk);
 	}
 	else
 	{
-		builder = &m_builderar[ mi->second];
+		m_blockar[ mi->second] = blk;
 	}
-	builder->append( structno, source, sink);
 }
 
 void StructIndexMap::deleteIndex( strus::Index docno)
@@ -65,7 +50,7 @@ void StructIndexMap::deleteIndex( strus::Index docno)
 	{
 		if (mi->second != DELETE_STRUCTURES)
 		{
-			m_builderar[ mi->second].clear();
+			m_blockar[ mi->second].clear();
 			m_docnomap[ docno] = DELETE_STRUCTURES;
 		}
 	}
@@ -98,21 +83,6 @@ void StructIndexMap::renameNewDocNumbers( const std::map<strus::Index,strus::Ind
 		}
 		docnomap_new[ new_docno] = ai->second;
 	}
-	std::vector<StructBlockBuilder>::iterator
-		bi = m_builderar.begin(), be = m_builderar.end();
-	for (; bi != be; ++bi)
-	{
-		if (KeyMap::isUnknown( bi->docno()))
-		{
-			std::map<strus::Index,strus::Index>::const_iterator
-				ri = docnoUnknownMap.find( bi->docno());
-			if (ri == docnoUnknownMap.end())
-			{
-				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "struct map");
-			}
-			bi->setDocno( ri->second);
-		}
-	}
 	m_docnomap.swap( docnomap_new);
 }
 
@@ -128,8 +98,8 @@ void StructIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		}
 		else
 		{
-			StructBlock blk( m_builderar[ ai->second].createBlock());
-			dbadapter.store( transaction, blk);
+			m_blockar[ ai->second].setId( ai->first);
+			dbadapter.store( transaction, m_blockar[ ai->second]);
 		}
 	}
 }
@@ -147,7 +117,7 @@ void StructIndexMap::print( std::ostream& out) const
 		else
 		{
 			out << "STORE ";
-			m_builderar[ ai->second].print( out);
+			m_blockar[ ai->second].print( out);
 			out << std::endl;
 		}
 	}

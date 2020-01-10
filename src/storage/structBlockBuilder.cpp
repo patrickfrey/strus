@@ -629,7 +629,6 @@ static StructBlock::FieldType getNextPackFieldType(
 
 StructBlock StructBlockBuilder::createBlock()
 {
-	if (docno() <= 0) throw std::runtime_error(_TXT("docno not set when calling create block"));
 	std::vector<FieldCover> covers = getFieldCovers();
 	if (covers.size() > StructBlock::MaxFieldLevels)
 	{

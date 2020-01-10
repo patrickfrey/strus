@@ -26,7 +26,7 @@ StorageDocument::StorageDocument(
 	:m_transaction(transaction_)
 	,m_docid(docid_)
 	,m_docno(docno_)
-	,m_terms(),m_invs(),m_structures(),m_attributes(),m_metadata(),m_userlist()
+	,m_terms(),m_invs(),m_structBuilder(),m_attributes(),m_metadata(),m_userlist()
 	,m_maxpos(0)
 	,m_nofStructuresIgnored(0)
 	,m_errorhnd(errorhnd_)
@@ -67,7 +67,7 @@ void StorageDocument::addSearchIndexTerm(
 			}
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding search index term to document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index term to document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::addSearchIndexStructure(
@@ -77,6 +77,14 @@ void StorageDocument::addSearchIndexStructure(
 {
 	try
 	{
+		if (source_.end() > std::numeric_limits<StructBlock::PositionType>::max())
+		{
+			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "source");
+		}
+		if (sink_.end() > std::numeric_limits<StructBlock::PositionType>::max())
+		{
+			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "sink");
+		}
 		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
@@ -87,7 +95,7 @@ void StorageDocument::addSearchIndexStructure(
 			&&  sink_.end() <= (strus::Index)Constants::storage_max_position_info())
 			{
 				Index structno = m_transaction->getOrCreateStructType( struct_);
-				m_structures.push_back( DocStructure( structno, source_, sink_));
+				m_structBuilder.append( structno, source_, sink_);
 			}
 			else
 			{
@@ -95,7 +103,7 @@ void StorageDocument::addSearchIndexStructure(
 			}
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding search index structure to document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure to document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::addForwardIndexTerm(
@@ -122,7 +130,7 @@ void StorageDocument::addForwardIndexTerm(
 			}
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding forward index structure to document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setMetaData(
@@ -133,7 +141,7 @@ void StorageDocument::setMetaData(
 	{
 		m_metadata.push_back( DocMetaData( name_, value_));
 	}
-	CATCH_ERROR_MAP( _TXT("error adding meta data to document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding meta data to document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setAttribute(
@@ -144,7 +152,7 @@ void StorageDocument::setAttribute(
 	{
 		m_attributes.push_back( DocAttribute( name_, value_));
 	}
-	CATCH_ERROR_MAP( _TXT("error adding attribute to document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding attribute to document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setUserAccessRight(
@@ -154,7 +162,7 @@ void StorageDocument::setUserAccessRight(
 	{
 		m_userlist.push_back( m_transaction->getOrCreateUserno( username_));
 	}
-	CATCH_ERROR_MAP( _TXT("error setting user rights of document: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error setting user rights of document: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::done()
@@ -197,16 +205,16 @@ void StorageDocument::done()
 			m_transaction->definePosinfoPosting(
 					ti->first.first, ti->first.second, m_docno, pos);
 		}
-		std::vector<DocStructure>::const_iterator si = m_structures.begin(), se = m_structures.end();
-		for (; si != se; ++si)
+		//[2.3.2] Build (compress) and insert structures:
+		if (!m_structBuilder.empty())
 		{
-			m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
+			m_transaction->defineStructureBlock( m_docno, m_structBuilder.createBlock());
 		}
 		m_transaction->openForwardIndexDocument( m_docno);
 		InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 		for (; ri != re; ++ri)
 		{
-			//[2.3.2] Insert forward index
+			//[2.3.3] Insert forward index
 			m_transaction->defineForwardIndexTerm(
 				ri->first.typeno, ri->first.pos, ri->second);
 		}
@@ -222,14 +230,14 @@ void StorageDocument::done()
 		//[3] Clear data:
 		m_terms.clear();
 		m_invs.clear();
-		m_structures.clear();
+		m_structBuilder.clear();
 		m_attributes.clear();
 		m_metadata.clear();
 		m_userlist.clear();
 		m_maxpos = 0;
 		m_nofStructuresIgnored = 0;
 	}
-	CATCH_ERROR_MAP( _TXT("error closing document in transaction: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error finishing document %d: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 

@@ -160,11 +160,10 @@ void StorageTransaction::deleteStructures( const Index& docno)
 	m_structIndexMap.deleteIndex( docno);
 }
 
-void StorageTransaction::defineStructure(
-	const Index& structno,
-	const Index& docno, const IndexRange& source, const IndexRange& sink)
+void StorageTransaction::defineStructureBlock(
+	const Index& docno, const StructBlock& blk)
 {
-	m_structIndexMap.defineStructure( structno, docno, source, sink);
+	m_structIndexMap.defineStructureBlock( docno, blk);
 }
 
 void StorageTransaction::openForwardIndexDocument( const Index& docno)

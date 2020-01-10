@@ -12,6 +12,7 @@
 #include "strus/numericVariant.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentStructs.hpp"
+#include "structBlockBuilder.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -95,7 +96,7 @@ private:
 	Index m_docno;						///< document number
 	TermMap m_terms;					///< map of all search index terms added
 	InvMap m_invs;						///< map of all forward index terms added
-	std::vector<DocStructure> m_structures;			///< structures to add
+	StructBlockBuilder m_structBuilder;			///< builder of structure block to add
 	std::vector<DocAttribute> m_attributes;			///< attributes to add
 	std::vector<DocMetaData> m_metadata;			///< metadata to add
 	std::vector<Index> m_userlist;				///< users granted access to this document

@@ -110,6 +110,17 @@ void KeyMap::getWriteBatch(
 	clear();
 }
 
+std::map<Index,const char*> KeyMap::getInvMap() const
+{
+	std::map<Index,const char*> rt;
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		rt[ mi->second] = mi->first;
+	}
+	return rt;
+}
+
 void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction,

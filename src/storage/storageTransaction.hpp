@@ -114,9 +114,7 @@ public:/*Document,DocumentUpdate*/
 		const Index& docno, const std::vector<Index>& posinfo);
 
 	void deleteStructures( const Index& docno);
-	void defineStructure(
-		const Index& structno,
-		const Index& docno, const IndexRange& source, const IndexRange& sink);
+	void defineStructureBlock( const Index& docno, const StructBlock& blk);
 
 	void openForwardIndexDocument( const Index& docno);
 

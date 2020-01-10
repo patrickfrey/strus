@@ -67,14 +67,26 @@ void StorageDocumentUpdate::addSearchIndexStructure(
 {
 	try
 	{
+		if (source_.end() > std::numeric_limits<StructBlock::PositionType>::max())
+		{
+			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "source");
+		}
+		if (sink_.end() > std::numeric_limits<StructBlock::PositionType>::max())
+		{
+			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "sink");
+		}
 		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
 		}
 		else
 		{
-			Index structno = m_transaction->getOrCreateStructType( struct_);
-			m_structures.push_back( DocStructure( structno, source_, sink_));
+			if (source_.end() <= (strus::Index)Constants::storage_max_position_info()
+			&&  sink_.end() <= (strus::Index)Constants::storage_max_position_info())
+			{
+				Index structno = m_transaction->getOrCreateStructType( struct_);
+				m_structBuilder.append( structno, source_, sink_);
+			}
 			m_doClearStructureList = false;
 		}
 	}
@@ -117,7 +129,7 @@ void StorageDocumentUpdate::clearSearchIndexStructures()
 {
 	try
 	{
-		m_structures.clear();
+		m_structBuilder.clear();
 		m_doClearStructureList = true;
 	}
 	CATCH_ERROR_MAP( _TXT("error removing structures from search index: %s"), *m_errorhnd);
@@ -241,7 +253,7 @@ void StorageDocumentUpdate::done()
 				m_transaction->deleteDocForwardIndexType( m_docno, *fi);
 			}
 		}{
-			if (m_doClearStructureList || !m_structures.empty())
+			if (m_doClearStructureList || !m_structBuilder.empty())
 			{
 				m_transaction->deleteStructures( m_docno);
 			}
@@ -276,21 +288,21 @@ void StorageDocumentUpdate::done()
 				m_transaction->definePosinfoPosting(
 						ti->first.first, ti->first.second, m_docno, pos);
 			}
+			//[2.3.2] Build (compress) and insert structures:
+			if (!m_structBuilder.empty())
+			{
+				m_transaction->defineStructureBlock( m_docno, m_structBuilder.createBlock());
+			}
+
 			m_transaction->openForwardIndexDocument( m_docno);
 			InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 			for (; ri != re; ++ri)
 			{
-				//[2.3.2] Insert forward index
+				//[2.3.3] Insert forward index
 				m_transaction->defineForwardIndexTerm(
 					ri->first.typeno, ri->first.pos, ri->second);
 			}
 			m_transaction->closeForwardIndexDocument();
-
-			std::vector<DocStructure>::const_iterator si = m_structures.begin(), se = m_structures.end();
-			for (; si != se; ++si)
-			{
-				m_transaction->defineStructure( si->structno, m_docno, si->source, si->sink);
-			}
 		}{
 			//[2.4] Update document access rights:
 			if (m_doClearUserList)
@@ -313,7 +325,7 @@ void StorageDocumentUpdate::done()
 		m_invs.clear();
 		m_delete_search_typenolist.clear();
 		m_delete_forward_typenolist.clear();
-		m_structures.clear();
+		m_structBuilder.clear();
 		m_attributes.clear();
 		m_metadata.clear();
 		m_add_userlist.clear();
