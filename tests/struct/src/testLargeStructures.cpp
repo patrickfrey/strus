@@ -190,24 +190,6 @@ static std::pair<strus::IndexRange,strus::IndexRange>
 					if (contentpos < ci->range.end())
 					{
 						rt.second = ci->range;
-
-						// Join adjacent contents:
-						std::list<RangeTreeNode>::const_iterator ni = ci, ne = ce;
-						for (++ni; ni != ne; ++ni)
-						{
-							if (ni->range.start() == rt.second.end())
-							{
-								rt.second = strus::IndexRange( rt.second.start(), ni->range.end());
-							}
-						}
-						std::list<RangeTreeNode>::const_iterator pi = ci, pe = node.chld.begin();
-						for (--pi; pi != pe; --pi)
-						{
-							if (pi->range.end() == rt.second.start())
-							{
-								rt.second = strus::IndexRange( pi->range.start(), rt.second.end());
-							}
-						}
 						break;
 					}
 				}

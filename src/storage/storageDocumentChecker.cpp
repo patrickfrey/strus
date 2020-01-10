@@ -460,25 +460,6 @@ void StorageDocumentChecker::setUserAccessRight( const std::string& username)
 	CATCH_ERROR_MAP( _TXT("error setting user access right: %s"), *m_errorhnd);
 }
 
-void StorageDocumentChecker::joinAdjacentStructureMembers( StructureList& structurelist)
-{
-	StructureList newlist;
-	StructureList::iterator si = structurelist.begin(), se = structurelist.end();
-	while (si != se)
-	{
-		StructureList::iterator sn = si;
-		++sn;
-		Structure newst( *si);
-		for (; sn != se && sn->source == si->source && sn->structname == si->structname && sn->sink.start() == newst.sink.end(); ++sn)
-		{
-			newst.sink = strus::IndexRange( newst.sink.start(), sn->sink.end());
-		}
-		newlist.insert( newst);
-		si = sn;
-	}
-	structurelist.swap( newlist);
-}
-
 void StorageDocumentChecker::done()
 {
 	try
@@ -487,7 +468,6 @@ void StorageDocumentChecker::done()
 		{
 			m_errorhnd->info( _TXT("token positions are out of range (document too big, only %d of %d token positions assigned), %d structures dropped"), (int)(strus::Index)Constants::storage_max_position_info(), (int)m_maxpos, (int)m_nofStructuresIgnored);
 		}
-		joinAdjacentStructureMembers( m_structurelist);
 		if (m_logfile == "-")
 		{
 			doCheck( std::cout);

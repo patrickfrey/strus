@@ -60,18 +60,6 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 	int structidx = m_map.findStructureHeader( src, structno);
 	if (structidx > 0)
 	{
-		strus::IndexRange pred_range( 0, sink.start());
-		IndexRangeLinkMap::const_iterator pi = m_map.first( pred_range), pe = m_map.end();
-		for (; pi != pe && pi->range.end() == sink.start(); ++pi)
-		{
-			if (pi->link.structno == structno && pi->link.idx == structidx && pi->link.head == false)
-			{
-				strus::IndexRange sink_expanded( pi->range.start(), sink.end());
-				StructBlockLink lnk( structno, false/*head*/, structidx);
-				m_map.erase( pi);
-				return m_map.append( sink_expanded, lnk);
-			}
-		}
 		return m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
 	}
 	else

@@ -144,9 +144,6 @@ private:
 	typedef std::set<Structure> StructureList;
 
 private:
-	void joinAdjacentStructureMembers( StructureList& structurelist);
-
-private:
 	const StorageClient* m_storage;		///< storage
 	TermMap m_termMap;			///< terms defined
 	InvTermMap m_invTermMap;		///< inverse map of search terms defined
