@@ -67,7 +67,7 @@ void StorageDocument::addSearchIndexTerm(
 			}
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index term to document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index term to document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::addSearchIndexStructure(
@@ -103,7 +103,7 @@ void StorageDocument::addSearchIndexStructure(
 			}
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure to document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure to document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::addForwardIndexTerm(
@@ -130,7 +130,7 @@ void StorageDocument::addForwardIndexTerm(
 			}
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding forward index structure to document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding forward index structure to document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setMetaData(
@@ -141,7 +141,7 @@ void StorageDocument::setMetaData(
 	{
 		m_metadata.push_back( DocMetaData( name_, value_));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding meta data to document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding meta data to document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setAttribute(
@@ -152,7 +152,7 @@ void StorageDocument::setAttribute(
 	{
 		m_attributes.push_back( DocAttribute( name_, value_));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding attribute to document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding attribute to document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::setUserAccessRight(
@@ -162,7 +162,7 @@ void StorageDocument::setUserAccessRight(
 	{
 		m_userlist.push_back( m_transaction->getOrCreateUserno( username_));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error setting user rights of document: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error setting user rights of document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 void StorageDocument::done()
@@ -237,7 +237,7 @@ void StorageDocument::done()
 		m_maxpos = 0;
 		m_nofStructuresIgnored = 0;
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error finishing document %d: %s"), m_docid.c_str(), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error finishing document %s: %s"), m_docid.c_str(), *m_errorhnd);
 }
 
 
