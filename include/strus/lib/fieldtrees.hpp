@@ -37,6 +37,10 @@ struct FieldTree
 		chld.swap( nd.chld);
 		std::swap( range, nd.range);
 	}
+	typedef std::list<FieldTree>::const_iterator const_iterator;
+
+	const_iterator begin() const	{return chld.begin();}
+	const_iterator end() const	{return chld.end();}
 };
 
 /// \brief Takes a list of dependencies and try to build a list of trees where for each tree a parent field (range) covers every child completely, separating overlaps without coverage into a rest list of fields
