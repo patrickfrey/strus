@@ -9,11 +9,13 @@
 #include "structBlock.hpp"
 #include "structBlockLink.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/lib/fieldtrees.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "strus/base/localErrorBuffer.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
 #include <algorithm>
-#include <list>
 
 #undef STRUS_LOWLEVEL_DEBUG
 using namespace strus;
@@ -156,25 +158,6 @@ public:
 	}
 };
 
-struct IndexRangeTreeNode
-{
-	strus::IndexRange range;
-	std::list<IndexRangeTreeNode> chld;
-
-	IndexRangeTreeNode( const strus::IndexRange& range_)
-		:range(range_),chld(){}
-	IndexRangeTreeNode( const IndexRangeTreeNode& o)
-		:range(o.range),chld(o.chld){}
-
-	void add( const IndexRangeTreeNode& nd)
-		{chld.push_back(nd);}
-	void swap( IndexRangeTreeNode& nd)
-	{
-		chld.swap( nd.chld);
-		std::swap( range, nd.range);
-	}
-};
-
 struct IndexRangeLevelAssingment
 {
 	strus::IndexRange range;
@@ -191,134 +174,23 @@ struct IndexRangeLevelAssingment
 	}
 };
 
-static bool addIndexRangeTreeNode( IndexRangeTreeNode& tree, const strus::IndexRange& elem)
-{
-	if (elem.overlap( tree.range))
-	{
-		if (elem.cover( tree.range))
-		{
-			return false;
-		}
-		else if (tree.range.cover( elem))
-		{
-			std::list<IndexRangeTreeNode>::iterator ci = tree.chld.begin(), ce = tree.chld.end();
-			for (; ci != ce; ++ci)
-			{
-				if (elem.cover( ci->range))
-				{
-					if (elem == ci->range) return true;
-
-					IndexRangeTreeNode covernode( elem);
-					covernode.add( *ci);
-					ci = tree.chld.erase( ci);
-					ce = tree.chld.end();
-					while (ci != ce)
-					{
-						if (covernode.range.cover( ci->range))
-						{
-							covernode.add( *ci);
-							ci = tree.chld.erase( ci);
-							ce = tree.chld.end();
-						}
-						else
-						{
-							++ci;
-						}
-					}
-					tree.add( covernode);
-					return true;
-				}
-				else if (addIndexRangeTreeNode( *ci, elem))
-				{
-					return true;
-				}
-			}
-			tree.add( elem);
-			return true;
-		}
-	}
-	return false;
-}
-
-static std::vector<IndexRangeTreeNode> buildIndexRangeTrees( std::vector<strus::IndexRange>& rest, const std::vector<strus::IndexRange>& llist)
-{
-	std::vector<IndexRangeTreeNode> rt;
-	if (llist.empty()) return rt;
-
-	std::vector<strus::IndexRange>::const_iterator
-		li = llist.begin(), le = llist.end();
-	for (; li != le; ++li)
-	{
-		bool added = false;
-		std::vector<IndexRangeTreeNode>::iterator
-			ri = rt.begin(), re = rt.end();
-		while (ri != re && !added)
-		{
-			if (addIndexRangeTreeNode( *ri, *li))
-			{
-				added = true;
-			}
-			else if (*li == ri->range)
-			{
-				added = true;
-			}
-			else if (li->cover( ri->range))
-			{
-				IndexRangeTreeNode covernode( *li);
-				covernode.add( *ri);
-				ri = rt.erase( ri);
-				re = rt.end();
-				while (ri != re)
-				{
-					if (covernode.range.cover( ri->range))
-					{
-						covernode.add( *ri);
-						ri = rt.erase( ri);
-						re = rt.end();
-					}
-					else
-					{
-						++ri;
-					}
-				}
-				rt.push_back( covernode);
-				added = true;
-			}
-			else if (li->overlap( ri->range))
-			{
-				rest.push_back( *li);
-				added = true;
-			}
-			else
-			{
-				++ri;
-			}
-		}
-		if (!added)
-		{
-			rt.push_back( *li);
-		}
-	}
-	return rt;
-}
-
-static void collectIndexRangeTreeLevelAssignments( std::set<IndexRangeLevelAssingment>& result, const IndexRangeTreeNode& node, int depth)
+static void collectFieldTreeLevelAssignments( std::set<IndexRangeLevelAssingment>& result, const FieldTree& node, int depth)
 {
 	result.insert( IndexRangeLevelAssingment( node.range, depth));
-	std::list<IndexRangeTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
+	std::list<FieldTree>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
 	for (; ci != ce; ++ci)
 	{
-		collectIndexRangeTreeLevelAssignments( result, *ci, depth+1);
+		collectFieldTreeLevelAssignments( result, *ci, depth+1);
 	}
 }
 
-static std::set<IndexRangeLevelAssingment> getIndexRangeTreeLevelAssignments( const std::vector<IndexRangeTreeNode>& trees)
+static std::set<IndexRangeLevelAssingment> getFieldTreeLevelAssignments( const std::vector<FieldTree>& trees)
 {
 	std::set<IndexRangeLevelAssingment> rt;
-	std::vector<IndexRangeTreeNode>::const_iterator ni = trees.begin(), ne = trees.end();
+	std::vector<FieldTree>::const_iterator ni = trees.begin(), ne = trees.end();
 	for (; ni != ne; ++ni)
 	{
-		collectIndexRangeTreeLevelAssignments( rt, *ni, 0);
+		collectFieldTreeLevelAssignments( rt, *ni, 0);
 	}
 	return rt;
 }
@@ -335,16 +207,16 @@ static bool hasOverlappingFields( const FieldCover& field)
 	return false;
 }
 
-
 static std::vector<FieldCover> getFieldCovers_( const std::vector<strus::IndexRange>& fields, std::vector<strus::IndexRange>& rest)
 {
+	LocalErrorBuffer errorbuf;
 	std::vector<FieldCover> rt;
 	if (fields.empty()) return rt;
 
-	std::vector<IndexRangeTreeNode>
-		treelist = buildIndexRangeTrees( rest, fields);
-	std::set<IndexRangeLevelAssingment>
-		rangeLevelAssignments = getIndexRangeTreeLevelAssignments( treelist);
+	std::vector<FieldTree> treelist = buildFieldTrees( rest, fields, &errorbuf);
+	if (treelist.empty()) throw std::runtime_error( errorbuf.fetchError());
+
+	std::set<IndexRangeLevelAssingment> rangeLevelAssignments = getFieldTreeLevelAssignments( treelist);
 
 	std::set<IndexRangeLevelAssingment>::const_iterator
 		ai = rangeLevelAssignments.begin(), ae = rangeLevelAssignments.end();
