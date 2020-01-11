@@ -494,6 +494,23 @@ static StructBlock::FieldType getNextPackFieldType(
 	return StructBlock::FieldTypeIndex;
 }
 
+static std::string getFieldDependencyDescription(
+		const StructBlockBuilder::IndexRangeLinkMap& map, const std::set<StructBlockLink>& lnkset)
+{
+	std::string rt;
+	std::set<StructBlockLink>::const_iterator li = lnkset.begin(), le = lnkset.end();
+	for (; li != le; ++li)
+	{
+		StructBlockBuilder::IndexRangeLinkMap::inv_iterator vi = map.inv_first( *li);
+		if (vi == map.inv_end()) throw std::runtime_error(_TXT("logic error: structure link not found"));
+		if (!rt.empty()) rt.push_back(',');
+		rt.append( strus::string_format("%c(%d|%d)[%d,%d]",
+				li->head ? 'H':'C', (int)li->structno, (int)li->idx,
+				(int)vi->range.start(), (int)vi->range.end()));
+	}
+	return rt;
+}
+
 StructBlock StructBlockBuilder::createBlock()
 {
 	std::vector<FieldCover> covers = getFieldCovers();
@@ -515,8 +532,7 @@ StructBlock StructBlockBuilder::createBlock()
 	for (; ci != ce; ++ci,++cidx)
 	{
 		std::vector<LinkDef> linkdefs;
-		std::set<strus::IndexRange>::const_iterator
-			fi = ci->begin(), fe = ci->end();
+		std::set<strus::IndexRange>::const_iterator fi = ci->begin(), fe = ci->end();
 		for (; fi != fe; ++fi)
 		{
 			IndexRangeLinkMap::const_iterator mi = m_map.first( *fi);
@@ -528,7 +544,10 @@ StructBlock StructBlockBuilder::createBlock()
 			int width = lnkset.size();
 			if (width > StructBlock::MaxLinkWidth)
 			{
-				throw strus::runtime_error( _TXT("too many links defined defined per field (%d > maximum %d)"), width, (int)StructBlock::MaxLinkWidth);
+				std::string depdescr = getFieldDependencyDescription( m_map, lnkset);
+				throw strus::runtime_error( _TXT("too many links (%d > maximum %d) defined defined per field [%d,%d] => {%s}"),
+						width, (int)StructBlock::MaxLinkWidth,
+						(int)fi->start(), (int)fi->end(), depdescr.c_str());
 			}
 			if (width == 0)
 			{
