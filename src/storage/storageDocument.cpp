@@ -77,30 +77,27 @@ void StorageDocument::addSearchIndexStructure(
 {
 	try
 	{
-		if (source_.end() > std::numeric_limits<StructBlock::PositionType>::max())
-		{
-			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "source");
-		}
-		if (sink_.end() > std::numeric_limits<StructBlock::PositionType>::max())
-		{
-			throw strus::runtime_error(_TXT("structure %s exceeds maximum position stored"), "sink");
-		}
 		if (source_.start() <= 0 || source_.end() <= 0 || sink_.start() <= 0 || sink_.end() <= 0)
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "structure range positions must be >= 1 (structure '%s')"), struct_.c_str());
 		}
+		if (source_.end() > m_maxpos)
+		{
+			m_maxpos = source_.end();
+		}
+		if (sink_.end() > m_maxpos)
+		{
+			m_maxpos = source_.end();
+		}
+		if (source_.end() <= std::numeric_limits<StructBlock::PositionType>::max()
+		&&  sink_.end() <= std::numeric_limits<StructBlock::PositionType>::max())
+		{
+			Index structno = m_transaction->getOrCreateStructType( struct_);
+			m_structBuilder.append( structno, source_, sink_);
+		}
 		else
 		{
-			if (source_.end() <= (strus::Index)Constants::storage_max_position_info()
-			&&  sink_.end() <= (strus::Index)Constants::storage_max_position_info())
-			{
-				Index structno = m_transaction->getOrCreateStructType( struct_);
-				m_structBuilder.append( structno, source_, sink_);
-			}
-			else
-			{
-				m_nofStructuresIgnored += 1;
-			}
+			m_nofStructuresIgnored += 1;
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding search index structure to document %s: %s"), m_docid.c_str(), *m_errorhnd);

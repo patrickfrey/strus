@@ -19,6 +19,7 @@
 #include "strus/structIteratorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
+#include "strus/base/stdint.h"
 #include "strus/base/packed.h"
 #include <vector>
 #include <cstring>
@@ -39,11 +40,11 @@ public:
 		MaxNofStructIdx=(1<<16)-1,
 		MaxFieldIdx=(1<<13)-1,
 		MaxFieldType=7,
-		MaxLinkWidth=4
+		MaxLinkBaseIdx=(1<<22)-1,
+		MaxLinkWidth=(1<<2)-1
 	};
 	typedef unsigned short PositionType;
 	typedef unsigned short FieldIdx;
-	typedef unsigned short PackedLinkBasePointer;
 
 	enum FieldType {
 		FieldTypeOffset,
@@ -66,9 +67,11 @@ public:
 		strus::Index pkshortidx;
 		strus::Index _;
 	};
-	class StructureField;
+	struct StructureField;
+	struct LinkBasePointer;
+
 	typedef StaticIntrusiveArray<StructureField> StructureFieldArray;
-	typedef StaticIntrusiveArray<PackedLinkBasePointer> LinkBasePointerArray;
+	typedef StaticIntrusiveArray<LinkBasePointer> LinkBasePointerArray;
 	typedef StaticIntrusiveArray<StructBlockLink> LinkArray;
 
 	class BlockData
@@ -136,13 +139,33 @@ public:
 		const StructBlockFieldPackedShort* m_pkshortar;
 	};
 
-	PACKED_STRUCT( StructureField)
+	PACKED_STRUCT( LinkBasePointer )
+	{
+		LinkBasePointer( int index_, int width_)
+			:index(index_),width(width_){}
+		LinkBasePointer( const LinkBasePointer& o)
+			:index(o.index),width(o.width){}
+
+		int index :22;		//...index of the first link
+		int width :2;		//...number links per element (>=1), bound to MaxLinkWidth=4)
+
+		bool operator == (const LinkBasePointer& o) const
+		{
+			return index == o.index && width == o.width;
+		}
+		bool operator < (const LinkBasePointer& o) const
+		{
+			return width == o.width ? index < o.index : width < o.width;
+		}
+	};
+
+	PACKED_STRUCT( StructureField )
 	{
 	private:
 		PositionType m_end;
 
 		unsigned short m_type:3;	//... bound to MaxFieldType=7
-		unsigned short m_idx:13;	//... bound to MaxFieldIdx=(1<<13)-1
+		unsigned short m_idx:13;	//... bound to MaxFieldIdx=(1<<14)-1
 
 	public:
 		strus::Index end() const	{return m_end;}
@@ -208,30 +231,6 @@ public:
 		int m_fieldLevel;
 		strus::IndexRange m_cur;
 		StructureLinkArray m_linkar;
-	};
-
-	struct LinkBasePointer
-	{
-		LinkBasePointer( const PackedLinkBasePointer& pp)
-			{setValue(pp);}
-		LinkBasePointer( int index_, int width_)
-			:index(index_),width(width_){}
-		LinkBasePointer( const LinkBasePointer& o)
-			:index(o.index),width(o.width){}
-
-		int index;		//...index of the first link (14 bits)
-		int width;		//...number links per element (>=1), bound to MaxLinkWidth=4)
-
-		PackedLinkBasePointer value() const
-		{
-			return (((width-1) & 0x3) << 14) + (index & 0x3fFF);
-		}
-
-		void setValue( PackedLinkBasePointer vv)
-		{
-			width = (vv >> 14)+1;
-			index = vv & 0x3fFF;
-		}
 	};
 
 public:

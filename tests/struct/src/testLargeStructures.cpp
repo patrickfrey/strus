@@ -498,7 +498,6 @@ struct Collection
 	
 			strus::Index headerpos = randomIndex( hdr);
 			strus::Index contentpos = randomIndex( mbr);
-	
 			std::pair<strus::IndexRange,strus::IndexRange>
 				answer = findAnswerStructure( doc.structuretree, headerpos, contentpos);
 			strus::IndexRange answer_hdr = answer.first;
@@ -587,7 +586,6 @@ static void verifyQueryAnswer( Storage& storage, strus::StructIteratorInterface*
 	strus::Index docno = storage.sci->documentNumber( qa.query.docid);
 	if (!docno) throw strus::runtime_error("document id unknown: %s", qa.query.docid.c_str());
 	sitr->skipDoc( docno);
-
 	std::pair<strus::IndexRange,int> stu = findQuerySource( sitr, qa.query.structno, qa.query.headerpos);
 
 	strus::Index structno = qa.query.structno;

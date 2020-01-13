@@ -17,7 +17,7 @@
 #include <limits>
 #include <algorithm>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 using namespace strus;
 
 StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_)
@@ -325,7 +325,7 @@ struct FieldPackingDim
 		:elements(0),bytes(0),end(0){}
 	FieldPackingDim( int elements_, int unitsize, int width, StructBlock::PositionType end_)
 		:elements(elements_)
-		,bytes(unitsize + sizeof(StructBlock::StructureField) + (elements_ * width * sizeof(StructBlockLink)) + sizeof(StructBlock::PackedLinkBasePointer))
+		,bytes(unitsize + sizeof(StructBlock::StructureField) + (elements_ * width * sizeof(StructBlockLink)) + sizeof(StructBlock::LinkBasePointer))
 		,end(end_){}
 	FieldPackingDim( const FieldPackingDim& o)
 		:elements(o.elements),bytes(o.bytes),end(o.end){}
@@ -457,7 +457,9 @@ static StructBlock::FieldType getNextPackFieldType(
 				StructBlock::FieldType fieldType = cd.count ? cd.type : StructBlock::FieldTypeIndex;
 				cdset.insert( FieldPackingCandidate( si+dim.elements, cd.weight + dim.weight(), fieldType, cd.count+1));
 			}
-		}{
+		}
+#ifdef EXCLUDE_ENUM_KSJAHDKLSH
+		{
 			StructBlockFieldEnum enm;
 			FieldPackingDim dim = evaluateFieldPackingDim_enum( si, se, enm);
 			if (dim.defined())
@@ -465,7 +467,10 @@ static StructBlock::FieldType getNextPackFieldType(
 				StructBlock::FieldType fieldType = cd.count ? cd.type : StructBlock::FieldTypeEnum;
 				cdset.insert( FieldPackingCandidate( si+dim.elements, cd.weight + dim.weight(), fieldType, cd.count+1));
 			}
-		}{
+		}
+#endif
+#ifdef EXCLUDE_REPEAT_SAJHLFKSD
+			{
 			StructBlockFieldRepeat rep;
 			FieldPackingDim dim = evaluateFieldPackingDim_repeat( si, se, rep);
 			if (dim.defined())
@@ -473,7 +478,10 @@ static StructBlock::FieldType getNextPackFieldType(
 				StructBlock::FieldType fieldType = cd.count ? cd.type : StructBlock::FieldTypeRepeat;
 				cdset.insert( FieldPackingCandidate( si+dim.elements, cd.weight + dim.weight(), fieldType, cd.count+1));
 			}
-		}{
+		}
+#endif
+#ifdef EXCLUDE_PACKED_BYTE_BSLAKJD
+			{
 			StructBlockFieldPackedByte pkb;
 			FieldPackingDim dim = evaluateFieldPackingDim_pkbyte( si, se, pkb);
 			if (dim.defined())
@@ -481,7 +489,10 @@ static StructBlock::FieldType getNextPackFieldType(
 				StructBlock::FieldType fieldType = cd.count ? cd.type : StructBlock::FieldTypePackedByte;
 				cdset.insert( FieldPackingCandidate( si+dim.elements, cd.weight + dim.weight(), fieldType, cd.count+1));
 			}
-		}{
+		}
+#endif
+#ifdef EXCLUDE_PACKED_SHORT_BSLAKJD
+		{
 			StructBlockFieldPackedShort pks;
 			FieldPackingDim dim = evaluateFieldPackingDim_pkshort( si, se, pks);
 			if (dim.defined())
@@ -489,7 +500,9 @@ static StructBlock::FieldType getNextPackFieldType(
 				StructBlock::FieldType fieldType = cd.count ? cd.type : StructBlock::FieldTypePackedShort;
 				cdset.insert( FieldPackingCandidate( si+dim.elements, cd.weight + dim.weight(), fieldType, cd.count+1));
 			}
-		}}
+		}
+#endif
+		}
 	}
 	return StructBlock::FieldTypeIndex;
 }
@@ -541,19 +554,19 @@ StructBlock StructBlockBuilder::createBlock()
 			{
 				lnkset.insert( mi->link);
 			}
-			int width = lnkset.size();
+			if (lnkset.empty())
+			{
+				throw std::runtime_error( _TXT("found range not assigned to structure"));
+			}
+			int width = lnkset.size()-1;
 			if (width > StructBlock::MaxLinkWidth)
 			{
 				std::string depdescr = getFieldDependencyDescription( m_map, lnkset);
 				throw strus::runtime_error( _TXT("too many links (%d > maximum %d) defined defined per field [%d,%d] => {%s}"),
-						width, (int)StructBlock::MaxLinkWidth,
+						width+1, (int)StructBlock::MaxLinkWidth,
 						(int)fi->start(), (int)fi->end(), depdescr.c_str());
 			}
-			if (width == 0)
-			{
-				throw std::runtime_error( _TXT("found range not assigned to structure"));
-			}
-			std::vector<StructBlockLink>& ths_linkar = linkar[ width-1];
+			std::vector<StructBlockLink>& ths_linkar = linkar[ width];
 			linkdefs.push_back( LinkDef( *fi, width, ths_linkar.size()));
 			ths_linkar.insert( ths_linkar.end(), lnkset.begin(), lnkset.end());
 		}
@@ -614,21 +627,74 @@ StructBlock StructBlockBuilder::createBlock()
 					break;
 				}
 			}
+			if (li->index >= StructBlock::MaxLinkBaseIdx)
+			{
+				strus::runtime_error(_TXT("too many structures defined, link base index (%d) out of range"), li->index);
+			}
+			if (li->width >= StructBlock::MaxLinkWidth)
+			{
+				strus::runtime_error(_TXT("logic error: structure number of links (%d) out of range"), li->width);
+			}
 			linkbasear[ cidx].push_back( StructBlock::LinkBasePointer( li->index, li->width));
 			li += dim.elements;
 		}
 	}
 	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar);
 #ifdef STRUS_LOWLEVEL_DEBUG
+	int fi = 0,fe = rt.fieldarsize();
+	for (; fi != fe; ++fi)
+	{
+		const StructBlock::StructureFieldArray& blk_fieldar = rt.fieldar( fi);
+		if (blk_fieldar.size != fieldar[fi].size()) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+		if (0!=std::memcmp( blk_fieldar.ar, fieldar[fi].data(), blk_fieldar.size * sizeof( StructBlock::StructureField))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+		const StructBlock::LinkBasePointerArray& blk_linkbasear = rt.linkbasear( fi);
+		if (blk_linkbasear.size != linkbasear[fi].size()) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+		if (0!=std::memcmp( blk_linkbasear.ar, linkbasear[fi].data(), blk_linkbasear.size * sizeof( StructBlock::LinkBasePointer))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+	}
+	int wi = 0, we = StructBlock::MaxLinkWidth;
+	for (; wi != we; ++wi)
+	{
+		const StructBlock::LinkArray& blk_linkar = rt.linkar( wi);
+		if ((int)linkar.size() <= wi)
+		{
+			if (blk_linkar.size != 0) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+		}
+		else
+		{
+			if (blk_linkar.size != linkar[wi].size()) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+			if (0!=std::memcmp( blk_linkar.ar, linkar[wi].data(), blk_linkar.size * sizeof(StructBlockLink))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+		}
+	}
+	const StructBlockFieldEnum* blk_enumar = rt.enumar();
+	if (0!=std::memcmp( blk_enumar, enumar.data(), enumar.size() * sizeof( blk_enumar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
+	const StructBlockFieldRepeat* blk_repeatar = rt.repeatar();
+	if (0!=std::memcmp( blk_repeatar, repeatar.data(), repeatar.size() * sizeof( blk_repeatar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
+	const StructBlock::PositionType* blk_startar = rt.startar();
+	if (0!=std::memcmp( blk_startar, startar.data(), startar.size() * sizeof( blk_startar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
+	const StructBlockFieldPackedByte* blk_pkbytear = rt.pkbytear();
+	if (0!=std::memcmp( blk_pkbytear, pkbytear.data(), pkbytear.size() * sizeof( blk_pkbytear[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
+	const StructBlockFieldPackedShort* blk_pkshortar = rt.pkshortar();
+	if (0!=std::memcmp( blk_pkshortar, pkshortar.data(), pkshortar.size() * sizeof( blk_pkshortar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
 	std::vector<StructBlockDeclaration> declist_build = this->declarations();
 	std::vector<StructBlockDeclaration> declist_block = rt.declarations();
 	std::vector<StructBlockDeclaration>::const_iterator ui = declist_build.begin(), ue = declist_build.end();
 	std::vector<StructBlockDeclaration>::const_iterator li = declist_block.begin(), le = declist_block.end();
 	for (; li != le && ui != ue; ++li,++ui)
 	{
-		if (*ui != *li) throw std::runtime_error(_TXT("structures built are currupt"));
+		if (*ui != *li)
+		{
+			throw std::runtime_error(_TXT("structures built are currupt"));
+		}
 	}
-	if (li != le || ui != ue) throw std::runtime_error(_TXT("structures built are currupt"));
+	if (li != le || ui != ue)
+	{
+		throw std::runtime_error(_TXT("structures built are currupt"));
+	}
 #endif
 	return rt;
 }

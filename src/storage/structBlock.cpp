@@ -28,6 +28,7 @@ struct StaticAsserts
 	{
 		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureField) == 4);
 		STRUS_STATIC_ASSERT( sizeof(StructBlockLink) == 3);
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::LinkBasePointer) == 3);
 	}
 };
 }//anonymous namespace
@@ -117,7 +118,7 @@ StructBlock::StructBlock(
 			{
 				throw strus::runtime_error(_TXT("link base array [%d] size is not equal to parallel field array"), fi);
 			}
-			pi += linkbasear_[fi].size() * sizeof(PackedLinkBasePointer);
+			pi += linkbasear_[fi].size() * sizeof(LinkBasePointer);
 			hdr.linkbaseidx[ fi] = pi;
 		}
 		for (; fi != MaxFieldLevels; ++fi)
@@ -162,7 +163,7 @@ StructBlock::StructBlock(
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.fieldidx[ fi];
-			if (endidx)
+			if (endidx > startidx)
 			{
 				std::memcpy( dt + startidx, fieldar_[fi].data(), endidx-startidx);
 				startidx = endidx;
@@ -173,14 +174,9 @@ StructBlock::StructBlock(
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.linkbaseidx[ fi];
-			if (endidx)
+			if (endidx > startidx)
 			{
-				PackedLinkBasePointer* ar = (PackedLinkBasePointer*)(dt + startidx);
-				std::size_t li = 0, le = linkbasear_[fi].size();
-				for (; li != le; ++li)
-				{
-					ar[ li] = linkbasear_[ fi][ li].value();
-				}
+				std::memcpy( dt + startidx, linkbasear_[fi].data(), endidx-startidx);
 				startidx = endidx;
 			}
 		}
@@ -189,14 +185,9 @@ StructBlock::StructBlock(
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.linkidx[ fi];
-			if (endidx)
+			if (endidx > startidx)
 			{
-				StructBlockLink* ar = (StructBlockLink*)(dt + startidx);
-				std::size_t li = 0, le = linkar_[ fi].size();
-				for (; li != le; ++li)
-				{
-					ar[ li] = linkar_[ fi][ li];
-				}
+				std::memcpy( dt + startidx, linkar_[fi].data(), endidx-startidx);
 				startidx = endidx;
 			}
 		}
@@ -232,7 +223,7 @@ void StructBlock::initFrame()
 			for (; fi != fe && hdr->fieldidx[fi]; ++fi)
 			{
 				const StructureField* ar = getStructPtr<StructureField>( "field definitions", ptr(), pi, hdr->fieldidx[fi]);
-				int arsize = getStructSize<StructureField>( "field definitions", pi, hdr->fieldidx[fi]);
+				std::size_t arsize = getStructSize<StructureField>( "field definitions", pi, hdr->fieldidx[fi]);
 				fieldar_[ fi].init( ar, arsize);
 				pi = hdr->fieldidx[fi];
 			}
@@ -246,9 +237,10 @@ void StructBlock::initFrame()
 			fi = 0;
 			for (; fi != fe && hdr->linkbaseidx[fi]; ++fi)
 			{
-				const PackedLinkBasePointer* ar = getStructPtr<PackedLinkBasePointer>( "link base pointer definitions", ptr(), pi, hdr->linkbaseidx[fi]);
-				int arsize = getStructSize<PackedLinkBasePointer>( "link base pointer definitions", pi, hdr->linkbaseidx[fi]);
+				const LinkBasePointer* ar = getStructPtr<LinkBasePointer>( "link base pointer definitions", ptr(), pi, hdr->linkbaseidx[fi]);
+				std::size_t arsize = getStructSize<LinkBasePointer>( "link base pointer definitions", pi, hdr->linkbaseidx[fi]);
 				linkbasear_[ fi].init( ar, arsize);
+				if (arsize != fieldar_[ fi].size) throw std::runtime_error(_TXT("link base pointer array not parallel to structure field array"));
 				pi = hdr->linkbaseidx[fi];
 			}
 			for (; fi != fe; ++fi)
@@ -260,7 +252,7 @@ void StructBlock::initFrame()
 			for (; fi != fe && hdr->linkidx[ fi]; ++fi)
 			{
 				const StructBlockLink* ar = getStructPtr<StructBlockLink>( "link definitions", ptr(), pi, hdr->linkidx[fi]);
-				int arsize = getStructSize<StructBlockLink>( "link definitions", pi, hdr->linkidx[fi]);
+				std::size_t arsize = getStructSize<StructBlockLink>( "link definitions", pi, hdr->linkidx[fi]);
 				linkar_[ fi].init( ar, arsize);
 				pi = hdr->linkidx[fi];
 			}
@@ -336,11 +328,11 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	}
 	m_cur = loc.first;
 	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
-	int li = linkbase.index + (loc.second * linkbase.width);
-	int wi = 0, we = linkbase.width;
+	int li = linkbase.index + (loc.second * (linkbase.width+1));
 	StructureLink lar[ MaxLinkWidth];
-	for (; wi != we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width-1)[ li].unpacked();
-	m_linkar.init( lar, we);
+	int wi = 0, we = linkbase.width;
+	for (; wi <= we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width)[ li].unpacked();
+	m_linkar.init( lar, linkbase.width+1);
 	return m_cur;
 }
 
