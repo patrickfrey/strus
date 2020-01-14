@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #ifdef NDEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 #else
 #define STRUS_LOWLEVEL_DEBUG
 #endif
