@@ -67,7 +67,7 @@ public:
 		:m_nofLinks(0){}
 	/// \brief Constructor
 	StructureLinkArray( StructureLink* links_, int size_)
-		{for (int ai=0; ai < size_; ++ai) {m_links[ ai] = links_[ ai];}}
+		:m_nofLinks(size_){for (int ai=0; ai < size_; ++ai) {m_links[ ai] = links_[ ai];}}
 	/// \brief Copy constructor
 	StructureLinkArray( const StructureLinkArray& o)
 		:m_nofLinks(o.m_nofLinks){for (int ai=0; ai < o.m_nofLinks; ++ai) {m_links[ ai] = o.m_links[ ai];}}

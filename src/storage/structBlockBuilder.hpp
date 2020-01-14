@@ -27,16 +27,21 @@ class ErrorBufferInterface;
 class StructBlockBuilder
 {
 public:
-	explicit StructBlockBuilder( strus::Index docno_, ErrorBufferInterface* errorhnd_)
-		:m_map(),m_docno(docno_),m_indexCount(0),m_errorhnd(errorhnd_){}
+	explicit StructBlockBuilder( const std::string& docid_, strus::Index docno_, ErrorBufferInterface* errorhnd_)
+		:m_map()
+		,m_docid(docid_)
+		,m_docno(docno_)
+		,m_indexCount(0)
+		,m_errorhnd(errorhnd_){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
+		,m_docid(o.m_docid)
 		,m_docno(o.m_docno)
 		,m_indexCount(o.m_indexCount)
 		,m_errorhnd(o.m_errorhnd){}
-	StructBlockBuilder( const StructBlock& blk, ErrorBufferInterface* errorhnd_);
+	StructBlockBuilder( const StructBlock& blk, const std::string& docid_, ErrorBufferInterface* errorhnd_);
 
-	StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations, ErrorBufferInterface* errorhnd_);
+	StructBlockBuilder( const std::string& docid_, strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations, ErrorBufferInterface* errorhnd_);
 
 	Index docno() const
 	{
@@ -134,7 +139,10 @@ public:/*local functions*/
 
 		void erase( Map::const_iterator mi);
 
-		void removeStructure( strus::Index structno, unsigned int idx);
+		/// \param[in] structno structure type number
+		/// \param[in] idx index assigned to structure
+		/// \param[in,out] deletes where to append deleted structure declarations
+		void removeStructure( strus::Index structno, unsigned int idx, std::vector<StructBlockDeclaration>& deletes);
 
 		int findStructureHeader( const strus::IndexRange& range, strus::Index structno);
 
@@ -199,9 +207,11 @@ public:/*local functions*/
 
 private:
 	std::vector<FieldCover> getFieldCovers() const;
+	void eliminateStructuresBeyondCapacity();
 
 private:
 	IndexRangeLinkMap m_map;
+	std::string m_docid;
 	strus::Index m_docno;
 	int m_indexCount;
 	ErrorBufferInterface* m_errorhnd;

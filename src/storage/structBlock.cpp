@@ -9,6 +9,7 @@
 #include "structBlockBuilder.hpp"
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
+#include "strus/lib/structs.hpp"
 #include "strus/base/static_assert.hpp"
 #include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
@@ -64,16 +65,16 @@ void StructBlock::BlockData::init(
 		const StructBlockFieldPackedByte* pkbytear_,
 		const StructBlockFieldPackedShort* pkshortar_)
 {
-	if (fieldarsize_ > MaxFieldLevels)
+	if (fieldarsize_ > NofFieldLevels)
 	{
-		throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)MaxFieldLevels);
+		throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)NofFieldLevels);
 	}
 	std::memset( this, 0, sizeof(*this));
 	m_fieldarsize = fieldarsize_;
 	int ii;
 	if (fieldar_) for (ii=0; ii != m_fieldarsize; ++ii) m_fieldar[ii] = fieldar_[ii];
 	if (linkbasear_) for (ii=0; ii != m_fieldarsize; ++ii) m_linkbasear[ii] = linkbasear_[ii];
-	if (linkar_) for (ii=0; ii != MaxLinkWidth; ++ii) m_linkar[ii] = linkar_[ii];
+	if (linkar_) for (ii=0; ii != MaxLinkWidth+1; ++ii) m_linkar[ii] = linkar_[ii];
 	m_enumar = enumar_; 
 	m_repeatar = repeatar_;
 	m_startar = startar_;
@@ -94,9 +95,9 @@ StructBlock::StructBlock(
 {
 	BlockHeader hdr;
 	std::memset( &hdr, 0, sizeof( hdr));
-	if (fieldar_.size() > MaxFieldLevels) throw strus::runtime_error(_TXT("too many levels of fields defined (%d > maximum %d)"), (int)fieldar_.size(), (int)MaxFieldLevels);
+	if (fieldar_.size() > NofFieldLevels) throw strus::runtime_error(_TXT("too many levels of fields defined (%d > maximum %d)"), (int)fieldar_.size(), (int)NofFieldLevels);
 	if (linkbasear_.size() != fieldar_.size()) throw std::runtime_error(_TXT("link base array size is not equal to parallel field array"));
-	if (linkar_.size() > MaxLinkWidth) throw strus::runtime_error(_TXT("too many links defined defined per field (%d > maximum %d)"), (int)linkar_.size(), (int)MaxLinkWidth);
+	if (linkar_.size() > MaxLinkWidth+1) throw strus::runtime_error(_TXT("too many links defined defined per field (%d > maximum %d)"), (int)linkar_.size(), (int)MaxLinkWidth+1);
 
 	int pi = sizeof(hdr);
 	{
@@ -106,7 +107,7 @@ StructBlock::StructBlock(
 			pi += fieldar_[fi].size() * sizeof(StructureField);
 			hdr.fieldidx[ fi] = pi;
 		}
-		for (; fi != MaxFieldLevels; ++fi)
+		for (; fi != NofFieldLevels; ++fi)
 		{
 			hdr.fieldidx[ fi] = 0;
 		}
@@ -121,7 +122,7 @@ StructBlock::StructBlock(
 			pi += linkbasear_[fi].size() * sizeof(LinkBasePointer);
 			hdr.linkbaseidx[ fi] = pi;
 		}
-		for (; fi != MaxFieldLevels; ++fi)
+		for (; fi != NofFieldLevels; ++fi)
 		{
 			hdr.linkbaseidx[ fi] = 0;
 		}
@@ -132,7 +133,7 @@ StructBlock::StructBlock(
 			pi += linkar_[fi].size() * sizeof(StructBlockLink);
 			hdr.linkidx[ fi] = pi;
 		}
-		for (; fi != MaxLinkWidth; ++fi)
+		for (; fi != MaxLinkWidth+1; ++fi)
 		{
 			hdr.linkidx[ fi] = 0;
 		}
@@ -159,7 +160,7 @@ StructBlock::StructBlock(
 	int startidx = sizeof(hdr);
 	std::memcpy( dt, &hdr, sizeof(hdr));
 	{
-		int fi = 0, fe = MaxFieldLevels;
+		int fi = 0, fe = NofFieldLevels;
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.fieldidx[ fi];
@@ -170,7 +171,7 @@ StructBlock::StructBlock(
 			}
 		}
 	}{
-		int fi = 0, fe = MaxFieldLevels;
+		int fi = 0, fe = NofFieldLevels;
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.linkbaseidx[ fi];
@@ -181,7 +182,7 @@ StructBlock::StructBlock(
 			}
 		}
 	}{
-		int fi = 0, fe = MaxLinkWidth;
+		int fi = 0, fe = MaxLinkWidth+1;
 		for (; fi != fe; ++fi)
 		{
 			int endidx = hdr.linkidx[ fi];
@@ -212,14 +213,14 @@ void StructBlock::initFrame()
 		const BlockHeader* hdr = (const BlockHeader*)ptr();
 		int blockSize = (int)DataBlock::size();
 
-		StructureFieldArray fieldar_[ MaxFieldLevels];
+		StructureFieldArray fieldar_[ NofFieldLevels];
 		int fieldarsize_ = 0;
-		LinkBasePointerArray linkbasear_[ MaxFieldLevels];
-		LinkArray linkar_[ MaxLinkWidth];
+		LinkBasePointerArray linkbasear_[ NofFieldLevels];
+		LinkArray linkar_[ MaxLinkWidth+1];
 
 		int pi = sizeof(BlockHeader);
 		{
-			int fi = 0, fe = MaxFieldLevels;
+			int fi = 0, fe = NofFieldLevels;
 			for (; fi != fe && hdr->fieldidx[fi]; ++fi)
 			{
 				const StructureField* ar = getStructPtr<StructureField>( "field definitions", ptr(), pi, hdr->fieldidx[fi]);
@@ -233,7 +234,7 @@ void StructBlock::initFrame()
 				fieldar_[ fi].init( 0, 0);
 			}
 		}{
-			int fi = 0, fe = MaxFieldLevels;
+			int fi = 0, fe = NofFieldLevels;
 			fi = 0;
 			for (; fi != fe && hdr->linkbaseidx[fi]; ++fi)
 			{
@@ -248,7 +249,7 @@ void StructBlock::initFrame()
 				linkbasear_[ fi].init( 0, 0);
 			}
 		}{
-			int fi = 0, fe = MaxLinkWidth;
+			int fi = 0, fe = MaxLinkWidth+1;
 			for (; fi != fe && hdr->linkidx[ fi]; ++fi)
 			{
 				const StructBlockLink* ar = getStructPtr<StructBlockLink>( "link definitions", ptr(), pi, hdr->linkidx[fi]);
@@ -328,8 +329,8 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	}
 	m_cur = loc.first;
 	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
-	int li = linkbase.index + (loc.second * (linkbase.width+1));
-	StructureLink lar[ MaxLinkWidth];
+	int li = ((int)linkbase.index + (int)loc.second) * (int)(linkbase.width+1);
+	StructureLink lar[ MaxLinkWidth+1];
 	int wi = 0, we = linkbase.width;
 	for (; wi <= we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width)[ li].unpacked();
 	m_linkar.init( lar, linkbase.width+1);
@@ -339,8 +340,7 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 std::vector<StructBlockDeclaration> StructBlock::declarations() const
 {
 	std::vector<StructBlockDeclaration> rt;
-	typedef std::map<StructBlockKey,std::vector<StructBlockDeclaration> > DeclMap;
-	DeclMap declmap;
+	StorageStructMap::Map declmap;
 
 	int fi = 0, fe = fieldarsize();
 	for (; fi != fe; ++fi)
@@ -358,58 +358,42 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 				{
 					throw std::runtime_error(_TXT("corrupt index: illegal structure number"));
 				}
-				StructBlockKey key( link.structno(), link.index());
-				std::pair<DeclMap::iterator,bool> ins = declmap.insert( DeclMap::value_type( key, std::vector<StructBlockDeclaration>()));
-				DeclMap::iterator di = ins.first;
+				StorageStructMap::Key key( link.structno(), link.index());
+				std::pair<StorageStructMap::Map::iterator,bool>
+					ins = declmap.insert( StorageStructMap::Map::value_type( key, StorageStructMap::FieldRelation()));
+				StorageStructMap::Map::iterator di = ins.first;
 
 				if (link.header())
 				{
-					if (di->second.empty())
+					if (di->second.first.defined())
 					{
-						di->second.push_back( StructBlockDeclaration( key.structno, field, strus::IndexRange()));
-					}
-					else if (di->second.back().src.defined())
-					{
-						if (di->second.back().src != field)
-						{
-							throw std::runtime_error(_TXT("corrupt index: overlapping duplicate structure key"));
-						}
+						throw strus::runtime_error(_TXT("corrupt index: overlapping duplicate structure key: [%d,%d] and [%d,%d]"),
+									 (int)di->second.first.start(), (int)di->second.first.end(),
+									 (int)field.start(), (int)field.end());
 					}
 					else
 					{
-						std::vector<StructBlockDeclaration>::iterator
-							ei = di->second.begin(), ee = di->second.end();
-						for (; ei != ee; ++ei)
-						{
-							ei->src = field;
-						}
+						di->second.first = field;
 					}
 				}
 				else
 				{
-					if (di->second.empty())
-					{
-						di->second.push_back( StructBlockDeclaration( key.structno, strus::IndexRange(), field));
-					}
-					else if (di->second.back().sink.defined())
-					{
-						di->second.push_back( StructBlockDeclaration( key.structno, di->second.back().src, field));
-					}
-					else
-					{
-						di->second.back().sink = field;
-					}
+					di->second.second.push_back( field);
 				}
 			}
 		}
 	}
-	DeclMap::iterator mi = declmap.begin(), me = declmap.end();
+	StorageStructMap::Map::const_iterator mi = declmap.begin(), me = declmap.end();
 	for (; mi != me; ++mi)
 	{
-		std::vector<StructBlockDeclaration>& declist = mi->second;
-		std::sort( declist.begin(), declist.end());
-
-		rt.insert( rt.end(), declist.begin(), declist.end());
+		strus::IndexRange src = mi->second.first;
+		std::vector<strus::IndexRange>::const_iterator
+			di = mi->second.second.begin(), de = mi->second.second.end();
+		for (; di != de; ++di)
+		{
+			strus::IndexRange sink = *di;
+			rt.push_back( StructBlockDeclaration( mi->first.structno(), src, sink));
+		}
 	}
 	return rt;
 }

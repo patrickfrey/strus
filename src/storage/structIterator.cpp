@@ -44,7 +44,7 @@ void StructIterator::skipDoc( const Index& docno_)
 			{
 				m_scanner[ li] = m_curblock.fieldscanner( li);
 			}
-			for (; li < StructBlock::MaxFieldLevels; ++li)
+			for (; li < StructBlock::NofFieldLevels; ++li)
 			{
 				m_scanner[ li] = StructBlock::FieldScanner();
 			}
@@ -54,7 +54,7 @@ void StructIterator::skipDoc( const Index& docno_)
 			m_docno = 0;
 			m_levels = 0;
 			int li = 0;
-			for (; li < StructBlock::MaxFieldLevels; ++li)
+			for (; li < StructBlock::NofFieldLevels; ++li)
 			{
 				m_scanner[ li] = StructBlock::FieldScanner();
 			}

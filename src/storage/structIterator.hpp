@@ -46,7 +46,7 @@ private:
 	const DatabaseClientInterface* m_database;			///< database handle to create cursor
 	Reference<DatabaseAdapter_StructBlock::Reader> m_dbadapter;	///< database cursor
 	StructBlock m_curblock;						///< structure block of the current document
-	StructBlock::FieldScanner m_scanner[ StructBlock::MaxFieldLevels];///< scanner of structure instances for every level
+	StructBlock::FieldScanner m_scanner[ StructBlock::NofFieldLevels];///< scanner of structure instances for every level
 	Index m_docno;							///< current document number
 	int m_levels;							///< number of structure levels in current document
 	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface

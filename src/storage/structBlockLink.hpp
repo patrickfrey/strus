@@ -26,8 +26,8 @@ PACKED_STRUCT( StructBlockLink)
 		{head=o.head; structno=o.structno; idx=o.idx; return *this;}
 
 	unsigned int head:1;		//...bit 15
-	unsigned int structno:7;	//...bits 11 12 13 14, bound to StructBlock::MaxNofStructNo=15
-	unsigned int idx:16;		//...rest bits 0..10, bound to StructBlock::MaxNofStructIdx=2047
+	unsigned int structno:7;	//...bound to StructBlock::MaxNofStructNo=(1<<7)-1,
+	unsigned int idx:16;		//...bound to StructBlock::MaxNofStructIdx=(1<<16)-1
 
 	bool operator < (const StructBlockLink& o) const
 	{
@@ -35,7 +35,7 @@ PACKED_STRUCT( StructBlockLink)
 			? (structno == o.structno
 				? (idx < o.idx)
 				: (structno < o.structno))
-			: (head == true);
+			: ((int)head > (int)o.head);
 	}
 	bool valid() const
 	{
@@ -68,18 +68,18 @@ struct StructBlockKey
 	StructBlockKey& operator=( const StructBlockKey& o)
 		{structno=o.structno; idx=o.idx; return *this;}
 
-	strus::Index structno;		//...bits 11 12 13 14, bound to MaxNofStructNo=16
-	int idx;			//...rest bits 0..10, bound to MaxNofStructIdx=2048
+	strus::Index structno;		//...bound to StructBlock::MaxNofStructNo=(1<<7)-1,
+	int idx;			//...bound to StructBlock::MaxNofStructIdx=(1<<16)-1
 
+	bool valid() const
+	{
+		return structno && idx;
+	}
 	bool operator < (const StructBlockKey& o) const
 	{
 		return structno == o.structno
 				? (idx < o.idx)
 				: (structno < o.structno);
-	}
-	bool valid() const
-	{
-		return structno && idx;
 	}
 	bool operator==( const StructBlockKey& o) const
 	{

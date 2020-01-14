@@ -35,11 +35,11 @@ class StructBlock
 {
 public:
 	enum {
-		MaxFieldLevels=8,
+		NofFieldLevels=8,
 		MaxNofStructNo=(1<<7)-1,
 		MaxNofStructIdx=(1<<16)-1,
 		MaxFieldIdx=(1<<13)-1,
-		MaxFieldType=7,
+		MaxFieldType=NofFieldLevels-1,
 		MaxLinkBaseIdx=(1<<22)-1,
 		MaxLinkWidth=(1<<2)-1
 	};
@@ -57,9 +57,9 @@ public:
 
 	struct BlockHeader
 	{
-		strus::Index fieldidx[ MaxFieldLevels];
-		strus::Index linkbaseidx[ MaxFieldLevels];
-		strus::Index linkidx[ MaxLinkWidth];
+		strus::Index fieldidx[ NofFieldLevels];
+		strus::Index linkbaseidx[ NofFieldLevels];
+		strus::Index linkidx[ MaxLinkWidth+1];
 		strus::Index enumidx;
 		strus::Index repeatidx;
 		strus::Index startidx;
@@ -86,7 +86,7 @@ public:
 				const StructureFieldArray* fieldar_,
 				int fieldarsize_,
 				const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
-				const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth]
+				const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
 				const StructBlockFieldEnum* enumar_,
 				const StructBlockFieldRepeat* repeatar_,
 				const PositionType* startar_,
@@ -110,7 +110,7 @@ public:
 			const StructureFieldArray* fieldar_,
 			int fieldarsize_,
 			const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
-			const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth]
+			const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
 			const StructBlockFieldEnum* enumar_,
 			const StructBlockFieldRepeat* repeatar_,
 			const PositionType* startar_,
@@ -128,10 +128,10 @@ public:
 		const StructBlockFieldPackedShort* pkshortar() const		{return m_pkshortar;}
 
 	private:
-		StructureFieldArray m_fieldar[ MaxFieldLevels];
+		StructureFieldArray m_fieldar[ NofFieldLevels];
 		int m_fieldarsize;
-		LinkBasePointerArray m_linkbasear[ MaxFieldLevels];
-		LinkArray m_linkar[ MaxLinkWidth];
+		LinkBasePointerArray m_linkbasear[ NofFieldLevels];
+		LinkArray m_linkar[ MaxLinkWidth+1];
 		const StructBlockFieldEnum* m_enumar;
 		const StructBlockFieldRepeat* m_repeatar;
 		const PositionType* m_startar;
@@ -146,8 +146,8 @@ public:
 		LinkBasePointer( const LinkBasePointer& o)
 			:index(o.index),width(o.width){}
 
-		int index :22;		//...index of the first link
-		int width :2;		//...number links per element (>=1), bound to MaxLinkWidth=4)
+		unsigned int index :22;		//...index of the first link
+		unsigned int width :2;		//...number links per element (>=1), max bound to MaxLinkWidth=3)
 
 		bool operator == (const LinkBasePointer& o) const
 		{
@@ -164,8 +164,8 @@ public:
 	private:
 		PositionType m_end;
 
-		unsigned short m_type:3;	//... bound to MaxFieldType=7
-		unsigned short m_idx:13;	//... bound to MaxFieldIdx=(1<<14)-1
+		unsigned short m_type:3;	//... max bound to MaxFieldType=7
+		unsigned short m_idx:13;	//... max bound to MaxFieldIdx=(1<<13)-1
 
 	public:
 		strus::Index end() const	{return m_end;}

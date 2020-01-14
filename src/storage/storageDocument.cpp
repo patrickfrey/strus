@@ -27,7 +27,7 @@ StorageDocument::StorageDocument(
 	,m_docid(docid_)
 	,m_docno(docno_)
 	,m_terms(),m_invs()
-	,m_structBuilder( docno_, errorhnd_)
+	,m_structBuilder( docid_, docno_, errorhnd_)
 	,m_attributes(),m_metadata(),m_userlist()
 	,m_maxpos(0)
 	,m_nofStructuresIgnored(0)

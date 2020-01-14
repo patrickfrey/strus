@@ -11,6 +11,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include <string>
 #include <cstring>
 #include <set>
@@ -25,7 +26,7 @@ StorageDocumentUpdate::StorageDocumentUpdate(
 	,m_docno(docno_)
 	,m_terms(),m_invs()
 	,m_delete_search_typenolist(),m_delete_forward_typenolist()
-	,m_structBuilder( docno_, errorhnd_)
+	,m_structBuilder( strus::string_format("%d",docno_),docno_, errorhnd_)
 	,m_attributes(),m_metadata()
 	,m_add_userlist(),m_del_userlist()
 	,m_doClearUserList(false)
