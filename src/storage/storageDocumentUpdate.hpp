@@ -102,6 +102,12 @@ private:
 	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 
 private:
+#if __cplusplus >= 201103L
+	StorageDocumentUpdate( StorageDocumentUpdate&) = delete;//... non copyable
+	void operator=( StorageDocumentUpdate&) = delete;	//... non copyable
+#endif
+	
+private:
 	StorageTransaction* m_transaction;			///< transaction
 	Index m_docno;						///< document number
 	TermMap m_terms;					///< map of all search index terms added

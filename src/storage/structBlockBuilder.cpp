@@ -20,8 +20,8 @@
 #define STRUS_LOWLEVEL_DEBUG
 using namespace strus;
 
-StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_)
-	:m_map(),m_docno(docno_),m_indexCount(0)
+StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_, ErrorBufferInterface* errorhnd_)
+	:m_map(),m_docno(docno_),m_indexCount(0),m_errorhnd(errorhnd_)
 {
 	std::vector<StructBlockDeclaration>::const_iterator di = declarations_.begin(), de = declarations_.end();
 	for (; di != de; ++di)
@@ -30,8 +30,8 @@ StructBlockBuilder::StructBlockBuilder( strus::Index docno_, const std::vector<S
 	}
 }
 
-StructBlockBuilder::StructBlockBuilder( const StructBlock& blk)
-	:m_map(),m_docno(blk.id()),m_indexCount(0)
+StructBlockBuilder::StructBlockBuilder( const StructBlock& blk, ErrorBufferInterface* errorhnd_)
+	:m_map(),m_docno(blk.id()),m_indexCount(0),m_errorhnd(errorhnd_)
 {
 	std::vector<StructBlockDeclaration> declist = blk.declarations();
 	std::vector<StructBlockDeclaration>::const_iterator
@@ -710,5 +710,70 @@ void StructBlockBuilder::print( std::ostream& out) const
 	}
 }
 
+bool StructBlockBuilder::IndexRangeLinkMap::append( const strus::IndexRange& range, const StructBlockLink& link)
+{
+	bool rt = false;
+	rt |= map.insert( IndexRangeLinkPair( range, link)).second;
+	rt |= invmap.insert( LinkIndexRangePair( link, range)).second;
+	return rt;
+}
 
+void StructBlockBuilder::IndexRangeLinkMap::erase( Map::const_iterator mi)
+{
+	map.erase( IndexRangeLinkPair( mi->range, mi->link));
+	invmap.erase( LinkIndexRangePair( mi->link, mi->range));
+}
+
+void StructBlockBuilder::IndexRangeLinkMap::removeStructure( strus::Index structno, unsigned int idx)
+{
+	std::vector<LinkIndexRangePair> removelist;
+	StructBlockLink hl( structno, true/*head*/, idx);
+	StructBlockLink cl( structno, false/*head*/, idx);
+	InvMap::iterator ii = invmap.lower_bound( LinkIndexRangePair( hl, strus::IndexRange()));
+	for (;ii != invmap.end() && ii->link == hl; ++ii)
+	{
+		removelist.push_back( LinkIndexRangePair( ii->link, ii->range));
+	}
+	ii = invmap.lower_bound( LinkIndexRangePair( cl, strus::IndexRange()));
+	for (;ii != invmap.end() && ii->link == cl; ++ii)
+	{
+		removelist.push_back( LinkIndexRangePair( ii->link, ii->range));
+	}
+	std::vector<LinkIndexRangePair>::const_iterator
+		ri = removelist.begin(), re = removelist.end();
+	for (; ri != re; ++ri)
+	{
+		map.erase( IndexRangeLinkPair( ri->range, ri->link));
+		invmap.erase( LinkIndexRangePair( ri->link, ri->range));
+	}
+}
+
+int StructBlockBuilder::IndexRangeLinkMap::findStructureHeader( const strus::IndexRange& range, strus::Index structno)
+{
+	Map::const_iterator ri = first( range), re = end();
+	for (; ri != re && ri->range == range; ++ri)
+	{
+		if (ri->link.head && ri->link.structno == structno) return ri->link.idx;
+	}
+	return -1;
+}
+
+int StructBlockBuilder::IndexRangeLinkMap::maxIndex() const
+{
+	int maxidx = 0;
+	InvMap::const_iterator ri = inv_begin(), re = inv_end();
+	for (; ri != re && ri->link.head; ++ri)
+	{
+		if (ri->link.idx > maxidx) maxidx = ri->link.idx;
+	}
+	return maxidx;
+}
+
+strus::IndexRange StructBlockBuilder::IndexRangeLinkMap::lastSource() const
+{
+	if (map.empty()) return strus::IndexRange();
+	Map::reverse_iterator ri = map.rend(), re = map.rbegin();
+	for (; ri != re && !ri->link.head; ++ri){}
+	return (ri != re) ? ri->range : strus::IndexRange();
+}
 

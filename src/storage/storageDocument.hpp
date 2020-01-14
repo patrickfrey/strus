@@ -87,8 +87,10 @@ private:
 	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 
 private:
-	StorageDocument( const StorageDocument&){}	//non copyable
-	void operator=( const StorageDocument&){}	//non copyable
+#if __cplusplus >= 201103L
+	StorageDocument( StorageDocument&) = delete;	//... non copyable
+	void operator=( StorageDocument&) = delete;	//... non copyable
+#endif
 
 private:
 	StorageTransaction* m_transaction;			///< transaction

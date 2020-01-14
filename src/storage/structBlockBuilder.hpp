@@ -21,19 +21,22 @@
 #include <set>
 
 namespace strus {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class StructBlockBuilder
 {
 public:
-	explicit StructBlockBuilder( strus::Index docno_=0)
-		:m_map(),m_docno(docno_),m_indexCount(0){}
+	explicit StructBlockBuilder( strus::Index docno_, ErrorBufferInterface* errorhnd_)
+		:m_map(),m_docno(docno_),m_indexCount(0),m_errorhnd(errorhnd_){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
 		,m_docno(o.m_docno)
-		,m_indexCount(o.m_indexCount){}
-	StructBlockBuilder( const StructBlock& blk);
+		,m_indexCount(o.m_indexCount)
+		,m_errorhnd(o.m_errorhnd){}
+	StructBlockBuilder( const StructBlock& blk, ErrorBufferInterface* errorhnd_);
 
-	StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations);
+	StructBlockBuilder( strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations, ErrorBufferInterface* errorhnd_);
 
 	Index docno() const
 	{
@@ -127,48 +130,17 @@ public:/*local functions*/
 		IndexRangeLinkMap( const IndexRangeLinkMap& o)
 			:map(o.map),invmap(o.invmap){}
 
-		bool append( const strus::IndexRange& range, const StructBlockLink& link)
-		{
-			bool rt = false;
-			rt |= map.insert( IndexRangeLinkPair( range, link)).second;
-			rt |= invmap.insert( LinkIndexRangePair( link, range)).second;
-			return rt;
-		}
+		bool append( const strus::IndexRange& range, const StructBlockLink& link);
 
-		void erase( Map::const_iterator mi)
-		{
-			map.erase( IndexRangeLinkPair( mi->range, mi->link));
-			invmap.erase( LinkIndexRangePair( mi->link, mi->range));
-		}
+		void erase( Map::const_iterator mi);
 
-		int findStructureHeader( const strus::IndexRange& range, strus::Index structno)
-		{
-			Map::const_iterator ri = first( range), re = end();
-			for (; ri != re && ri->range == range; ++ri)
-			{
-				if (ri->link.head && ri->link.structno == structno) return ri->link.idx;
-			}
-			return -1;
-		}
+		void removeStructure( strus::Index structno, unsigned int idx);
 
-		int maxIndex() const
-		{
-			int maxidx = 0;
-			InvMap::const_iterator ri = inv_begin(), re = inv_end();
-			for (; ri != re && ri->link.head; ++ri)
-			{
-				if (ri->link.idx > maxidx) maxidx = ri->link.idx;
-			}
-			return maxidx;
-		}
+		int findStructureHeader( const strus::IndexRange& range, strus::Index structno);
 
-		strus::IndexRange lastSource() const
-		{
-			if (map.empty()) return strus::IndexRange();
-			Map::reverse_iterator ri = map.rend(), re = map.rbegin();
-			for (; ri != re && !ri->link.head; ++ri){}
-			return (ri != re) ? ri->range : strus::IndexRange();
-		}
+		int maxIndex() const;
+
+		strus::IndexRange lastSource() const;
 
 		bool empty() const
 		{
@@ -232,6 +204,7 @@ private:
 	IndexRangeLinkMap m_map;
 	strus::Index m_docno;
 	int m_indexCount;
+	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace
 #endif
