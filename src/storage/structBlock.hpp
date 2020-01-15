@@ -96,11 +96,6 @@ public:
 			init( fieldar_,fieldarsize_,linkbasear_,linkar_,enumar_,repeatar_,startar_,pkbytear_,pkshortar_);
 		}
 
-		BlockData( const BlockData& o)
-		{
-			std::memcpy( this, &o, sizeof(*this));
-		}
-
 		void init()
 		{
 			init(0,0,0,0,0,0,0,0,0);
