@@ -49,6 +49,7 @@ StructBlockBuilder::StructBlockBuilder( const StructBlock& blk, const std::strin
 
 bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange& src, const strus::IndexRange& sink)
 {
+	bool rt = false;
 	if (!src.defined() || !sink.defined())
 	{
 		throw strus::runtime_error(_TXT("relation with undefined source or sink added to structure block"));
@@ -64,7 +65,7 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 	int structidx = m_map.findStructureHeader( src, structno);
 	if (structidx > 0)
 	{
-		return m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
+		rt = m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
 	}
 	else
 	{
@@ -73,11 +74,10 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 		{
 			throw strus::runtime_error(_TXT("number of structures (%d), out of range, only %d different structure types allowed"), (int)m_indexCount, (int)StructBlock::MaxNofStructIdx);
 		}
-		bool rt = false;
 		rt |= m_map.append( src, StructBlockLink( structno, true/*head*/, structidx));
 		rt |= m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
-		return rt;
 	}
+	return rt;
 }
 
 std::vector<StructBlockDeclaration> StructBlockBuilder::declarations() const
@@ -383,15 +383,19 @@ static FieldPackingDim evaluateFieldPackingDim_repeat(
 	StructBlock::PositionType end = 0;
 	int elements = 0;
 	int width = si->width;
-	if (si + 1 < se)
+	if (si + 1 >= se) return FieldPackingDim();
+
+	std::vector<LinkDef>::const_iterator sn = si+1;
+	if (sn->width != si->width) return FieldPackingDim();
+	strus::Index nextStart;
+	if (!rep.appendFirstPair( nextStart, si->range, sn->range)) return FieldPackingDim();
+	end = sn->range.end();
+	si += 2;
+
+	for (; si != se && si->width == width; ++si,++elements)
 	{
-		std::vector<LinkDef>::const_iterator sn = si+1;
-		strus::Index itrend = sn->range.start();
-		for (; si != se && si->width == width; ++si,++elements)
-		{
-			if (!rep.append( itrend, si->range)) break;
-			end = si->range.end();
-		}
+		if (!rep.appendNext( nextStart, si->range)) break;
+		end = si->range.end();
 	}
 	return FieldPackingDim( elements, sizeof(StructBlockFieldRepeat)/*unitsize*/, width, end);
 }

@@ -279,6 +279,7 @@ public:
 	const StructBlockFieldPackedShort* pkshortar() const		{return m_data.pkshortar();}
 
 	std::vector<StructBlockDeclaration> declarations() const;
+	std::vector<strus::IndexRange> fields() const;
 
 	void print( std::ostream& out) const;
 

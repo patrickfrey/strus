@@ -337,6 +337,22 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	return m_cur;
 }
 
+std::vector<strus::IndexRange> StructBlock::fields() const
+{
+	std::vector<strus::IndexRange> rt;
+	int fi = 0, fe = fieldarsize();
+	for (; fi != fe; ++fi)
+	{
+		StructBlock::FieldScanner scanner = fieldscanner( fi);
+		strus::IndexRange field = scanner.next();
+		for (; field.defined(); field = scanner.next())
+		{
+			rt.push_back( field);
+		}
+	}
+	return rt;
+}
+
 std::vector<StructBlockDeclaration> StructBlock::declarations() const
 {
 	std::vector<StructBlockDeclaration> rt;

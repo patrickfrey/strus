@@ -321,6 +321,38 @@ struct Collection
 	Collection( const Collection& o)
 		:doclist(o.doclist){}
 
+	void insert( strus::StorageClientInterface* storage, const std::string& selectDocid)
+	{
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
+		try
+		{
+			std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
+			for (; di != de; ++di)
+			{
+				if (di->docid == selectDocid)
+				{
+					strus::local_ptr<strus::StorageDocumentInterface>
+						doc( transaction->createDocument( di->docid));
+					if (!doc.get()) throw strus::runtime_error("error creating document to insert");
+
+					buildDocument( doc.get(), di->structurelist);
+				}
+			}
+		}
+		catch (const std::runtime_error& err)
+		{
+			throw std::runtime_error( err.what());
+		}
+		if (g_errorhnd->hasError())
+		{
+			throw strus::runtime_error( "insert failed: %s", g_errorhnd->fetchError());
+		}
+		if (!transaction->commit())
+		{
+			throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
+		}
+	}
+
 	void insert( strus::StorageClientInterface* storage, int commitSize)
 	{
 		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
@@ -619,13 +651,20 @@ static void verifyQueryAnswer( Storage& storage, strus::StructIteratorInterface*
 	}
 }
 
-static void testLargeStructures( int nofDocuments, int nofStructures, int commitSize, int nofQueryies)
+static void testLargeStructures( int nofDocuments, int nofStructures, int commitSize, int nofQueryies, const std::string& selectDocid)
 {
 	Storage storage( g_fileLocator, g_errorhnd);
 	storage.open( "path=storage", true);
 	Collection collection( nofDocuments, nofStructures);
 
-	collection.insert( storage.sci.get(), commitSize);
+	if (selectDocid.empty())
+	{
+		collection.insert( storage.sci.get(), commitSize);
+	}
+	else
+	{
+		collection.insert( storage.sci.get(), selectDocid);
+	}
 	if (g_dumpCollection) collection.dump( std::cout);
 
 	int qi = 0, qe = nofQueryies;
@@ -645,7 +684,11 @@ static void testLargeStructures( int nofDocuments, int nofStructures, int commit
 			{
 				if (g_verbosity >= 1) fprintf( stderr, "\rissued %d queries", qi);
 			}
-			verifyQueryAnswer( storage, sitr.get(), collection.randomQueryAnswer());
+			Collection::QueryAnswerPair qa = collection.randomQueryAnswer();
+			if (selectDocid.empty() || qa.query.docid == selectDocid)
+			{
+				verifyQueryAnswer( storage, sitr.get(), qa);
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -667,6 +710,7 @@ static void printUsage()
 	std::cerr << "  -D             :dump collection created" << std::endl;
 	std::cerr << "  -K             :keep artefacts, do not clean up" << std::endl;
 	std::cerr << "  -W <seed>   :sepecify pseudo random number generator seed (int)" << std::endl;
+	std::cerr << "  -F <docid>  :only process insert of document with id <docid>" << std::endl;
 	std::cerr << "<nofdocs>     :number of documents inserted" << std::endl;
 	std::cerr << "<nofstu>      :average number of structures per document" << std::endl;
 	std::cerr << "<commitsize>  :number of documents inserted per transaction" << std::endl;
@@ -678,6 +722,7 @@ int main( int argc, const char* argv[])
 	int rt = 0;
 	bool do_cleanup = true;
 	int argi = 1;
+	std::string selectDocid;
 	for (; argc > argi; ++argi)
 	{
 		if (std::strcmp( argv[argi], "-K") == 0)
@@ -689,6 +734,11 @@ int main( int argc, const char* argv[])
 			if (++argi == argc) throw std::runtime_error("argument expected for option -W (random seed)");
 			if (argv[argi][0] < '0' || argv[argi][0] > '9') throw std::runtime_error("non negative integer argument expected for option -W (random seed)");
 			g_random.init( atoi( argv[argi]));
+		}
+		else if (std::strcmp( argv[argi], "-F") == 0)
+		{
+			if (++argi == argc) throw std::runtime_error("argument expected for option -F (docid)");
+			selectDocid = argv[argi];
 		}
 		else if (std::strcmp( argv[argi], "-V") == 0)
 		{
@@ -754,7 +804,7 @@ int main( int argc, const char* argv[])
 		int nofQueryies = strus::numstring_conv::toint( argv[ argi+ai], std::strlen(argv[ argi+ai]), std::numeric_limits<int>::max());
 		++ai;
 
-		testLargeStructures( nofDocuments, nofStructures, commitSize, nofQueryies);
+		testLargeStructures( nofDocuments, nofStructures, commitSize, nofQueryies, selectDocid);
 		std::cerr << "OK" << std::endl;
 	}
 	catch (const std::bad_alloc&)

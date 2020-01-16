@@ -49,42 +49,25 @@ struct StructBlockFieldRepeat
 	StructBlockFieldRepeat( const StructBlockFieldRepeat& o)
 		:base(o.base),ofs(o.ofs),size(o.size){}
 
-	bool append( strus::Index& enditr, const strus::IndexRange& range)
+	bool appendFirstPair( strus::Index& nextStart, const strus::IndexRange& range1, const strus::IndexRange& range2)
 	{
-		if (!base)
-		{
-			base = positionCast( range.start());
-			size = sizeCast( range.end() - range.start());
-			ofs = offsetCast( enditr - range.start());
-			if (!base || !size || !ofs)
-			{
-				base = 0; size = 0; ofs = 0;
-				return false;
-			}
-			enditr += ofs;
-			return true;
-		}
-		else
-		{
-			strus::Index membsize = range.end() - range.start();
-			strus::Index membofs = enditr - range.start();
+		if (range1.len() != range2.len()) return false;
 
-			if (sizeCast( membsize) == size && offsetCast( membofs) == ofs)
-			{
-				enditr += membofs;
-				return true;
-			}
-			return false;
-		}
+		base = positionCast( range1.start());
+		size = sizeCast( range1.len());
+		ofs  = offsetCast( range2.start() - range1.start());
+		if (!ofs ||!size) return false;
+		nextStart = range2.start() + ofs;
+		return true;
 	}
 
-	strus::Index append( const std::vector<strus::IndexRange>& rangear)
+	bool appendNext( strus::Index& nextStart, const strus::IndexRange& range)
 	{
-		if (rangear.size() < 3) return false;
-		strus::Index rt = rangear[0].start() + (rangear[1].end() - rangear[0].end());
-		std::vector<strus::IndexRange>::const_iterator ri = rangear.begin(), re = rangear.end();
-		for (; ri != re && append( rt, *ri); ++ri){}
-		return ri == re ? rt : 0;
+		if (nextStart != range.start()) return false;
+		if (sizeCast( range.len()) != size) return false;
+
+		nextStart += ofs;
+		return true;
 	}
 
 	int nofMembers( PositionType end) const
