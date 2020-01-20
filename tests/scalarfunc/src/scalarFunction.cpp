@@ -14,6 +14,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_format.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>
@@ -95,7 +96,7 @@ static bool run( const ScalarFunctionParserInterface* parser, unsigned int testi
 		std::cerr << "function:" << std::endl;
 		std::cerr << func->view().tostring() << std::endl;
 
-		std::cerr << std::setprecision(11) << "result=" << result << " expected=" << test.result << " diff=" << xx << std::endl;
+		std::cerr << "result=" << strus::string_format( "%.5f", result) << " expected=" << strus::string_format( "%.5f", test.result) << " diff=" << strus::string_format( "%.5f", xx) << std::endl;
 	}
 	return rt;
 }

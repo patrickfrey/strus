@@ -25,7 +25,7 @@ class Ranker
 {
 public:
 	/// \brief Constructor
-	Ranker( std::size_t maxNofRanks_)
+	explicit Ranker( std::size_t maxNofRanks_)
 		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
 	{
 		if (maxNofRanks_ == 0) throw strus::runtime_error( "%s",  _TXT( "illegal value for max number of ranks"));
@@ -169,7 +169,7 @@ private:
 
 	const WeightedDocument& lastRank() const
 	{
-		static const WeightedDocument emptyRank( 0, std::numeric_limits<double>::max());
+		static const WeightedDocument emptyRank;
 		if (m_nofRanks == 0) return emptyRank;
 		std::size_t lastElemIdx = (m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks) -1;
 		return m_brute_ar[ m_brute_index[ lastElemIdx]];

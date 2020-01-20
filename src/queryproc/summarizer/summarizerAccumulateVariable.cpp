@@ -110,7 +110,7 @@ std::vector<unsigned int> SummarizerFunctionContextAccumulateVariable::getCandid
 	return rt;
 }
 
-SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionContextAccumulateVariable::buildPosWeightMap( const std::vector<unsigned int>& fsel)
+SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionContextAccumulateVariable::buildPosWeightMap( const std::vector<unsigned int>& fsel, const strus::IndexRange& field)
 {
 	PosWeightMap rt;
 
@@ -118,8 +118,9 @@ SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionCont
 	for (; fi != fe; ++fi)
 	{
 		const SummarizationFeature& sumfeat = m_features[ *fi];
-		Index curpos = sumfeat.itr->skipPos( 0);
-		for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
+		strus::Index curpos = sumfeat.itr->skipPos( field.start());
+		strus::Index endpos = field.defined() ? field.end() : std::numeric_limits<strus::Index>::max();
+		for (; curpos && curpos < endpos; curpos = sumfeat.itr->skipPos( curpos+1))
 		{
 			std::vector<const PostingIteratorInterface*>::const_iterator
 				vi = sumfeat.varitr.begin(), ve = sumfeat.varitr.end();
@@ -140,7 +141,7 @@ SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionCont
 	return rt;
 }
 
-void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel)
+void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel, const strus::IndexRange& field)
 {
 	PosWeightMap posWeightMap;
 
@@ -148,8 +149,9 @@ void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream&
 	for (; fi != fe; ++fi)
 	{
 		const SummarizationFeature& sumfeat = m_features[ *fi];
-		Index curpos = sumfeat.itr->skipPos( 0);
-		for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
+		strus::Index curpos = sumfeat.itr->skipPos( field.start());
+		strus::Index endpos = field.defined() ? field.end() : std::numeric_limits<strus::Index>::max();
+		for (; curpos && curpos < endpos; curpos = sumfeat.itr->skipPos( curpos+1))
 		{
 			std::vector<const PostingIteratorInterface*>::const_iterator
 				vi = sumfeat.varitr.begin(), ve = sumfeat.varitr.end();
@@ -158,14 +160,14 @@ void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream&
 				PosWeightMap::iterator wi = posWeightMap.find( curpos);
 				if (wi == posWeightMap.end())
 				{
-					out << string_format( _TXT( "accu pos=%u, weight=%f"),
+					out << string_format( _TXT( "accu pos=%u, weight=%.5f"),
 								(unsigned int)curpos, sumfeat.weight)
 						<< std::endl;
 				}
 				else
 				{
 					wi->second *= m_data->cofactor * sumfeat.weight;
-					out << string_format( _TXT( "accu pos=%u, weight=%f, result=%f"),
+					out << string_format( _TXT( "accu pos=%u, weight=%.5f, result=%.5f"),
 								(unsigned int)curpos,
 								(m_data->cofactor * sumfeat.weight), wi->second)
 						<< std::endl;
@@ -220,18 +222,18 @@ std::vector<SummaryElement> SummarizerFunctionContextAccumulateVariable::getSumm
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextAccumulateVariable::getSummary( const Index& docno)
+	SummarizerFunctionContextAccumulateVariable::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
-		m_forwardindex->skipDoc( docno);
+		m_forwardindex->skipDoc( doc.docno());
 
 		// Build a bitmap with all matching documents:
-		std::vector<unsigned int> flist = getCandidateSet( docno);
+		std::vector<unsigned int> flist = getCandidateSet( doc.docno());
 
 		// For every match position multiply the weights for each position and add them 
 		// to the final accumulation result:
-		PosWeightMap posWeightMap( buildPosWeightMap( flist));
+		PosWeightMap posWeightMap( buildPosWeightMap( flist, doc.field()));
 
 		// Build the accumulation result:
 		return getSummariesFromPosWeightMap( posWeightMap);
@@ -239,21 +241,24 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextAccumulateVariable::debugCall( const Index& docno)
+std::string SummarizerFunctionContextAccumulateVariable::debugCall( const strus::WeightedDocument& doc)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	m_forwardindex->skipDoc( docno);
-
-	// Build a bitmap with all matching documents:
-	std::vector<unsigned int> flist = getCandidateSet( docno);
-
-	// Log events that contribute to the result:
-	printPosWeights( out, flist);
-
-	return out.str();
+	try
+	{
+		std::ostringstream out;
+		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+	
+		m_forwardindex->skipDoc( doc.docno());
+	
+		// Build a bitmap with all matching documents:
+		std::vector<unsigned int> flist = getCandidateSet( doc.docno());
+	
+		// Log events that contribute to the result:
+		printPosWeights( out, flist, doc.field());
+	
+		return out.str();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 

@@ -12,6 +12,7 @@
 #include "strus/summarizationVariable.hpp"
 #include "strus/summaryElement.hpp"
 #include "strus/termStatistics.hpp"
+#include "strus/weightedDocument.hpp"
 #include <string>
 #include <vector>
 
@@ -49,14 +50,14 @@ public:
 	virtual void setVariableValue( const std::string& name, double value)=0;
 
 	/// \brief Get the summarization elements for one document
-	/// \param[in] docno document to get the summary element from
+	/// \param[in] doc weighted document or passage to get the summary element from
 	/// \return the summarization elements
-	virtual std::vector<SummaryElement> getSummary( const Index& docno)=0;
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc)=0;
 
 	/// \brief Get debug info dumped as string of the summarization call for one document
 	/// \param[in] docno document to get the summary debug info from
 	/// \return the debug info as string
-	virtual std::string debugCall( const Index& docno)=0;
+	virtual std::string debugCall( const strus::WeightedDocument& doc)=0;
 };
 
 }//namespace

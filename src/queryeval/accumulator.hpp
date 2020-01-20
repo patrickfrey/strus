@@ -9,12 +9,15 @@
 #define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
+#include "strus/constants.hpp"
+#include "strus/weightedField.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "strus/base/dynamic_bitset.hpp"
+#include "ranker.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -54,6 +57,7 @@ public:
 		,m_metadata(metadata_)
 		,m_metaDataRestriction(metaDataRestriction_?metaDataRestriction_->createInstance():0)
 		,m_weightingFormula(weightingFormula_)
+		,m_weightingElements(),m_selectorPostings(),m_featureRestrictions(),m_aclRestrictions()
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -61,6 +65,7 @@ public:
 		,m_maxDocumentNumber(maxDocumentNumber_)
 		,m_nofDocumentsRanked(0)
 		,m_nofDocumentsVisited(0)
+		,m_ranker(maxNofRanks_)
 		,m_evaluationSetIterator(0)
 	{}
 
@@ -80,7 +85,8 @@ public:
 
 	void addAlternativeAclRestriction( const Reference<InvAclIteratorInterface>& iterator);
 
-	bool nextRank( Index& docno, unsigned int& selectorState, double& weight);
+	bool nextRank( Index& docno, unsigned int& selectorState);
+	const Ranker& ranker()				{return m_ranker;}
 
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
@@ -114,7 +120,6 @@ private:
 	Reference<MetaDataRestrictionInstanceInterface> m_metaDataRestriction;
 	const ScalarFunctionInstanceInterface* m_weightingFormula;
 	std::vector<WeightingElement> m_weightingElements;
-	std::vector<double> m_weights;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
 	std::vector<Reference<InvAclIteratorInterface> > m_aclRestrictions;
@@ -125,6 +130,7 @@ private:
 	Index m_maxDocumentNumber;
 	unsigned int m_nofDocumentsRanked;
 	unsigned int m_nofDocumentsVisited;
+	Ranker m_ranker;
 	PostingIteratorInterface* m_evaluationSetIterator;
 };
 

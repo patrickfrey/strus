@@ -47,7 +47,7 @@ public:
 			double/*weight*/,
 			const TermStatistics&);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
@@ -55,7 +55,8 @@ private:
 	strus::Reference<MetaDataReaderInterface> m_metadata;
 	Index m_elementHandle;
 	double m_weight;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::vector<WeightedField> m_lastResult;	///< buffer for the last result calculated
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceMetadata
@@ -68,8 +69,6 @@ public:
 		:m_weight(1.0),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceMetadata(){}
-
-	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 

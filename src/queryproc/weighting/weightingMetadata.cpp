@@ -32,6 +32,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 	:m_metadata(metadata_)
 	,m_elementHandle(-1)
 	,m_weight(weight_)
+	,m_lastResult( 1, WeightedField())
 	,m_errorhnd(errorhnd_)
 {
 	m_elementHandle = m_metadata->elementHandle(elementName_);
@@ -55,24 +56,29 @@ void WeightingFunctionContextMetadata::addWeightingFeature(
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), THIS_METHOD_NAME);
 }
 
-double WeightingFunctionContextMetadata::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextMetadata::call( const Index& docno)
 {
 	m_metadata->skipDoc( docno);
-	return m_weight * (double)m_metadata->getValue( m_elementHandle);
+	m_lastResult.resize( 1);
+	m_lastResult[0].setWeight( m_weight * (double)m_metadata->getValue( m_elementHandle));
+	return m_lastResult;
 }
 
 std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-
-	m_metadata->skipDoc( docno);
-	double val = (double)m_metadata->getValue( m_elementHandle);
-	double res = m_weight * val;
-
-	out << string_format( _TXT( "result=%f, value=%f"), res, val) << std::endl;
-	return out.str();
+	try
+	{
+		std::ostringstream out;
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+	
+		m_metadata->skipDoc( docno);
+		double val = (double)m_metadata->getValue( m_elementHandle);
+		double res = m_weight * val;
+	
+		out << string_format( _TXT( "result=%.5f, value=%.5f"), res, val) << std::endl;
+		return out.str();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of the weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -81,11 +87,6 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
-}
-
-void WeightingFunctionInstanceMetadata::setMaxNofWeightedFields( int N)
-{
-	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& name_, const std::string& value)

@@ -35,7 +35,7 @@ public:
 		std::size_t nofargs,
 		unsigned int range_,
 		unsigned int cardinality_,
-		Index firstpos_,
+		const strus::IndexRange& field,
 		EvaluationType evaluationType_);
 
 	/// \brief Initializer method
@@ -44,7 +44,7 @@ public:
 		std::size_t nofargs,
 		unsigned int range_,
 		unsigned int cardinality_,
-		Index firstpos_,
+		const strus::IndexRange& field,
 		EvaluationType evaluationType_);
 
 	/// \brief Skip to the first window and return true, if there is one more:
@@ -54,7 +54,7 @@ public:
 	bool next();
 
 	/// \brief Skip to the first window after pos and return true, if there is one more:
-	bool skip( const Index& pos);
+	bool skip( strus::Index pos);
 
 	/// \brief Return the number of elements of the current window (depends on evaluation type)
 	unsigned int size() const
@@ -92,7 +92,7 @@ private:
 	/// \brief Get the size of the current maximal window within a proximity range:
 	unsigned int getMaxWinSize();
 	/// \brief Advance to the next candidate (after advancepos if defined):
-	bool advance( const Index& advancepos=0);
+	bool advance( strus::Index advancepos=0);
 
 private:
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< element iterators
@@ -103,6 +103,7 @@ private:
 	unsigned int m_cardinality;				///< number of elements for a candidate window
 	unsigned int m_windowsize;				///< size of current window in elements
 	strus::bitset<MaxNofArguments> m_isnew_bitset;		///< bitset zu determine is an element in the window has not been visited yet
+	strus::Index m_endpos;					///< first position not accepted anymore
 	EvaluationType m_evaluationType;			///< type of evaluation
 };
 

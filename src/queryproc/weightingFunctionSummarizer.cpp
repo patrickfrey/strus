@@ -54,24 +54,45 @@ public:
 		m_func->setVariableValue( name_, value);
 	}
 
-	virtual std::vector<SummaryElement> getSummary( const Index& docno)
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc)
 	{
 		try
 		{
 			std::ostringstream out;
-			out << m_func->call( docno);
+			const std::vector<WeightedField>& wf = m_func->call( docno);
+			std::vector<WeightedField>::const_iterator wi = wf.begin(), we = wf.end();
 			std::vector<SummaryElement> rt;
-			rt.push_back( SummaryElement( m_name, out.str()));
+			for (int widx=0; wi != we; ++wi,++widx)
+			{
+				if (wi->field() == doc.field())
+				{
+					if (wi->field().defined())
+					{
+						rt.push_back( SummaryElement( "start", strus::string_format("%d", (int)wi->field().start()), widx));
+						rt.push_back( SummaryElement( "end", strus::string_format("%d", (int)wi->field().end()), widx));
+					}
+					rt.push_back( SummaryElement( "weight", strus::string_format("%.4f", wi->weight()), widx));
+				}
+			}
 			return rt;
 		}
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::vector<SummaryElement>());
 	}
 
-	virtual std::string debugCall( const Index& docno)
+	virtual std::string debugCall( const strus::WeightedDocument& doc)
 	{
 		try
 		{
-			return m_func->debugCall( docno);
+			std::ostringstream out;
+			out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+		
+			std::vector<SummaryElement> res = getSummary( doc);
+			std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
+			for (; ri != re; ++ri)
+			{
+				out << string_format( _TXT( "name=%s, value='%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+			}
+			return out.str();
 		}
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::string());
 	}

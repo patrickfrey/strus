@@ -33,7 +33,7 @@ class ErrorBufferInterface;
 /// \brief Configured parameters of the BM25pff weighting function
 struct WeightingFunctionParameterBM25pff
 {
-	int maxNofWeightingFields;		///< maximum number of weighted fields returned
+	int maxNofResults;			///< maximum number of weighted fields returned
 	double k1;				///< k1 value of BM25
 	double b;				///< b value of BM25
 	double avgDocLength;			///< average document length in the collection
@@ -53,7 +53,7 @@ struct WeightingFunctionParameterBM25pff
 	double prop_weight_const;		///< constant factor for proportional feature weight [0.0 .. 1.0]
 
 	WeightingFunctionParameterBM25pff()
-		:maxNofWeightingFields(1)
+		:maxNofResults(1)
 		,k1(1.5),b(0.75),avgDocLength(500)
 		,paragraphsize(300)
 		,sentencesize(100)
@@ -98,7 +98,7 @@ public:
 
 	virtual void setVariableValue( const std::string& name_, double value);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
@@ -162,6 +162,7 @@ private:
 	strus::Reference<MetaDataReaderInterface> m_metadata;	///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
 	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
+	std::vector<WeightedField> m_lastResult;		///< buffer for the last result calculated
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -176,7 +177,6 @@ public:
 		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
-	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);

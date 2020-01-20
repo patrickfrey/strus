@@ -8,7 +8,6 @@
 #include "query.hpp"
 #include "queryEval.hpp"
 #include "accumulator.hpp"
-#include "ranker.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -715,15 +714,13 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> ranks;
-		Ranker ranker( maxNofRanks + minRank);
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
 		double weight = 0.0;
 	
-		while (accumulator.nextRank( docno, state, weight))
+		while (accumulator.nextRank( docno, state))
 		{
-			ranker.insert( WeightedDocument( docno, weight));
 			if (state > prev_state && (int)ranker.nofRanks() >= maxNofRanks + minRank)
 			{
 				state = prev_state;
@@ -731,8 +728,8 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			}
 			prev_state = state;
 		}
-		std::vector<WeightedDocument> resultlist = ranker.result( minRank);
-	
+		std::vector<WeightedDocument> resultlist = accumulator.ranker().result( minRank);
+
 		// [6] Summarization:
 		evaluationPhase = "summarization";
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;

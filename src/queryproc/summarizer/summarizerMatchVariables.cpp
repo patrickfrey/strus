@@ -72,22 +72,23 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextMatchVariables::getSummary( const Index& docno)
+	SummarizerFunctionContextMatchVariables::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
 		std::vector<SummaryElement> rt;
-		m_forwardindex->skipDoc( docno);
-		Index curpos = 0;
+		m_forwardindex->skipDoc( doc.docno());
 
 		std::vector<SummarizationFeature>::const_iterator
 			fi = m_features.begin(), fe = m_features.end();
 		for (; fi != fe; ++fi)
 		{
-			if (docno==fi->itr->skipDoc( docno))
+			if (doc.docno()==fi->itr->skipDoc( doc.docno()))
 			{
-				curpos = fi->itr->skipPos( 0);
-				for (int groupidx=0; curpos; curpos = fi->itr->skipPos( curpos+1),++groupidx)
+				strus::Index curpos = doc.field().start();
+				strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
+
+				for (int groupidx=0; curpos && curpos < endpos; curpos = fi->itr->skipPos( curpos+1),++groupidx)
 				{
 					std::vector<SummarizationVariable>::const_iterator
 						vi = fi->variables.begin(),
@@ -95,7 +96,7 @@ std::vector<SummaryElement>
 
 					for (; vi != ve; ++vi)
 					{
-						Index pos = vi->position();
+						strus::Index pos = vi->position();
 						if (pos)
 						{
 							if (pos == m_forwardindex->skipPos( pos))
@@ -112,13 +113,12 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextMatchVariables::debugCall( const Index& docno)
+std::string SummarizerFunctionContextMatchVariables::debugCall( const strus::WeightedDocument& doc)
 {
 	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
 	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 
-	std::vector<SummaryElement> res = getSummary( docno);
+	std::vector<SummaryElement> res = getSummary( doc);
 	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
 	for (; ri != re; ++ri)
 	{

@@ -28,7 +28,7 @@ class WeightingFunctionContextTermFrequency
 {
 public:
 	explicit WeightingFunctionContextTermFrequency( ErrorBufferInterface* errorhnd_)
-		:m_featar(),m_errorhnd(errorhnd_){}
+		:m_featar(),m_lastResult( 1, WeightedField()),m_errorhnd(errorhnd_){}
 
 	struct Feature
 	{
@@ -49,13 +49,14 @@ public:
 			double weight_,
 			const TermStatistics&);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
 private:
 	std::vector<Feature> m_featar;
-	ErrorBufferInterface* m_errorhnd;	///< buffer for error messages
+	std::vector<WeightedField> m_lastResult;	///< buffer for the last result calculated
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 
@@ -69,8 +70,6 @@ public:
 		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceTermFrequency(){}
-
-	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 

@@ -54,12 +54,12 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextMetaData::getSummary( const Index& docno)
+	SummarizerFunctionContextMetaData::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
 		std::vector<SummaryElement> rt;
-		m_metadata->skipDoc( docno);
+		m_metadata->skipDoc( doc.docno());
 		NumericVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
@@ -70,12 +70,12 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextMetaData::debugCall( const Index& docno)
+std::string SummarizerFunctionContextMetaData::debugCall( const strus::WeightedDocument& doc)
 {
 	std::ostringstream out;
 	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 
-	m_metadata->skipDoc( docno);
+	m_metadata->skipDoc( doc.docno());
 	NumericVariant value = m_metadata->getValue( m_attrib);
 	if (value.defined()) 
 	{

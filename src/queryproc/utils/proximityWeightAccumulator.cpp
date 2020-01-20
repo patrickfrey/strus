@@ -8,6 +8,7 @@
 #include "proximityWeightAccumulator.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/base/math.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include <limits>
 #include <iostream>
@@ -22,7 +23,7 @@ std::string ProximityWeightAccumulator::WeightArray::tostring() const
 	for (std::size_t ai=0; ai < arsize; ++ai)
 	{
 		if (ai) rt << ' ';
-		rt << std::setprecision(7) << std::fixed << ar[ai];
+		rt << strus::string_format( "%.5f", ar[ai]);
 	}
 	return rt.str();
 }

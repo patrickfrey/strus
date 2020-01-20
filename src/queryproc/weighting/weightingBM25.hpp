@@ -76,7 +76,7 @@ public:
 
 	virtual void setVariableValue( const std::string& name_, double value);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
@@ -88,8 +88,9 @@ private:
 	double m_nofCollectionDocuments;
 	std::vector<Feature> m_featar;
 	strus::Reference<MetaDataReaderInterface> m_metadata;
-	int m_metadata_doclen;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	int m_metadata_doclen;					///< metadata element handle for the ducmnet length
+	std::vector<WeightedField> m_lastResult;		///< buffer for the last result calculated
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -103,7 +104,6 @@ public:
 		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
-	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);

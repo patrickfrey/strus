@@ -39,6 +39,7 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 	,m_metadata(metadata_)
 	,m_metadatahnd(metadatahnd_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
+	,m_lastResult( 1, WeightedField())
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_func.get())
@@ -86,77 +87,82 @@ void WeightingFunctionContextSmart::fillParameter( strus::Index docno, double ff
 	}
 }
 
-double WeightingFunctionContextSmart::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextSmart::call( const Index& docno)
 {
-	if (!m_metadatahnd.empty())
+	try
 	{
-		m_metadata->skipDoc( docno);
-	}
-	double rt = 0.0;
-	unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
-
-	if (m_featar.empty())
-	{
-		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
-		fillParameter( docno, 0, 0, param);
-
-		rt += m_func->call( param, nofParam);
-	}
-	else
-	{
-		FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
-		for (; fi != fe; ++fi)
+		m_lastResult.resize( 0);
+		if (!m_metadatahnd.empty())
+		{
+			m_metadata->skipDoc( docno);
+		}
+		double ww = 0.0;
+		unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
+	
+		if (m_featar.empty())
 		{
 			double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
-			fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
-
-			rt += m_func->call( param, nofParam) * fi->weight();
+			fillParameter( docno, 0, 0, param);
+	
+			ww += m_func->call( param, nofParam);
 		}
+		else
+		{
+			FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+			for (; fi != fe; ++fi)
+			{
+				double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
+				fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+	
+				ww += m_func->call( param, nofParam) * fi->weight();
+			}
+		}
+		m_lastResult.resize( 1);
+		m_lastResult[ 0].setWeight( ww);
+		return m_lastResult;
 	}
-	return rt;
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
 std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-
-	if (!m_metadatahnd.empty())
+	try
 	{
-		m_metadata->skipDoc( docno);
-	}
-	double res = 0.0;
-	unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
-
-	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (unsigned int fidx=0; fi != fe; ++fi,++fidx)
-	{
-		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
-		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
-
-		double ww = m_func->call( param, nofParam);
-		res += ww;
-		out << string_format( _TXT( "[%u] result=%f, ff=%u, df=%u, N=%u, qf=%u"),
-					fidx, ww, (unsigned int)fi->ff(),
-					(unsigned int)(fi->df()+0.5),
-					(unsigned int)m_nofCollectionDocuments,
-					(unsigned int)m_featar.size()) << std::endl;
-
-		unsigned int pi=NOF_IMPLICIT_ARGUMENTS, pe=nofParam;
-		for (; pi != pe; ++pi)
+		std::ostringstream out;
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+	
+		if (!m_metadatahnd.empty())
 		{
-			out << string_format( _TXT( ", x%u=%f"), pi, param[pi]);
+			m_metadata->skipDoc( docno);
 		}
-		out << std::endl;
+		double res = 0.0;
+		unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
+	
+		FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (unsigned int fidx=0; fi != fe; ++fi,++fidx)
+		{
+			double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
+			fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+	
+			double ww = m_func->call( param, nofParam);
+			res += ww;
+			out << string_format( _TXT( "[%u] result=%.5f, ff=%u, df=%u, N=%u, qf=%u"),
+						fidx, ww, (unsigned int)fi->ff(),
+						(unsigned int)(fi->df()+0.5),
+						(unsigned int)m_nofCollectionDocuments,
+						(unsigned int)m_featar.size()) << std::endl;
+	
+			unsigned int pi=NOF_IMPLICIT_ARGUMENTS, pe=nofParam;
+			for (; pi != pe; ++pi)
+			{
+				out << string_format( _TXT( ", x%u=%.5f"), pi, param[pi]);
+			}
+			out << std::endl;
+		}
+		out << string_format( _TXT( "sum result=%.5f"), res) << std::endl;
+		return out.str();
 	}
-	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
-	return out.str();
-}
-
-void WeightingFunctionInstanceSmart::setMaxNofWeightedFields( int N)
-{
-	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name_, const std::string& value)

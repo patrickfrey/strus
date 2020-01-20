@@ -43,7 +43,7 @@ struct AccumulateNearData
 	std::string type;		//< forward index type
 	unsigned int cardinality;	//< cardinality (minimum number of features in a window weighted)
 	float cardinality_frac;		//< cardinality defined as fraction (percentage) of the number of features
-	Index range;			//< maximum distance (ordinal position)
+	strus::Index range;		//< maximum distance (ordinal position)
 	unsigned int nofranks;		//< maximum number of ranks per document
 	float cofactor;			//< weight multiplication factor of results for feature references
 	double norm;			//< normalization factor for end result weights
@@ -80,9 +80,9 @@ public:
 
 	virtual void setVariableValue( const std::string& name, double value);
 
-	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const Index& docno);
+	virtual std::string debugCall( const strus::WeightedDocument& doc);
 
 private:
 	void initializeContext();
@@ -104,7 +104,7 @@ private:
 	double candidateWeight( const CandidateEntity& entityloc, PostingIteratorInterface** valid_itrar) const;
 
 	typedef std::map<std::string,double> EntityMap;
-	void initEntityMap( EntityMap& emap, strus::Index docno);
+	void initEntityMap( EntityMap& emap, const strus::WeightedDocument& doc);
 	std::vector<SummaryElement> getSummariesFromEntityMap( EntityMap& emap) const;
 
 private:

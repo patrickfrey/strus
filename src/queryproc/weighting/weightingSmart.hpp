@@ -96,7 +96,7 @@ public:
 
 	virtual void setVariableValue( const std::string& name_, double value);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
@@ -113,6 +113,7 @@ private:
 	Reference<MetaDataReaderInterface> m_metadata;		///< meta data reader
 	std::vector<Index> m_metadatahnd;			///< array of meta data element handles feeded to the function
 	double m_nofCollectionDocuments;			///< document collection size
+	std::vector<WeightedField> m_lastResult;		///< buffer for the last result calculated
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -132,7 +133,6 @@ public:
 
 	virtual ~WeightingFunctionInstanceSmart(){}
 
-	virtual void setMaxNofWeightedFields( int N);
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
 

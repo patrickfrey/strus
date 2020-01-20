@@ -33,11 +33,6 @@ public:
 	/// \brief Destructor
 	virtual ~WeightingFunctionInstanceInterface(){}
 
-	/// \brief Set maximum number of weighted fields
-	/// \param[in] N maximum number of weighted fields (default is 1)
-	/// \note The default is 1 because most of the weighting methods just weight one document
-	virtual void setMaxNofWeightedFields( int N)=0;
-
 	/// \brief Add a named string value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value

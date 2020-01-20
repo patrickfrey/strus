@@ -34,8 +34,7 @@ class WeightingFunctionContextConstant
 {
 public:
 	WeightingFunctionContextConstant(
-			double weight_, bool precalc_, ErrorBufferInterface* errorhnd_)
-		:m_featar(),m_weight(weight_),m_precalc(precalc_),m_errorhnd(errorhnd_){}
+			double weight_, bool precalc_, ErrorBufferInterface* errorhnd_);
 
 	struct Feature
 	{
@@ -56,7 +55,7 @@ public:
 			double weight_,
 			const TermStatistics& stats_);
 
-	virtual double call( const Index& docno);
+	virtual const std::vector<WeightedField>& call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
 
@@ -65,7 +64,8 @@ private:
 	float m_weight;
 	bool m_precalc;
 	std::map<Index,double> m_precalcmap;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::vector<WeightedField> m_lastResult;	///< buffer for the last result calculated
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceConstant
@@ -78,8 +78,6 @@ public:
 		:m_weight(1.0),m_precalc(false),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceConstant(){}
-
-	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 

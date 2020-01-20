@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "accumulator.hpp"
+#include "strus/weightedDocument.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -37,8 +38,11 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 void Accumulator::addWeightingElement(
 		WeightingFunctionContextInterface* function_)
 {
+	if (m_weightingElements.size() >= Constants::MaxNofWeightingElements)
+	{
+		throw strus::runtime_error(_TXT("number of weighting elements exceeds maximum size: %d"), (int)Constants::MaxNofWeightingElements);
+	}
 	m_weightingElements.push_back( WeightingElement( function_));
-	m_weights.push_back( 0.0);
 }
 
 void Accumulator::addAlternativeAclRestriction(
@@ -54,8 +58,7 @@ void Accumulator::defineWeightingVariableValue( std::size_t index, const std::st
 
 bool Accumulator::nextRank(
 		Index& docno,
-		unsigned int& selectorState,
-		double& weight)
+		unsigned int& selectorState)
 {
 	// For all selectors:
 	std::vector<SelectorPostings>::const_iterator
@@ -162,30 +165,73 @@ bool Accumulator::nextRank(
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		++m_nofDocumentsRanked;
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "Weighting document " << m_docno << std::endl;
-#endif
 		std::vector<WeightingElement>::iterator
 			ai = m_weightingElements.begin(), ae = m_weightingElements.end();
+		const std::vector<WeightedField>* weightedFields = 0;
+		int weightedFieldsIndex = -1;
+		double weights[ Constants::MaxNofWeightingElements];
+		// Calculate a weight for every element and call the weighting formula with the result:
+		for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+		{
+			const std::vector<WeightedField>& wf = (*ai)->call( m_docno);
+			if (wf.size() == 1 && !wf[0].field().defined())
+			{
+				weights[ aidx] = wf[0].weight();
+			}
+			else if (wf.size() == 0)
+			{
+				weights[ aidx] = 0.0;
+			}
+			else if (weightedFields != 0)
+			{
+				throw std::runtime_error(_TXT("more than one weighting functions defining a field with a score"));
+			}
+			else
+			{
+				weights[ aidx] = 0.0;
+				weightedFields = &wf;
+				weightedFieldsIndex = aidx;
+			}
+		}
 		if (m_weightingFormula)
 		{
-			// Calculate a weight for every element and call the weighting formula with the result:
-			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+			if (weightedFields)
 			{
-				m_weights[ aidx] = (*ai)->call( m_docno);
+				std::vector<WeightedField>::const_iterator
+					wi = weightedFields->begin(), we =  weightedFields->end();
+				for (; wi != we; ++wi)
+				{
+					weights[ weightedFieldsIndex] = wi->weight();
+					double fres = m_weightingFormula->call( weights, m_weightingElements.size());
+					m_ranker.insert( WeightedDocument( m_docno, wi->field(), fres));
+				}
 			}
-			weight = m_weightingFormula->call( m_weights.data(), m_weights.size());
+			else
+			{
+				double fres = m_weightingFormula->call( weights, m_weightingElements.size());
+				m_ranker.insert( WeightedDocument( m_docno, strus::IndexRange(), fres));
+			}
 		}
 		else
 		{
-			// Add a weight to the result for every element:
-			weight = 0.0;
-			for (; ai != ae; ++ai)
+			double weight = 0.0;
+			int fi = 0, fe = m_weightingElements.size();
+			for (; fi != fe; ++fi)
 			{
-				weight += (*ai)->call( m_docno);
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
-#endif
+				weight += weights[ fi];
+			}
+			if (weightedFields)
+			{
+				std::vector<WeightedField>::const_iterator
+					wi = weightedFields->begin(), we =  weightedFields->end();
+				for (; wi != we; ++wi)
+				{
+					m_ranker.insert( WeightedDocument( m_docno, wi->field(), weight + wi->weight()));
+				}
+			}
+			else
+			{
+				m_ranker.insert( WeightedDocument( m_docno, strus::IndexRange(), weight));
 			}
 		}
 		return true;

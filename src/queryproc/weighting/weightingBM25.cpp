@@ -35,6 +35,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	,m_featar()
 	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
+	,m_lastResult( 1, WeightedField())
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metadata.get())
@@ -118,43 +119,52 @@ double WeightingFunctionContextBM25::featureWeight( const Feature& feat, strus::
 	return 0.0;
 }
 
-double WeightingFunctionContextBM25::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextBM25::call( const Index& docno)
 {
-	double rt = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for ( ;fi != fe; ++fi)
+	try
 	{
-		rt += featureWeight( *fi, docno);
+		m_lastResult.resize( 0);
+		double ww = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for ( ;fi != fe; ++fi)
+		{
+			ww += featureWeight( *fi, docno);
+		}
+		m_lastResult[ 0].setWeight( ww);
+		return m_lastResult;
 	}
-	return rt;
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
 std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-	double res = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (int fidx=0 ;fi != fe; ++fi,++fidx)
+	try
 	{
-		double ww = featureWeight( *fi, docno);
-		if (ww < std::numeric_limits<double>::epsilon()) continue;
+		std::ostringstream out;
 
-		unsigned int doclen = 0;
-		if (m_parameter.b)
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+		double res = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (int fidx=0 ;fi != fe; ++fi,++fidx)
 		{
-			m_metadata->skipDoc( docno);
-			doclen = m_metadata->getValue( m_metadata_doclen).touint();
+			double ww = featureWeight( *fi, docno);
+			if (ww < std::numeric_limits<double>::epsilon()) continue;
+	
+			unsigned int doclen = 0;
+			if (m_parameter.b)
+			{
+				m_metadata->skipDoc( docno);
+				doclen = m_metadata->getValue( m_metadata_doclen).touint();
+			}
+			out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%.5f, doclen=%u"),
+						fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,
+						fi->weight, doclen) << std::endl;
+			res += ww;
 		}
-		out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%f, doclen=%u"),
-					fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,
-					fi->weight, doclen) << std::endl;
-		res += ww;
+		out << string_format( _TXT("sum result=%.5f"), res) << std::endl;
+		return out.str();
 	}
-	out << string_format( _TXT("sum result=%f"), res) << std::endl;
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
@@ -162,11 +172,6 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
-}
-
-void WeightingFunctionInstanceBM25::setMaxNofWeightedFields( int N)
-{
-	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name_, const std::string& value)

@@ -48,40 +48,50 @@ void WeightingFunctionContextTermFrequency::setVariableValue( const std::string&
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for the function '%s'"), THIS_METHOD_NAME);
 }
 
-double WeightingFunctionContextTermFrequency::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextTermFrequency::call( const Index& docno)
 {
-	double rt = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (;fi != fe; ++fi)
+	try
 	{
-		if (docno==fi->itr->skipDoc( docno))
+		m_lastResult.resize( 0);
+		double ww = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
 		{
-			rt += fi->weight * fi->itr->frequency();
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				ww += fi->weight * fi->itr->frequency();
+			}
 		}
+		m_lastResult.resize( 1);
+		m_lastResult[0].setWeight( ww);
+		return m_lastResult;
 	}
-	return rt;
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
 std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-
-	double res = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
+	try
 	{
-		if (docno==fi->itr->skipDoc( docno))
+		std::ostringstream out;
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+	
+		double res = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
 		{
-			double ww = fi->weight * fi->itr->frequency();
-			res += ww;
-			out << string_format( _TXT( "[%u] result=%f, ff=%u"),
-						fidx, ww, (unsigned int)fi->itr->frequency()) << std::endl;			
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				double ww = fi->weight * fi->itr->frequency();
+				res += ww;
+				out << string_format( _TXT( "[%u] result=%.5f, ff=%u"),
+							fidx, ww, (unsigned int)fi->itr->frequency()) << std::endl;			
+			}
 		}
+		out << string_format( _TXT( "sum result=%.5f"), res) << std::endl;
+		return out.str();
 	}
-	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
@@ -89,11 +99,6 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
-}
-
-void WeightingFunctionInstanceTermFrequency::setMaxNofWeightedFields( int N)
-{
-	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::string& name_, const std::string& value)

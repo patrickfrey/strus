@@ -49,9 +49,9 @@ public:
 
 	virtual void setVariableValue( const std::string& name, double value);
 
-	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const Index& docno);
+	virtual std::string debugCall( const strus::WeightedDocument& doc);
 
 private:
 	AttributeReaderInterface* m_attribreader;			///< attribute reader interface

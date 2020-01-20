@@ -43,6 +43,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
 	,m_titleitr(0)
+	,m_lastResult( 1)
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metadata.get())
@@ -354,143 +355,151 @@ double WeightingFunctionContextBM25pff::featureWeight( const WeightingData& wdat
 	return 0.0;
 }
 
-double WeightingFunctionContextBM25pff::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const Index& docno)
 {
 	try
 	{
-		if (m_itrarsize == 0) return 0.0;
-		if (!m_initialized) initializeContext();
+		m_lastResult.resize( 0);
+		if (m_itrarsize > 0)
+		{
+			if (!m_initialized) initializeContext();
+	
+			// Init data:
+			WeightingData wdata( m_itrarsize, m_structarsize, m_paraarsize, m_parameter.sentencesize, m_parameter.paragraphsize);
+			initWeightingData( wdata, docno);
+	
+			// Calculate artificial ff for all features:
+			calcTitleWeights( wdata, docno, wdata.ffincrar);
+	
+			std::size_t featcount = 0;
+			double ww = 0.0;
+			std::size_t fi = 0;
+			for ( ;fi != m_itrarsize; ++fi)
+			{
+				if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
+			}
+			if (featcount <= 1)
+			{
+				//.... Fallback to BM25 plus some title increments
+				for (fi = 0; fi != m_itrarsize; ++fi)
+				{
+					if (!wdata.valid_itrar[ fi]) continue;
+					ww += featureWeight( wdata, docno, m_idfar[ fi], wdata.valid_itrar[ fi]->frequency() + wdata.ffincrar[ fi]);
+				}
+			}
+			else
+			{
+				if (m_cardinality <= m_itrarsize)
+				{
+					calcProximityFfIncrements( wdata, wdata.ffincrar);
+				}
+		
+				// Calculate the BM25 weight with the artificial ff:
+				for (fi = 0;fi != m_itrarsize; ++fi)
+				{
+					if (!wdata.valid_itrar[ fi]) continue;
+		
+					double sing_ff = wdata.valid_itrar[ fi]->frequency();
+					if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
+		
+					double prox_ff = wdata.ffincrar[ fi];
+					double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
+		
+					ww += featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+				}
+			}
+			m_lastResult.resize( 1);
+			m_lastResult[ 0].setWeight( ww);
+		}
+		return m_lastResult;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
+}
 
+std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
+{
+	try
+	{
+		if (m_itrarsize == 0) return std::string();
+	
+		std::ostringstream out;
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+	
+		if (!m_initialized) initializeContext();
+	
 		// Init data:
 		WeightingData wdata( m_itrarsize, m_structarsize, m_paraarsize, m_parameter.sentencesize, m_parameter.paragraphsize);
 		initWeightingData( wdata, docno);
-
-		// Calculate artificial ff for all features:
-		calcTitleWeights( wdata, docno, wdata.ffincrar);
-
+	
+		std::string wstr = m_weightincr.tostring();
+		out << string_format( _TXT("feature weights: %s, sum=%.5f"), wstr.c_str(), m_weightincr.sum()) << std::endl;
+	
+		// Calculate proximity ff for all features:
+		WeightArray titleweightar( wdata.ffincrar.arsize, 0.0);
+		calcTitleWeights( wdata, docno, titleweightar);
+		std::string titleweightar_str = titleweightar.tostring();
+		out << string_format( _TXT("title ff increments=%s"), titleweightar_str.c_str()) << std::endl;
+	
 		std::size_t featcount = 0;
-		double rt = 0.0;
-		std::size_t fi = 0;
-		for ( ;fi != m_itrarsize; ++fi)
+		double res = 0.0;
+		for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
 		{
 			if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
 		}
 		if (featcount <= 1)
 		{
-			//.... Fallback to BM25 plus some title increments
-			for (fi = 0; fi != m_itrarsize; ++fi)
+			out << _TXT( "fallback to BM25 (too few query features)") << std::endl;
+			for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
 			{
 				if (!wdata.valid_itrar[ fi]) continue;
-				rt += featureWeight( wdata, docno, m_idfar[ fi], wdata.valid_itrar[ fi]->frequency() + wdata.ffincrar[ fi]);
+				double ff = wdata.valid_itrar[ fi]->frequency();
+				double ww = featureWeight( wdata, docno, m_idfar[ fi], ff + wdata.ffincrar[ fi]);
+				res += ww;
+				out << string_format( _TXT("[%u] result=%.5f, ff=%.5f, title ff incr=%.5f, idf=%.5f, doclen=%u"),
+							(unsigned int)fi, ww,
+							ff, wdata.ffincrar[ fi],
+							m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
 			}
 		}
 		else
 		{
 			if (m_cardinality <= m_itrarsize)
 			{
-				calcProximityFfIncrements( wdata, wdata.ffincrar);
+				logCalcProximityFfIncrements( out, wdata, wdata.ffincrar);
 			}
-	
-			// Calculate the BM25 weight with the artificial ff:
-			for (fi = 0;fi != m_itrarsize; ++fi)
+			std::string ffincrar_str = wdata.ffincrar.tostring();
+			out << string_format( _TXT("proximity ff increments: %s"), ffincrar_str.c_str()) << std::endl;
+		
+			wdata.ffincrar.add( titleweightar);
+		
+			ffincrar_str = wdata.ffincrar.tostring();
+			out << string_format( _TXT("accumulated ff increments: %s"),
+						ffincrar_str.c_str()) << std::endl;
+		
+			// Calculate the BM25 weight with the proximity ff:
+			std::size_t fi = 0;
+			for ( ;fi != m_itrarsize; ++fi)
 			{
 				if (!wdata.valid_itrar[ fi]) continue;
-	
+		
 				double sing_ff = wdata.valid_itrar[ fi]->frequency();
 				if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
-	
+		
 				double prox_ff = wdata.ffincrar[ fi];
 				double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
-	
-				rt += featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+		
+				double ww = featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+				res += ww;
+				out << string_format( _TXT("[%u] result=%.5f, accu_ff=%.5f, sing_ff=%.5f, prox_ff=%.5f, idf=%.5f, doclen=%u"),
+							(unsigned int)fi, ww,
+							accu_ff, sing_ff, prox_ff,
+							m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
 			}
 		}
-		return rt;
+		out << string_format( _TXT("sum result=%.5f"), res) << std::endl;
+		return out.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, 0.0);
-}
-
-std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
-{
-	if (m_itrarsize == 0) return std::string();
-
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-
-	if (!m_initialized) initializeContext();
-
-	// Init data:
-	WeightingData wdata( m_itrarsize, m_structarsize, m_paraarsize, m_parameter.sentencesize, m_parameter.paragraphsize);
-	initWeightingData( wdata, docno);
-
-	std::string wstr = m_weightincr.tostring();
-	out << string_format( _TXT("feature weights: %s, sum=%f"), wstr.c_str(), m_weightincr.sum()) << std::endl;
-
-	// Calculate proximity ff for all features:
-	WeightArray titleweightar( wdata.ffincrar.arsize, 0.0);
-	calcTitleWeights( wdata, docno, titleweightar);
-	std::string titleweightar_str = titleweightar.tostring();
-	out << string_format( _TXT("title ff increments=%s"), titleweightar_str.c_str()) << std::endl;
-
-	std::size_t featcount = 0;
-	double res = 0.0;
-	for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
-	{
-		if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
-	}
-	if (featcount <= 1)
-	{
-		out << _TXT( "fallback to BM25 (too few query features)") << std::endl;
-		for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
-		{
-			if (!wdata.valid_itrar[ fi]) continue;
-			double ff = wdata.valid_itrar[ fi]->frequency();
-			double ww = featureWeight( wdata, docno, m_idfar[ fi], ff + wdata.ffincrar[ fi]);
-			res += ww;
-			out << string_format( _TXT("[%u] result=%f, ff=%f, title ff incr=%f, idf=%f, doclen=%u"),
-						(unsigned int)fi, ww,
-						ff, wdata.ffincrar[ fi],
-						m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
-		}
-	}
-	else
-	{
-		if (m_cardinality <= m_itrarsize)
-		{
-			logCalcProximityFfIncrements( out, wdata, wdata.ffincrar);
-		}
-		std::string ffincrar_str = wdata.ffincrar.tostring();
-		out << string_format( _TXT("proximity ff increments: %s"), ffincrar_str.c_str()) << std::endl;
-	
-		wdata.ffincrar.add( titleweightar);
-	
-		ffincrar_str = wdata.ffincrar.tostring();
-		out << string_format( _TXT("accumulated ff increments: %s"),
-					ffincrar_str.c_str()) << std::endl;
-	
-		// Calculate the BM25 weight with the proximity ff:
-		std::size_t fi = 0;
-		for ( ;fi != m_itrarsize; ++fi)
-		{
-			if (!wdata.valid_itrar[ fi]) continue;
-	
-			double sing_ff = wdata.valid_itrar[ fi]->frequency();
-			if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
-	
-			double prox_ff = wdata.ffincrar[ fi];
-			double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
-	
-			double ww = featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
-			res += ww;
-			out << string_format( _TXT("[%u] result=%f, accu_ff=%f, sing_ff=%f, prox_ff=%f, idf=%f, doclen=%u"),
-						(unsigned int)fi, ww,
-						accu_ff, sing_ff, prox_ff,
-						m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
-		}
-	}
-	out << string_format( _TXT("sum result=%f"), res) << std::endl;
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
@@ -498,16 +507,6 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
-}
-
-void WeightingFunctionInstanceBM25pff::setMaxNofWeightedFields( int N)
-{
-	try
-	{
-		if (N <= 0) throw std::runtime_error( _TXT("positive number expected as argument"));
-		m_parameter.maxNofWeightingFields = N;
-	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function set max nof weighted fields: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& name_, const std::string& value)
@@ -554,6 +553,18 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct") || strus::caseInsensitiveEquals( name_, "para"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+	}
+	else if (strus::caseInsensitiveEquals( name_, "results"))
+	{
+		int N = value.toint();
+		if (N > 0)
+		{
+			m_parameter.maxNofResults = N;
+		}
+		else
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("positive number expected as argument"));
+		}
 	}
 	else if (strus::caseInsensitiveEquals( name_, "k1"))
 	{

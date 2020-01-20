@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 namespace strus
 {
@@ -105,9 +106,9 @@ public:
 
 	virtual void setVariableValue( const std::string& name_, double value);
 
-	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const Index& docno);
+	virtual std::string debugCall( const strus::WeightedDocument& doc);
 
 public:
 	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
@@ -115,26 +116,28 @@ public:
 private:
 	struct WeightingData
 	{
-		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, strus::Index structwindowsize_, strus::Index parawindowsize_)
-			:titlestart(1),titleend(1)
+		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, strus::Index structwindowsize_, strus::Index parawindowsize_, const strus::IndexRange& field_)
+			:field(field_)
+			,titlestart(1),titleend(1)
 		{
 			valid_paraar = &valid_structar[ structarsize_];
 			paraiter.init( parawindowsize_, valid_paraar, paraarsize_);
 			structiter.init( structwindowsize_, valid_structar, structarsize_);
+			
 		}
-
+		strus::IndexRange field;
 		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
 		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
 		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
-		Index titlestart;						//< start position of the title
-		Index titleend;							//< end position of the title (first item after the title)
+		strus::Index titlestart;					//< start position of the title
+		strus::Index titleend;						//< end position of the title (first item after the title)
 		StructureIterator paraiter;					//< iterator on paragraph frames
 		StructureIterator structiter;					//< iterator on sentence frames
 	};
 
 private:
 	void initializeContext();
-	void initWeightingData( WeightingData& wdata, strus::Index docno);
+	void initWeightingData( WeightingData& wdata, const strus::WeightedDocument& doc);
 
 private:
 	struct Match

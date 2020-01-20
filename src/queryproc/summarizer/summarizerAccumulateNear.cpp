@@ -113,7 +113,7 @@ static void callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std:
 	}
 }
 
-static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
+static Index callSkipPos( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
 {
 	Index rt = 0;
 	std::size_t ti=0;
@@ -222,19 +222,19 @@ double SummarizerFunctionContextAccumulateNear::candidateWeight( const Candidate
 }
 
 
-void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, strus::Index docno)
+void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, const strus::WeightedDocument& doc)
 {
 	// Initialize posting iterators
 	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
 	PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
 	
-	callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
-	callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
-	m_forwardindex->skipDoc( docno);
+	callSkipDoc( doc.docno(), m_itrar, m_itrarsize, valid_itrar);
+	callSkipDoc( doc.docno(), m_structar, m_structarsize, valid_structar);
+	m_forwardindex->skipDoc( doc.docno());
 
 	// Fetch entities and weight them:
 	PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
-				0, PositionWindow::MaxWin);
+				doc.field(), PositionWindow::MaxWin);
 	bool more = poswin.first();
 	while (more)
 	{
@@ -284,7 +284,7 @@ std::vector<SummaryElement>
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextAccumulateNear::getSummary( const Index& docno)
+	SummarizerFunctionContextAccumulateNear::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
@@ -301,7 +301,7 @@ std::vector<SummaryElement>
 
 		// Init map of weighted entities:
 		EntityMap entitymap;
-		initEntityMap( entitymap, docno);
+		initEntityMap( entitymap, doc);
 
 		// Get summary from map of weighted entities
 		return getSummariesFromEntityMap( entitymap);
@@ -310,60 +310,63 @@ std::vector<SummaryElement>
 }
 
 
-std::string SummarizerFunctionContextAccumulateNear::debugCall( const Index& docno)
+std::string SummarizerFunctionContextAccumulateNear::debugCall( const strus::WeightedDocument& doc)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	// Initialization:
-	if (m_itrarsize == 0)
+	try
 	{
-		return std::string();
-	}
-	if (!m_initialized) initializeContext();
-	if (m_itrarsize < m_cardinality)
-	{
-		return std::string();
-	}
-
-	// Initialize posting iterators
-	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
-	PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		std::ostringstream out;
+		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 	
-	callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
-	callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
-	m_forwardindex->skipDoc( docno);
-
-	// Fetch entities and print them with weight:
-	PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
-				0, PositionWindow::MaxWin);
-	bool more = poswin.first();
-	while (more)
-	{
-		Index nextstart;
-		CandidateEntity candidate;
-		if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
+		// Initialization:
+		if (m_itrarsize == 0)
 		{
-			double normfactor = m_normfactorar[ candidate.windowsize-1];
-
-			// Calculate the weights of matching entities:
-			while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
+			return std::string();
+		}
+		if (!m_initialized) initializeContext();
+		if (m_itrarsize < m_cardinality)
+		{
+			return std::string();
+		}
+	
+		// Initialize posting iterators
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		
+		callSkipDoc( doc.docno(), m_itrar, m_itrarsize, valid_itrar);
+		callSkipDoc( doc.docno(), m_structar, m_structarsize, valid_structar);
+		m_forwardindex->skipDoc( doc.docno());
+	
+		// Fetch entities and print them with weight:
+		PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
+					doc.field(), PositionWindow::MaxWin);
+		bool more = poswin.first();
+		while (more)
+		{
+			Index nextstart;
+			CandidateEntity candidate;
+			if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
 			{
-				double ww = normfactor * candidateWeight( candidate, valid_itrar);
-				std::string keystr( m_forwardindex->fetch());
-				out << string_format( _TXT( "entity pos=%u, span=%u, weight=%f, value='%s'"),
-							poswin.pos(), poswin.span(), ww, keystr.c_str()) << std::endl;
+				double normfactor = m_normfactorar[ candidate.windowsize-1];
+	
+				// Calculate the weights of matching entities:
+				while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
+				{
+					double ww = normfactor * candidateWeight( candidate, valid_itrar);
+					std::string keystr( m_forwardindex->fetch());
+					out << string_format( _TXT( "entity pos=%u, span=%u, weight=%.5f, value='%s'"),
+								poswin.pos(), poswin.span(), ww, keystr.c_str()) << std::endl;
+				}
+				nextstart = candidate.windowendpos;
 			}
-			nextstart = candidate.windowendpos;
+			else
+			{
+				nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
+			}
+			more = poswin.skip( nextstart);
 		}
-		else
-		{
-			nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
-		}
-		more = poswin.skip( nextstart);
+		return out.str();
 	}
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name_, const std::string& value)

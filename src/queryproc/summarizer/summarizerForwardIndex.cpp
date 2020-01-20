@@ -53,15 +53,16 @@ void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextForwardIndex::getSummary( const Index& docno)
+	SummarizerFunctionContextForwardIndex::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
 		std::vector<SummaryElement> rt;
 		unsigned int cnt = m_maxNofMatches;
-		m_forwardindex->skipDoc( docno);
-		Index pos = 0;
-		while (0 != (pos = m_forwardindex->skipPos( pos+1)))
+		m_forwardindex->skipDoc( doc.docno());
+		strus::Index pos = doc.field().start();
+		strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
+		for (; pos && pos < endpos; pos = m_forwardindex->skipPos( pos+1))
 		{
 			rt.push_back( SummaryElement( m_type, m_forwardindex->fetch(), 1.0, pos));
 			if (--cnt == 0) break;
@@ -71,19 +72,22 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno)
+std::string SummarizerFunctionContextForwardIndex::debugCall( const strus::WeightedDocument& doc)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	std::vector<SummaryElement> res = getSummary( docno);
-	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-	for (; ri != re; ++ri)
+	try
 	{
-		out << string_format( _TXT("match %s '%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+		std::ostringstream out;
+		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+	
+		std::vector<SummaryElement> res = getSummary( doc);
+		std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
+		for (; ri != re; ++ri)
+		{
+			out << string_format( _TXT("match %s '%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+		}
+		return out.str();
 	}
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 

@@ -78,9 +78,9 @@ public:
 
 	virtual void setVariableValue( const std::string& name, double value);
 
-	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const Index& docno);
+	virtual std::string debugCall( const strus::WeightedDocument& doc);
 
 private:
 	struct SummarizationFeature
@@ -99,11 +99,11 @@ private:
 	typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
 
 	std::vector<unsigned int> getCandidateSet( strus::Index docno) const;
-	PosWeightMap buildPosWeightMap( const std::vector<unsigned int>& fsel);
+	PosWeightMap buildPosWeightMap( const std::vector<unsigned int>& fsel, const strus::IndexRange& field);
 
 	std::vector<SummaryElement> getSummariesFromPosWeightMap( const PosWeightMap& posWeightMap);
 
-	void printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel);
+	void printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel, const strus::IndexRange& field);
 
 private:
 	const StorageClientInterface* m_storage;			///< storage interface

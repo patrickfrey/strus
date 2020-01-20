@@ -35,10 +35,13 @@ public:
 	WeightedField& operator=( const WeightedField& o)
 		{m_field=o.m_field; m_weight=o.m_weight; return *this;}
 
-	/// \brief Get the document number of the result
+	/// \brief Get the field weighted
 	const IndexRange& field() const				{return m_field;}
-	/// \brief Get the accumulated weight of the ranking of the result
+	/// \brief Get the weight assigned to the field
 	double weight() const					{return m_weight;}
+
+	/// \brief Set the weight of the field
+	void setWeight( double weight_)				{m_weight = weight_;}
 
 	/// \brief Comparison for sorting
 	bool operator < ( const WeightedField& o) const

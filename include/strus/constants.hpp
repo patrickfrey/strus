@@ -208,6 +208,9 @@ struct Constants
 	{
 		return 1.4;
 	}
+
+	///\brief Maximum number of elements that can be used for weighting in query evaluation
+	enum {MaxNofWeightingElements = 64};
 };
 }//namespace
 #endif

@@ -12,6 +12,7 @@
 #include "private/internationalization.hpp"
 #include <cstdio>
 #include <cstring>
+#include <limits>
 
 using namespace strus;
 
@@ -43,11 +44,11 @@ PositionWindow::PositionWindow(
 		std::size_t nofargs,
 		unsigned int range_,
 		unsigned int cardinality_,
-		Index firstpos_,
+		const strus::IndexRange& field,
 		EvaluationType evaluationType_)
 	:m_isnew_bitset()
 {
-	init( args, nofargs, range_, cardinality_, firstpos_, evaluationType_);
+	init( args, nofargs, range_, cardinality_, field, evaluationType_);
 }
 
 void PositionWindow::init(
@@ -55,7 +56,7 @@ void PositionWindow::init(
 		std::size_t nofargs,
 		unsigned int range_,
 		unsigned int cardinality_,
-		Index firstpos_,
+		const strus::IndexRange& field,
 		EvaluationType evaluationType_)
 {
 	m_arsize = 0;
@@ -63,6 +64,7 @@ void PositionWindow::init(
 	m_cardinality = (cardinality_>0?cardinality_:nofargs);
 	m_windowsize = 0;
 	m_isnew_bitset.reset();
+	m_endpos = field.defined() ? field.end() : std::numeric_limits<strus::Index>::max();
 	m_evaluationType = evaluationType_;
 
 	if (nofargs > MaxNofArguments)
@@ -79,8 +81,8 @@ void PositionWindow::init(
 	for (; ai != ae; ++ai)
 	{
 		m_itrar[ ai] = args[ai];
-		Index wpos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
-		if (wpos)
+		Index wpos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( field.start()) : 0;
+		if (wpos && wpos < m_endpos)
 		{
 			// Insert element:
 			std::size_t pi = 0, pe = m_arsize;
@@ -112,7 +114,7 @@ unsigned int PositionWindow::getMaxWinSize()
 	return ai;
 }
 
-bool PositionWindow::advance( const Index& advancepos)
+bool PositionWindow::advance( strus::Index advancepos)
 {
 	if (m_arsize < m_cardinality)
 	{
@@ -135,7 +137,7 @@ bool PositionWindow::advance( const Index& advancepos)
 		apos = advancepos;
 	}
 	apos = itr ? itr->skipPos( apos) : 0;
-	if (apos)
+	if (apos && apos < m_endpos)
 	{
 		// Rearrange array to be sorted again by positions:
 		std::size_t pi = 0, pe = m_arsize;
@@ -187,7 +189,7 @@ bool PositionWindow::next()
 	return true;
 }
 
-bool PositionWindow::skip( const Index& pos_)
+bool PositionWindow::skip( Index pos_)
 {
 	m_isnew_bitset.reset();
 	do

@@ -56,12 +56,12 @@ SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextAttribute::getSummary( const Index& docno)
+	SummarizerFunctionContextAttribute::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
 		std::vector<SummaryElement> rt;
-		m_attribreader->skipDoc( docno);
+		m_attribreader->skipDoc( doc.docno());
 		std::string attr = m_attribreader->getValue( m_attrib);
 		if (!attr.empty()) 
 		{
@@ -72,20 +72,23 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextAttribute::debugCall( const Index& docno)
+std::string SummarizerFunctionContextAttribute::debugCall( const strus::WeightedDocument& doc)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-	out << strus::string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	m_attribreader->skipDoc( docno);
-	std::string attr = m_attribreader->getValue( m_attrib);
-	if (!attr.empty()) 
+	try
 	{
-		out << strus::string_format( _TXT( "attribute name=%s, value=%s"),
-				m_attribname.c_str(), attr.c_str()) << std::endl;
+		std::ostringstream out;
+		out << strus::string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+	
+		m_attribreader->skipDoc( doc.docno());
+		std::string attr = m_attribreader->getValue( m_attrib);
+		if (!attr.empty()) 
+		{
+			out << strus::string_format( _TXT( "attribute name=%s, value=%s"),
+					m_attribname.c_str(), attr.c_str()) << std::endl;
+		}
+		return out.str();
 	}
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name_, const std::string& value)

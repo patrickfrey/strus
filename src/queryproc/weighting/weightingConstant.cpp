@@ -22,6 +22,12 @@ using namespace strus;
 
 #define THIS_METHOD_NAME const_cast<char*>("constant")
 
+WeightingFunctionContextConstant::WeightingFunctionContextConstant(
+		double weight_, bool precalc_, ErrorBufferInterface* errorhnd_)
+	:m_featar(),m_weight(weight_),m_precalc(precalc_)
+	,m_lastResult( 1, WeightedField())
+	,m_errorhnd(errorhnd_){}
+
 void WeightingFunctionContextConstant::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
@@ -54,70 +60,77 @@ void WeightingFunctionContextConstant::setVariableValue( const std::string&, dou
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
-double WeightingFunctionContextConstant::call( const Index& docno)
+const std::vector<WeightedField>& WeightingFunctionContextConstant::call( const Index& docno)
 {
-	double rt = 0.0;
-	if (m_precalc)
+	try
 	{
-		std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
-		if (mi != m_precalcmap.end())
+		m_lastResult.resize( 0);
+		if (m_precalc)
 		{
-			return mi->second;
+			std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
+			if (mi != m_precalcmap.end())
+			{
+				m_lastResult.resize( 1);
+				m_lastResult[ 0].setWeight( mi->second);
+			}
 		}
 		else
 		{
-			return 0.0;
-		}
-	}
-	else
-	{
-		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-		for (;fi != fe; ++fi)
-		{
-			if (docno==fi->itr->skipDoc( docno))
+			double ww = 0.0;
+			std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+			for (;fi != fe; ++fi)
 			{
-				rt += fi->weight * m_weight;
+				if (docno==fi->itr->skipDoc( docno))
+				{
+					ww += fi->weight * m_weight;
+				}
+				m_lastResult.resize( 1);
+				m_lastResult[ 0].setWeight( ww);
 			}
 		}
+		return m_lastResult;
 	}
-	return rt;
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
 std::string WeightingFunctionContextConstant::debugCall( const Index& docno)
 {
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(8);
-
-	out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-	double res_precalc = 0.0;
-	if (m_precalc)
+	try
 	{
-		std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
-		if (mi != m_precalcmap.end())
+		std::ostringstream out;
+	
+		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
+		double res_precalc = 0.0;
+		if (m_precalc)
 		{
-			res_precalc = mi->second;
+			std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
+			if (mi != m_precalcmap.end())
+			{
+				res_precalc = mi->second;
+			}
 		}
-	}
-	double res_detail = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
-	{
-		if (docno==fi->itr->skipDoc( docno))
+		double res_detail = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
 		{
-			double ww = fi->weight * m_weight;
-			res_detail += ww;
-			out << string_format( _TXT( "[%u] result=%f"), fidx, ww) << std::endl;
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				double ww = fi->weight * m_weight;
+				res_detail += ww;
+				out << string_format( _TXT( "[%u] result=%.5f"), fidx, ww) << std::endl;
+			}
 		}
+		if (m_precalc)
+		{
+			out << string_format( _TXT( "sum nof features=%u, result=%.5f, precalc=%.5f"), (unsigned int)m_featar.size(), res_detail, res_precalc) << std::endl;
+		}
+		else
+		{
+			out << string_format( _TXT( "sum nof features=%u, result=%.5f"), (unsigned int)m_featar.size(), res_detail) << std::endl;
+		}
+		return out.str();
 	}
-	if (m_precalc)
-	{
-		out << string_format( _TXT( "sum nof features=%u, result=%f, precalc=%f"), (unsigned int)m_featar.size(), res_detail, res_precalc) << std::endl;
-	}
-	else
-	{
-		out << string_format( _TXT( "sum nof features=%u, result=%f"), (unsigned int)m_featar.size(), res_detail) << std::endl;
-	}
-	return out.str();
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
@@ -125,11 +138,6 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
-}
-
-void WeightingFunctionInstanceConstant::setMaxNofWeightedFields( int N)
-{
-	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceConstant::addStringParameter( const std::string& name_, const std::string& value)
