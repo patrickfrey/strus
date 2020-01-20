@@ -84,7 +84,7 @@ Index IteratorStructSequence::skipDoc( const Index& docno_)
 	return m_docno;
 }
 
-Index IteratorStructSequence::positionCut( const Index& min_pos, const Index& max_pos)
+Index IteratorStructSequence::positionCut( strus::Index min_pos, strus::Index max_pos)
 {
 	Index rt = 0;
 	if (!m_cut.get())

@@ -25,7 +25,7 @@ struct UsrAclKey
 	Index usrno;
 	Index docno;
 
-	UsrAclKey( const Index& usrno_, const Index& docno_)
+	UsrAclKey( strus::Index usrno_, strus::Index docno_)
 		:usrno(usrno_),docno(docno_){}
 	UsrAclKey( const UsrAclKey& o)
 		:usrno(o.usrno),docno(o.docno){}
@@ -52,18 +52,18 @@ public:
 		:m_database(database_),m_usrdocmap(),m_docusrmap(),m_usr_deletes(),m_doc_deletes(){}
 
 	void defineUserAccess(
-		const Index& userno,
-		const Index& docno);
+		strus::Index userno,
+		strus::Index docno);
 
 	void deleteUserAccess(
-		const Index& userno,
-		const Index& docno);
+		strus::Index userno,
+		strus::Index docno);
 
 	void deleteUserAccess(
-		const Index& userno);
+		strus::Index userno);
 
 	void deleteDocumentAccess(
-		const Index& docno);
+		strus::Index docno);
 
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
@@ -72,8 +72,8 @@ public:
 
 private:
 	void markSetElement(
-		const Index& userno,
-		const Index& docno,
+		strus::Index userno,
+		strus::Index docno,
 		bool isMember);
 
 public:

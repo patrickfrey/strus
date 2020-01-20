@@ -218,7 +218,7 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 	return rt;
 }
 
-std::string SummarizerFunctionContextMatchPhrase::getPhraseString( const Index& firstpos, const Index& lastpos)
+std::string SummarizerFunctionContextMatchPhrase::getPhraseString( strus::Index firstpos, strus::Index lastpos)
 {
 	std::string rt;
 	Index pi = firstpos > 5 ? (firstpos - 5):1, pe = lastpos + 5;
@@ -664,7 +664,7 @@ void SummarizerFunctionContextMatchPhrase::initializeContext()
 	}
 }
 
-void SummarizerFunctionContextMatchPhrase::initWeightingData( WeightingData& wdata, const Index& docno)
+void SummarizerFunctionContextMatchPhrase::initWeightingData( WeightingData& wdata, strus::Index docno)
 {
 	callSkipDoc( docno, m_itrar, m_itrarsize, wdata.valid_itrar);
 	callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, wdata.valid_structar);

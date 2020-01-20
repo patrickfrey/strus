@@ -34,7 +34,7 @@ public:
 	ResultDocument( const WeightedDocument& o)
 		:WeightedDocument(o){}
 	/// \brief Constructor from a composition its basic parts
-	ResultDocument( const Index& docno_, double weight_, const std::vector<SummaryElement>& summaryElements_)
+	ResultDocument( strus::Index docno_, double weight_, const std::vector<SummaryElement>& summaryElements_)
 		:WeightedDocument(docno_,weight_),m_summaryElements(summaryElements_){}
 	ResultDocument& operator=( const ResultDocument& o)
 		{WeightedDocument::operator=(o); m_summaryElements=o.m_summaryElements; return *this;}

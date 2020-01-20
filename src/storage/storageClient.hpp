@@ -248,11 +248,11 @@ public:/*StorageMetaDataTransaction*/
 	void resetMetaDataBlockCache( const strus::shared_ptr<MetaDataBlockCache>& mdcache);
 
 public:/*StatisticsBuilder*/
-	Index documentFrequency( const Index& typeno, const Index& termno) const;
+	Index documentFrequency( strus::Index typeno, strus::Index termno) const;
 
 public:/*StorageDocumentChecker,AclIterator*/
-	IndexSetIterator getAclIterator( const Index& docno) const;
-	IndexSetIterator getUserAclIterator( const Index& userno) const;
+	IndexSetIterator getAclIterator( strus::Index docno) const;
+	IndexSetIterator getUserAclIterator( strus::Index userno) const;
 
 public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache

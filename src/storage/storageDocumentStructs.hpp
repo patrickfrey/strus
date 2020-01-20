@@ -30,7 +30,7 @@ typedef std::map< TermMapKey, TermMapValue> TermMap;
 
 struct InvMapKey
 {
-	InvMapKey( const Index& t, const Index& p)
+	InvMapKey( strus::Index t, strus::Index p)
 		:typeno(t),pos(p){}
 	InvMapKey( const InvMapKey& o)
 		:typeno(o.typeno),pos(o.pos){}
@@ -51,7 +51,7 @@ struct DocStructure
 	IndexRange source;
 	IndexRange sink;
 
-	DocStructure( const Index& structno_, const IndexRange& source_, const IndexRange& sink_)
+	DocStructure( strus::Index structno_, const IndexRange& source_, const IndexRange& sink_)
 		:structno(structno_),source(source_),sink(sink_){}
 	DocStructure( const DocStructure& o)
 		:structno(o.structno),source(o.source),sink(o.sink){}

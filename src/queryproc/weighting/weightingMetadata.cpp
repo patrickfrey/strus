@@ -83,6 +83,11 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	return rt;
 }
 
+void WeightingFunctionInstanceMetadata::setMaxNofWeightedFields( int N)
+{
+	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
+}
+
 void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try

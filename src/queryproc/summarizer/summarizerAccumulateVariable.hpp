@@ -98,7 +98,7 @@ private:
 	typedef LocalStructAllocator<std::pair<const Index,double> > PosWeightAllocator;
 	typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
 
-	std::vector<unsigned int> getCandidateSet( const Index& docno) const;
+	std::vector<unsigned int> getCandidateSet( strus::Index docno) const;
 	PosWeightMap buildPosWeightMap( const std::vector<unsigned int>& fsel);
 
 	std::vector<SummaryElement> getSummariesFromPosWeightMap( const PosWeightMap& posWeightMap);

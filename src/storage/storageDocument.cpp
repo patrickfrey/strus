@@ -21,7 +21,7 @@ using namespace strus;
 StorageDocument::StorageDocument(
 		StorageTransaction* transaction_,
 		const std::string& docid_,
-		const Index& docno_,
+		strus::Index docno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_transaction(transaction_)
 	,m_docid(docid_)

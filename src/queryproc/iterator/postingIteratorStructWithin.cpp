@@ -99,7 +99,7 @@ struct WithinMatch
 	std::size_t argidx;
 
 	WithinMatch(){}
-	WithinMatch( const Index& pos_, std::size_t argidx_)
+	WithinMatch( strus::Index pos_, std::size_t argidx_)
 		:pos(pos_),argidx(argidx_){}
 	void assign( const WithinMatch& o)
 		{pos=o.pos;argidx=o.argidx;}
@@ -128,7 +128,7 @@ struct WithinMatchArray
 		return rt.str();
 	}
 
-	void insert( const Index& pos, std::size_t argidx)
+	void insert( strus::Index pos, std::size_t argidx)
 	{
 		std::size_t wi=0;
 		for (;wi<size && pos >= ar[wi].pos; ++wi){}
@@ -167,7 +167,7 @@ struct WithinMatchArray
 		return true;
 	}
 
-	const Index& maxpos() const
+	strus::Index maxpos() const
 	{
 		return ar[ size-1].pos;
 	}
@@ -226,7 +226,7 @@ struct WithinMatchArray
 	}
 };
 
-Index IteratorStructWithin::positionCut( const Index& min_pos, const Index& max_pos)
+Index IteratorStructWithin::positionCut( strus::Index min_pos, strus::Index max_pos)
 {
 	Index rt = 0;
 	if (!m_cut.get())

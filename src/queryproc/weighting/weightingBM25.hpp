@@ -81,7 +81,7 @@ public:
 	virtual std::string debugCall( const Index& docno);
 
 private:
-	double featureWeight( const Feature& feat, const Index& docno);
+	double featureWeight( const Feature& feat, strus::Index docno);
 
 private:
 	WeightingFunctionParameterBM25 m_parameter;
@@ -103,6 +103,7 @@ public:
 		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
+	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);

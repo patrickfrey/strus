@@ -20,7 +20,7 @@ using namespace strus;
 
 StorageDocumentUpdate::StorageDocumentUpdate(
 		StorageTransaction* transaction_,
-		const Index& docno_,
+		strus::Index docno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_transaction(transaction_)
 	,m_docno(docno_)

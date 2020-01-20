@@ -10,6 +10,7 @@
 #ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/weightedField.hpp"
 #include "strus/base/math.hpp"
 #include <utility>
 #include <limits>
@@ -17,7 +18,7 @@
 namespace strus {
 
 /// \class WeightedDocument
-/// \brief Pure ranking result of a strus query without the attributes
+/// \brief Pure ranking result of a strus query without summaries
 class WeightedDocument
 {
 public:
@@ -28,7 +29,7 @@ public:
 	WeightedDocument( const WeightedDocument& o)
 		:m_docno(o.m_docno),m_weight(o.m_weight){}
 	/// \brief Constructor
-	WeightedDocument( const Index& docno_, double weight_)
+	WeightedDocument( strus::Index docno_, double weight_)
 		:m_docno(docno_),m_weight(weight_){}
 	WeightedDocument& operator=( const WeightedDocument& o)
 		{m_docno=o.m_docno; m_weight=o.m_weight; return *this;}

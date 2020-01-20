@@ -117,6 +117,12 @@ std::string WeightingFunctionContextScalar::debugCall( const Index& docno)
 	return out.str();
 }
 
+
+void WeightingFunctionInstanceScalar::setMaxNofWeightedFields( int N)
+{
+	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
+}
+
 void WeightingFunctionInstanceScalar::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try

@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-	Index positionCut( const Index& minpos, const Index& maxpos);
+	Index positionCut( strus::Index minpos, strus::Index maxpos);
 
 public:
 	enum {MaxNofArguments=256};

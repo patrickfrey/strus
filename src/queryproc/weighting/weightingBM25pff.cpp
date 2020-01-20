@@ -160,7 +160,7 @@ void WeightingFunctionContextBM25pff::calcTitleFfIncrements(
 }
 
 
-void WeightingFunctionContextBM25pff::calcTitleWeights( WeightingData& wdata, const Index& docno, ProximityWeightAccumulator::WeightArray& weightar)
+void WeightingFunctionContextBM25pff::calcTitleWeights( WeightingData& wdata, strus::Index docno, ProximityWeightAccumulator::WeightArray& weightar)
 {
 	if (m_parameter.titleinc > std::numeric_limits<double>::epsilon()
 		&& m_titleitr && m_titleitr->skipDoc( docno) == docno)
@@ -325,7 +325,7 @@ void WeightingFunctionContextBM25pff::initializeContext()
 	m_initialized = true;
 }
 
-void WeightingFunctionContextBM25pff::initWeightingData( WeightingData& wdata, const Index& docno)
+void WeightingFunctionContextBM25pff::initWeightingData( WeightingData& wdata, strus::Index docno)
 {
 	callSkipDoc( docno, m_itrar, m_itrarsize, wdata.valid_itrar);
 	callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, wdata.valid_structar);
@@ -333,7 +333,7 @@ void WeightingFunctionContextBM25pff::initWeightingData( WeightingData& wdata, c
 	wdata.doclen = m_metadata->getValue( m_metadata_doclen);
 }
 
-double WeightingFunctionContextBM25pff::featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const
+double WeightingFunctionContextBM25pff::featureWeight( const WeightingData& wdata, strus::Index docno, double idf, double weight_ff) const
 {
 	if (m_parameter.b)
 	{
@@ -498,6 +498,16 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
+}
+
+void WeightingFunctionInstanceBM25pff::setMaxNofWeightedFields( int N)
+{
+	try
+	{
+		if (N <= 0) throw std::runtime_error( _TXT("positive number expected as argument"));
+		m_parameter.maxNofWeightingFields = N;
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function set max nof weighted fields: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& name_, const std::string& value)

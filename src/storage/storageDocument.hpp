@@ -33,7 +33,7 @@ public:
 	StorageDocument(
 		StorageTransaction* transaction_,
 		const std::string& docid_,
-		const Index& docno_,
+		strus::Index docno_,
 		ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor

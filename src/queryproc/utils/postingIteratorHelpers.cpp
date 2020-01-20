@@ -9,7 +9,7 @@
 
 using namespace strus;
 
-bool strus::callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
+bool strus::callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
 {
 	bool rt = false;
 	for (std::size_t ai=0; ai < arsize; ++ai)
@@ -27,7 +27,7 @@ bool strus::callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std:
 	return rt;
 }
 
-Index strus::callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
+Index strus::callSkipPos( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
 {
 	Index rt = 0;
 	std::size_t ti=0;
@@ -45,7 +45,7 @@ Index strus::callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 	return rt;
 }
 
-std::pair<Index,Index> strus::callSkipPosWithLen( Index start, PostingIteratorInterface** ar, std::size_t size)
+std::pair<Index,Index> strus::callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
 {
 	std::pair<Index,Index> rt( 0, 0);
 	std::size_t ti=0;

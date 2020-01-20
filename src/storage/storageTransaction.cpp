@@ -31,7 +31,7 @@ using namespace strus;
 
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
-		const Index& maxtypeno_,
+		strus::Index maxtypeno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_attributeMap(storage_->databaseClient())
@@ -100,80 +100,80 @@ Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 	return m_attributeNameMap.getOrCreate( string_conv::tolower( name));
 }
 
-void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value)
+void StorageTransaction::defineMetaData( strus::Index docno, const std::string& varname, const NumericVariant& value)
 {
 	m_metaDataMap.defineMetaData( docno, varname, value);
 }
 
-void StorageTransaction::deleteMetaData( const Index& docno, const std::string& varname)
+void StorageTransaction::deleteMetaData( strus::Index docno, const std::string& varname)
 {
 	m_metaDataMap.deleteMetaData( docno, varname);
 }
 
-void StorageTransaction::deleteMetaData( const Index& docno)
+void StorageTransaction::deleteMetaData( strus::Index docno)
 {
 	m_metaDataMap.deleteMetaData( docno);
 }
 
-void StorageTransaction::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
+void StorageTransaction::defineAttribute( strus::Index docno, const std::string& varname, const std::string& value)
 {
 	Index varno = getOrCreateAttributeName( varname);
 	m_attributeMap.defineAttribute( docno, varno, value);
 }
 
-void StorageTransaction::deleteAttribute( const Index& docno, const std::string& varname)
+void StorageTransaction::deleteAttribute( strus::Index docno, const std::string& varname)
 {
 	Index varno = getOrCreateAttributeName( varname);
 	m_attributeMap.deleteAttribute( docno, varno);
 }
 
-void StorageTransaction::deleteAttributes( const Index& docno)
+void StorageTransaction::deleteAttributes( strus::Index docno)
 {
 	m_attributeMap.deleteAttributes( docno);
 }
 
-void StorageTransaction::defineAcl( const Index& userno, const Index& docno)
+void StorageTransaction::defineAcl( strus::Index userno, strus::Index docno)
 {
 	m_userAclMap.defineUserAccess( userno, docno);
 }
 
-void StorageTransaction::deleteAcl( const Index& userno, const Index& docno)
+void StorageTransaction::deleteAcl( strus::Index userno, strus::Index docno)
 {
 	m_userAclMap.deleteUserAccess( userno, docno);
 }
 
-void StorageTransaction::deleteAcl( const Index& docno)
+void StorageTransaction::deleteAcl( strus::Index docno)
 {
 	m_userAclMap.deleteDocumentAccess( docno);
 }
 
 void StorageTransaction::definePosinfoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno, const std::vector<Index>& posinfo)
+	strus::Index termtype, strus::Index termvalue,
+	strus::Index docno, const std::vector<Index>& posinfo)
 {
 	m_invertedIndexMap.definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
-void StorageTransaction::deleteStructures( const Index& docno)
+void StorageTransaction::deleteStructures( strus::Index docno)
 {
 	m_structIndexMap.deleteIndex( docno);
 }
 
 void StorageTransaction::defineStructureBlock(
-	const Index& docno, const StructBlock& blk)
+	strus::Index docno, const StructBlock& blk)
 {
 	m_structIndexMap.defineStructureBlock( docno, blk);
 }
 
-void StorageTransaction::openForwardIndexDocument( const Index& docno)
+void StorageTransaction::openForwardIndexDocument( strus::Index docno)
 {
 	m_forwardIndexMap.openForwardIndexDocument( docno);
 }
 
 void StorageTransaction::defineForwardIndexTerm(
-	const Index& typeno,
-	const Index& pos,
+	strus::Index typeno,
+	strus::Index pos,
 	const std::string& termstring)
 {
 	m_forwardIndexMap.defineForwardIndexTerm( typeno, pos, termstring);
@@ -184,19 +184,19 @@ void StorageTransaction::closeForwardIndexDocument()
 	m_forwardIndexMap.closeForwardIndexDocument();
 }
 
-void StorageTransaction::deleteIndex( const Index& docno)
+void StorageTransaction::deleteIndex( strus::Index docno)
 {
 	m_invertedIndexMap.deleteIndex( docno);
 	m_structIndexMap.deleteIndex( docno);
 	m_forwardIndexMap.deleteIndex( docno);
 }
 
-void StorageTransaction::deleteDocSearchIndexType( const Index& docno, const Index& typeno)
+void StorageTransaction::deleteDocSearchIndexType( strus::Index docno, strus::Index typeno)
 {
 	m_invertedIndexMap.deleteIndex( docno, typeno);
 }
 
-void StorageTransaction::deleteDocForwardIndexType( const Index& docno, const Index& typeno)
+void StorageTransaction::deleteDocForwardIndexType( strus::Index docno, strus::Index typeno)
 {
 	m_forwardIndexMap.deleteIndex( docno, typeno);
 }

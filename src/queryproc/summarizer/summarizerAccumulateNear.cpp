@@ -98,7 +98,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
+static void callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
 {
 	for (std::size_t ai=0; ai < arsize; ++ai)
 	{
@@ -222,7 +222,7 @@ double SummarizerFunctionContextAccumulateNear::candidateWeight( const Candidate
 }
 
 
-void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, const Index& docno)
+void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, strus::Index docno)
 {
 	// Initialize posting iterators
 	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features

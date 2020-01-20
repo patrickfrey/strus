@@ -69,6 +69,8 @@ public:
 
 	virtual ~WeightingFunctionInstanceMetadata(){}
 
+	virtual void setMaxNofWeightedFields( int N);
+
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);

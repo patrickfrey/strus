@@ -54,7 +54,7 @@ public:
 	///\param[in] errorhnd_ error buffer interface
 	StorageTransaction( 
 		StorageClient* storage_,
-		const Index& maxtypeno_,
+		strus::Index maxtypeno_,
 		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
@@ -93,33 +93,33 @@ public:/*Document,DocumentUpdate*/
 	Index getOrCreateUserno( const std::string& name);
 	Index lookUpTermValue( const std::string& name);
 
-	void defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value);
-	void deleteMetaData( const Index& docno, const std::string& varname);
-	void deleteMetaData( const Index& docno);
+	void defineMetaData( strus::Index docno, const std::string& varname, const NumericVariant& value);
+	void deleteMetaData( strus::Index docno, const std::string& varname);
+	void deleteMetaData( strus::Index docno);
 
-	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);
-	void deleteAttribute( const Index& docno, const std::string& varname);
-	void deleteAttributes( const Index& docno);
+	void defineAttribute( strus::Index docno, const std::string& varname, const std::string& value);
+	void deleteAttribute( strus::Index docno, const std::string& varname);
+	void deleteAttributes( strus::Index docno);
 
-	void defineAcl( const Index& userno, const Index& docno);
-	void deleteAcl( const Index& userno, const Index& docno);
-	void deleteAcl( const Index& docno);
+	void defineAcl( strus::Index userno, strus::Index docno);
+	void deleteAcl( strus::Index userno, strus::Index docno);
+	void deleteAcl( strus::Index docno);
 
-	void deleteIndex( const Index& docno);
-	void deleteDocSearchIndexType( const Index& docno, const Index& typeno);
-	void deleteDocForwardIndexType( const Index& docno, const Index& typeno);
+	void deleteIndex( strus::Index docno);
+	void deleteDocSearchIndexType( strus::Index docno, strus::Index typeno);
+	void deleteDocForwardIndexType( strus::Index docno, strus::Index typeno);
 
 	void definePosinfoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno, const std::vector<Index>& posinfo);
+		strus::Index termtype, strus::Index termvalue,
+		strus::Index docno, const std::vector<Index>& posinfo);
 
-	void deleteStructures( const Index& docno);
-	void defineStructureBlock( const Index& docno, const StructBlock& blk);
+	void deleteStructures( strus::Index docno);
+	void defineStructureBlock( strus::Index docno, const StructBlock& blk);
 
-	void openForwardIndexDocument( const Index& docno);
+	void openForwardIndexDocument( strus::Index docno);
 
 	void defineForwardIndexTerm(
-		const Index& typeno, const Index& pos, const std::string& termstring);
+		strus::Index typeno, strus::Index pos, const std::string& termstring);
 
 	void closeForwardIndexDocument();
 

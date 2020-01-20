@@ -108,7 +108,7 @@ void ProximityWeightAccumulator::weight_invpos(
 	WeightArray& ar,
 	double factor,
 	const WeightArray& incrar,
-	const Index& firstpos,
+	strus::Index firstpos,
 	const std::size_t* window, std::size_t windowsize,
 	PostingIteratorInterface** featar, std::size_t featarsize)
 {
@@ -129,7 +129,7 @@ void ProximityWeightAccumulator::weight_invpos(
 	WeightArray& ar,
 	double factor,
 	const WeightArray& incrar,
-	const Index& firstpos,
+	strus::Index firstpos,
 	PostingIteratorInterface** featar, std::size_t featarsize)
 {
 	std::size_t fi=0;

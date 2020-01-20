@@ -91,7 +91,7 @@ private:
 
 	struct InvKey
 	{
-		InvKey( const std::string& type_, const Index& pos_)
+		InvKey( const std::string& type_, strus::Index pos_)
 			:type(type_),pos(pos_){}
 		InvKey( const InvKey& o)
 			:type(o.type),pos(o.pos){}

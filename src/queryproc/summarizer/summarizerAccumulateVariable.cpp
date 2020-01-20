@@ -94,7 +94,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-std::vector<unsigned int> SummarizerFunctionContextAccumulateVariable::getCandidateSet( const Index& docno) const
+std::vector<unsigned int> SummarizerFunctionContextAccumulateVariable::getCandidateSet( strus::Index docno) const
 {
 	std::vector<unsigned int> rt;
 	std::vector<SummarizationFeature>::const_iterator

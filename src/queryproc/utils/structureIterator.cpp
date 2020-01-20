@@ -19,7 +19,7 @@ void StructureIterator::init( Index windowsize_, PostingIteratorInterface** vali
 	m_cur.second = 0;
 }
 
-std::pair<Index,Index> StructureIterator::skipPos( const Index& posno)
+std::pair<Index,Index> StructureIterator::skipPos( strus::Index posno)
 {
 	if (!posno) return std::pair<Index,Index>();
 	if (posno < m_cur.second && posno >= m_cur.first) return m_cur;

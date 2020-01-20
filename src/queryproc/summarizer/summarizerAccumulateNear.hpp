@@ -104,7 +104,7 @@ private:
 	double candidateWeight( const CandidateEntity& entityloc, PostingIteratorInterface** valid_itrar) const;
 
 	typedef std::map<std::string,double> EntityMap;
-	void initEntityMap( EntityMap& emap, const Index& docno);
+	void initEntityMap( EntityMap& emap, strus::Index docno);
 	std::vector<SummaryElement> getSummariesFromEntityMap( EntityMap& emap) const;
 
 private:

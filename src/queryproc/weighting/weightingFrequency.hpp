@@ -60,7 +60,7 @@ private:
 
 
 /// \class WeightingFunctionInstanceTermFrequency
-/// \brief Weighting function instance based on the BM25 formula
+/// \brief Weighting function instance just counting the number of occurrencies
 class WeightingFunctionInstanceTermFrequency
 	:public WeightingFunctionInstanceInterface
 {
@@ -69,6 +69,8 @@ public:
 		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceTermFrequency(){}
+
+	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 

@@ -53,7 +53,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 
 void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionContextBM25::addWeightingFeature(
@@ -89,7 +89,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const Index& docno)
+double WeightingFunctionContextBM25::featureWeight( const Feature& feat, strus::Index docno)
 {
 	if (docno==feat.itr->skipDoc( docno))
 	{
@@ -162,6 +162,11 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
+}
+
+void WeightingFunctionInstanceBM25::setMaxNofWeightedFields( int N)
+{
+	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name_, const std::string& value)

@@ -27,10 +27,10 @@ public:
 	PostingIterator( 
 			const StorageClient* storage_,
 			const DatabaseClientInterface* database,
-			const Index& termtypeno,
-			const Index& termvalueno,
+			strus::Index termtypeno,
+			strus::Index termvalueno,
 			const char* termstr,
-			const Index& length_,
+			strus::Index length_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PostingIterator(){}
@@ -64,7 +64,7 @@ public:
 	}
 
 private:
-	Index skipDoc_impl( const Index& docno_);
+	Index skipDoc_impl( strus::Index docno_);
 
 private:
 	IndexSetIterator m_docnoIterator;

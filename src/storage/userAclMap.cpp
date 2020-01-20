@@ -81,8 +81,8 @@ void UserAclMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 }
 
 void UserAclMap::markSetElement(
-	const Index& userno,
-	const Index& docno,
+	strus::Index userno,
+	strus::Index docno,
 	bool isMember)
 {
 	UsrAclKey mkey( userno, docno);
@@ -91,21 +91,21 @@ void UserAclMap::markSetElement(
 }
 
 void UserAclMap::defineUserAccess(
-	const Index& userno,
-	const Index& docno)
+	strus::Index userno,
+	strus::Index docno)
 {
 	markSetElement( userno, docno, true);
 }
 
 void UserAclMap::deleteUserAccess(
-	const Index& userno,
-	const Index& docno)
+	strus::Index userno,
+	strus::Index docno)
 {
 	markSetElement( userno, docno, false);
 }
 
 void UserAclMap::deleteUserAccess(
-	const Index& userno)
+	strus::Index userno)
 {
 	UsrDocMap::const_iterator mi = m_usrdocmap.upper_bound( UsrAclKey( userno, 0));
 	if (mi == m_usrdocmap.end() || mi->first.usrno == userno)
@@ -119,7 +119,7 @@ void UserAclMap::deleteUserAccess(
 }
 
 void UserAclMap::deleteDocumentAccess(
-	const Index& docno)
+	strus::Index docno)
 {
 	DocUsrMap::const_iterator mi = m_docusrmap.upper_bound( UsrAclKey( 0, docno));
 	if (mi == m_docusrmap.end() || mi->first.docno == docno)
@@ -168,7 +168,7 @@ static void resetAllBooleanBlockElementsFromStorage(
 
 static void defineRangeElement(
 		std::vector<BooleanBlock::MergeRange>& docrangear,
-		const Index& docno,
+		strus::Index docno,
 		bool isMember)
 {
 	if (docrangear.empty())

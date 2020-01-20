@@ -33,6 +33,7 @@ class ErrorBufferInterface;
 /// \brief Configured parameters of the BM25pff weighting function
 struct WeightingFunctionParameterBM25pff
 {
+	int maxNofWeightingFields;		///< maximum number of weighted fields returned
 	double k1;				///< k1 value of BM25
 	double b;				///< b value of BM25
 	double avgDocLength;			///< average document length in the collection
@@ -52,7 +53,8 @@ struct WeightingFunctionParameterBM25pff
 	double prop_weight_const;		///< constant factor for proportional feature weight [0.0 .. 1.0]
 
 	WeightingFunctionParameterBM25pff()
-		:k1(1.5),b(0.75),avgDocLength(500)
+		:maxNofWeightingFields(1)
+		,k1(1.5),b(0.75),avgDocLength(500)
 		,paragraphsize(300)
 		,sentencesize(100)
 		,windowsize(100)
@@ -106,7 +108,7 @@ public:
 private:
 	struct WeightingData
 	{
-		WeightingData( std::size_t itrarsize_, std::size_t structarsize_, std::size_t paraarsize_, const Index& structwindowsize_, const Index& parawindowsize_)
+		WeightingData( std::size_t itrarsize_, std::size_t structarsize_, std::size_t paraarsize_, strus::Index structwindowsize_, strus::Index parawindowsize_)
 			:doclen(0),titlestart(1),titleend(1),ffincrar( itrarsize_,0.0)
 		{
 			valid_paraar = &valid_structar[ structarsize_];
@@ -127,7 +129,7 @@ private:
 
 private:
 	void initializeContext();
-	void initWeightingData( WeightingData& data, const Index& docno);
+	void initWeightingData( WeightingData& data, strus::Index docno);
 
 	void calcWindowWeight(
 			WeightingData& wdata, const PositionWindow& poswin,
@@ -135,13 +137,13 @@ private:
 			const std::pair<Index,Index>& paraframe,
 			ProximityWeightAccumulator::WeightArray& result);
 
-	double featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const;
+	double featureWeight( const WeightingData& wdata, strus::Index docno, double idf, double weight_ff) const;
 
 	typedef ProximityWeightAccumulator::WeightArray WeightArray;
 	void calcProximityFfIncrements( WeightingData& wdata, WeightArray& result);
 	void logCalcProximityFfIncrements( std::ostream& out, WeightingData& wdata, ProximityWeightAccumulator::WeightArray& result);
 	void calcTitleFfIncrements( WeightingData& wdata, WeightArray& result);
-	void calcTitleWeights( WeightingData& wdata, const Index& docno, WeightArray& weightar);
+	void calcTitleWeights( WeightingData& wdata, strus::Index docno, WeightArray& weightar);
 
 private:
 	WeightingFunctionParameterBM25pff m_parameter;		///< weighting function parameters
@@ -174,6 +176,7 @@ public:
 		:m_parameter(),m_metadata_doclen(strus::Constants::standard_metadata_document_length()),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
+	virtual void setMaxNofWeightedFields( int N);
 
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);

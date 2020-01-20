@@ -31,7 +31,7 @@ public:
 	/// \brief Constructor
 	StorageDocumentUpdate(
 		StorageTransaction* transaction_,
-		const Index& docno_,
+		strus::Index docno_,
 		ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor

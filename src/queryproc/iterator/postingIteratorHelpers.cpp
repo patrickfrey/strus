@@ -29,7 +29,7 @@ struct IteratorDf
 	Index argidx;
 	Index df;
 
-	IteratorDf( const Index& argidx_, const Index& df_)
+	IteratorDf( strus::Index argidx_, strus::Index df_)
 		:argidx(argidx_),df(df_){}
 	IteratorDf( const IteratorDf& o)
 		:argidx(o.argidx),df(o.df){}

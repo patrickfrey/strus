@@ -115,7 +115,7 @@ public:
 private:
 	struct WeightingData
 	{
-		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, const Index& structwindowsize_, const Index& parawindowsize_)
+		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, strus::Index structwindowsize_, strus::Index parawindowsize_)
 			:titlestart(1),titleend(1)
 		{
 			valid_paraar = &valid_structar[ structarsize_];
@@ -134,7 +134,7 @@ private:
 
 private:
 	void initializeContext();
-	void initWeightingData( WeightingData& wdata, const Index& docno);
+	void initWeightingData( WeightingData& wdata, strus::Index docno);
 
 private:
 	struct Match
@@ -164,7 +164,7 @@ private:
 
 		Abstract()
 			:start(0),span(0),defined_start(false),defined_end(false),is_docstart(false){}
-		Abstract( const Index& start_, const Index& span_, bool defined_start_, bool defined_end_, bool is_docstart_)
+		Abstract( strus::Index start_, strus::Index span_, bool defined_start_, bool defined_end_, bool is_docstart_)
 			:start(start_),span(span_),defined_start(defined_start_),defined_end(defined_end_),is_docstart(is_docstart_){}
 		Abstract( const Abstract& o)
 			:start(o.start),span(o.span),defined_start(o.defined_start),defined_end(o.defined_end),is_docstart(o.is_docstart){}
@@ -189,7 +189,7 @@ private:
 
 	std::string getParaTitleString( const Abstract& para_abstract);
 	std::string getPhraseString( const Abstract& phrase_abstract, WeightingData& wdata);
-	std::string getPhraseString( const Index& firstpos, const Index& lastpos);
+	std::string getPhraseString( strus::Index firstpos, strus::Index lastpos);
 
 	std::vector<SummaryElement>
 		getSummariesFromAbstracts(

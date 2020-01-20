@@ -752,7 +752,7 @@ static unsigned int parseUnsigned( char const*& itr)
 	return numstring_conv::touint( item, std::numeric_limits<unsigned int>::max());
 }
 
-static void storeMetaDataValue( StorageTransactionInterface& transaction, const Index& docno, const std::string& name, const NumericVariant& val)
+static void storeMetaDataValue( StorageTransactionInterface& transaction, strus::Index docno, const std::string& name, const NumericVariant& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
 	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
@@ -761,7 +761,7 @@ static void storeMetaDataValue( StorageTransactionInterface& transaction, const 
 	update->done();
 }
 
-static void storeAttributeValue( StorageTransactionInterface& transaction, const Index& docno, const std::string& name, const std::string& val)
+static void storeAttributeValue( StorageTransactionInterface& transaction, strus::Index docno, const std::string& name, const std::string& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
 	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
@@ -776,7 +776,7 @@ static void storeAttributeValue( StorageTransactionInterface& transaction, const
 	update->done();
 }
 
-static void storeUserRights( StorageTransactionInterface& transaction, const Index& docno, const std::string& val)
+static void storeUserRights( StorageTransactionInterface& transaction, strus::Index docno, const std::string& val)
 {
 	strus::local_ptr<StorageDocumentUpdateInterface> update( transaction.createDocumentUpdate( docno));
 	if (!update.get()) throw strus::runtime_error( _TXT("failed to create document update structure"));
@@ -841,7 +841,7 @@ enum StorageValueType
 
 static bool updateStorageValue(
 		StorageTransactionInterface* transaction,
-		const Index& docno,
+		strus::Index docno,
 		const std::string& elementName,
 		StorageValueType valueType,
 		const std::string& value)

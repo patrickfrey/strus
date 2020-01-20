@@ -104,7 +104,7 @@ public:
 	enum {MaxNofParameter=64};				///< maximum number of arguments passed to the defined function
 
 private:
-	void fillParameter( const Index& docno, double ff, double df, double* parameterVector) const;
+	void fillParameter( strus::Index docno, double ff, double df, double* parameterVector) const;
 
 private:
 	typedef std::vector<Feature> FeatureVector;
@@ -132,6 +132,7 @@ public:
 
 	virtual ~WeightingFunctionInstanceSmart(){}
 
+	virtual void setMaxNofWeightedFields( int N);
 	virtual void addStringParameter( const std::string& name_, const std::string& value);
 	virtual void addNumericParameter( const std::string& name_, const NumericVariant& value);
 

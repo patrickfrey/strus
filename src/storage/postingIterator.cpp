@@ -27,18 +27,18 @@ using namespace strus;
 PostingIterator::PostingIterator(
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
-		const Index& termtypeno,
-		const Index& termvalueno, const char* termstr,
-		const Index& length_,
+		strus::Index termtypeno,
+		strus::Index termvalueno, const char* termstr,
+		strus::Index length_,
 		ErrorBufferInterface* errorhnd_)
 #else
 PostingIterator::PostingIterator(
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
-		const Index& termtypeno,
-		const Index& termvalueno,
+		strus::Index termtypeno,
+		strus::Index termvalueno,
 		const char*,
-		const Index& length_,
+		strus::Index length_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
@@ -61,7 +61,7 @@ PostingIterator::PostingIterator(
 #endif
 }
 
-Index PostingIterator::skipDoc_impl( const Index& docno_)
+Index PostingIterator::skipDoc_impl( strus::Index docno_)
 {
 	if (m_docno && m_docno == docno_) return m_docno;
 

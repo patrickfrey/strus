@@ -40,12 +40,12 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function feature parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of the weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionContextTermFrequency::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for the function '%s'"), THIS_METHOD_NAME);
 }
 
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
@@ -89,6 +89,11 @@ static NumericVariant parameterValue( const std::string& name_, const std::strin
 	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
+}
+
+void WeightingFunctionInstanceTermFrequency::setMaxNofWeightedFields( int N)
+{
+	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::string& name_, const std::string& value)

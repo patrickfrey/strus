@@ -72,7 +72,7 @@ void WeightingFunctionContextSmart::setVariableValue( const std::string& name_, 
 	m_func->setVariableValue( name_, value);
 }
 
-void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff, double df, double* param) const
+void WeightingFunctionContextSmart::fillParameter( strus::Index docno, double ff, double df, double* param) const
 {
 	param[ 0] = ff;
 	param[ 1] = df;
@@ -152,6 +152,11 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 	}
 	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
 	return out.str();
+}
+
+void WeightingFunctionInstanceSmart::setMaxNofWeightedFields( int N)
+{
+	if (N != 1) m_errorhnd->report( ErrorCodeNotImplemented, _TXT("set maximum number of weighting fields not implemented for the function '%s'"), THIS_METHOD_NAME);
 }
 
 void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name_, const std::string& value)

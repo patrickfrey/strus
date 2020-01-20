@@ -14,11 +14,11 @@
 
 namespace strus {
 
-bool callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar);
+bool callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar);
 
-Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size);
+Index callSkipPos( strus::Index start, PostingIteratorInterface** ar, std::size_t size);
 
-std::pair<Index,Index> callSkipPosWithLen( Index start, PostingIteratorInterface** ar, std::size_t size);
+std::pair<Index,Index> callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size);
 
 }//namespace
 #endif

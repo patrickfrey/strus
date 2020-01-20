@@ -283,7 +283,7 @@ static Index versionNo( Index major, Index minor)
 	return (major * 1000) + minor;
 }
 
-static unsigned int versionIndex( const Index& version)
+static unsigned int versionIndex( strus::Index version)
 {
 	static const Index ar[] = {0004,0};
 	unsigned int ii=0;
@@ -522,7 +522,7 @@ class InvertedAclIterator
 	
 {
 public:
-	InvertedAclIterator( const DatabaseClientInterface* database_, const Index& userno_, ErrorBufferInterface* errorhnd_)
+	InvertedAclIterator( const DatabaseClientInterface* database_, strus::Index userno_, ErrorBufferInterface* errorhnd_)
 		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_), true),m_errorhnd(errorhnd_){}
 	virtual ~InvertedAclIterator(){}
 
@@ -828,12 +828,12 @@ Index StorageClient::maxStructTypeNo() const
 	return m_next_structno.value() -1;
 }
 
-IndexSetIterator StorageClient::getAclIterator( const Index& docno) const
+IndexSetIterator StorageClient::getAclIterator( strus::Index docno) const
 {
 	return IndexSetIterator( m_database.get(), DatabaseKey::AclBlockPrefix, BlockKey(docno), false);
 }
 
-IndexSetIterator StorageClient::getUserAclIterator( const Index& userno) const
+IndexSetIterator StorageClient::getUserAclIterator( strus::Index userno) const
 {
 	return IndexSetIterator( m_database.get(), DatabaseKey::UserAclBlockPrefix, BlockKey(userno), true);
 }
@@ -848,7 +848,7 @@ Index StorageClient::nofDocumentsInserted() const
 	return m_nof_documents.value();
 }
 
-Index StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
+Index StorageClient::documentFrequency( strus::Index typeno, strus::Index termno) const
 {
 	return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
 }

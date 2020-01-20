@@ -24,7 +24,7 @@ public:
 
 	void init( Index windowsize_, PostingIteratorInterface** valid_structar_, std::size_t structarSize_);
 
-	std::pair<Index,Index> skipPos( const Index& posno);
+	std::pair<Index,Index> skipPos( strus::Index posno);
 
 private:
 	PostingIteratorInterface** m_valid_structar;

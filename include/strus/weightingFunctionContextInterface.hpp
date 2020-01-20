@@ -11,6 +11,7 @@
 #define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/termStatistics.hpp"
+#include "strus/weightedField.hpp"
 #include <string>
 
 namespace strus
@@ -46,7 +47,8 @@ public:
 
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number
-	/// \return the calculated weight of the document
+	/// \return the calculated best N weighted fields of the document as reference
+	//virtual const std::vector<WeightedField>& call( const Index& docno)=0;
 	virtual double call( const Index& docno)=0;
 
 	/// \brief Get debug info dumped as string of the weighting call for one document
