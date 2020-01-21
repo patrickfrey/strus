@@ -1,5 +1,6 @@
 #include "positionWindow.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
@@ -114,7 +115,7 @@ static void testWinWindow()
 		args.push_back( argbufs.back().get());
 	}
 	Result const* ri = res;
-	strus::PositionWindow win( args.data(), args.size(), 10, 0, 0, strus::PositionWindow::MinWin);
+	strus::PositionWindow win( args.data(), args.size(), 10/*range*/, 0/*cardinality*/, strus::IndexRange()/*field*/, strus::PositionWindow::MinWin);
 	bool more=win.first();
 	for (; more && ri->pos; more=win.next(),++ri)
 	{

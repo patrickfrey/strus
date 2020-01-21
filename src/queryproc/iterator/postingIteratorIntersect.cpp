@@ -155,7 +155,7 @@ Index IteratorIntersectWithCardinality::skipPos( const Index& pos_)
 	else
 	{
 		DocnoMatchPrioQueue::CandidateList candiates = m_docnoMatchPrioQueue.getCandidateList();
-		m_positionWindow.init( candiates.ar, candiates.arsize, 0, m_cardinality, 0, PositionWindow::MaxWin);
+		m_positionWindow.init( candiates.ar, candiates.arsize, 0, m_cardinality, strus::IndexRange()/*field*/, PositionWindow::MaxWin);
 		m_windowIsInitialized = true;
 		m_call_posno = 0;
 	}

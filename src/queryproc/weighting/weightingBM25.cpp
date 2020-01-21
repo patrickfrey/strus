@@ -130,6 +130,7 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25::call( const Inde
 		{
 			ww += featureWeight( *fi, docno);
 		}
+		m_lastResult.resize( 1);
 		m_lastResult[ 0].setWeight( ww);
 		return m_lastResult;
 	}

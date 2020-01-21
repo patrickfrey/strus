@@ -59,7 +59,7 @@ public:
 		try
 		{
 			std::ostringstream out;
-			const std::vector<WeightedField>& wf = m_func->call( docno);
+			const std::vector<WeightedField>& wf = m_func->call( doc.docno());
 			std::vector<WeightedField>::const_iterator wi = wf.begin(), we = wf.end();
 			std::vector<SummaryElement> rt;
 			for (int widx=0; wi != we; ++wi,++widx)
@@ -84,7 +84,7 @@ public:
 		try
 		{
 			std::ostringstream out;
-			out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+			out << string_format( _TXT( "summarize %s"), m_name.c_str()) << std::endl;
 		
 			std::vector<SummaryElement> res = getSummary( doc);
 			std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();

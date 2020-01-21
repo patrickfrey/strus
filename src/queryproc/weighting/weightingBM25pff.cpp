@@ -235,7 +235,7 @@ void WeightingFunctionContextBM25pff::calcProximityFfIncrements(
 	Index lastEndPos = 0;
 	unsigned int lastElementCnt = 0;
 	PositionWindow poswin( wdata.valid_itrar, m_itrarsize, m_parameter.windowsize, m_cardinality,
-				1U/*firstpos*/, PositionWindow::MaxWin);
+				strus::IndexRange()/*field*/, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
@@ -269,7 +269,7 @@ void WeightingFunctionContextBM25pff::logCalcProximityFfIncrements(
 	Index lastEndPos = 0;
 	unsigned int lastElementCnt = 0;
 	PositionWindow poswin( wdata.valid_itrar, m_itrarsize, m_parameter.windowsize, m_cardinality,
-				1U/*firstpos*/, PositionWindow::MaxWin);
+				strus::IndexRange()/*field*/, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{

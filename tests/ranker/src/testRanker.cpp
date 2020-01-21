@@ -7,6 +7,7 @@
  */
 #include "ranker.hpp"
 #include "strus/index.hpp"
+#include "strus/constants.hpp"
 #include "strus/weightedDocument.hpp"
 #include "strus/base/math.hpp"
 #include "strus/base/pseudoRandom.hpp"
@@ -34,10 +35,27 @@ static std::string doubleToString( double val_)
 	return val_str.str();
 }
 
+static strus::IndexRange randomField()
+{
+	for (;;)
+	{
+		strus::Index aa = g_random.get( 1, strus::Constants::storage_max_position_info()-1);
+		strus::Index bb = g_random.get( 1, strus::Constants::storage_max_position_info()-1);
+		if (aa < bb)
+		{
+			return strus::IndexRange( aa, bb);
+		}
+		else if (aa > bb)
+		{
+			return strus::IndexRange( bb, aa);
+		}
+	}
+}
+
 static strus::WeightedDocument randomWeightedDocument()
 {
 	float weight = (float)g_random.get(0,10000) / g_random.get(1,10000);
-	return strus::WeightedDocument( ++g_docnum, weight);
+	return strus::WeightedDocument( ++g_docnum, randomField(), weight);
 }
 
 static int compareWeight( double w1, double w2)

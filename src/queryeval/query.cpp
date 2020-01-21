@@ -717,11 +717,10 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
-		double weight = 0.0;
 	
 		while (accumulator.nextRank( docno, state))
 		{
-			if (state > prev_state && (int)ranker.nofRanks() >= maxNofRanks + minRank)
+			if (state > prev_state && (int)accumulator.ranker().nofRanks() >= maxNofRanks + minRank)
 			{
 				state = prev_state;
 				break;
@@ -794,7 +793,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				si = summarizers.begin(), se = summarizers.end();
 			for (;si != se; ++si,++prefix_si)
 			{
-				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
+				std::vector<SummaryElement> summary = (*si)->getSummary( *ri);
 				std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
 				for (; li != le; ++li)
 				{
@@ -813,7 +812,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				{
 					if (!zi->debugAttributeName().empty())
 					{
-						std::string debuginfo = (*si)->debugCall( ri->docno());
+						std::string debuginfo = (*si)->debugCall( *ri);
 						summaries.push_back( SummaryElement( std::string("debug:") + zi->debugAttributeName(), debuginfo));
 					}
 				}

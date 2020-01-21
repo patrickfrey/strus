@@ -757,7 +757,7 @@ std::string SummarizerFunctionContextMatchPhrase::debugCall( const strus::Weight
 	
 		m_forwardindex->skipDoc( doc.docno());
 	
-		Index firstpos = m_forwardindex->skipPos( 0);
+		Index firstpos = m_forwardindex->skipPos( doc.field().start());
 		if (!firstpos) return std::string();
 	
 		Match candidate = logFindAbstractMatch( out, wdata);
