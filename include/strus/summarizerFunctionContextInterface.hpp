@@ -52,12 +52,12 @@ public:
 	/// \brief Get the summarization elements for one document
 	/// \param[in] doc weighted document or passage to get the summary element from
 	/// \return the summarization elements
-	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc)=0;
+	virtual std::vector<SummaryElement> getSummary( const WeightedDocument& doc)=0;
 
 	/// \brief Get debug info dumped as string of the summarization call for one document
 	/// \param[in] docno document to get the summary debug info from
 	/// \return the debug info as string
-	virtual std::string debugCall( const strus::WeightedDocument& doc)=0;
+	virtual std::string debugCall( const WeightedDocument& doc)=0;
 };
 
 }//namespace
