@@ -85,7 +85,7 @@ std::vector<SummaryElement>
 		{
 			if (doc.docno()==fi->itr->skipDoc( doc.docno()))
 			{
-				strus::Index curpos = doc.field().start();
+				strus::Index curpos = fi->itr->skipPos( doc.field().start());
 				strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
 
 				for (int groupidx=0; curpos && curpos < endpos; curpos = fi->itr->skipPos( curpos+1),++groupidx)

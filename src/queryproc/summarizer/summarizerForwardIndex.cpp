@@ -60,7 +60,7 @@ std::vector<SummaryElement>
 		std::vector<SummaryElement> rt;
 		unsigned int cnt = m_maxNofMatches;
 		m_forwardindex->skipDoc( doc.docno());
-		strus::Index pos = doc.field().start();
+		strus::Index pos = m_forwardindex->skipPos( doc.field().start());
 		strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
 		for (; pos && pos < endpos; pos = m_forwardindex->skipPos( pos+1))
 		{
