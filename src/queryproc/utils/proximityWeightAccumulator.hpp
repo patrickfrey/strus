@@ -105,7 +105,7 @@ public:
 		const WeightArray& incrar,
 		const std::size_t* window, std::size_t windowsize,
 		PostingIteratorInterface** featar, std::size_t featarsize,
-		const std::pair<Index,Index>& structframe);
+		const strus::IndexRange& structframe);
 
 	/// \brief Accumulate with inverse sqrt of distance
 	static void weight_invdist(

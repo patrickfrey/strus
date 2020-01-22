@@ -48,13 +48,13 @@ void ProximityWeightAccumulator::weight_same_sentence(
 	const WeightArray& incrar,
 	const std::size_t* window, std::size_t windowsize,
 	PostingIteratorInterface** featar, std::size_t featarsize,
-	const std::pair<Index,Index>& structframe)
+	const strus::IndexRange& structframe)
 {
 	std::size_t wi = 0;
 	double weight = 0.0;
 	for (; wi < windowsize; ++wi)
 	{
-		if (!structframe.second || featar[ window[ wi]]->posno() < structframe.second)
+		if (!structframe.defined() || featar[ window[ wi]]->posno() < structframe.end())
 		{
 			weight += incrar[ window[wi]];
 		}
@@ -65,7 +65,7 @@ void ProximityWeightAccumulator::weight_same_sentence(
 	}
 	for (wi=0; wi < windowsize; ++wi)
 	{
-		if (!structframe.second || featar[ window[ wi]]->posno() < structframe.second)
+		if (!structframe.defined() || featar[ window[ wi]]->posno() < structframe.end())
 		{
 			ar[ window[wi]] += incrar[ window[wi]] * (weight - incrar[ window[wi]]) * factor;
 		}

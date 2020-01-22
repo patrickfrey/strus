@@ -122,8 +122,8 @@ SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 
 double SummarizerFunctionContextMatchPhrase::windowWeight(
 		WeightingData& wdata, const PositionWindow& poswin,
-		const std::pair<Index,Index>& structframe,
-		const std::pair<Index,Index>& paraframe)
+		const strus::IndexRange& structframe,
+		const strus::IndexRange& paraframe)
 {
 	const std::size_t* window = poswin.window();
 	std::size_t windowsize = poswin.size();
@@ -155,18 +155,18 @@ double SummarizerFunctionContextMatchPhrase::windowWeight(
 			weightar, m_parameter->m_weight_invpos_start, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
-	if (paraframe.first)
+	if (paraframe.defined())
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, m_parameter->m_weight_invpos_para, m_weightincr, paraframe.first,
+			weightar, m_parameter->m_weight_invpos_para, m_weightincr, paraframe.start(),
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
-	if (structframe.first)
+	if (structframe.defined())
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, m_parameter->m_weight_invpos_struct, m_weightincr, structframe.first,
+			weightar, m_parameter->m_weight_invpos_struct, m_weightincr, structframe.start(),
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	weightar.multiply( m_idfar);
@@ -197,11 +197,11 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
-		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+		strus::IndexRange paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.defined() && paraframe.end() < windowpos + windowspan) continue;
 
 		// Calculate sentence frame:
-		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
+		strus::IndexRange structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate the candidate weight:
 		double weight = windowWeight( wdata, poswin, structframe, paraframe);
@@ -265,11 +265,11 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
-		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+		strus::IndexRange paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.defined() && paraframe.end() < windowpos + windowspan) continue;
 
 		// Calculate sentence frame:
-		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
+		strus::IndexRange structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate the candidate weight:
 		double weight = windowWeight( wdata, poswin, structframe, paraframe);
@@ -554,15 +554,15 @@ std::string SummarizerFunctionContextMatchPhrase::getPhraseString( const Abstrac
 	Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 	while (pi < pe)
 	{
-		std::pair<Index,Index> minpos = callSkipPosWithLen( pi, wdata.valid_itrar, m_itrarsize);
-		if (minpos.first && minpos.first < pe)
+		strus::IndexRange minpos = callSkipPosWithLen( pi, wdata.valid_itrar, m_itrarsize);
+		if (minpos.defined() && minpos.start() < pe)
 		{
-			Index li = 0, le = minpos.second;
+			Index li = minpos.start(), le = minpos.end();
 			for (; li != le; ++li)
 			{
-				highlightpos.push_back( minpos.first+li);
+				highlightpos.push_back( li);
 			}
-			pi = minpos.first+(le?le:1);
+			pi = minpos.end();
 		}
 		else
 		{

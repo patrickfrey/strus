@@ -8,29 +8,30 @@
 #ifndef _STRUS_QUERYPROC_STRUCTURE_ITERATOR_HPP_INCLUDED
 #define _STRUS_QUERYPROC_STRUCTURE_ITERATOR_HPP_INCLUDED
 #include "private/internationalization.hpp"
+#include "strus/index.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <utility>
 
 namespace strus {
 
-class StructureIterator
+class SentenceIterator
 {
 public:
-	StructureIterator()
-		:m_valid_structar(0),m_structarSize(0),m_windowsize(0),m_cur(0,0){}
-	StructureIterator( Index windowsize_, PostingIteratorInterface** valid_structar_, std::size_t structarSize_)
-		:m_valid_structar(valid_structar_),m_structarSize(structarSize_),m_windowsize(windowsize_),m_cur(0,0){}
+	SentenceIterator()
+		:m_delimar(0),m_structarSize(0),m_windowsize(0),m_cur(0,0){}
+	SentenceIterator( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_)
+		:m_delimar(delimar_),m_structarSize(structarSize_),m_windowsize(windowsize_),m_cur(0,0){}
 
-	void init( Index windowsize_, PostingIteratorInterface** valid_structar_, std::size_t structarSize_);
+	void init( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_);
 
-	std::pair<Index,Index> skipPos( strus::Index posno);
+	strus::IndexRange skipPos( strus::Index posno);
 
 private:
-	PostingIteratorInterface** m_valid_structar;
+	PostingIteratorInterface** m_delimar;
 	std::size_t m_structarSize;
 	Index m_windowsize;
-	std::pair<Index,Index> m_cur;
+	strus::IndexRange m_cur;
 };
 
 }//namespace

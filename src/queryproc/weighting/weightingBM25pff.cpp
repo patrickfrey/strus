@@ -188,8 +188,8 @@ void WeightingFunctionContextBM25pff::calcTitleWeights( WeightingData& wdata, st
 
 void WeightingFunctionContextBM25pff::calcWindowWeight(
 		WeightingData& wdata, const PositionWindow& poswin,
-		const std::pair<Index,Index>& structframe,
-		const std::pair<Index,Index>& paraframe,
+		const strus::IndexRange& structframe,
+		const strus::IndexRange& paraframe,
 		ProximityWeightAccumulator::WeightArray& result)
 {
 	const std::size_t* window = poswin.window();
@@ -212,18 +212,18 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 			result, m_parameter.weight_invpos_start, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
-	if (paraframe.first)
+	if (paraframe.defined())
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, m_parameter.weight_invpos_para, m_weightincr, paraframe.first,
+			result, m_parameter.weight_invpos_para, m_weightincr, paraframe.start(),
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
-	if (structframe.first)
+	if (structframe.defined())
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, m_parameter.weight_invpos_struct, m_weightincr, structframe.first,
+			result, m_parameter.weight_invpos_struct, m_weightincr, structframe.start(),
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 }
@@ -250,11 +250,11 @@ void WeightingFunctionContextBM25pff::calcProximityFfIncrements(
 		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for ff increments:
-		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
-		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+		strus::IndexRange paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.defined() && paraframe.end() < windowpos + windowspan) continue;
 	
 		// Calculate sentence frame:
-		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
+		strus::IndexRange structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate ff increments of this window:
 		calcWindowWeight( wdata, poswin, structframe, paraframe, result);
@@ -284,11 +284,11 @@ void WeightingFunctionContextBM25pff::logCalcProximityFfIncrements(
 		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for ff increments:
-		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
-		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+		strus::IndexRange paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.defined() && paraframe.end() < windowpos + windowspan) continue;
 	
 		// Calculate sentence frame:
-		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
+		strus::IndexRange structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate ff increments of this window:
 		ProximityWeightAccumulator::WeightArray row_result( result.arsize, 0.0);

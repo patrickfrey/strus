@@ -18,7 +18,7 @@ bool callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std::size_t
 
 Index callSkipPos( strus::Index start, PostingIteratorInterface** ar, std::size_t size);
 
-std::pair<Index,Index> callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size);
+strus::IndexRange callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size);
 
 }//namespace
 #endif

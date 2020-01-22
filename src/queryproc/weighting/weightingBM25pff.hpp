@@ -18,7 +18,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "proximityWeightAccumulator.hpp"
-#include "structureIterator.hpp"
+#include "sentenceIterator.hpp"
 #include <vector>
 #include <cstring>
 #include <sstream>
@@ -122,8 +122,8 @@ private:
 		double doclen;							//< length of the document
 		Index titlestart;						//< start position of the title
 		Index titleend;							//< end position of the title (first item after the title)
-		StructureIterator paraiter;					//< iterator on paragraph frames
-		StructureIterator structiter;					//< iterator on sentence frames
+		SentenceIterator paraiter;					//< iterator on paragraph frames
+		SentenceIterator structiter;					//< iterator on sentence frames
 		ProximityWeightAccumulator::WeightArray ffincrar;		//< proximity and structure increment of ff
 	};
 
@@ -133,8 +133,8 @@ private:
 
 	void calcWindowWeight(
 			WeightingData& wdata, const PositionWindow& poswin,
-			const std::pair<Index,Index>& structframe,
-			const std::pair<Index,Index>& paraframe,
+			const strus::IndexRange& structframe,
+			const strus::IndexRange& paraframe,
 			ProximityWeightAccumulator::WeightArray& result);
 
 	double featureWeight( const WeightingData& wdata, strus::Index docno, double idf, double weight_ff) const;

@@ -5,37 +5,37 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "structureIterator.hpp"
+#include "sentenceIterator.hpp"
 #include "postingIteratorHelpers.hpp"
 
 using namespace strus;
 
-void StructureIterator::init( Index windowsize_, PostingIteratorInterface** valid_structar_, std::size_t structarSize_)
+void SentenceIterator::init( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_)
 {
-	m_valid_structar = valid_structar_;
+	m_delimar = delimar_;
 	m_structarSize = structarSize_;
 	m_windowsize = windowsize_;
-	m_cur.first = 0;
-	m_cur.second = 0;
+	m_cur.init( 0, 0);
 }
 
-std::pair<Index,Index> StructureIterator::skipPos( strus::Index posno)
+strus::IndexRange SentenceIterator::skipPos( strus::Index posno)
 {
-	if (!posno) return std::pair<Index,Index>();
-	if (posno < m_cur.second && posno >= m_cur.first) return m_cur;
+	if (!posno) return strus::IndexRange();
+	if (posno < m_cur.end() && posno >= m_cur.start()) return m_cur;
 
-	if (m_cur.second && m_cur.second <= posno && m_cur.second + m_windowsize >= posno)
+	if (m_cur.end() && m_cur.end() <= posno && m_cur.end() + m_windowsize >= posno)
 	{
 		// ... we are close enough to the last structure element and skip seeking for it:
-		m_cur.first = m_cur.second;
+		strus::Index start = m_cur.end();
 		for (;;)
 		{
-			m_cur.second = callSkipPos( m_cur.first+1, m_valid_structar, m_structarSize);
-			if (m_cur.second && m_cur.second <= posno)
+			strus::Index end = callSkipPos( start+1, m_delimar, m_structarSize);
+			if (end && end <= posno)
 			{
-				m_cur.first = m_cur.second;
+				start = end;
 				continue;
 			}
+			m_cur.init( start, end);
 			break;
 		}
 	}
@@ -47,19 +47,20 @@ std::pair<Index,Index> StructureIterator::skipPos( strus::Index posno)
 		{
 			// Search start of structure frame:
 			startpos = posno > windowsize ? (posno - windowsize):0;
-			Index pos = callSkipPos( startpos, m_valid_structar, m_structarSize);
+			Index pos = callSkipPos( startpos, m_delimar, m_structarSize);
 			if (pos && pos <= posno)
 			{
-				m_cur.first = pos;
+				strus::Index start = pos;
 				for (;;)
 				{
 					// Search end of structure frame:
-					m_cur.second = callSkipPos( m_cur.first+1, m_valid_structar, m_structarSize);
-					if (m_cur.second && m_cur.second <= posno)
+					strus::Index end = callSkipPos( start+1, m_delimar, m_structarSize);
+					if (end && end <= posno)
 					{
-						m_cur.first = m_cur.second;
+						start = end;
 						continue;
 					}
+					m_cur.init( start, end);
 					break;
 				}
 				break;

@@ -14,7 +14,7 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "proximityWeightAccumulator.hpp"
-#include "structureIterator.hpp"
+#include "sentenceIterator.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -131,8 +131,8 @@ private:
 		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
 		strus::Index titlestart;					//< start position of the title
 		strus::Index titleend;						//< end position of the title (first item after the title)
-		StructureIterator paraiter;					//< iterator on paragraph frames
-		StructureIterator structiter;					//< iterator on sentence frames
+		SentenceIterator paraiter;					//< iterator on paragraph frames
+		SentenceIterator structiter;					//< iterator on sentence frames
 	};
 
 private:
@@ -175,7 +175,7 @@ private:
 		bool isDefined() const		{return span > 0;}
 	};
 
-	double windowWeight( WeightingData& wdata, const PositionWindow& poswin, const std::pair<Index,Index>& structframe, const std::pair<Index,Index>& paraframe);
+	double windowWeight( WeightingData& wdata, const PositionWindow& poswin, const strus::IndexRange& structframe, const strus::IndexRange& paraframe);
 
 	void fetchNoTitlePostings( WeightingData& wdata, PostingIteratorInterface** itrar, Index& cntTitleTerms, Index& cntNoTitleTerms);
 	Match findBestMatch_( WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);

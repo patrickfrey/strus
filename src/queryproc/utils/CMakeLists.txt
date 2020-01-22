@@ -7,7 +7,7 @@ set( source_files
 	positionWindow.cpp
 	proximityWeightAccumulator.cpp
 	postingIteratorHelpers.cpp
-	structureIterator.cpp
+	sentenceIterator.cpp
 )
 
 include_directories(

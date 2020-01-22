@@ -46,6 +46,19 @@ public:
 	{
 		return m_end;
 	}
+	void setStart( strus::Index start_)
+	{
+		m_start = start_;
+	}
+	void setEnd( strus::Index end_)
+	{
+		m_end = end_;
+	}
+	void init( strus::Index start_, strus::Index end_)
+	{
+		m_start = start_;
+		m_end = end_;
+	}
 	int len() const
 	{
 		return m_end - m_start;

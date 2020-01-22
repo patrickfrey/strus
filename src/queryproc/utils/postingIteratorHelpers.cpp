@@ -45,9 +45,9 @@ Index strus::callSkipPos( strus::Index start, PostingIteratorInterface** ar, std
 	return rt;
 }
 
-std::pair<Index,Index> strus::callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
+strus::IndexRange strus::callSkipPosWithLen( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
 {
-	std::pair<Index,Index> rt( 0, 0);
+	strus::IndexRange rt( 0, 0);
 	std::size_t ti=0;
 	for (; ti<size; ++ti)
 	{
@@ -56,19 +56,23 @@ std::pair<Index,Index> strus::callSkipPosWithLen( strus::Index start, PostingIte
 			Index pos = ar[ ti]->skipPos( start);
 			if (pos)
 			{
-				if (!rt.first)
+				if (!rt.defined())
 				{
-					rt = std::pair<Index,Index>( pos, ar[ ti]->length());
+					rt = strus::IndexRange( pos, pos + ar[ ti]->length());
 				}
-				else if (pos <= rt.first)
+				else if (pos <= rt.start())
 				{
-					if (pos < rt.first)
+					if (pos < rt.start())
 					{
-						rt = std::pair<Index,Index>( pos, ar[ ti]->length());
+						rt = strus::IndexRange( pos, pos + ar[ ti]->length());
 					}
-					else
+					else//if (pos == rt.start())
 					{
-						rt = std::pair<Index,Index>( pos, std::max( rt.second, ar[ ti]->length()));
+						strus::Index end = pos + ar[ ti]->length();
+						if (end > rt.end())
+						{
+							rt.setEnd( end);
+						}
 					}
 				}
 			}
