@@ -35,7 +35,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	,m_featar()
 	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
-	,m_lastResult( 1, WeightedField())
+	,m_lastResult()
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metadata.get())

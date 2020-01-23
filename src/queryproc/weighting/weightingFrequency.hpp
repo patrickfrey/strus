@@ -28,7 +28,7 @@ class WeightingFunctionContextTermFrequency
 {
 public:
 	explicit WeightingFunctionContextTermFrequency( ErrorBufferInterface* errorhnd_)
-		:m_featar(),m_lastResult( 1, WeightedField()),m_errorhnd(errorhnd_){}
+		:m_featar(),m_lastResult(),m_errorhnd(errorhnd_){}
 
 	struct Feature
 	{

@@ -32,7 +32,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 	:m_metadata(metadata_)
 	,m_elementHandle(-1)
 	,m_weight(weight_)
-	,m_lastResult( 1, WeightedField())
+	,m_lastResult()
 	,m_errorhnd(errorhnd_)
 {
 	m_elementHandle = m_metadata->elementHandle(elementName_);

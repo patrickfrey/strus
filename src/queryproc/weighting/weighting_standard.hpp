@@ -44,6 +44,10 @@ WeightingFunctionInterface* createWeightingFunctionMetadata( ErrorBufferInterfac
 /// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionTermFrequency( ErrorBufferInterface* errorhnd);
 
+/// \brief Create a weighting function that returns the weighted innermost title of a title hierarchy that is completely referenced with exception of the innnermost title element returned
+/// \return the weighting function reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionTitle( ErrorBufferInterface* errorhnd);
+
 }//namespace
 #endif
 

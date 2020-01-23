@@ -72,7 +72,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "struct"))
+		if (strus::caseInsensitiveEquals( name_, "punct"))
 		{
 			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize++] = itr;
@@ -373,7 +373,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct"))
+		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
 		}
@@ -404,7 +404,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 
 void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct"))
+	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
@@ -507,7 +507,7 @@ StructView SummarizerFunctionAccumulateNear::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Extract and weight all elements in the forward index of a given type that are within a window with features specified."));
 		rt( P::Feature, "match", _TXT( "defines the query features to inspect for near matches"), "");
-		rt( P::Feature, "struct", _TXT( "defines a structural delimiter for interaction of features on the same result"), "");
+		rt( P::Feature, "punct", _TXT( "defines a sentence delimiter"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		rt( P::String, "result", _TXT( "the name of the result if not equal to type"), "");
 		rt( P::Numeric, "cofactor", _TXT( "multiplication factor for features pointing to the same result"), "");

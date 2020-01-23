@@ -13,6 +13,7 @@
 #include "strus/weightedDocument.hpp"
 #include "strus/summaryElement.hpp"
 #include <vector>
+#include <utility>
 
 namespace strus {
 

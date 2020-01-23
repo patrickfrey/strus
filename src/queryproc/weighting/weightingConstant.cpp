@@ -25,7 +25,7 @@ using namespace strus;
 WeightingFunctionContextConstant::WeightingFunctionContextConstant(
 		double weight_, bool precalc_, ErrorBufferInterface* errorhnd_)
 	:m_featar(),m_weight(weight_),m_precalc(precalc_)
-	,m_lastResult( 1, WeightedField())
+	,m_lastResult()
 	,m_errorhnd(errorhnd_){}
 
 void WeightingFunctionContextConstant::addWeightingFeature(

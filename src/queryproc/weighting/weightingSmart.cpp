@@ -39,7 +39,7 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 	,m_metadata(metadata_)
 	,m_metadatahnd(metadatahnd_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
-	,m_lastResult( 1, WeightedField())
+	,m_lastResult()
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_func.get())

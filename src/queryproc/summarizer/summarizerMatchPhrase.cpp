@@ -80,7 +80,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			if (m_titleitr) throw std::runtime_error( _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "struct"))
+		else if (strus::caseInsensitiveEquals( name_, "punct"))
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
@@ -808,7 +808,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
+		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), "matchvariables");
 		}
@@ -845,7 +845,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
+	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
@@ -955,7 +955,7 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Get best matching phrases delimited by the structure postings"));
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
-		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
+		rt( P::Feature, "punct", _TXT( "defines the delimiter for sentences"), "");
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
 		rt( P::Feature, "title", _TXT( "defines the title field of documents"), "");
 		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");

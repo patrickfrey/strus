@@ -14,6 +14,7 @@
 #include "weightingConstant.hpp"
 #include "weightingMetadata.hpp"
 #include "weightingFrequency.hpp"
+#include "weightingTitle.hpp"
 
 using namespace strus;
 
@@ -52,6 +53,10 @@ WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency( ErrorBu
 	return new WeightingFunctionTermFrequency( errorhnd);
 }
 
+WeightingFunctionInterface* strus::createWeightingFunctionTitle( ErrorBufferInterface* errorhnd)
+{
+	return new WeightingFunctionTitle( errorhnd);
+}
 
 
 

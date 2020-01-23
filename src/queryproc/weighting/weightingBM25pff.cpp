@@ -43,7 +43,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
 	,m_titleitr(0)
-	,m_lastResult( 1)
+	,m_lastResult()
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metadata.get())
@@ -75,7 +75,7 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 			if (m_titleitr) throw std::runtime_error( _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "struct"))
+		else if (strus::caseInsensitiveEquals( name_, "punct"))
 		{
 			if (m_structarsize + m_structarsize > MaxNofArguments) throw std::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
@@ -513,7 +513,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct") || strus::caseInsensitiveEquals( name_, "para"))
+		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para"))
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
@@ -550,7 +550,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 
 void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "struct") || strus::caseInsensitiveEquals( name_, "para"))
+	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
@@ -690,7 +690,7 @@ StructView WeightingFunctionInstanceBM25pff::view() const
 		rt( "cprop", m_parameter.prop_weight_const);
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' weighting function introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 WeightingFunctionInstanceInterface* WeightingFunctionBM25pff::createInstance(
@@ -710,7 +710,7 @@ StructView WeightingFunctionBM25pff::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Calculate the document weight with the weighting scheme \"BM25pff\". This is \"BM25\" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
-		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
+		rt( P::Feature, "punct", _TXT( "defines the delimiter for sentences"), "");
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders)"), "");
 		rt( P::Feature, "title", _TXT( "defines the title field (used for weighting increment of features appearing in title)"), "");
 		rt( P::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
