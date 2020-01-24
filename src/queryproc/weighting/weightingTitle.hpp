@@ -38,7 +38,7 @@ public:
 	WeightingFunctionContextTitle(
 			const StorageClientInterface* storage,
 			double hierarchyWeightFactor_,
-			GlobalCounter nofCollectionDocuments_,
+			int maxNofResults_,
 			ErrorBufferInterface* errorhnd_);
 	
 	~WeightingFunctionContextTitle(){}
@@ -55,26 +55,26 @@ public:
 
 	virtual std::string debugCall( const Index& docno);
 
+private:
+	int tryQuerySequenceMatchToField( int postingIdx, const strus::IndexRange& field);
+
 public:
 	enum {
-		MaxNofArguments=64,		///< maximum number of arguments fix because of extensive use of fixed size arrays
-		MaxTitleSize=64,		///< maximum title size considered as worth for weighting
-		EvalAllocSize=128		///< Elements reserved
+		MaxNofArguments=64,	///< maximum number of arguments fix because of extensive use of fixed size arrays
+		MaxTitleSize=64		///< maximum title size considered as worth for weighting
 	};
 	
 public:
 	struct Posting
 	{
 		PostingIteratorInterface* iterator;
-		double idf;
-		double weight;
 
 		Posting()
-			:iterator(0),idf(0.0),weight(0.0){}
-		Posting( PostingIteratorInterface* iterator_, double idf_, double weight_)
-			:iterator(iterator_),idf(idf_),weight(weight_){}
+			:iterator(0){}
+		Posting( PostingIteratorInterface* iterator_)
+			:iterator(iterator_){}
 		Posting( const Posting& o)
-			:iterator(o.iterator),idf(o.idf),weight(o.weight){}
+			:iterator(o.iterator){}
 	};
 
 private:
@@ -83,7 +83,8 @@ private:
 	Posting m_postingar[ MaxNofArguments];			///< array of weighted feature postings
 	int m_postingarsize;
 	double m_hierarchyWeightFactor;				///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
-	GlobalCounter m_nofCollectionDocuments;			///< number of documents in the collection
+	double m_levelWeight[ strus::Constants::MaxStructLevels];///< weight for each structure level
+	int m_maxNofResults;					///< maximum number of results
 	std::vector<WeightedField> m_lastResult;		///< buffer for the last result calculated
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
@@ -116,6 +117,7 @@ public:
 
 private:
 	double m_hierarchyWeightFactor;			///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
+	int m_maxNofResults;				///< maximum number of results
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

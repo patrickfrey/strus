@@ -7,12 +7,13 @@ include_directories(
 	"${strusbase_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 )
+
 link_directories(
 	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
 	"${LevelDB_LIBRARY_PATH}"
 )
 
-add_executable( testRandomCollection testRandomCollection.cpp)
-target_link_libraries( testRandomCollection strus_error strus_filelocator strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
+add_executable( testWeightingTitle testWeightingTitle.cpp)
+target_link_libraries( testWeightingTitle strus_error strus_filelocator strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 

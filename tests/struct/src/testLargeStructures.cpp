@@ -709,12 +709,12 @@ static void printUsage()
 	std::cerr << "  -V             :increment verbosity (repeating)" << std::endl;
 	std::cerr << "  -D             :dump collection created" << std::endl;
 	std::cerr << "  -K             :keep artefacts, do not clean up" << std::endl;
-	std::cerr << "  -W <seed>   :sepecify pseudo random number generator seed (int)" << std::endl;
-	std::cerr << "  -F <docid>  :only process insert of document with id <docid>" << std::endl;
-	std::cerr << "<nofdocs>     :number of documents inserted" << std::endl;
-	std::cerr << "<nofstu>      :average number of structures per document" << std::endl;
-	std::cerr << "<commitsize>  :number of documents inserted per transaction" << std::endl;
-	std::cerr << "<nofqry>      :number of random queries to verify stored structures" << std::endl;
+	std::cerr << "  -W <seed>      :sepecify pseudo random number generator seed (int)" << std::endl;
+	std::cerr << "  -F <docid>     :only process insert of document with id <docid>" << std::endl;
+	std::cerr << "<nofdocs>        :number of documents inserted" << std::endl;
+	std::cerr << "<nofstu>         :average number of structures per document" << std::endl;
+	std::cerr << "<commitsize>     :number of documents inserted per transaction" << std::endl;
+	std::cerr << "<nofqry>         :number of random queries to verify stored structures" << std::endl;
 }
 
 int main( int argc, const char* argv[])
