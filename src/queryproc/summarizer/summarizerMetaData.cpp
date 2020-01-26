@@ -63,7 +63,7 @@ std::vector<SummaryElement>
 		NumericVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
-			rt.push_back( SummaryElement( m_metaname, value.tostring().c_str(), 1.0));
+			rt.push_back( SummaryElement( "", value.tostring().c_str(), 1.0));
 		}
 		return rt;
 	}

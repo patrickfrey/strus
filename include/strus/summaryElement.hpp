@@ -35,9 +35,17 @@ public:
 		{m_name=std::move(o.m_name); m_value=std::move(o.m_value); m_weight=o.m_weight; m_index=o.m_index; return *this;}
 #endif
 	/// \brief Set the summarizer id prefix given to it when defining it for the query evaluation
-	void setSummarizerPrefix( const std::string& id_)
+	void setSummarizerPrefix( const std::string& id_, char sep)
 	{
-		m_name.insert( 0, id_);
+		if (m_name.empty())
+		{
+			m_name = id_;
+		}
+		else
+		{
+			m_name.insert( 0, id_.c_str(), id_.size()+1);
+			m_name[ id_.size()] = sep;
+		}
 	}
 
 	/// \brief Get the name of the element

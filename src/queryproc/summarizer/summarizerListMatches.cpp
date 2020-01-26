@@ -73,7 +73,7 @@ std::vector<SummaryElement>
 				{
 					char posstr[ 64];
 					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
-					rt.push_back( SummaryElement( "pos", posstr, 1.0, gidx));
+					rt.push_back( SummaryElement( "", posstr, 1.0, gidx));
 				}
 			}
 		}

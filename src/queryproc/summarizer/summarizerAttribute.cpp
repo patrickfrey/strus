@@ -65,7 +65,7 @@ std::vector<SummaryElement>
 		std::string attr = m_attribreader->getValue( m_attrib);
 		if (!attr.empty()) 
 		{
-			rt.push_back( SummaryElement( m_attribname, attr, 1.0));
+			rt.push_back( SummaryElement( "", attr, 1.0));
 		}
 		return rt;
 	}

@@ -31,6 +31,8 @@ public:
 	/// \brief Constructor
 	WeightedDocument( strus::Index docno_, const strus::IndexRange& field_, double weight_)
 		:m_docno(docno_),m_field(field_),m_weight(weight_){}
+	WeightedDocument( strus::Index docno_, const WeightedField& wf)
+		:m_docno(docno_),m_field(wf.field()),m_weight(wf.weight()){}
 	WeightedDocument& operator=( const WeightedDocument& o)
 		{m_docno=o.m_docno; m_field=o.m_field; m_weight=o.m_weight; return *this;}
 

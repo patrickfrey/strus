@@ -229,7 +229,7 @@ bool Accumulator::nextRank(
 					m_ranker.insert( WeightedDocument( m_docno, wi->field(), weight + wi->weight()));
 				}
 			}
-			else
+			else if (weight != 0.0)
 			{
 				m_ranker.insert( WeightedDocument( m_docno, strus::IndexRange(), weight));
 			}

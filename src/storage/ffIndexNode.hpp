@@ -12,6 +12,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <limits>
 
 namespace strus {
 

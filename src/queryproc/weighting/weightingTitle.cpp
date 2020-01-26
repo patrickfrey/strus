@@ -57,8 +57,7 @@ void WeightingFunctionContextTitle::addWeightingFeature(
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			if (strus::Math::abs( weight) > std::numeric_limits<float>::epsilon()
-			||  strus::Math::abs( weight - 1.0) > std::numeric_limits<float>::epsilon())
+			if (!strus::Math::isequal( weight, 0.0) && !strus::Math::isequal( weight, 1.0))
 			{
 				m_errorhnd->info( _TXT("warning: weight ignored for 'title' weighting method"));
 			}
@@ -225,7 +224,7 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 			for (; li != le; ++li)
 			{
 				strus::Index posno = m_postingar[ pi].iterator->skipPos( 0);
-				for (; posno; posno = m_postingar[ pi].iterator->skipPos( posno+1))
+				for (; posno; posno = m_postingar[ pi].iterator->skipPos( posno))
 				{
 					strus::IndexRange field = m_structitr->skipPos( li, posno);
 					if (!field.defined()) break;
@@ -256,6 +255,7 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 							}
 						}
 					}
+					posno = field.end();
 				}
 			}
 			// [1.2] Sort Headers by level:
@@ -462,7 +462,7 @@ void WeightingFunctionInstanceTitle::addNumericParameter( const std::string& nam
 		else if (strus::caseInsensitiveEquals( name_, "results"))
 		{
 			int N = value.toint();
-			if (N > 0)
+			if (N >= 0)
 			{
 				m_maxNofResults = N;
 			}
@@ -496,7 +496,10 @@ StructView WeightingFunctionInstanceTitle::view() const
 	{
 		StructView rt;
 		rt( "hf", m_hierarchyWeightFactor);
-		rt( "results", m_maxNofResults);
+		if (m_maxNofResults)
+		{
+			rt( "results", m_maxNofResults);
+		}
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' weighting function introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -517,7 +520,7 @@ StructView WeightingFunctionTitle::view() const
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Feature, "struct", _TXT( "defines the name of the structures used for determining titles"), "");
 		rt( P::Numeric, "hf", _TXT("hierarchy weight factor (defines the weight of a heading against the weight of its enclosing title or heading, e.g. the weight loss of a subsection title against a section title"), "0.0:1.0");
-		rt( P::Numeric, "results", _TXT("maximum number of results"), "1..");
+		rt( P::Numeric, "results", _TXT("maximum number of results of 0 for unlimited"), "0..");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());

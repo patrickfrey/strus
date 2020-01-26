@@ -732,7 +732,6 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		// [6] Summarization:
 		evaluationPhase = "summarization";
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
-		std::vector<std::string> summarizerPrefixList;
 		if (!resultlist.empty())
 		{
 			// [6.1] Create the summarizers:
@@ -742,7 +741,6 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			for (; zi != ze; ++zi)
 			{
 				// [5.1] Create the summarizer:
-				summarizerPrefixList.push_back( zi->summaryId().empty() ? std::string() : (zi->summaryId() + ":"));
 				summarizers.push_back(
 					zi->function()->createFunctionContext( m_storage, m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
@@ -787,17 +785,15 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			if (m_debugtrace) m_debugtrace->event( "result", "docno=%d weight=%f", ri->docno(), ri->weight());
 			std::vector<SummaryElement> summaries;
 
-			std::vector<std::string>::const_iterator
-				prefix_si = summarizerPrefixList.begin();
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
-			for (;si != se; ++si,++prefix_si)
+			for (int sidx=0 ;si != se; ++si,++sidx)
 			{
 				std::vector<SummaryElement> summary = (*si)->getSummary( *ri);
 				std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
 				for (; li != le; ++li)
 				{
-					li->setSummarizerPrefix( *prefix_si);
+					li->setSummarizerPrefix( m_queryEval->summarizers()[ sidx].summaryId(), ':');
 				}
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
