@@ -252,7 +252,8 @@ struct Query
 					{
 						std::vector<int>::const_iterator fn = fi;
 						for (; fn != fe && *fn >= 0; ++fn){}
-						int nn = fn - fi;
+						std::size_t nn = fn - fi;
+						if (nn > (*ti)->featar.size()) nn = (*ti)->featar.size();
 						if (subMatch( fi, fn, (*ti)->featar.begin(), (*ti)->featar.begin() + nn))
 						{
 							std::vector<int> fa_new = maskSubMatches( fa, fi, fi + nn);
@@ -305,9 +306,11 @@ struct Query
 		if (mc > (int)features.size()) return;
 		if (occupy( features, nodestk.begin(), nodestk.end()))
 		{
+			// ... features can be covered by nodes in the tree
+			// Find out how many features are used per node.
+			// This determines the weight without hierarchy factor:
 			std::vector<const TitleTreeNode*>::const_iterator ni = nodestk.begin(), ne = nodestk.end();
-			std::vector<int> fused;
-
+			std::vector<int> numberOfFeaturesUsedPerNode;
 			int fno = 0;
 			for (; ni != ne; ++ni)
 			{
@@ -318,38 +321,50 @@ struct Query
 					uu -= fno - (int)features.size();
 					if (uu <= 0) throw std::logic_error( "logic error (findAnswers)");
 				}
-				fused.push_back( uu);
+				numberOfFeaturesUsedPerNode.push_back( uu);
 			}
+			// Calculate the weight of the solution as sum of the node weights 
+			//	multiplied by the hierarchy factor:
 			strus::Index res_start = nodestk.back()->field.start();
 			strus::Index res_end = res_start + nodestk.back()->featar.size();
 			strus::IndexRange field( res_start, res_end);
 			double ww = 0.0;
 			double factor = 1.0;
-			std::vector<int>::const_iterator ui = fused.begin(), ue = fused.end();
+			std::vector<int>::const_iterator
+				ui = numberOfFeaturesUsedPerNode.begin(),
+				ue = numberOfFeaturesUsedPerNode.end();
 			for (; ui != ue; ++ui)
 			{
 				ww += factor * ((double)*ui / (double)features.size());
 				factor *= hierarchyWeightFactor;
 			}
+			// Add final result:
 			res.push_back( strus::WeightedField( field, ww));
 		}
 		if (!nodestk.empty())
 		{
-			std::vector<const TitleTreeNode*> new_nodestk_copy( nodestk);
-			std::vector<const TitleTreeNode*> new_nodestk_null( nodestk);
-			new_nodestk_null.back() = NULL;
-
+			// Create follow candidates for a solution:
+			std::vector<const TitleTreeNode*> new_nodestk( nodestk);
 			std::list<TitleTreeNode>::const_iterator
 				ci = nodestk.back()->chld.begin(), ce = nodestk.back()->chld.end();
 			for (; ci != ce; ++ci)
 			{
-				new_nodestk_copy.push_back( &*ci);
-				findAnswers( hierarchyWeightFactor, res, new_nodestk_copy);
-				new_nodestk_copy.pop_back();
-
-				new_nodestk_null.push_back( &*ci);
-				findAnswers( hierarchyWeightFactor, res, new_nodestk_null);
-				new_nodestk_null.pop_back();
+				new_nodestk.push_back( &*ci);
+				findAnswers( hierarchyWeightFactor, res, new_nodestk);
+				new_nodestk.pop_back();
+			}
+			if (new_nodestk.size() > 1)
+			{
+				// Include candidate with a dismissed node that is not the root node
+				//	(condition new_nodestk.size() > 1):
+				new_nodestk.back() = NULL;
+				ci = nodestk.back()->chld.begin();
+				for (; ci != ce; ++ci)
+				{
+					new_nodestk.push_back( &*ci);
+					findAnswers( hierarchyWeightFactor, res, new_nodestk);
+					new_nodestk.pop_back();
+				}
 			}
 		}
 	}
@@ -375,6 +390,18 @@ struct Query
 		return rt;
 	}
 };
+
+static void printStructureList( std::ostream& out, std::vector<strus::test::StructureDef>& structurelist)
+{
+	std::vector<strus::test::StructureDef>::const_iterator
+		si = structurelist.begin(), se = structurelist.end();
+	for (; si != se; ++si)
+	{
+		out << strus::string_format("%s [%d,%d] => [%d,%d]",
+				si->name().c_str(), (int)si->header().start(), (int)si->header().end(),
+				(int)si->content().start(), (int)si->content().end()) << std::endl;
+	}
+}
 
 static void fillStructureList( std::vector<strus::test::StructureDef>& structurelist, const TitleTreeNode& node)
 {
@@ -497,7 +524,6 @@ struct Document
 	std::string tostring() const
 	{
 		std::string rt;
-		rt.append( strus::string_format("document %s:\n", docid.c_str()));
 		std::vector<TitleTreeNode>::const_iterator
 			ti = titletreelist.begin(), te = titletreelist.end();
 		for (; ti != te; ++ti)
@@ -653,13 +679,13 @@ struct Collection
 		}
 		if (maxNofRanks <= 0 || maxNofRanks > (int)rt.size())
 		{
-			std::sort( rt.begin(), rt.end());
+			std::sort( rt.begin(), rt.end(), std::greater<strus::WeightedDocument>());
 		}
 		else
 		{
-			std::nth_element( rt.begin(), rt.begin()+maxNofRanks, rt.end());
+			std::nth_element( rt.begin(), rt.begin()+maxNofRanks, rt.end(), std::greater<strus::WeightedDocument>());
 			rt.resize( maxNofRanks);
-			std::sort( rt.begin(), rt.end());
+			std::sort( rt.begin(), rt.end(), std::greater<strus::WeightedDocument>());
 		}
 		return rt;
 	}
@@ -675,6 +701,15 @@ struct Collection
 			if (!docno) throw std::runtime_error( strus::string_format("logic error: document undefined %s", docid.c_str()));
 			rt[ docno] = docid;
 		}
+		return rt;
+	}
+
+	std::map<strus::Index,std::string> docnoDocidMap( const strus::StorageClientInterface* storage, const std::string& selectDocid) const
+	{
+		std::map<strus::Index,std::string> rt;
+		strus::Index docno = storage->documentNumber( selectDocid);
+		if (!docno) throw std::runtime_error( strus::string_format("logic error: document undefined %s", selectDocid.c_str()));
+		rt[ docno] = selectDocid;
 		return rt;
 	}
 };
@@ -761,10 +796,10 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 	}
 }
 
-static void checkResult( const std::map<strus::Index,std::string>& docnoDocidMap, const Query& qry, const std::vector<strus::ResultDocument>& result, const std::vector<strus::WeightedDocument>& expected, int ranksChecked)
+static void checkResult( const std::map<strus::Index,std::string>& docnoDocidMap, int qryidx, const Query& qry, const std::vector<strus::ResultDocument>& result, const std::vector<strus::WeightedDocument>& expected, int ranksChecked)
 {
 	std::string qrystr = qry.tostring();
-	std::string testdescr = strus::string_format( "test query='%s'", qrystr.c_str());
+	std::string testdescr = strus::string_format( "test query %d = '%s'", qryidx, qrystr.c_str());
 	testResultAgainstExpected( docnoDocidMap, testdescr, result, expected, ranksChecked);
 }
 
@@ -828,9 +863,11 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
+	std::map<strus::Index,std::string> docnoDocidMap;
 	if (selectDocid.empty())
 	{
 		collection.insert( storage.sci.get(), commitSize);
+		docnoDocidMap = collection.docnoDocidMap( storage.sci.get());
 	}
 	else
 	{
@@ -838,11 +875,15 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 		if (g_verbosity >= 1)
 		{
 			std::string docstr = data.tostring();
-			std::cerr << strus::string_format( "selecting document %s:\n%s", selectDocid.c_str(), docstr.c_str()) << std::endl;
+			std::cerr << strus::string_format( "document %s:\n", selectDocid.c_str());
+			std::cerr << docstr << std::endl;
+			std::cerr << "structures:\n";
+			printStructureList( std::cerr, data.structurelist);
+			std::cerr << std::endl;
 		}
 		collection.insert( storage.sci.get(), selectDocid);
+		docnoDocidMap = collection.docnoDocidMap( storage.sci.get(), selectDocid);
 	}
-	std::map<strus::Index,std::string> docnoDocidMap = collection.docnoDocidMap( storage.sci.get());
 
 	std::vector<Query> queries = collection.randomQueries( nofQueryies);
 	int ranksChecked = maxNofRanks / 5;
@@ -885,7 +926,7 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 				printExpected( std::cerr, docnoDocidMap, expected);
 			}
 		}
-		checkResult( docnoDocidMap, qry, result, expected, ranksChecked);
+		checkResult( docnoDocidMap, selectQuery, qry, result, expected, ranksChecked);
 	}
 	else
 	{
@@ -923,7 +964,7 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 					printExpected( std::cerr, docnoDocidMap, expected);
 				}
 			}
-			checkResult( docnoDocidMap, *qi, result, expected, ranksChecked);
+			checkResult( docnoDocidMap, qidx, *qi, result, expected, ranksChecked);
 		}
 	}
 }

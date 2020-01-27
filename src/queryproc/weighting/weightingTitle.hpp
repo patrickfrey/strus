@@ -64,29 +64,16 @@ public:
 		MaxTitleSize=64		///< maximum title size considered as worth for weighting
 	};
 	
-public:
-	struct Posting
-	{
-		PostingIteratorInterface* iterator;
-
-		Posting()
-			:iterator(0){}
-		Posting( PostingIteratorInterface* iterator_)
-			:iterator(iterator_){}
-		Posting( const Posting& o)
-			:iterator(o.iterator){}
-	};
-
 private:
-	const StorageClientInterface* m_storage;		///< storage client interface
-	strus::Reference<StructIteratorInterface> m_structitr;	///< structure iterator to recognize titles
-	Posting m_postingar[ MaxNofArguments];			///< array of weighted feature postings
+	const StorageClientInterface* m_storage;			///< storage client interface
+	strus::Reference<StructIteratorInterface> m_structitr;		///< structure iterator to recognize titles
+	PostingIteratorInterface* m_postingar[ MaxNofArguments];	///< array of weighted feature postings
 	int m_postingarsize;
-	double m_hierarchyWeightFactor;				///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
-	double m_levelWeight[ strus::Constants::MaxStructLevels];///< weight for each structure level
-	int m_maxNofResults;					///< maximum number of results
-	std::vector<WeightedField> m_lastResult;		///< buffer for the last result calculated
-	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
+	double m_hierarchyWeightFactor;					///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
+	double m_hierarchyWeight[ strus::Constants::MaxStructLevels];	///< weight for each structure level
+	int m_maxNofResults;						///< maximum number of results
+	std::vector<WeightedField> m_lastResult;			///< buffer for the last result calculated
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceTitle

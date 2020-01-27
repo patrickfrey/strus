@@ -39,10 +39,10 @@ WeightingFunctionContextTitle::WeightingFunctionContextTitle(
 	,m_maxNofResults(maxNofResults_)
 	,m_lastResult(),m_errorhnd(errorhnd_)
 {
-	m_levelWeight[ 0] = 1.0;
+	m_hierarchyWeight[ 0] = 1.0;
 	for (int li=1; li < strus::Constants::MaxStructLevels; ++li)
 	{
-		m_levelWeight[ li] = m_levelWeight[ li-1] * m_hierarchyWeightFactor;
+		m_hierarchyWeight[ li] = m_hierarchyWeight[ li-1] * m_hierarchyWeightFactor;
 	}
 	if (!m_structitr.get()) throw std::runtime_error(_TXT("failed to create structure iterator"));
 }
@@ -62,7 +62,7 @@ void WeightingFunctionContextTitle::addWeightingFeature(
 				m_errorhnd->info( _TXT("warning: weight ignored for 'title' weighting method"));
 			}
 			if (m_postingarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features (%d) out of range"), m_postingarsize);
-			m_postingar[ m_postingarsize++] = Posting( itr);
+			m_postingar[ m_postingarsize++] = itr;
 		}
 		else
 		{
@@ -109,24 +109,28 @@ struct StructureHeaderReference
 	:public StructureReference
 {
 	QueryPostingRange queryPostingRange;
+	int hierarchy;
 
-	StructureHeaderReference( const StructureReference& stu, const QueryPostingRange& queryPostingRange_)
-		:StructureReference(stu),queryPostingRange(queryPostingRange_)
+	StructureHeaderReference( const StructureReference& stu, const QueryPostingRange& queryPostingRange_, int hierarchy_)
+		:StructureReference(stu),queryPostingRange(queryPostingRange_),hierarchy(hierarchy_)
 	{}
 	StructureHeaderReference( const StructureHeaderReference& o)
-		:StructureReference(o),queryPostingRange(o.queryPostingRange)
+		:StructureReference(o),queryPostingRange(o.queryPostingRange),hierarchy(o.hierarchy)
 	{}
 	bool operator < (const StructureHeaderReference& o) const
 	{
-		return (level == o.level) 
-			? structindex == o.structindex
-				? field == o.field
-					? queryPostingRange.second == o.queryPostingRange.second
-						? queryPostingRange.first < o.queryPostingRange.first
-						: queryPostingRange.second < o.queryPostingRange.second
-					: field < o.field
-				: structindex < o.structindex
-			: level < o.level;
+		return
+			hierarchy == o.hierarchy
+				? (level == o.level) 
+					? structindex == o.structindex
+						? field == o.field
+							? queryPostingRange.second == o.queryPostingRange.second
+								? queryPostingRange.first < o.queryPostingRange.first
+								: queryPostingRange.second < o.queryPostingRange.second
+							: field < o.field
+						: structindex < o.structindex
+					: level < o.level
+				: hierarchy < o.hierarchy;
 	}
 	bool completeMatch() const
 	{
@@ -143,7 +147,7 @@ int WeightingFunctionContextTitle::tryQuerySequenceMatchToField( int postingIdx,
 	for (; fi != fe && pi != pe; ++fi,++pi)
 	{
 		strus::Index expectpos = field.start()+fi;
-		if (m_postingar[ pi].iterator->skipPos( expectpos) == expectpos)
+		if (m_postingar[ pi]->skipPos( expectpos) == expectpos)
 		{
 			++rt;
 		}
@@ -159,13 +163,13 @@ struct StructureCoverSearch
 {
 	strus::bitset<WeightingFunctionContextTitle::MaxNofArguments> postingsUsed;
 	strus::IndexRange field;
-	int level;
+	int hierarchy;
 	double weight;
 
 	StructureCoverSearch()
-		:postingsUsed(),field(),level(0),weight(0.0){}
-	StructureCoverSearch( const strus::IndexRange& field_, int level_, double weight_, const QueryPostingRange& postingsUsed_)
-		:postingsUsed(),field(field_),level(level_),weight(weight_)
+		:postingsUsed(),field(),hierarchy(0),weight(0.0){}
+	StructureCoverSearch( const strus::IndexRange& field_, int hierarchy_, double weight_, const QueryPostingRange& postingsUsed_)
+		:postingsUsed(),field(field_),hierarchy(hierarchy_),weight(weight_)
 	{
 		int pi = postingsUsed_.first, pe = postingsUsed_.second;
 		for (; pi != pe; ++pi)
@@ -174,17 +178,17 @@ struct StructureCoverSearch
 		}
 	}
 	StructureCoverSearch( const StructureCoverSearch& o)
-		:postingsUsed(o.postingsUsed),field(o.field),level(o.level),weight(o.weight){}
+		:postingsUsed(o.postingsUsed),field(o.field),hierarchy(o.hierarchy),weight(o.weight){}
 
 	bool operator < (const StructureCoverSearch& o) const
 	{
-		return level == o.level
+		return hierarchy == o.hierarchy
 			? weight == o.weight
 				? field == o.field
 					? postingsUsed < o.postingsUsed
 					: field > o.field
 				: weight > o.weight
-			: level < o.level;
+			: hierarchy < o.hierarchy;
 	}
 	bool overlapsPostingsUsed( const QueryPostingRange& postingsUsed_)
 	{
@@ -220,11 +224,16 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 		int pi = 0, pe = m_postingarsize;
 		for (; pi != pe; ++pi)
 		{
+			if (m_postingar[ pi]->skipDoc( docno) != docno) return m_lastResult;
+		}
+		pi = 0;
+		for (; pi != pe; ++pi)
+		{
 			int li=0, le = m_structitr->levels();
 			for (; li != le; ++li)
 			{
-				strus::Index posno = m_postingar[ pi].iterator->skipPos( 0);
-				for (; posno; posno = m_postingar[ pi].iterator->skipPos( posno))
+				strus::Index posno = m_postingar[ pi]->skipPos( 0);
+				for (; posno; posno = m_postingar[ pi]->skipPos( posno))
 				{
 					strus::IndexRange field = m_structitr->skipPos( li, posno);
 					if (!field.defined()) break;
@@ -244,8 +253,11 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 									int matchlen = tryQuerySequenceMatchToField( pi, field);
 									if (matchlen > 0)
 									{
-										QueryPostingRange prange( pi, pi+matchlen);
-										headerar.push_back( StructureHeaderReference( stu, prange));
+										for (int submatchlen=1; submatchlen<=matchlen; ++submatchlen)
+										{
+											QueryPostingRange prange( pi, pi+submatchlen);
+											headerar.push_back( StructureHeaderReference( stu, prange, 0));
+										}
 									}
 								}
 							}
@@ -254,15 +266,57 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 								contentar.push_back( stu);
 							}
 						}
+						posno = field.end();
 					}
-					posno = field.end();
+					else
+					{
+						posno = field.start();
+					}
 				}
 			}
-			// [1.2] Sort Headers by level:
+		}
+		{
+			// [1.2] Sort content array and eliminate duplicates:
+			std::sort( contentar.begin(), contentar.end());
+
+			std::vector<StructureContentReference>::iterator
+				ci = contentar.begin(), ce = contentar.end(), cp = contentar.begin();
+			while (ci != ce)
+			{
+				*cp = *ci;
+				for (++ci; ci != ce && ci->structindex == cp->structindex && ci->field.start() == cp->field.start(); ++ci){}
+				++cp;
+			}
+			contentar.resize( cp - contentar.begin());
+		}
+		{
+			// [1.3] Calculate the number of times a header element is covered by content
+			//	field of another structure than itself corresponding to the position
+			//	in the hierarchy:
+			std::vector<StructureContentReference>::iterator
+				ci = contentar.begin(), ce = contentar.end();
+			for (; ci != ce; ++ci)
+			{
+				std::vector<StructureHeaderReference>::iterator hi = headerar.begin(), he = headerar.end();
+				for (; hi != he; ++hi)
+				{
+					if (hi->structindex != ci->structindex && ci->field.cover( hi->field))
+					{
+						++hi->hierarchy;
+					}
+				}
+			}
+			// [NOTE 2020-1-27] Maybe the hierarchy info could be stored in the block.
+			//	If it is used elsewhere too, we could think about storing it.
+			//	If not the bits wasted per structure are not worth it.
+		}
+		{
+			// [1.4] Sort Headers by hierarchy:
 			std::sort( headerar.begin(), headerar.end());
 		}
 		{
-			// [1.3] Eliminate unused content elements and build map of structure index to content:
+			// [1.5] Eliminate unused content elements and build a map structure index to 
+			//	content element:
 			std::vector<StructureContentReference>::iterator
 				ci = contentar.begin(), ce = contentar.end();
 			for (; ci != ce && structIndexHeaderSet.find( ci->structindex) != structIndexHeaderSet.end(); ++ci)
@@ -280,32 +334,11 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 				}
 				contentar.resize( ci - contentar.begin());
 			}
-			std::sort( contentar.begin(), contentar.end());
-
 			ci = contentar.begin(), ce = contentar.end();
 			int cidx = 0;
 			for (; ci != ce; ++ci,++cidx)
 			{
 				structIndexContentMap.insert( std::pair<int,int>( ci->structindex, cidx));
-			}
-		}
-		{
-			// [1.4] Calculate the level of heading elements for weighting
-			std::vector<StructureHeaderReference>::iterator hi = headerar.begin(), he = headerar.end();
-			for (; hi != he; ++hi)
-			{
-				StructIndexContentMapRange crg = structIndexContentMap.equal_range( hi->structindex);
-				StructIndexContentMap::const_iterator ci = crg.first, ce = crg.second;
-				int minlevel = hi->level;
-				for (; ci != ce; ++ci)
-				{
-					const StructureContentReference& content = contentar[ ci->second];
-					if (content.field.cover( hi->field) && minlevel > content.level)
-					{
-						minlevel = content.level;
-					}
-				}
-				hi->level = minlevel;
 			}
 		}
 		// [2] Calculate the queue for searching complete title path solutions:
@@ -315,13 +348,13 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 				ei = headerar.begin(), ee = headerar.end();
 			for (; ei != ee; ++ei)
 			{
-				int comsumedPostings = ei->queryPostingRange.second - ei->queryPostingRange.first;
-				double weight = (double)(comsumedPostings) / (double)m_postingarsize;
+				int consumedPostings = ei->queryPostingRange.second - ei->queryPostingRange.first;
+				double weight = (double)(consumedPostings) / (double)m_postingarsize;
 
-				if (ei->level == 0)
+				if (ei->hierarchy == 0)
 				{
 					// ... initial field must be top level and not coverd by any other field
-					if (comsumedPostings == m_postingarsize)
+					if (consumedPostings == m_postingarsize)
 					{
 						// ... all query features used
 						if (strus::Math::abs( weight - 1.0) > std::numeric_limits<float>::epsilon()) throw std::runtime_error(_TXT("logic error in weight calculation"));
@@ -340,7 +373,7 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 						for (; ci != ce; ++ci)
 						{
 							const StructureContentReference& content = contentar[ ci->second];
-							queue.insert( StructureCoverSearch( content.field, ei->level, weight, ei->queryPostingRange));
+							queue.insert( StructureCoverSearch( content.field, ei->hierarchy, weight, ei->queryPostingRange));
 						}
 					}
 				}
@@ -355,14 +388,14 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 			std::vector<StructureHeaderReference>::iterator hi = headerar.begin(), he = headerar.end();
 			for (; hi != he; ++hi)
 			{
-				if (hi->level > search.level && search.field.cover( hi->field) && !search.overlapsPostingsUsed( hi->queryPostingRange))
+				if (hi->hierarchy > search.hierarchy && search.field.cover( hi->field) && !search.overlapsPostingsUsed( hi->queryPostingRange))
 				{
-					int comsumedPostings = hi->queryPostingRange.second - hi->queryPostingRange.first;
+					int consumedPostings = hi->queryPostingRange.second - hi->queryPostingRange.first;
 					double weight = search.weight
-							+ (((double)(comsumedPostings) / (double)m_postingarsize)
-								* m_levelWeight[ hi->level]);
+							+ (((double)(consumedPostings) / (double)m_postingarsize)
+								* m_hierarchyWeight[ hi->hierarchy]);
 
-					if (comsumedPostings + (int)search.postingsUsed.size() == m_postingarsize)
+					if (consumedPostings + (int)search.postingsUsed.size() == m_postingarsize)
 					{
 						// ... all query features used
 						m_lastResult.push_back( WeightedField( hi->field, weight));

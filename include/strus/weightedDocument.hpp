@@ -49,27 +49,25 @@ public:
 	/// \brief Comparison for sorting
 	bool operator < ( const WeightedDocument& o) const
 	{
-		double diff = m_weight - o.m_weight;
-		if (strus::Math::abs( diff) < std::numeric_limits<double>::epsilon())
+		if (strus::Math::isequal( m_weight, o.m_weight))
 		{
 			return m_docno < o.m_docno;
 		}
 		else
 		{
-			return (diff < 0.0);
+			return m_weight < o.m_weight;
 		}
 	}
 	/// \brief Comparison for sorting
 	bool operator > ( const WeightedDocument& o) const
 	{
-		double diff = m_weight - o.m_weight;
-		if (strus::Math::abs( diff) < std::numeric_limits<double>::epsilon())
+		if (strus::Math::isequal( m_weight, o.m_weight))
 		{
 			return m_docno > o.m_docno;
 		}
 		else
 		{
-			return (diff > 0.0);
+			return m_weight > o.m_weight;
 		}
 	}
 
