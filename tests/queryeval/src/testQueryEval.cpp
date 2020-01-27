@@ -209,7 +209,7 @@ private:
 			if (!summarizer.get()) throw std::runtime_error(g_errorhnd->fetchError());
 			summarizer->addStringParameter( "name", "docid");
 			qei->addSummarizerFunction(
-				"attribute", summarizer.release(),
+				"docid", summarizer.release(),
 				std::vector<strus::QueryEvalInterface::FeatureParameter>());
 		}{
 			strus::Reference<strus::SummarizerFunctionInstanceInterface>
@@ -218,7 +218,7 @@ private:
 			summarizer->addStringParameter( "name", "description");
 
 			qei->addSummarizerFunction(
-				"attribute", summarizer.release(),
+				"description", summarizer.release(),
 				std::vector<strus::QueryEvalInterface::FeatureParameter>());
 		}
 		const strus::WeightingFunctionInterface* weightfunci
@@ -391,7 +391,7 @@ std::string getResultDocumentDocid( const strus::ResultDocument& res)
 	std::vector<strus::SummaryElement>::const_iterator si = res.summaryElements().begin(), se = res.summaryElements().end();
 	for (; si != se; ++si)
 	{
-		if (si->name() == "attribute:docid") return si->value();
+		if (si->name() == "docid") return si->value();
 	}
 	return std::string();
 }

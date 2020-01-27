@@ -207,7 +207,7 @@ public:
 		strus::SummarizerFunctionInstanceInterface* summarizerInstance = summarizer->createInstance( qpi);
 		if (!summarizerInstance) throw std::runtime_error("failed to create summarizer instance");
 		summarizerInstance->addStringParameter( "name", "docid");
-		qeval->addSummarizerFunction( "attribute", summarizerInstance, std::vector<strus::QueryEvalInterface::FeatureParameter>());
+		qeval->addSummarizerFunction( "docid", summarizerInstance, std::vector<strus::QueryEvalInterface::FeatureParameter>());
 
 		qeval->addSelectionFeature( "sel");
 		qeval->addRestrictionFeature( "res");
@@ -255,7 +255,7 @@ static std::string getQueryResultMembersString( const strus::QueryResult& result
 		std::vector<strus::SummaryElement>::const_iterator si = ri->summaryElements().begin(), se = ri->summaryElements().end();
 		for (int sidx=0; si != se; ++si,++sidx)
 		{
-			if (si->name() == "attribute:docid")
+			if (si->name() == "docid")
 			{
 				resbuf.push_back( std::string( si->value().c_str()+3));
 			}
