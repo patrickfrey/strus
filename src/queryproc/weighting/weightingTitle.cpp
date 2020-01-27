@@ -404,7 +404,7 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 					else if (hi->completeMatch())
 					{
 						// ... not all query features used but complete match of the title
-						StructureCoverSearch newsearch( strus::IndexRange(), hi->level, weight, hi->queryPostingRange);
+						StructureCoverSearch newsearch( strus::IndexRange(), hi->hierarchy, weight, hi->queryPostingRange);
 						newsearch.postingsUsed.join( search.postingsUsed);
 
 						StructIndexContentMapRange crg = structIndexContentMap.equal_range( hi->structindex);
