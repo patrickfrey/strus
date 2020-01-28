@@ -763,6 +763,8 @@ StructBlock StructBlockBuilder::createBlock()
 		int structidx = 1;
 		for (; hi != he; ++hi,++structidx)
 		{
+			if (*hi == 0) continue;/*structure was deleted*/
+
 			int li=0, le=rt.fieldarsize();
 			for (; li != le; ++li)
 			{
