@@ -30,6 +30,7 @@ struct StaticAsserts
 		STRUS_STATIC_ASSERT( sizeof(StructBlock::StructureField) == 4);
 		STRUS_STATIC_ASSERT( sizeof(StructBlockLink) == 3);
 		STRUS_STATIC_ASSERT( sizeof(StructBlock::LinkBasePointer) == 3);
+		STRUS_STATIC_ASSERT( sizeof(StructBlock::PositionType) == 2);
 	}
 };
 }//anonymous namespace
@@ -63,7 +64,9 @@ void StructBlock::BlockData::init(
 		const StructBlockFieldRepeat* repeatar_,
 		const PositionType* startar_,
 		const StructBlockFieldPackedByte* pkbytear_,
-		const StructBlockFieldPackedShort* pkshortar_)
+		const StructBlockFieldPackedShort* pkshortar_,
+		const PositionType* headerar_,
+		int headerarsize_)
 {
 	if (fieldarsize_ > NofFieldLevels)
 	{
@@ -80,6 +83,7 @@ void StructBlock::BlockData::init(
 	m_startar = startar_;
 	m_pkbytear = pkbytear_;
 	m_pkshortar = pkshortar_;
+	m_headerar.init( headerar_, headerarsize_);
 }
 
 StructBlock::StructBlock(
@@ -91,7 +95,8 @@ StructBlock::StructBlock(
 	const std::vector<StructBlockFieldRepeat>& repeatar_,
 	const std::vector<PositionType>& startar_,
 	const std::vector<StructBlockFieldPackedByte>& pkbytear_,
-	const std::vector<StructBlockFieldPackedShort>& pkshortar_)
+	const std::vector<StructBlockFieldPackedShort>& pkshortar_,
+	const std::vector<PositionType>& headerar_)
 {
 	BlockHeader hdr;
 	std::memset( &hdr, 0, sizeof( hdr));
@@ -152,6 +157,8 @@ StructBlock::StructBlock(
 	pi += pkshortar_.size() * sizeof( StructBlockFieldPackedShort);
 	hdr.startidx = pi;
 	pi += startar_.size() * sizeof( PositionType);
+	hdr.headeridx = pi;
+	pi += headerar_.size() * sizeof(PositionType);
 	int blockSize = pi;
 
 	DataBlock blk( docno_, blockSize);
@@ -197,7 +204,8 @@ StructBlock::StructBlock(
 	std::memcpy( dt + hdr.repeatidx, repeatar_.data(), hdr.pkbyteidx - hdr.repeatidx);
 	std::memcpy( dt + hdr.pkbyteidx, pkbytear_.data(), hdr.pkshortidx - hdr.pkbyteidx);
 	std::memcpy( dt + hdr.pkshortidx, pkshortar_.data(), hdr.startidx - hdr.pkshortidx);
-	std::memcpy( dt + hdr.startidx, startar_.data(), blockSize - hdr.startidx);
+	std::memcpy( dt + hdr.startidx, startar_.data(), hdr.headeridx - hdr.startidx);
+	std::memcpy( dt + hdr.headeridx, headerar_.data(), blockSize - hdr.headeridx);
 
 	this->swap( blk);
 }
@@ -266,13 +274,15 @@ void StructBlock::initFrame()
 		const StructBlockFieldRepeat* repeatar_ = getStructPtr<StructBlockFieldRepeat>( "repeating field definitions", ptr(), hdr->repeatidx, hdr->pkbyteidx);
 		const StructBlockFieldPackedByte* pkbytear_ = getStructPtr<StructBlockFieldPackedByte>( "packed (byte) field definitions", ptr(), hdr->pkbyteidx, hdr->pkshortidx);
 		const StructBlockFieldPackedShort* pkshortar_ = getStructPtr<StructBlockFieldPackedShort>( "packed (short) field definitions", ptr(), hdr->pkshortidx, hdr->startidx);
-		const PositionType* startar_ = getStructPtr<PositionType>( "big field start definitions", ptr(), hdr->startidx, blockSize);
+		const PositionType* startar_ = getStructPtr<PositionType>( "big field start definitions", ptr(), hdr->startidx, hdr->headeridx);
+		const PositionType* headerar_ = getStructPtr<PositionType>( "map structure index to header field start", ptr(), hdr->headeridx, blockSize);
+		int headerarsize_ = getStructSize<PositionType>( "map structure index to header field start", hdr->headeridx, blockSize);
 
-		m_data.init( fieldar_, fieldarsize_, linkbasear_, linkar_, enumar_, repeatar_, startar_, pkbytear_, pkshortar_);
+		m_data.init( fieldar_, fieldarsize_, linkbasear_, linkar_, enumar_, repeatar_, startar_, pkbytear_, pkshortar_, headerar_, headerarsize_);
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("data corruption in structure block: %s"), _TXT("header size does not match"));
+		throw strus::runtime_error( _TXT("data corruption in structure block: %s"), _TXT("block header size does not match"));
 	}
 }
 

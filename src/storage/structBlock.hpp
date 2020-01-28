@@ -65,73 +65,7 @@ public:
 		strus::Index startidx;
 		strus::Index pkbyteidx;
 		strus::Index pkshortidx;
-		strus::Index _;
-	};
-	struct StructureField;
-	struct LinkBasePointer;
-
-	typedef StaticIntrusiveArray<StructureField> StructureFieldArray;
-	typedef StaticIntrusiveArray<LinkBasePointer> LinkBasePointerArray;
-	typedef StaticIntrusiveArray<StructBlockLink> LinkArray;
-
-	class BlockData
-	{
-	public:
-		BlockData()
-		{
-			init(0,0,0,0,0,0,0,0,0);
-		}
-
-		BlockData(
-				const StructureFieldArray* fieldar_,
-				int fieldarsize_,
-				const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
-				const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
-				const StructBlockFieldEnum* enumar_,
-				const StructBlockFieldRepeat* repeatar_,
-				const PositionType* startar_,
-				const StructBlockFieldPackedByte* pkbytear_,
-				const StructBlockFieldPackedShort* pkshortar_)
-		{
-			init( fieldar_,fieldarsize_,linkbasear_,linkar_,enumar_,repeatar_,startar_,pkbytear_,pkshortar_);
-		}
-
-		void init()
-		{
-			init(0,0,0,0,0,0,0,0,0);
-		}
-
-		void init(
-			const StructureFieldArray* fieldar_,
-			int fieldarsize_,
-			const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
-			const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
-			const StructBlockFieldEnum* enumar_,
-			const StructBlockFieldRepeat* repeatar_,
-			const PositionType* startar_,
-			const StructBlockFieldPackedByte* pkbytear_,
-			const StructBlockFieldPackedShort* pkshortar_);
-
-		const StructureFieldArray& fieldar( int idx) const		{return m_fieldar[ idx];}
-		int fieldarsize() const						{return m_fieldarsize;}
-		const LinkBasePointerArray& linkbasear( int idx) const		{return m_linkbasear[ idx];}
-		const LinkArray& linkar( int idx) const				{return m_linkar[ idx];}
-		const StructBlockFieldEnum* enumar() const			{return m_enumar;}
-		const StructBlockFieldRepeat* repeatar() const			{return m_repeatar;}
-		const PositionType* startar() const				{return m_startar;}
-		const StructBlockFieldPackedByte* pkbytear() const		{return m_pkbytear;}
-		const StructBlockFieldPackedShort* pkshortar() const		{return m_pkshortar;}
-
-	private:
-		StructureFieldArray m_fieldar[ NofFieldLevels];
-		int m_fieldarsize;
-		LinkBasePointerArray m_linkbasear[ NofFieldLevels];
-		LinkArray m_linkar[ MaxLinkWidth+1];
-		const StructBlockFieldEnum* m_enumar;
-		const StructBlockFieldRepeat* m_repeatar;
-		const PositionType* m_startar;
-		const StructBlockFieldPackedByte* m_pkbytear;
-		const StructBlockFieldPackedShort* m_pkshortar;
+		strus::Index headeridx;
 	};
 
 	PACKED_STRUCT( LinkBasePointer )
@@ -141,8 +75,8 @@ public:
 		LinkBasePointer( const LinkBasePointer& o)
 			:index(o.index),width(o.width){}
 
-		unsigned int index :22;		//...index of the first link
-		unsigned int width :2;		//...number links per element (>=1), max bound to MaxLinkWidth=3)
+		unsigned int index :22;		///< index of the first link
+		unsigned int width :2;		///< number links per element (>=1), max bound to MaxLinkWidth=3)
 
 		bool operator == (const LinkBasePointer& o) const
 		{
@@ -184,6 +118,82 @@ public:
 				return (strus::Index)(unsigned int)aa.m_end <= bb;
 			}
 		};
+	};
+
+	typedef StaticIntrusiveArray<StructureField> StructureFieldArray;
+	typedef StaticIntrusiveArray<LinkBasePointer> LinkBasePointerArray;
+	typedef StaticIntrusiveArray<StructBlockLink> LinkArray;
+	typedef StaticIntrusiveArray<PositionType> HeaderStartArray;
+
+	class BlockData
+	{
+	public:
+		BlockData()
+		{
+			init();
+		}
+
+		BlockData(
+				const StructureFieldArray* fieldar_,
+				int fieldarsize_,
+				const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
+				const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
+				const StructBlockFieldEnum* enumar_,
+				const StructBlockFieldRepeat* repeatar_,
+				const PositionType* startar_,
+				const StructBlockFieldPackedByte* pkbytear_,
+				const StructBlockFieldPackedShort* pkshortar_,
+				const PositionType* headerar_,
+				int headerarsize_)
+		{
+			init( fieldar_,fieldarsize_,linkbasear_,linkar_,enumar_,repeatar_,startar_,pkbytear_,pkshortar_,headerar_,headerarsize_);
+		}
+
+		void init()
+		{
+			init(0,0,0,0,0,0,0,0,0,0,0);
+		}
+
+		void init(
+			const StructureFieldArray* fieldar_,
+			int fieldarsize_,
+			const LinkBasePointerArray* linkbasear_,	//... array parallel to fieldar_
+			const LinkArray* linkar_,			//... fixed size array [MaxLinkWidth+1]
+			const StructBlockFieldEnum* enumar_,
+			const StructBlockFieldRepeat* repeatar_,
+			const PositionType* startar_,
+			const StructBlockFieldPackedByte* pkbytear_,
+			const StructBlockFieldPackedShort* pkshortar_,
+			const PositionType* headerar_,
+			int headerarsize_);
+
+		const StructureFieldArray& fieldar( int idx) const		{return m_fieldar[ idx];}
+		int fieldarsize() const						{return m_fieldarsize;}
+		const LinkBasePointerArray& linkbasear( int idx) const		{return m_linkbasear[ idx];}
+		const LinkArray& linkar( int idx) const				{return m_linkar[ idx];}
+		const StructBlockFieldEnum* enumar() const			{return m_enumar;}
+		const StructBlockFieldRepeat* repeatar() const			{return m_repeatar;}
+		const PositionType* startar() const				{return m_startar;}
+		const StructBlockFieldPackedByte* pkbytear() const		{return m_pkbytear;}
+		const StructBlockFieldPackedShort* pkshortar() const		{return m_pkshortar;}
+		const HeaderStartArray& headerar() const			{return m_headerar;}
+
+		strus::Index headerStart( int structidx) const
+		{
+			return (structidx > 0 && structidx <= (int)m_headerar.size) ? m_headerar[structidx-1]:0;
+		}
+
+	private:
+		StructureFieldArray m_fieldar[ NofFieldLevels];
+		int m_fieldarsize;
+		LinkBasePointerArray m_linkbasear[ NofFieldLevels];
+		LinkArray m_linkar[ MaxLinkWidth+1];
+		const StructBlockFieldEnum* m_enumar;
+		const StructBlockFieldRepeat* m_repeatar;
+		const PositionType* m_startar;
+		const StructBlockFieldPackedByte* m_pkbytear;
+		const StructBlockFieldPackedShort* m_pkshortar;
+		HeaderStartArray m_headerar;
 	};
 
 	class FieldScanner
@@ -252,7 +262,8 @@ public:
 		const std::vector<StructBlockFieldRepeat>& repeatar_,
 		const std::vector<PositionType>& startar_,
 		const std::vector<StructBlockFieldPackedByte>& pkbytear_,
-		const std::vector<StructBlockFieldPackedShort>& pkshortar_);
+		const std::vector<StructBlockFieldPackedShort>& pkshortar_,
+		const std::vector<PositionType>& headerar_);
 
 	StructBlock& operator=( const StructBlock& o)
 	{
@@ -277,6 +288,8 @@ public:
 	const PositionType* startar() const				{return m_data.startar();}
 	const StructBlockFieldPackedByte* pkbytear() const		{return m_data.pkbytear();}
 	const StructBlockFieldPackedShort* pkshortar() const		{return m_data.pkshortar();}
+	const HeaderStartArray& headerar() const			{return m_data.headerar();}
+	strus::Index headerStart( int structidx) const			{return m_data.headerStart(structidx);}
 
 	std::vector<StructBlockDeclaration> declarations() const;
 	std::vector<strus::IndexRange> fields() const;

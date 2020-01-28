@@ -211,6 +211,7 @@ private:
 
 private:
 	IndexRangeLinkMap m_map;
+	std::vector<StructBlock::PositionType> m_headerar;
 	std::string m_docid;
 	strus::Index m_docno;
 	int m_indexCount;

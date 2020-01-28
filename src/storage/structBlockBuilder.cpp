@@ -76,6 +76,11 @@ bool StructBlockBuilder::append( strus::Index structno, const strus::IndexRange&
 		}
 		rt |= m_map.append( src, StructBlockLink( structno, true/*head*/, structidx));
 		rt |= m_map.append( sink, StructBlockLink( structno, false/*head*/, structidx));
+		m_headerar.push_back( src.start());
+		if ((int)m_headerar.size() != m_indexCount)
+		{
+			throw strus::runtime_error(_TXT("data corruption, structure index not key index for header start"));
+		}
 	}
 	return rt;
 }
@@ -674,7 +679,7 @@ StructBlock StructBlockBuilder::createBlock()
 			li += dim.elements;
 		}
 	}
-	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar);
+	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar, m_headerar);
 #ifdef STRUS_LOWLEVEL_DEBUG
 	int fi = 0,fe = rt.fieldarsize();
 	for (; fi != fe; ++fi)
@@ -715,24 +720,57 @@ StructBlock StructBlockBuilder::createBlock()
 	const StructBlockFieldPackedShort* blk_pkshortar = rt.pkshortar();
 	if (0!=std::memcmp( blk_pkshortar, pkshortar.data(), pkshortar.size() * sizeof( blk_pkshortar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
 
+	const StructBlock::HeaderStartArray& blk_headerar = rt.headerar();
+	if (blk_headerar.size != m_headerar.size()
+	||  0!=std::memcmp( blk_headerar.ar, m_headerar.data(), m_headerar.size() * sizeof( blk_headerar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+
 	std::vector<StructBlockDeclaration> declist_build = this->declarations();
 	std::sort( declist_build.begin(), declist_build.end());
 
 	std::vector<StructBlockDeclaration> declist_block = rt.declarations();
 	std::sort( declist_block.begin(), declist_block.end());
 
-	std::vector<StructBlockDeclaration>::const_iterator ui = declist_build.begin(), ue = declist_build.end();
-	std::vector<StructBlockDeclaration>::const_iterator li = declist_block.begin(), le = declist_block.end();
-	for (int uidx=0; li != le && ui != ue; ++li,++ui,++uidx)
 	{
-		if (*ui != *li)
+		std::vector<StructBlockDeclaration>::const_iterator ui = declist_build.begin(), ue = declist_build.end();
+		std::vector<StructBlockDeclaration>::const_iterator li = declist_block.begin(), le = declist_block.end();
+		for (int uidx=0; li != le && ui != ue; ++li,++ui,++uidx)
+		{
+			if (*ui != *li)
+			{
+				throw std::runtime_error(_TXT("structures built differ from expected"));
+			}
+		}
+		if (li != le || ui != ue)
 		{
 			throw std::runtime_error(_TXT("structures built differ from expected"));
 		}
-	}
-	if (li != le || ui != ue)
-	{
-		throw std::runtime_error(_TXT("structures built differ from expected"));
+	}{
+		std::vector<StructBlock::PositionType>::const_iterator
+			hi = m_headerar.begin(), he = m_headerar.end();
+		int structidx = 1;
+		for (; hi != he; ++hi,++structidx)
+		{
+			int li=0, le=rt.fieldarsize();
+			for (; li != le; ++li)
+			{
+				StructBlock::FieldScanner scan = rt.fieldscanner( li);
+				strus::IndexRange field = scan.skip( *hi);
+				if (field.start() == (strus::Index)*hi)
+				{
+					const StructureLinkArray& lar = scan.links();
+					int xi = 0, xe = lar.nofLinks();
+					for (; xi != xe; ++xi)
+					{
+						if (lar[ xi].header() && lar[ xi].index() == structidx) break;
+					}
+					if (xi != xe) break;
+				}
+			}
+			if (li == le)
+			{
+				throw std::runtime_error(_TXT("corrupt structure block: header structure lost"));
+			}
+		}
 	}
 #endif
 	return rt;
