@@ -29,16 +29,19 @@ class StructBlockBuilder
 public:
 	explicit StructBlockBuilder( const std::string& docid_, strus::Index docno_, ErrorBufferInterface* errorhnd_)
 		:m_map()
+		,m_headerar()
 		,m_docid(docid_)
 		,m_docno(docno_)
 		,m_indexCount(0)
 		,m_errorhnd(errorhnd_){}
 	StructBlockBuilder( const StructBlockBuilder& o)
 		:m_map(o.m_map)
+		,m_headerar(o.m_headerar)
 		,m_docid(o.m_docid)
 		,m_docno(o.m_docno)
 		,m_indexCount(o.m_indexCount)
 		,m_errorhnd(o.m_errorhnd){}
+
 	StructBlockBuilder( const StructBlock& blk, const std::string& docid_, ErrorBufferInterface* errorhnd_);
 
 	StructBlockBuilder( const std::string& docid_, strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations, ErrorBufferInterface* errorhnd_);

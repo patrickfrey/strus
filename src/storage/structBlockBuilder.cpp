@@ -25,7 +25,7 @@
 using namespace strus;
 
 StructBlockBuilder::StructBlockBuilder( const std::string& docid_, strus::Index docno_, const std::vector<StructBlockDeclaration>& declarations_, ErrorBufferInterface* errorhnd_)
-	:m_map(),m_docid(docid_),m_docno(docno_),m_indexCount(0),m_errorhnd(errorhnd_)
+	:m_map(),m_headerar(),m_docid(docid_),m_docno(docno_),m_indexCount(0),m_errorhnd(errorhnd_)
 {
 	std::vector<StructBlockDeclaration>::const_iterator di = declarations_.begin(), de = declarations_.end();
 	for (; di != de; ++di)
@@ -35,8 +35,14 @@ StructBlockBuilder::StructBlockBuilder( const std::string& docid_, strus::Index 
 }
 
 StructBlockBuilder::StructBlockBuilder( const StructBlock& blk, const std::string& docid_, ErrorBufferInterface* errorhnd_)
-	:m_map(),m_docid(docid_),m_docno(blk.id()),m_indexCount(0),m_errorhnd(errorhnd_)
+	:m_map(),m_headerar(),m_docid(docid_),m_docno(blk.id()),m_indexCount(0),m_errorhnd(errorhnd_)
 {
+	m_headerar.reserve( blk.headerar().size);
+	int hi=0, he=blk.headerar().size;
+	for (; hi != he; ++hi)
+	{
+		m_headerar.push_back( blk.headerar()[ hi]);
+	}
 	std::vector<StructBlockDeclaration> declist = blk.declarations();
 	std::vector<StructBlockDeclaration>::const_iterator
 		di = declist.begin(), de = declist.end();
@@ -557,6 +563,7 @@ void StructBlockBuilder::eliminateStructuresBeyondCapacity()
 		for (; si != se; ++si)
 		{
 			m_map.removeStructure( si->structno, si->idx, deletes);
+			m_headerar[ si->idx-1] = 0;
 		}
 		m_errorhnd->info( _TXT("warning: had to ignore %d structure relations in document '%s' due to complexity (more than %d links for a field)"), (int)deletes.size(), m_docid.c_str(), (int)(StructBlock::MaxLinkWidth+1));
 	}
@@ -679,7 +686,13 @@ StructBlock StructBlockBuilder::createBlock()
 			li += dim.elements;
 		}
 	}
-	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar, m_headerar);
+	std::vector<StructBlock::PositionType> headerar( m_headerar);
+	{
+		std::size_t hi = headerar.size();
+		while (hi > 0 && headerar[ hi-1] == 0) --hi;
+		headerar.resize( hi);
+	}
+	StructBlock rt( docno(), fieldar, linkbasear, linkar, enumar, repeatar, startar, pkbytear, pkshortar, headerar);
 #ifdef STRUS_LOWLEVEL_DEBUG
 	int fi = 0,fe = rt.fieldarsize();
 	for (; fi != fe; ++fi)
@@ -721,8 +734,8 @@ StructBlock StructBlockBuilder::createBlock()
 	if (0!=std::memcmp( blk_pkshortar, pkshortar.data(), pkshortar.size() * sizeof( blk_pkshortar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
 
 	const StructBlock::HeaderStartArray& blk_headerar = rt.headerar();
-	if (blk_headerar.size != m_headerar.size()
-	||  0!=std::memcmp( blk_headerar.ar, m_headerar.data(), m_headerar.size() * sizeof( blk_headerar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
+	if (blk_headerar.size != headerar.size()
+	||  0!=std::memcmp( blk_headerar.ar, headerar.data(), headerar.size() * sizeof( blk_headerar[0]))) throw strus::runtime_error(_TXT("logic error: corrupt block data structure built (line %d)"), (int)__LINE__);
 
 	std::vector<StructBlockDeclaration> declist_build = this->declarations();
 	std::sort( declist_build.begin(), declist_build.end());
