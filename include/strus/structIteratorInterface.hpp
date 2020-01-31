@@ -17,7 +17,7 @@ namespace strus
 {
 
 /// \class StructIteratorInterface
-/// \brief Structure that represents relations of position info index ranges (directed graph) per document.
+/// \brief Structure that represents relations of position info ordinal position ranges (directed graph) per document.
 class StructIteratorInterface
 {
 public:
@@ -37,7 +37,7 @@ public:
 	/// \return the current document number or 0 if undefined
 	virtual Index docno() const=0;
 
-	/// \brief Return the first matching field (index range) on a defined level with a end position higher than firstpos in the current document or {0,0}. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	/// \brief Return the first matching field (ordinal position range) on a defined level with a end position higher than firstpos in the current document or {0,0}. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	/// \param[in] firstpos the minimum position to fetch
 	/// \remark The field is not guaranteed to cover 'firstpos', this has to be checked by the called with IndexRange::start >= firstpos of a returned valid field
 	/// \note use IndexRange::defined() to check if a matching field has been found and is valid
@@ -51,6 +51,11 @@ public:
 	/// \brief Return the links associated with the last field retrieved with 'skipPos( int, const Index&)' of the specified level without having called 'skipDoc( const Index&)' thereafter.
 	/// \return a list of links as structure
 	virtual StructureLinkArray links( int level) const=0;
+
+	/// \brief Return the header field of a defined structure
+	/// \param[in] structIndex index of the structure defined in a link retrieved with links
+	/// \return a valid field or {0,0} if not defined
+	virtual IndexRange headerField( int structIndex) const =0;
 };
 
 }//namespace

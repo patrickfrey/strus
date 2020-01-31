@@ -15,7 +15,7 @@
 #include "structBlockDeclaration.hpp"
 #include "docIndexNode.hpp"
 #include "staticIntrusiveArray.hpp"
-#include "skipScanArray.hpp"
+#include "private/skipScanArray.hpp"
 #include "strus/structIteratorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
@@ -110,6 +110,7 @@ public:
 		{
 			return !!m_end;
 		}
+		/// \brief Comparator functor to find fields that potentially contain the needle (end > needle)
 		struct SearchCompare
 		{
 			SearchCompare(){}
@@ -200,13 +201,13 @@ public:
 	{
 	public:
 		FieldScanner()
-			:m_data(0),m_ar(0,0),m_aridx(0),m_fieldLevel(0),m_cur(),m_linkar(){}
+			:m_data(0),m_ar(0,0),m_aridx(0),m_fieldLevel(0),m_cur(),m_curlnk(-1),m_curwidth(-1){}
 		FieldScanner( const BlockData* data_, const StructureFieldArray& fields, int fieldLevel_)
-			:m_data(data_),m_ar(fields.ar,fields.size),m_aridx(0),m_fieldLevel(fieldLevel_),m_cur(),m_linkar(){}
+			:m_data(data_),m_ar(fields.ar,fields.size),m_aridx(0),m_fieldLevel(fieldLevel_),m_cur(),m_curlnk(-1),m_curwidth(-1){}
 		FieldScanner( const FieldScanner& o)
-			:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_fieldLevel(o.m_fieldLevel),m_cur(o.m_cur),m_linkar(o.m_linkar){}
+			:m_data(o.m_data),m_ar(o.m_ar),m_aridx(o.m_aridx),m_fieldLevel(o.m_fieldLevel),m_cur(o.m_cur),m_curlnk(o.m_curlnk),m_curwidth(o.m_curwidth){}
 		FieldScanner& operator=( const FieldScanner& o)
-			{m_data=o.m_data; m_ar=o.m_ar; m_aridx=o.m_aridx; m_fieldLevel=o.m_fieldLevel; m_cur = o.m_cur; m_linkar = o.m_linkar; return *this;}
+			{m_data=o.m_data; m_ar=o.m_ar; m_aridx=o.m_aridx; m_fieldLevel=o.m_fieldLevel; m_cur = o.m_cur; m_curlnk = o.m_curlnk; m_curwidth = o.m_curwidth; return *this;}
 
 		bool initialized() const
 		{
@@ -217,8 +218,7 @@ public:
 			{return skip( m_cur.end());}
 		strus::IndexRange current() const
 			{return m_cur;}
-		const StructureLinkArray& links() const
-			{return m_linkar;}
+		StructureLinkArray getLinks() const;
 
 		strus::IndexRange skip( strus::Index pos);
 
@@ -226,7 +226,8 @@ public:
 		{
 			m_aridx = 0;
 			m_cur = strus::IndexRange();
-			m_linkar.reset();
+			m_curlnk = -1;
+			m_curwidth = -1;
 		}
 
 	private:
@@ -235,7 +236,8 @@ public:
 		int m_aridx;
 		int m_fieldLevel;
 		strus::IndexRange m_cur;
-		StructureLinkArray m_linkar;
+		int m_curlnk;
+		int m_curwidth;
 	};
 
 public:

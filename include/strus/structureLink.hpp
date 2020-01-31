@@ -79,6 +79,13 @@ public:
 	void reset()
 		{m_nofLinks=0;}
 
+	/// \brief Add one element
+	/// \param[in] lnk link to add
+	void add( const StructureLink& lnk)
+	{
+		m_links[ m_nofLinks++] = lnk;
+	}
+
 private:
 	StructureLink m_links[ MaxNofLinks];
 	int m_nofLinks;

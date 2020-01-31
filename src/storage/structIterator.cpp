@@ -108,11 +108,34 @@ StructureLinkArray StructIterator::links( int level) const
 	{
 		if (level >= 0 && level < m_levels)
 		{
-			rt = m_scanner[ level].links();
+			rt = m_scanner[ level].getLinks();
 		}
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current links: %s"), INTERFACE_NAME, *m_errorhnd, rt);
+}
+
+strus::IndexRange StructIterator::headerField( int structIndex) const
+{
+	strus::IndexRange rt;
+	try
+	{
+		strus::Index start = m_curblock.headerStart( structIndex);
+		if (!start) return rt;
+		int li = 0, le = m_levels;
+		for (; li != le; ++li)
+		{
+			StructBlock::FieldScanner scan( m_curblock.fieldscanner( li));
+			strus::IndexRange candidate = scan.skip( start);
+			if (candidate.start() == start)
+			{
+				rt = candidate;
+				break;
+			}
+		}
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get header field: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
 

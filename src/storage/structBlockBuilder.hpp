@@ -11,7 +11,6 @@
 #include "structBlock.hpp"
 #include "structBlockDeclaration.hpp"
 #include "structBlockLink.hpp"
-#include "skipScanArray.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include <cstring>

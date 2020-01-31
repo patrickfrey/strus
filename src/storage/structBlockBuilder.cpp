@@ -772,7 +772,7 @@ StructBlock StructBlockBuilder::createBlock()
 				strus::IndexRange field = scan.skip( *hi);
 				if (field.start() == (strus::Index)*hi)
 				{
-					const StructureLinkArray& lar = scan.links();
+					StructureLinkArray lar = scan.getLinks();
 					int xi = 0, xe = lar.nofLinks();
 					for (; xi != xe; ++xi)
 					{

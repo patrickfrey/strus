@@ -41,6 +41,8 @@ public:
 
 	virtual StructureLinkArray links( int level) const;
 
+	virtual IndexRange headerField( int structIndex) const;
+
 private:
 	const StorageClient* m_storage;					///< storage instance
 	const DatabaseClientInterface* m_database;			///< database handle to create cursor

@@ -339,12 +339,24 @@ strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 	}
 	m_cur = loc.first;
 	LinkBasePointer linkbase( m_data->linkbasear( m_fieldLevel)[ m_aridx]);
-	int li = ((int)linkbase.index + (int)loc.second) * (int)(linkbase.width+1);
-	StructureLink lar[ MaxLinkWidth+1];
-	int wi = 0, we = linkbase.width;
-	for (; wi <= we; ++wi,++li) lar[ wi] = m_data->linkar( linkbase.width)[ li].unpacked();
-	m_linkar.init( lar, linkbase.width+1);
+	m_curlnk = ((int)linkbase.index + (int)loc.second) * (int)(linkbase.width+1);
+	m_curwidth = linkbase.width;
 	return m_cur;
+}
+
+StructureLinkArray StructBlock::FieldScanner::getLinks() const
+{
+	StructureLinkArray rt;
+	if (m_curlnk >= 0)
+	{
+		if (m_curwidth > MaxLinkWidth) throw std::runtime_error(_TXT("corrupt data structure: width in field scanner"));
+		int li = m_curlnk, le = m_curlnk + m_curwidth+1;
+		for (; li < le; li++)
+		{
+			rt.add( m_data->linkar( m_curwidth)[ li].unpacked());
+		}
+	}
+	return rt;
 }
 
 std::vector<strus::IndexRange> StructBlock::fields() const
@@ -375,7 +387,7 @@ std::vector<StructBlockDeclaration> StructBlock::declarations() const
 		strus::IndexRange field = scanner.next();
 		for (; field.defined(); field = scanner.next())
 		{
-			const StructureLinkArray& links = scanner.links();
+			StructureLinkArray links = scanner.getLinks();
 			int li = 0, le = links.nofLinks();
 			for (; li != le; ++li)
 			{
