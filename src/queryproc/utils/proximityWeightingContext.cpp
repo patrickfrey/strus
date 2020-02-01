@@ -23,14 +23,13 @@ using namespace strus;
 #endif
 
 void ProximityWeightingContext::init(
-	PostingIteratorInterface** postings, int nofPostings, const Config& config,
-	PostingIteratorInterface* eos_postings, strus::Index docno, const strus::IndexRange& field)
+	PostingIteratorInterface** postings, int nofPostings, PostingIteratorInterface* eos_postings,
+	strus::Index docno, const strus::IndexRange& field)
 {
 	if (nofPostings == 0)
 	{
 		throw strus::runtime_error(_TXT("query is empty"));
 	}
-	m_config = config;
 	m_nofPostings = 0;
 	m_nofWeightedNeighbours = nofPostings-1;
 	m_docno = docno;
@@ -100,7 +99,7 @@ void ProximityWeightingContext::init(
 			++quesize;
 		}
 	}
-	int minClusterSize = (int)(config.minClusterSize * nofPostings + 0.5);
+	int minClusterSize = (int)(m_config.minClusterSize * nofPostings + 0.5);
 	int min_quesize = minClusterSize > 1 ? minClusterSize : 2;
 	while (quesize >= min_quesize)
 	{
@@ -330,7 +329,7 @@ void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, 
 	}
 }
 
-void ProximityWeightingContext::initStructures( StructIteratorInterface* structIterator)
+void ProximityWeightingContext::initStructures( StructIteratorInterface* structIterator, strus::Index structno)
 {
 	m_stmOperations.clear();
 	m_fieldStatistics.clear();
@@ -374,7 +373,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 							{
 								if (!fieldUsed)
 								{
-									if (!m_config.structno || m_config.structno == lnk.structno())
+									if (!structno || structno == lnk.structno())
 									{
 										fieldUsed = true;
 										m_stmOperations.push_back( StmOperation( field.start(), m_fieldStatistics.size()));
@@ -528,7 +527,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 	int sentidx = 0;
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
 
-	int nofPositions = m_config.nofSentencesSummary * m_config.maxNofSentenceWords;
+	int nofPositions = m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords;
 	if (nofPositions >= MaxSummaryFieldSize) nofPositions = MaxSummaryFieldSize-1;
 
 	int cur_idx = 0;
@@ -566,7 +565,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 			if (m_hasPunctuation)
 			{
 				int sidx = start_idx;
-				while (weightedPos[ sidx].sentidx + m_config.nofSentencesSummary
+				while (weightedPos[ sidx].sentidx + m_config.nofSummarySentences
 						< weightedPos[ cur_idx].sentidx)
 				{
 					++sidx;

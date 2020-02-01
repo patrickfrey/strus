@@ -15,6 +15,7 @@ set( source_files
 	postingIteratorSequenceImm.cpp
 	postingIteratorHelpers.cpp
 	postingIteratorContains.cpp
+	postingIteratorBetween.cpp
 	docnoMatchPrioQueue.cpp
 	docnoAllMatchItr.cpp
 )

@@ -32,13 +32,16 @@ WeightingFunctionContextTitle::WeightingFunctionContextTitle(
 		const StorageClientInterface* storage_,
 		double hierarchyWeightFactor_,
 		int maxNofResults_,
+		double maxdf_,
+		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_structitr(storage_->createStructIterator()),m_postingarsize(0)
 	,m_hierarchyWeightFactor(hierarchyWeightFactor_)
-	,m_maxNofResults(maxNofResults_)
+	,m_maxdf(maxdf_),m_maxNofResults(maxNofResults_),m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_lastResult(),m_errorhnd(errorhnd_)
 {
+	std::memset( &m_isStopWordAr, false, sizeof( m_isStopWordAr));
 	m_hierarchyWeight[ 0] = 1.0;
 	for (int li=1; li < strus::Constants::MaxStructLevels; ++li)
 	{
@@ -57,12 +60,16 @@ void WeightingFunctionContextTitle::addWeightingFeature(
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
+			double nofMatches = termstats.documentFrequency()>=0?termstats.documentFrequency():itr->documentFrequency();
 			if (!strus::Math::isequal( weight, 0.0) && !strus::Math::isequal( weight, 1.0))
 			{
 				m_errorhnd->info( _TXT("warning: weight ignored for 'title' weighting method"));
 			}
 			if (m_postingarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features (%d) out of range"), m_postingarsize);
-			m_postingar[ m_postingarsize++] = itr;
+			
+			m_postingar[ m_postingarsize] = itr;
+			m_isStopWordAr[ m_postingarsize] = (nofMatches > m_nofCollectionDocuments * m_maxdf);
+			++m_postingarsize;
 		}
 		else
 		{
@@ -397,9 +404,27 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 
 					if (consumedPostings + (int)search.postingsUsed.size() == m_postingarsize)
 					{
-						// ... all query features used
-						m_lastResult.push_back( WeightedField( hi->field, weight));
-						if (m_maxNofResults && m_maxNofResults == (int)m_lastResult.size()) break;
+						bool isValidPartialMatch = false;
+						if (hi->completeMatch())
+						{
+							// ... all query features used
+							isValidPartialMatch = true;
+						}
+						else
+						{
+							int qi = hi->queryPostingRange.first, qe = hi->queryPostingRange.second;
+							for (; qi != qe && m_isStopWordAr[ qi]; ++qi){}
+							if (qi != qe)
+							{
+								//... at least one non stopword used in a partial match
+								isValidPartialMatch = true;
+							}
+						}
+						if (isValidPartialMatch)
+						{
+							m_lastResult.push_back( WeightedField( hi->field, weight));
+							if (m_maxNofResults && m_maxNofResults == (int)m_lastResult.size()) break;
+						}
 					}
 					else if (hi->completeMatch())
 					{
@@ -504,6 +529,14 @@ void WeightingFunctionInstanceTitle::addNumericParameter( const std::string& nam
 				m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("positive number expected as argument"));
 			}
 		}
+		else if (strus::caseInsensitiveEquals( name_, "maxdf"))
+		{
+			m_maxdf = (double)value;
+			if (m_maxdf < 0.0 || m_maxdf > 1.0)
+			{
+				m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name_.c_str(), THIS_METHOD_NAME);
+			}
+		}
 		else
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown parameter '%s' for weighting scheme '%s'"), name_.c_str(), THIS_METHOD_NAME);
@@ -518,7 +551,8 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceTitle::createFunctio
 {
 	try
 	{
-		return new WeightingFunctionContextTitle( storage, m_hierarchyWeightFactor, m_maxNofResults, m_errorhnd);
+		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
+		return new WeightingFunctionContextTitle( storage, m_hierarchyWeightFactor, m_maxNofResults, m_maxdf, (double)nofdocs, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }

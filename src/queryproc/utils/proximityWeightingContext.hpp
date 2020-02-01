@@ -30,15 +30,14 @@ public:
 	};
 	struct Config
 	{
-		int distance_imm;
-		int distance_close;
-		int distance_near;
-		float minClusterSize;
-		int nofHotspots;
-		int nofSentencesSummary;
-		int maxNofSentenceWords;
-		double minFfWeight;
-		strus::Index structno;
+		int distance_imm;			///< ordinal position distance considered as immediate in the same sentence
+		int distance_close;			///< ordinal position distance considered as close in the same sentence
+		int distance_near;			///< ordinal position distance considered as near for features not in the same sentence
+		float minClusterSize;			///< part [0.0,1.0] of query features considered as relevant in a group
+		int nofHotspots;			///< only a part of the matches are used to calculate the structures weighted in a document. The number of hotspots defines the number of features with most neighbour features to be used to determine the document parts to weight.
+		int nofSummarySentences;		///< number of sentences in a summary
+		int maxNofSummarySentenceWords;		///< maximum number of words in a summary sentence
+		double minFfWeight;			///< minimum ff assigned [0.0,1.0] to any feature weighted, some features are lost if you use a minimum cluster size > 0.0
 
 		Config()
 			:distance_imm(2)
@@ -46,20 +45,18 @@ public:
 			,distance_near(40)
 			,minClusterSize(0.7)
 			,nofHotspots(10)
-			,nofSentencesSummary(2)
-			,maxNofSentenceWords(20)
-			,minFfWeight(0.1)
-			,structno(0){}
+			,nofSummarySentences(2)
+			,maxNofSummarySentenceWords(20)
+			,minFfWeight(0.1){}
 		Config( const Config& o)
 			:distance_imm(o.distance_imm)
 			,distance_close(o.distance_close)
 			,distance_near(o.distance_near)
 			,minClusterSize(o.minClusterSize)
 			,nofHotspots(o.nofHotspots)
-			,nofSentencesSummary(o.nofSentencesSummary)
-			,maxNofSentenceWords(o.maxNofSentenceWords)
-			,minFfWeight(o.minFfWeight)
-			,structno(o.structno){}
+			,nofSummarySentences(o.nofSummarySentences)
+			,maxNofSummarySentenceWords(o.maxNofSummarySentenceWords)
+			,minFfWeight(o.minFfWeight){}
 
 		void setDistanceImm( int distance_imm_)
 		{
@@ -86,25 +83,20 @@ public:
 			if (nofHotspots_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
 			nofHotspots = nofHotspots_;
 		}
-		void setNofSentencesSummary( float nofSentencesSummary_)
+		void setNofSummarySentences( float nofSummarySentences_)
 		{
-			if (nofSentencesSummary_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			nofSentencesSummary = nofSentencesSummary_;
+			if (nofSummarySentences_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
+			nofSummarySentences = nofSummarySentences_;
 		}
-		void setMaxNofSentenceWords( float maxNofSentenceWords_)
+		void setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_)
 		{
-			if (maxNofSentenceWords_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			maxNofSentenceWords = maxNofSentenceWords_;
+			if (maxNofSummarySentenceWords_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
+			maxNofSummarySentenceWords = maxNofSummarySentenceWords_;
 		}
 		void setMinFfWeight( double minFfWeight_)
 		{
 			if (minFfWeight_ < 0.0 || minFfWeight_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
 			minFfWeight = minFfWeight_;
-		}
-		void setContentStructure( strus::Index structno_)
-		{
-			if (structno_ < 0) throw std::runtime_error(_TXT("expected valid structure identifier"));
-			structno = structno_;
 		}
 	};
 
@@ -141,7 +133,7 @@ public:
 			,titleScopeMatches(o.titleScopeMatches)
 			,featidx(o.featidx){}
 
-		int inline touchCount() const
+		inline int touchCount() const
 		{
 			return closeMatches + immediateMatches + sentenceMatches + nearMatches;
 		}
@@ -170,8 +162,8 @@ public:
 	{
 		m_nodeScanner.init( m_nodear.data(), m_nodear.size());
 	}
-	ProximityWeightingContext()
-		:m_config()
+	ProximityWeightingContext( const Config& config_)
+		:m_config(config_)
 		,m_nofPostings(0),m_nofWeightedNeighbours(0)
 		,m_hasPunctuation(false),m_docno(0),m_field()
 		,m_nodear()
@@ -181,11 +173,16 @@ public:
 		,m_nodeScanner()
 	{}
 
-	void init(
-		PostingIteratorInterface** postings, int nofPostings, const Config& config,
-		PostingIteratorInterface* eos_postings, strus::Index docno, const strus::IndexRange& field);
+	const Config& config() const
+	{
+		return m_config;
+	}
 
-	void initStructures( StructIteratorInterface* structIterator);
+	void init(
+		PostingIteratorInterface** postings, int nofPostings, PostingIteratorInterface* eos_postings, 
+		strus::Index docno, const strus::IndexRange& field);
+
+	void initStructures( StructIteratorInterface* structIterator, strus::Index structno);
 	void collectFieldStatistics();
 
 	struct FieldStatistics
@@ -223,6 +220,10 @@ public:
 			std::memcpy( &ar, &o.ar, sizeof(ar));
 		}
 		double operator[]( int featidx) const
+		{
+			return ar[ featidx];
+		}
+		double& operator[]( int featidx)
 		{
 			return ar[ featidx];
 		}

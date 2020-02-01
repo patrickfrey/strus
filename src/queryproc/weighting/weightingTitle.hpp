@@ -39,6 +39,8 @@ public:
 			const StorageClientInterface* storage,
 			double hierarchyWeightFactor_,
 			int maxNofResults_,
+			double maxdf_,
+			double nofCollectionDocuments_,
 			ErrorBufferInterface* errorhnd_);
 	
 	~WeightingFunctionContextTitle(){}
@@ -68,10 +70,13 @@ private:
 	const StorageClientInterface* m_storage;			///< storage client interface
 	strus::Reference<StructIteratorInterface> m_structitr;		///< structure iterator to recognize titles
 	PostingIteratorInterface* m_postingar[ MaxNofArguments];	///< array of weighted feature postings
-	int m_postingarsize;
+	int m_postingarsize;						///< number of postings defined
+	bool m_isStopWordAr[ MaxNofArguments];				///< parallel array to m_postingar that tells if the posting is a stopword
 	double m_hierarchyWeightFactor;					///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
 	double m_hierarchyWeight[ strus::Constants::MaxStructLevels];	///< weight for each structure level
+	double m_maxdf;							///< the maximum df of features not to be considered stopwords as fraction of the total collection size
 	int m_maxNofResults;						///< maximum number of results
+	double m_nofCollectionDocuments;				///< number of documents in the collection
 	std::vector<WeightedField> m_lastResult;			///< buffer for the last result calculated
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -83,7 +88,7 @@ class WeightingFunctionInstanceTitle
 {
 public:
 	explicit WeightingFunctionInstanceTitle( ErrorBufferInterface* errorhnd_)
-		:m_hierarchyWeightFactor(0.7),m_errorhnd(errorhnd_){}
+		:m_hierarchyWeightFactor(0.7),m_maxNofResults(5),m_maxdf(1.0),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceTitle(){}
 
@@ -105,6 +110,7 @@ public:
 private:
 	double m_hierarchyWeightFactor;			///< value between 0 and 1, factor a sub title feature is multiplied with, describes the weight loss of a sub title feature against a title feature
 	int m_maxNofResults;				///< maximum number of results
+	double m_maxdf;					///< the maximum df of features not to be considered stopwords as fraction of the total collection size
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
