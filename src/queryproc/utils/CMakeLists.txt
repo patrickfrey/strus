@@ -7,6 +7,7 @@ set( source_files
 	positionWindow.cpp
 	proximityWeightAccumulator.cpp
 	proximityWeightingContext.cpp
+	forwardIndexCollector.cpp
 	postingIteratorHelpers.cpp
 	sentenceIterator.cpp
 )

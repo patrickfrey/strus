@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "proximityWeightingContext.hpp"
+#include "forwardIndexCollector.hpp"
 #include "strus/structIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
@@ -30,29 +31,22 @@ void ProximityWeightingContext::init(
 	{
 		throw strus::runtime_error(_TXT("query is empty"));
 	}
+	if (nofPostings >= MaxNofArguments)
+	{
+		throw strus::runtime_error(_TXT("query to complex, number of features (%d) out of range (allowed %d)"), nofPostings, (int)MaxNofArguments);
+	}
 	m_nofPostings = 0;
 	m_nofWeightedNeighbours = nofPostings-1;
 	m_docno = docno;
 	m_field = field;
 	int eos_featidx = -1;
 
-	if (eos_postings && eos_postings->skipDoc(docno) == docno)
+	if (true == (m_hasPunctuation = (eos_postings != NULL && eos_postings->skipDoc(docno) == docno)))
 	{
 		eos_featidx = 0;
-		m_hasPunctuation = true;
-		m_postings[ m_nofPostings++] = eos_postings; 
-		if (nofPostings >= MaxNofArguments)
-		{
-			throw strus::runtime_error(_TXT("query to complex, number of features (%d) out of range (allowed %d)"), nofPostings+1, (int)MaxNofArguments);
-		}
-	}
-	else
-	{
-		m_hasPunctuation = false;
-		if (nofPostings > MaxNofArguments)
-		{
-			throw strus::runtime_error(_TXT("query to complex, number of features (%d) out of range (allowed %d)"), nofPostings, (int)MaxNofArguments);
-		}
+		m_length_postings[ m_nofPostings] = eos_postings->length();
+		m_postings[ m_nofPostings] = eos_postings; 
+		++m_nofPostings;
 	}
 	m_nodear.clear();
 	m_stmOperations.clear();
@@ -71,16 +65,20 @@ void ProximityWeightingContext::init(
 	{
 		if (postings[ pi]->skipDoc(docno) == docno)
 		{
+			m_length_postings[ m_nofPostings] = postings[ pi]->length();
 			m_postings[ m_nofPostings] = postings[ pi];
 			posnoar[ m_nofPostings] = m_postings[ pi]->skipPos( field.start());
 			if (0 == posnoar[ m_nofPostings] || posnoar[ m_nofPostings] > endpos)
 			{
+				m_length_postings[ m_nofPostings] = 0;
 				m_postings[ m_nofPostings] = 0;
 			}
 		}
 		else
 		{
+			m_length_postings[ m_nofPostings] = 0;
 			m_postings[ m_nofPostings] = 0;
+			posnoar[ m_nofPostings] = 0;
 		}
 		++m_nofPostings;
 	}
@@ -191,9 +189,9 @@ void ProximityWeightingContext::initNeighbourMatches()
 		{
 			if (fi->featidx == ni->featidx) continue;
 
-			if (ni->pos + m_config.distance_close > fi->pos)
+			if (ni->pos + m_length_postings[ ni->featidx] + m_config.distance_close > fi->pos)
 			{
-				if (ni->pos + m_config.distance_imm > fi->pos)
+				if (ni->pos + m_length_postings[ ni->featidx] + m_config.distance_imm > fi->pos)
 				{
 					if (fi->touched.set( ni->featidx, true))
 					{
@@ -505,80 +503,255 @@ void ProximityWeightingContext::collectFieldStatistics()
 	}
 }
 
+struct WeightedPos
+{
+	double weight;
+	strus::Index pos;
+	strus::Index sent_idx;
+};
+
+struct WeightedPosWindow
+{
+private:
+	enum {
+		MaxSummaryFieldSize = ProximityWeightingContext::MaxSummaryFieldSize,
+		MaxSummaryFieldMask = MaxSummaryFieldSize-1
+	};
+
+	WeightedPos weightedPos[ MaxSummaryFieldSize];
+	strus::Index sentenceStart[ MaxSummaryFieldSize];
+	int nofPositions;
+	int cur_idx;
+	int start_idx;
+	int sent_idx;
+	double weightsum;
+
+public:
+	explicit WeightedPosWindow( int windowSize)
+		:nofPositions(windowSize),cur_idx(0),start_idx(0),sent_idx( 0),weightsum(0.0)
+
+	{
+		STRUS_STATIC_ASSERT( MaxSummaryFieldSize != 0
+				&& (MaxSummaryFieldSize & (MaxSummaryFieldSize-1)) == 0);
+
+		if (nofPositions >= MaxSummaryFieldSize) nofPositions = MaxSummaryFieldSize-1;
+
+		std::memset( &weightedPos, 0, sizeof(weightedPos));
+		std::memset( &sentenceStart, 0, sizeof(sentenceStart));
+	}
+
+	void push_eos( strus::Index pos)
+	{
+		++sent_idx;
+		sentenceStart[ sent_idx & MaxSummaryFieldMask] = pos;
+	}
+
+	void push_weight( strus::Index pos, double weight)
+	{
+		cur_idx = (cur_idx + 1) & MaxSummaryFieldMask;
+		WeightedPos& cur = weightedPos[ cur_idx];
+		cur.pos = pos;
+		cur.sent_idx = sent_idx;
+		cur.weight = weight;
+		weightsum += cur.weight;
+
+		while (start_idx != cur_idx && weightedPos[ start_idx].pos + nofPositions < pos)
+		{
+			weightsum -= weightedPos[ start_idx].weight;
+			start_idx = (start_idx + 1) & MaxSummaryFieldMask;
+		}
+	}
+
+	strus::IndexRange getCurrentSentences( int nofSentences, strus::Index nextSentenceStart, int dist)
+	{
+		strus::IndexRange rt;
+		int sent_idx_start = weightedPos[ cur_idx].sent_idx - nofSentences;
+		if (sent_idx_start < 0) sent_idx_start = 0;
+		strus::Index start = sentenceStart[ sent_idx_start & MaxSummaryFieldMask];
+		strus::Index end = weightedPos[ cur_idx].pos + dist;
+		while (sent_idx_start != weightedPos[ cur_idx].sent_idx && start + nofPositions < end)
+		{
+			++sent_idx_start;
+			start = sentenceStart[ sent_idx_start & MaxSummaryFieldMask];
+		}
+		if (start + nofPositions < end)
+		{
+			start = end - nofPositions + dist;
+			if (start >= end) start = end -1;
+		}
+		if (nextSentenceStart <= start + nofPositions)
+		{
+			end = nextSentenceStart;
+		}
+		rt.init( start, end);
+		return rt;
+	}
+
+	strus::IndexRange getCurrentField() const
+	{
+		return strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1);
+	}
+
+	const WeightedPos& currentWeightedPos() const
+	{
+		return weightedPos[ cur_idx];
+	}
+
+	double currentWeightSum() const
+	{
+		return weightsum;
+	}
+
+	strus::Index currentSentenceStart() const
+	{
+		return sentenceStart[ sent_idx & MaxSummaryFieldMask];
+	}
+};
+
 strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeights& featureWeights) const
 {
-	STRUS_STATIC_ASSERT( MaxSummaryFieldSize != 0
-			&& (MaxSummaryFieldSize & (MaxSummaryFieldSize-1)) == 0);
-	enum {MaxSummaryFieldMask = MaxSummaryFieldSize-1};
-
 	strus::IndexRange rt;
 
-	struct WeightedPos
-	{
-		double weight;
-		strus::Index pos;
-		strus::Index sentidx;
-	};
-	WeightedPos weightedPos[ MaxSummaryFieldSize];
-	std::memset( &weightedPos, 0, sizeof(weightedPos));
-
-	double weightsum = 0.0;
 	double weightsum_max = 0.0;
-	int sentidx = 0;
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
 
-	int nofPositions = m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords;
-	if (nofPositions >= MaxSummaryFieldSize) nofPositions = MaxSummaryFieldSize-1;
+	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
 
-	int cur_idx = 0;
-	int start_idx = 0;
 	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
 	while (ni != ne)
 	{
 		if (ni->featidx == eos_featidx)
 		{
-			++sentidx;
+			window.push_eos( ni->pos);
 			++ni;
 			continue;
 		}
-		WeightedPos& cur = weightedPos[ cur_idx];
-		cur.pos = ni->pos;
-		cur.sentidx = sentidx;
-		cur.weight = featureWeights[ ni->featidx] * ff_weight( *ni);
-
-		for (++ni; ni != ne && ni->pos == cur.pos; ++ni)
+		strus::Index curpos = window.currentWeightedPos().pos;
+		double curweight = 0.0;
+		for (; ni != ne && ni->pos == curpos; ++ni)
 		{
-			cur.weight += featureWeights[ ni->featidx] * ff_weight( *ni);
+			curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
 		}
-		for (; start_idx != cur_idx
-			&& weightedPos[ start_idx].pos + nofPositions < ni->pos;
-			start_idx = (start_idx + 1) & MaxSummaryFieldMask)
-		{
-			weightsum -= weightedPos[ start_idx].weight;
-		}
-		weightsum += cur.weight;
-		cur_idx = (cur_idx + 1) & MaxSummaryFieldMask;
+		window.push_weight( curpos, curweight);
 
-		if (weightsum > weightsum_max)
+		if (window.currentWeightSum() > weightsum_max)
 		{
-			weightsum_max = weightsum;
+			weightsum_max = window.currentWeightSum();
 			if (m_hasPunctuation)
 			{
-				int sidx = start_idx;
-				while (weightedPos[ sidx].sentidx + m_config.nofSummarySentences
-						< weightedPos[ cur_idx].sentidx)
+				strus::Index nextSentenceStart = ni->pos+1;
+				std::vector<Node>::const_iterator next_ni = ni;
+				for (++next_ni;
+					next_ni != ne
+					&& next_ni->featidx != eos_featidx
+					&& next_ni->pos - ni->pos <= m_config.maxNofSummarySentenceWords;
+					++next_ni){}
+				if (next_ni != ne && next_ni->featidx != eos_featidx)
 				{
-					++sidx;
+					nextSentenceStart = next_ni->pos;
 				}
-				rt.init( weightedPos[ sidx].pos, weightedPos[ cur_idx].pos+1);
+				rt = window.getCurrentSentences( m_config.nofSummarySentences, nextSentenceStart, m_config.distance_close);
 			}
 			else
 			{
-				rt.init( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1);
+				rt = window.getCurrentField();
 			}
 		}
 	}
 	return rt;
 }
 
+void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const
+{
+	res.clear();
 
+	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+
+	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
+
+	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
+	while (ni != ne)
+	{
+		if (ni->featidx == eos_featidx)
+		{
+			window.push_eos( ni->pos);
+			std::vector<WeightedNeighbour>::iterator ri = res.end(), rb = res.begin();
+			for (; ri > rb && ri->pos >= ni->pos; --ri){}
+			res.resize( ri-rb);
+			++ni;
+			continue;
+		}
+		strus::Index curpos = window.currentWeightedPos().pos;
+		double curweight = 0.0;
+		for (; ni != ne && ni->pos == curpos; ++ni)
+		{
+			curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
+		}
+		window.push_weight( curpos, curweight);
+
+		const WeightedPos& match = window.currentWeightedPos();
+		strus::Index wpos = 0;
+		if (!res.empty())
+		{
+			std::vector<WeightedNeighbour>::iterator ri = res.end(), rb = res.begin();
+			strus::Index cur_sent_start = window.currentSentenceStart();
+			for (; ri > rb && ri->pos >= cur_sent_start && ri->pos + dist >= match.pos; --ri)
+			{
+				ri->weight += match.weight;
+			}
+			wpos = res.back().pos + 1;
+			if (wpos + dist < match.pos)
+			{
+				wpos = match.pos - dist;
+			}
+		}
+		for (; wpos < match.pos + dist; ++wpos)
+		{
+			res.push_back( WeightedNeighbour( wpos, match.weight));
+		}
+	}
+}
+
+
+
+void ProximityWeightingContext::Config::setDistanceImm( int distance_imm_)
+{
+	if (distance_imm_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	distance_imm = distance_imm_;
+}
+void ProximityWeightingContext::Config::setDistanceClose( int distance_close_)
+{
+	if (distance_close_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	distance_close = distance_close_;
+}
+void ProximityWeightingContext::Config::setDistanceNear( int distance_near_)
+{
+	if (distance_near_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	distance_near = distance_near_;
+}
+void ProximityWeightingContext::Config::setMinClusterSize( float minClusterSize_)
+{
+	if (minClusterSize_ <= 0.0 || minClusterSize_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
+	minClusterSize = minClusterSize_;
+}
+void ProximityWeightingContext::Config::setNofHotspots( float nofHotspots_)
+{
+	if (nofHotspots_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	nofHotspots = nofHotspots_;
+}
+void ProximityWeightingContext::Config::setNofSummarySentences( float nofSummarySentences_)
+{
+	if (nofSummarySentences_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	if (nofSummarySentences_ >= MaxSummaryFieldSize) throw std::runtime_error(_TXT("value out of range"));
+	nofSummarySentences = nofSummarySentences_;
+}
+void ProximityWeightingContext::Config::setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_)
+{
+	if (maxNofSummarySentenceWords_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
+	maxNofSummarySentenceWords = maxNofSummarySentenceWords_;
+}
+void ProximityWeightingContext::Config::setMinFfWeight( double minFfWeight_)
+{
+	if (minFfWeight_ < 0.0 || minFfWeight_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
+	minFfWeight = minFfWeight_;
+}

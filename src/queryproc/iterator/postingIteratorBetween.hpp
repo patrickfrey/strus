@@ -8,7 +8,6 @@
 #ifndef _STRUS_ITERATOR_BETWEEN_HPP_INCLUDED
 #define _STRUS_ITERATOR_BETWEEN_HPP_INCLUDED
 #include "strus/postingJoinOperatorInterface.hpp"
-#include "private/internationalization.hpp"
 #include "postingIteratorJoin.hpp"
 #include "docnoAllMatchItr.hpp"
 

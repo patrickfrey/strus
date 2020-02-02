@@ -10,8 +10,10 @@
 #include "strus/base/bitset.hpp"
 #include "strus/index.hpp"
 #include "private/skipScanArray.hpp"
-#include "private/internationalization.hpp"
 #include <limits>
+#include <string>
+#include <vector>
+#include <map>
 #include <cstring>
 
 namespace strus {
@@ -20,6 +22,10 @@ namespace strus {
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class StructIteratorInterface;
+/// \brief Forward declaration
+class ForwardIteratorInterface;
+/// \brief Forward declaration
+class ForwardIndexCollector;
 
 class ProximityWeightingContext
 {
@@ -58,46 +64,14 @@ public:
 			,maxNofSummarySentenceWords(o.maxNofSummarySentenceWords)
 			,minFfWeight(o.minFfWeight){}
 
-		void setDistanceImm( int distance_imm_)
-		{
-			if (distance_imm_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			distance_imm = distance_imm_;
-		}
-		void setDistanceClose( int distance_close_)
-		{
-			if (distance_close_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			distance_close = distance_close_;
-		}
-		void setDistanceNear( int distance_near_)
-		{
-			if (distance_near_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			distance_near = distance_near_;
-		}
-		void setMinClusterSize( float minClusterSize_)
-		{
-			if (minClusterSize_ <= 0.0 || minClusterSize_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
-			minClusterSize = minClusterSize_;
-		}
-		void setNofHotspots( float nofHotspots_)
-		{
-			if (nofHotspots_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			nofHotspots = nofHotspots_;
-		}
-		void setNofSummarySentences( float nofSummarySentences_)
-		{
-			if (nofSummarySentences_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			nofSummarySentences = nofSummarySentences_;
-		}
-		void setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_)
-		{
-			if (maxNofSummarySentenceWords_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
-			maxNofSummarySentenceWords = maxNofSummarySentenceWords_;
-		}
-		void setMinFfWeight( double minFfWeight_)
-		{
-			if (minFfWeight_ < 0.0 || minFfWeight_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
-			minFfWeight = minFfWeight_;
-		}
+		void setDistanceImm( int distance_imm_);
+		void setDistanceClose( int distance_close_);
+		void setDistanceNear( int distance_near_);
+		void setMinClusterSize( float minClusterSize_);
+		void setNofHotspots( float nofHotspots_);
+		void setNofSummarySentences( float nofSummarySentences_);
+		void setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_);
+		void setMinFfWeight( double minFfWeight_);
 	};
 
 	typedef unsigned short Position;
@@ -241,6 +215,22 @@ public:
 	
 	strus::IndexRange getBestPassage( const FeatureWeights& featureWeights) const;
 
+	struct WeightedNeighbour
+	{
+		strus::Index pos;
+		double weight;
+
+		WeightedNeighbour()
+			:pos(0),weight(0.0){}
+		WeightedNeighbour( strus::Index pos_, double weight_)
+			:pos(pos_),weight(weight_){}
+		WeightedNeighbour( const WeightedNeighbour& o)
+			:pos(o.pos),weight(o.weight){}
+	};
+
+	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, strus::Index dist) const;
+	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const;
+
 private:
 	double ff_weight( const Node& nd) const;
 	void initNeighbourMatches();
@@ -281,6 +271,7 @@ private:
 	PostingIteratorInterface* m_postings[ MaxNofArguments];
 	int m_nofPostings;
 	int m_nofWeightedNeighbours;
+	Position m_length_postings[ MaxNofArguments];
 	bool m_hasPunctuation;
 	strus::Index m_docno;
 	strus::IndexRange m_field;
