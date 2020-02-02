@@ -39,15 +39,23 @@ std::string ForwardIndexCollector::fetch( strus::Index pos)
 		{
 			if ((*vi)->skipPos( pos) == pos)
 			{
-				strus::Index endpos = pos+1;
-				if (m_typeiter.get() && m_typeiter->skipPos( pos) == pos)
+				if (m_typeiter.get())
 				{
-					rt.append( m_typeiter->fetch());
-					if (m_separator) rt.push_back( m_separator);
-					endpos = m_typeiter->skipPos( pos+1);
+					if (m_typeiter->skipPos( pos) == pos)
+					{
+						rt.append( m_typeiter->fetch());
+						if (m_separator) rt.push_back( m_separator);
+						rt.append( (*vi)->fetch());
+
+						strus::Index endpos = m_typeiter->skipPos( pos+1);
+						m_lastfield.init( pos, endpos ? endpos : (pos+1));
+					}
 				}
-				rt.append( (*vi)->fetch());
-				m_lastfield.init( pos, endpos);
+				else
+				{
+					rt.append( (*vi)->fetch());
+					m_lastfield.init( pos, pos+1);
+				}
 				break;
 			}
 		}

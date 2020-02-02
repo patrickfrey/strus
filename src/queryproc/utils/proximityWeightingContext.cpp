@@ -540,22 +540,26 @@ public:
 		std::memset( &sentenceStart, 0, sizeof(sentenceStart));
 	}
 
-	void push_eos( strus::Index pos)
+	void pushEos( strus::Index pos)
 	{
 		++sent_idx;
 		sentenceStart[ sent_idx & MaxSummaryFieldMask] = pos;
 	}
 
-	void push_weight( strus::Index pos, double weight)
+	void pushWeight( strus::Index pos, double weight)
 	{
 		cur_idx = (cur_idx + 1) & MaxSummaryFieldMask;
 		WeightedPos& cur = weightedPos[ cur_idx];
 		cur.pos = pos;
 		cur.sent_idx = sent_idx;
 		cur.weight = weight;
-		weightsum += cur.weight;
+	}
 
-		while (start_idx != cur_idx && weightedPos[ start_idx].pos + nofPositions < pos)
+	void calculateWeightSum()
+	{
+		WeightedPos& cur = weightedPos[ cur_idx];
+		weightsum += cur.weight;
+		while (start_idx != cur_idx && weightedPos[ start_idx].pos + nofPositions < cur.pos)
 		{
 			weightsum -= weightedPos[ start_idx].weight;
 			start_idx = (start_idx + 1) & MaxSummaryFieldMask;
@@ -622,7 +626,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 	{
 		if (ni->featidx == eos_featidx)
 		{
-			window.push_eos( ni->pos);
+			window.pushEos( ni->pos);
 			++ni;
 			continue;
 		}
@@ -632,7 +636,8 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 		{
 			curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
 		}
-		window.push_weight( curpos, curweight);
+		window.pushWeight( curpos, curweight);
+		window.calculateWeightSum();
 
 		if (window.currentWeightSum() > weightsum_max)
 		{
@@ -661,7 +666,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 	return rt;
 }
 
-void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const
+void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist, int minTouchCount) const
 {
 	res.clear();
 
@@ -674,7 +679,7 @@ void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedN
 	{
 		if (ni->featidx == eos_featidx)
 		{
-			window.push_eos( ni->pos);
+			window.pushEos( ni->pos);
 			std::vector<WeightedNeighbour>::iterator ri = res.end(), rb = res.begin();
 			for (; ri > rb && ri->pos >= ni->pos; --ri){}
 			res.resize( ri-rb);
@@ -683,12 +688,16 @@ void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedN
 		}
 		strus::Index curpos = window.currentWeightedPos().pos;
 		double curweight = 0.0;
+		int max_tc = 0;
 		for (; ni != ne && ni->pos == curpos; ++ni)
 		{
+			int tc = ni->touchCount();
+			if (tc > max_tc) max_tc = tc;
 			curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
 		}
-		window.push_weight( curpos, curweight);
+		if (max_tc < minTouchCount) continue;
 
+		window.pushWeight( curpos, curweight);
 		const WeightedPos& match = window.currentWeightedPos();
 		strus::Index wpos = 0;
 		if (!res.empty())

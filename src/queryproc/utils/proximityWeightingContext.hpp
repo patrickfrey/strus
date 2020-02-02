@@ -228,8 +228,7 @@ public:
 			:pos(o.pos),weight(o.weight){}
 	};
 
-	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, strus::Index dist) const;
-	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const;
+	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist, int minTouchCount) const;
 
 private:
 	double ff_weight( const Node& nd) const;
