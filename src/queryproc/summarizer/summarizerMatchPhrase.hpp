@@ -13,7 +13,8 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
-#include "proximityWeightAccumulator.hpp"
+#include "proximityWeightingContext.hpp"
+#include "forwardIndexTextCollector.hpp"
 #include "sentenceIterator.hpp"
 #include <vector>
 #include <string>
@@ -43,40 +44,20 @@ enum {
 /// \brief Configured parameters of the MatchPhrase summarizer function
 struct SummarizerFunctionParameterMatchPhrase
 {
-	SummarizerFunctionParameterMatchPhrase()
-		:m_type()
-		,m_paragraphsize(300)
-		,m_sentencesize(100)
-		,m_windowsize(100)
-		,m_cardinality(0)
-		,m_cardinality_frac(0.0)
-		,m_maxdf(0.1)
-		,m_matchmark()
-		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
-		,m_weight_same_sentence(0.6)
-		,m_weight_invdist(0.6)
-		,m_weight_invpos_start(2.5)
-		,m_weight_invpos_para(0.3)
-		,m_weight_invpos_struct(0.5)
-		,m_prop_weight_const(0.3)
-	{}
+	typedef ProximityWeightingContext::Config ProximityWeightingConfig;
+	ProximityWeightingConfig proximityConfig;	///< configuration for proximity weighting
+	std::string name;				///< name of the summary element
+	std::string textType;				///< name of the forward index feature to collect as text
+	std::string wordType;				///< name of the forward index feature that contains the word type of the feature to collect in the forward index; must align with the entity type and defines the length, resp. the number of terms overed by the entity
+	std::string entityType;				///< name of the forward index feature that contains the entity assigned to the aligned text feature
 
-	std::string m_type;					///< forward index type to extract
-	unsigned int m_paragraphsize;				///< search area for end of paragraph
-	unsigned int m_sentencesize;				///< search area for end of sentence
-	unsigned int m_windowsize;				///< maximum window size
-	unsigned int m_cardinality;				///< window cardinality
-	float m_cardinality_frac;				///< cardinality defined as fraction (percentage) of the number of features
-	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
-	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
-	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	double m_weight_same_sentence;				///< factor for weighting same sentences
-	double m_weight_invdist;				///< factor for weighting proximity
-	double m_weight_invpos_start;				///< factor for weighting distance to document start
-	double m_weight_invpos_para;				///< factor for weighting distance to last paragraph start
-	double m_weight_invpos_struct;				///< factor for weighting distance to last sentence start
-	double m_prop_weight_const;				///< constant factor for proportional feature weight [0.0 .. 1.0]
-};
+	SummarizerFunctionParameterMatchPhrase()
+		:proximityConfig(),name(),textType(),wordType(),entityType()
+	{}
+	SummarizerFunctionParameterMatchPhrase( const SummarizerFunctionParameterMatchPhrase& o)
+		:proximityConfig(o.proximityConfig)
+		,name(o.name),textType(o.textType),wordType(o.wordType),entityType(o.entityType)
+	{}
 
 class SummarizerFunctionContextMatchPhrase
 	:public SummarizerFunctionContextInterface
@@ -114,66 +95,17 @@ public:
 	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
 
 private:
-	struct WeightingData
-	{
-		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, strus::Index structwindowsize_, strus::Index parawindowsize_, const strus::IndexRange& field_)
-			:field(field_)
-			,titlestart(1),titleend(1)
-		{
-			valid_paraar = &valid_structar[ structarsize_];
-			paraiter.init( parawindowsize_, valid_paraar, paraarsize_);
-			structiter.init( structwindowsize_, valid_structar, structarsize_);
-			
-		}
-		strus::IndexRange field;
-		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
-		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
-		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
-		strus::Index titlestart;					//< start position of the title
-		strus::Index titleend;						//< end position of the title (first item after the title)
-		SentenceIterator paraiter;					//< iterator on paragraph frames
-		SentenceIterator structiter;					//< iterator on sentence frames
-	};
+	ProximityWeightingContext m_proximityWeightingContext;		///< proximity weighting context
+	SummarizerFunctionParameterMatchPhrase m_parameter;		///< parameter
+	PostingIteratorInterface* m_itrar[ MaxNofArguments];		///< posting iterators to weight
+	std::size_t m_itrarsize;					///< nof posting iterators defined to weight
+	FeatureWeights m_weightar;					///< array of feature weights parallel to m_itrar
+	PostingIteratorInterface* m_eos_itr;				///< posting iterators for end of sentence markers
+	double m_nofCollectionDocuments;				///< number of documents in the collection
+	const StorageClientInterface* m_storage;			///< storage client interface
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error reporting
 
 private:
-	void initializeContext();
-	void initWeightingData( WeightingData& wdata, const strus::WeightedDocument& doc);
-
-private:
-	struct Match
-	{
-		double weight;
-		Index pos;
-		Index span;
-		bool is_docstart;
-	
-		Match()
-			:weight(0.0),pos(0),span(0),is_docstart(false){}
-		Match( double weight_, Index pos_, Index span_, bool is_docstart_)
-			:weight(weight_),pos(pos_),span(span_),is_docstart(is_docstart_){}
-		Match( const Match& o)
-			:weight(o.weight),pos(o.pos),span(o.span),is_docstart(o.is_docstart){}
-	
-		bool isDefined() const		{return span > 0;}
-	};
-
-	struct Abstract
-	{
-		Index start;
-		Index span;
-		bool defined_start;
-		bool defined_end;
-		bool is_docstart;
-
-		Abstract()
-			:start(0),span(0),defined_start(false),defined_end(false),is_docstart(false){}
-		Abstract( strus::Index start_, strus::Index span_, bool defined_start_, bool defined_end_, bool is_docstart_)
-			:start(start_),span(span_),defined_start(defined_start_),defined_end(defined_end_),is_docstart(is_docstart_){}
-		Abstract( const Abstract& o)
-			:start(o.start),span(o.span),defined_start(o.defined_start),defined_end(o.defined_end),is_docstart(o.is_docstart){}
-
-		bool isDefined() const		{return span > 0;}
-	};
 
 	double windowWeight( WeightingData& wdata, const PositionWindow& poswin, const strus::IndexRange& structframe, const strus::IndexRange& paraframe);
 

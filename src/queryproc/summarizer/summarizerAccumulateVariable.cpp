@@ -7,7 +7,7 @@
  */
 #include "summarizerAccumulateVariable.hpp"
 #include "postingIteratorLink.hpp"
-#include "ranker.hpp"
+#include "private/ranker.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -22,6 +22,7 @@
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
 #include "viewUtils.hpp"
+#include "weightedValue.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -185,20 +186,22 @@ void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream&
 
 std::vector<SummaryElement> SummarizerFunctionContextAccumulateVariable::getSummariesFromPosWeightMap( const PosWeightMap& posWeightMap)
 {
+	typedef WeightedValue<strus::Index> WeightedPos;
+
 	std::vector<SummaryElement> rt;
 	PosWeightMap::const_iterator wi = posWeightMap.begin(), we = posWeightMap.end();
 	if (m_data->maxNofElements < posWeightMap.size())
 	{
-		Ranker ranker( m_data->maxNofElements);
+		Ranker<WeightedPos> ranker( m_data->maxNofElements);
 		for (; wi != we; ++wi)
 		{
-			ranker.insert( wi->second, wi->first);
+			ranker.insert( WeightedPos( wi->second, wi->first));
 		}
-		std::vector<Ranker::Element> ranklist = ranker.result();
-		std::vector<Ranker::Element>::const_iterator ri = ranklist.begin(), re = ranklist.end();
+		std::vector<WeightedPos> ranklist = ranker.result();
+		std::vector<WeightedPos>::const_iterator ri = ranklist.begin(), re = ranklist.end();
 		for (; ri != re; ++ri)
 		{
-			if (m_forwardindex->skipPos( ri->idx) == ri->idx)
+			if (m_forwardindex->skipPos( ri->value) == ri->value)
 			{
 				rt.push_back( SummaryElement(
 						m_data->var, m_forwardindex->fetch(),

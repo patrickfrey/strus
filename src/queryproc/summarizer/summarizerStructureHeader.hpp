@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2014 Patrick P. Frey
+ * Copyright (c) 2020 Patrick P. Frey
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_SUMMARIZER_ACCUMULATE_NEAR_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_ACCUMULATE_NEAR_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_STRUCTURE_HEADER_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_STRUCTURE_HEADER_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
@@ -15,7 +15,8 @@
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "proximityWeightingContext.hpp"
-#include "forwardIndexCollector.hpp"
+#include "forwardIndexTextCollector.hpp"
+#include "strus/structIteratorInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -36,7 +37,7 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-struct SummarizerFunctionParameterAccumulateNear
+struct SummarizerFunctionParameterStructureHeader
 {
 	typedef ProximityWeightingContext::Config ProximityWeightingConfig;
 	struct CollectorConfig
@@ -60,14 +61,14 @@ struct SummarizerFunctionParameterAccumulateNear
 	double maxdf;						///< the maximum df of features not to be considered stopwords as fraction of the total collection size
 	std::vector<CollectorConfig> collectorConfigs;		///< Grouped features from forward index to collect
 
-	SummarizerFunctionParameterAccumulateNear()
+	SummarizerFunctionParameterStructureHeader()
 		:proximityConfig()
 		,maxNofResults(20)
 		,distance_collect(8)
 		,maxdf(0.5)
 		,collectorConfigs()
 	{}
-	SummarizerFunctionParameterAccumulateNear( const SummarizerFunctionParameterAccumulateNear& o)
+	SummarizerFunctionParameterStructureHeader( const SummarizerFunctionParameterStructureHeader& o)
 		:proximityConfig(o.proximityConfig)
 		,maxNofResults(o.maxNofResults)
 		,distance_collect(o.distance_collect)
@@ -78,17 +79,17 @@ struct SummarizerFunctionParameterAccumulateNear
 	void addConfig( const std::string& configstr, ErrorBufferInterface* errorhnd);
 };
 
-class SummarizerFunctionContextAccumulateNear
+class SummarizerFunctionContextStructureHeader
 	:public SummarizerFunctionContextInterface
 {
 public:
-	SummarizerFunctionContextAccumulateNear(
+	SummarizerFunctionContextStructureHeader(
 			const StorageClientInterface* storage_,
-			const SummarizerFunctionParameterAccumulateNear& parameter_,
+			const SummarizerFunctionParameterStructureHeader& parameter_,
 			double nofCollectionDocuments_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~SummarizerFunctionContextAccumulateNear(){}
+	virtual ~SummarizerFunctionContextStructureHeader(){}
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -116,7 +117,7 @@ private:
 
 private:
 	ProximityWeightingContext m_proximityWeightingContext;		///< proximity weighting context
-	SummarizerFunctionParameterAccumulateNear m_parameter;		///< parameter
+	SummarizerFunctionParameterStructureHeader m_parameter;		///< parameter
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];		///< posting iterators to weight
 	std::size_t m_itrarsize;					///< nof posting iterators defined to weight
 	FeatureWeights m_weightar;					///< array of feature weights parallel to m_itrar
@@ -132,14 +133,14 @@ private:
 };
 
 
-class SummarizerFunctionInstanceAccumulateNear
+class SummarizerFunctionInstanceStructureHeader
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceAccumulateNear( ErrorBufferInterface* errorhnd_)
+	explicit SummarizerFunctionInstanceStructureHeader( ErrorBufferInterface* errorhnd_)
 		:m_parameter(),m_errorhnd(errorhnd_){}
 
-	virtual ~SummarizerFunctionInstanceAccumulateNear(){}
+	virtual ~SummarizerFunctionInstanceStructureHeader(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
@@ -157,18 +158,18 @@ public:
 	virtual StructView view() const;
 
 private:
-	SummarizerFunctionParameterAccumulateNear m_parameter;	///< summarizer function parameters
+	SummarizerFunctionParameterStructureHeader m_parameter;	///< summarizer function parameters
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
-class SummarizerFunctionAccumulateNear
+class SummarizerFunctionStructureHeader
 	:public SummarizerFunctionInterface
 {
 public:
-	explicit SummarizerFunctionAccumulateNear( ErrorBufferInterface* errorhnd_)
+	explicit SummarizerFunctionStructureHeader( ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_){}
-	virtual ~SummarizerFunctionAccumulateNear(){}
+	virtual ~SummarizerFunctionStructureHeader(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;

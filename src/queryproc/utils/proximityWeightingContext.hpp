@@ -10,7 +10,6 @@
 #include "strus/base/bitset.hpp"
 #include "strus/index.hpp"
 #include "private/skipScanArray.hpp"
-#include <limits>
 #include <string>
 #include <vector>
 #include <map>
@@ -228,7 +227,15 @@ public:
 			:pos(o.pos),weight(o.weight){}
 	};
 
-	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist, int minTouchCount) const;
+	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const;
+
+	static void collectWeightedNeighboursForSingleFeature( 
+			std::vector<WeightedNeighbour>& res,
+			strus::Index dist,
+			PostingIteratorInterface* postings,
+			PostingIteratorInterface* eos_postings, 
+			strus::Index docno,
+			const strus::IndexRange& field);
 
 private:
 	double ff_weight( const Node& nd) const;

@@ -7,11 +7,13 @@
  */
 #include "postingIteratorBetween.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-#define ITERATOR_NAME "between"
+#define THIS_ITERATOR_NAME const_cast<char*>("between")
 
 IteratorBetween::IteratorBetween(
 		const std::vector<Reference< PostingIteratorInterface> >& args,
@@ -24,8 +26,8 @@ IteratorBetween::IteratorBetween(
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (args.size() > 3) throw strus::runtime_error(_TXT("too many arguments for '%s' iterator"), ITERATOR_NAME);
-	if (args.size() < 2) throw strus::runtime_error(_TXT("too few arguments for '%s' iterator"), ITERATOR_NAME);
+	if (args.size() > 3) throw strus::runtime_error(_TXT("too many arguments for '%s' iterator"), THIS_ITERATOR_NAME);
+	if (args.size() < 2) throw strus::runtime_error(_TXT("too few arguments for '%s' iterator"), THIS_ITERATOR_NAME);
 
 	m_elemitr = args[0];
 	m_startitr = args[1];
@@ -105,4 +107,44 @@ Index IteratorBetween::documentFrequency() const
 }
 
 
+PostingIteratorInterface* PostingJoinBetween::createResultIterator(
+		const std::vector<Reference<PostingIteratorInterface> >& itrs,
+		int range,
+		unsigned int cardinality) const
+{
+	if (range != 0)
+	{
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no range argument expected for '%s'"), THIS_ITERATOR_NAME);
+		return 0;
+	}
+	if (itrs.size() < 2)
+	{
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for '%s'"), THIS_ITERATOR_NAME);
+		return 0;
+	}
+	else if (itrs.size() > 3)
+	{
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too many arguments for '%s'"), THIS_ITERATOR_NAME);
+		return 0;
+	}
+	try
+	{
+		return new IteratorBetween( itrs, m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), THIS_ITERATOR_NAME, *m_errorhnd, 0);
+}
 
+
+StructView PostingJoinBetween::view() const
+{
+	try
+	{
+		return Description( THIS_ITERATOR_NAME, _TXT("Get the postings from the first argument iterator that are between the second argument iterator and the third argument iterator"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "intersect", *m_errorhnd, StructView());
+}
+
+const char* PostingJoinBetween::name() const
+{
+	return THIS_ITERATOR_NAME;
+}

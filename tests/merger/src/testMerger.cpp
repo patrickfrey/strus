@@ -5,7 +5,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "ranker.hpp"
 #include "strus/index.hpp"
 #include "strus/constants.hpp"
 #include "strus/weightedDocument.hpp"
@@ -14,6 +13,7 @@
 #include "strus/base/math.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/base/fileio.hpp"
+#include "private/localStructAllocator.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -22,14 +22,13 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <iomanip>
-#include <ctime>
 #include <algorithm>
+#include <iomanip>
+#include <cstring>
+#include <ctime>
 
 static strus::PseudoRandom g_random;
 static strus::Index g_docnum = 0;
-
-#undef STRUS_LOWLEVEL_DEBUG
 
 static strus::IndexRange randomField()
 {

@@ -11,13 +11,14 @@
 #include "strus/reference.hpp"
 #include "strus/constants.hpp"
 #include "strus/weightedField.hpp"
+#include "strus/weightedDocument.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "strus/base/dynamic_bitset.hpp"
-#include "ranker.hpp"
+#include "private/ranker.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -86,7 +87,7 @@ public:
 	void addAlternativeAclRestriction( const Reference<InvAclIteratorInterface>& iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState);
-	const Ranker& ranker()				{return m_ranker;}
+	const Ranker<WeightedDocument>& ranker()	{return m_ranker;}
 
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
@@ -130,7 +131,7 @@ private:
 	Index m_maxDocumentNumber;
 	unsigned int m_nofDocumentsRanked;
 	unsigned int m_nofDocumentsVisited;
-	Ranker m_ranker;
+	Ranker<WeightedDocument> m_ranker;
 	PostingIteratorInterface* m_evaluationSetIterator;
 };
 

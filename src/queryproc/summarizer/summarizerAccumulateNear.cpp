@@ -9,7 +9,8 @@
 #include "proximityWeightAccumulator.hpp"
 #include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
-#include "ranker.hpp"
+#include "weightedValue.hpp"
+#include "private/ranker.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -21,6 +22,7 @@
 #include "strus/base/string_conv.hpp"
 #include "strus/base/numstring.hpp"
 #include "strus/base/math.hpp"
+#include "strus/base/configParser.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
@@ -37,25 +39,31 @@ using namespace strus;
 
 SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear(
 		const StorageClientInterface* storage_,
-		const QueryProcessorInterface* processor_,
-		const Reference<AccumulateNearData>& data_,
+		const SummarizerFunctionParameterAccumulateNear& parameter_,
 		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_)
-	:m_storage(storage_)
-	,m_processor(processor_)
-	,m_forwardindex(storage_->createForwardIterator( data_->type))
-	,m_data(data_)
-	,m_nofCollectionDocuments(nofCollectionDocuments_)
-	,m_idfar()
+	:m_proximityWeightingContext(parameter_.proximityConfig)
+	,m_parameter(parameter_)
 	,m_itrarsize(0)
-	,m_structarsize(0)
-	,m_cardinality(data_->cardinality)
-	,m_minwinsize(1)
-	,m_weightincr()
-	,m_initialized(false)
+	,m_weightar()
+	,m_stopword_itrarsize(0)
+	,m_stopword_weightar()
+	,m_eos_itr(0)
+	,m_nofCollectionDocuments(nofCollectionDocuments_)
+	,m_storage(storage_)
+	,m_collectors()
+	,m_weightnorm(1.0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw std::runtime_error( _TXT("error creating forward index iterator"));
+	typedef SummarizerFunctionParameterAccumulateNear::CollectorConfig CollectorConfig;
+	std::vector<CollectorConfig>::const_iterator
+		ci = m_parameter.collectorConfigs.begin(), ce = m_parameter.collectorConfigs.end();
+	for (; ci != ce; ++ci)
+	{
+		m_collectors.push_back( ForwardIndexCollector( m_storage, ci->tagSeparator, ci->tagType, m_errorhnd));
+	}
+	std::memset( &m_itrar, 0, sizeof(m_itrar));
+	std::memset( &m_stopword_itrar, 0, sizeof(m_itrar));
 }
 
 void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::string&, double)
@@ -74,21 +82,39 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 	{
 		if (strus::caseInsensitiveEquals( name_, "punct"))
 		{
-			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
-			m_structar[ m_structarsize++] = itr;
+			if (m_eos_itr) throw std::runtime_error( _TXT("only one end of sentence marker feature allowed"));
+			m_eos_itr = itr;
 		}
 		else if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
-
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
-			double idf = strus::Math::log( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+			double idf = strus::Math::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
 			if (idf < 0.00001)
 			{
 				idf = 0.00001;
 			}
-			m_itrar[ m_itrarsize++] = itr;
-			m_idfar.push( idf * weight);
+			if (m_parameter.maxdf * m_nofCollectionDocuments < df)
+			{
+				if (m_stopword_itrarsize >= MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
+				m_stopword_itrar[ m_stopword_itrarsize] = itr;
+				double ww = idf * weight;
+				m_stopword_weightar[ m_stopword_itrarsize] = ww;
+				++m_stopword_itrarsize;
+			}
+			else
+			{
+				if (m_itrarsize >= MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
+				m_itrar[ m_itrarsize] = itr;
+				m_weightar[ m_itrarsize] = idf * weight;
+				++m_itrarsize;
+
+				m_weightnorm = 0.0;
+				for (std::size_t ii=0; ii<m_itrarsize; ++ii)
+				{
+					m_weightnorm += m_weightar[ ii] * m_weightar[ ii];
+				}
+				m_weightnorm = std::sqrt( m_weightnorm);
+			}
 		}
 		else
 		{
@@ -98,189 +124,22 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
-static void callSkipDoc( strus::Index docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
+void SummarizerFunctionContextAccumulateNear::collectSummariesFromEntityMap( std::vector<SummaryElement>& summaries, const std::string& name, EntityMap& entitymap) const
 {
-	for (std::size_t ai=0; ai < arsize; ++ai)
-	{
-		if (docno == ar[ ai]->skipDoc( docno))
-		{
-			valid_ar[ ai] = ar[ ai];
-		}
-		else
-		{
-			valid_ar[ ai] = 0;
-		}
-	}
-}
+	typedef WeightedValue<const char*,(const char*)0> WeightedFeature;
 
-static Index callSkipPos( strus::Index start, PostingIteratorInterface** ar, std::size_t size)
-{
-	Index rt = 0;
-	std::size_t ti=0;
-	for (; ti<size; ++ti)
-	{
-		if (ar[ ti])
-		{
-			Index pos = ar[ ti]->skipPos( start);
-			if (pos)
-			{
-				if (!rt || pos < rt) rt = pos;
-			}
-		}
-	}
-	return rt;
-}
-
-void SummarizerFunctionContextAccumulateNear::initializeContext()
-{
-	if (m_cardinality == 0)
-	{
-		if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
-		{
-			m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
-		}
-		else
-		{
-			m_cardinality = m_itrarsize;
-		}
-	}
-	// initialize proportional ff increment weights
-	m_weightincr.init( m_itrarsize);
-	ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_data->cprop, m_idfar);
-
-	double factor = 1.0;
-	for (std::size_t ii=0; ii<m_itrarsize; ++ii)
-	{
-		m_normfactorar[ ii] = factor / sqrt(m_itrarsize - ii);
-		factor *= m_data->cofactor;
-	}
-	m_minwinsize = m_cardinality ? m_cardinality : m_itrarsize;
-	if (m_minwinsize > m_itrarsize) m_minwinsize = m_itrarsize;
-
-	m_initialized = true;
-}
-
-bool SummarizerFunctionContextAccumulateNear::getCandidateEntity( CandidateEntity& res, const PositionWindow& poswin, PostingIteratorInterface** valid_itrar, PostingIteratorInterface** valid_structar)
-{
-	Index windowpos = poswin.pos();
-	res.window = poswin.window();
-	res.windowsize = poswin.size();
-	res.windowendpos = valid_itrar[ res.window[ m_minwinsize-1]]->posno();
-
-	Index startpos = res.windowendpos < m_data->range ? 0 :(res.windowendpos - m_data->range);
-	Index struct_startpos = callSkipPos( startpos, valid_structar, m_structarsize);
-	res.structpos = 0;
-	if (!struct_startpos || struct_startpos > windowpos)
-	{
-		res.structpos = struct_startpos;
-	}
-	else
-	{
-		res.structpos = callSkipPos( windowpos, valid_structar, m_structarsize);
-	}
-	if (!res.structpos || res.structpos > windowpos + m_data->range)
-	{
-		res.structpos = windowpos + m_data->range + 1;
-	}
-	res.forwardpos = m_forwardindex->skipPos( startpos);
-	if (res.forwardpos && res.forwardpos < res.structpos && res.windowendpos < res.structpos)
-	{
-		// Calculate the window size not overlapping with :
-		Index windowspan = poswin.span();
-		Index windowmaxpos = windowpos + windowspan;
-		if (res.structpos >= windowmaxpos)
-		{
-			res.windowendpos = windowmaxpos;
-		}
-		else for (std::size_t wi=m_minwinsize; wi<res.windowsize; ++wi)
-		{
-			Index wpos = valid_itrar[ res.window[ wi]]->posno();
-			if (wpos < res.structpos)
-			{
-				res.windowendpos = wpos;
-			}
-			else
-			{
-				res.windowsize = wi;
-				break;
-			}
-		}
-		return true;
-	}
-	return false;
-}
-
-double SummarizerFunctionContextAccumulateNear::candidateWeight( const CandidateEntity& candidate, PostingIteratorInterface** valid_itrar) const
-{
-	double rt = 0.0;
-	for (std::size_t wi=0; wi<candidate.windowsize; ++wi)
-	{
-		double distweight = 1.0 / strus::Math::sqrt( strus::Math::abs( candidate.forwardpos - valid_itrar[ candidate.window[ wi]]->posno()) + DIST_WEIGHT_BASE);
-		rt += m_weightincr[ candidate.window[ wi]] * distweight;
-	}
-	return rt;
-}
-
-
-void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, const strus::WeightedDocument& doc)
-{
-	// Initialize posting iterators
-	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
-	PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
-	
-	callSkipDoc( doc.docno(), m_itrar, m_itrarsize, valid_itrar);
-	callSkipDoc( doc.docno(), m_structar, m_structarsize, valid_structar);
-	m_forwardindex->skipDoc( doc.docno());
-
-	// Fetch entities and weight them:
-	PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
-				doc.field(), PositionWindow::MaxWin);
-	bool more = poswin.first();
-	while (more)
-	{
-		Index nextstart;
-		CandidateEntity candidate;
-		if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
-		{
-			double normfactor = m_normfactorar[ candidate.windowsize-1];
-
-			// Calculate the weights of matching entities:
-			while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
-			{
-				double ww = candidateWeight( candidate, valid_itrar);
-				entitymap[ m_forwardindex->fetch()] += normfactor * ww;
-				candidate.forwardpos = m_forwardindex->skipPos( candidate.forwardpos + 1);
-			}
-			nextstart = candidate.windowendpos;
-		}
-		else
-		{
-			nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
-		}
-		more = poswin.skip( nextstart);
-	}
-}
-
-std::vector<SummaryElement>
-	SummarizerFunctionContextAccumulateNear::getSummariesFromEntityMap( EntityMap& entitymap) const
-{
-	std::vector<SummaryElement> rt;
-
-	Ranker ranker( m_data->nofranks);
+	Ranker<WeightedFeature> ranker( m_parameter.maxNofResults);
 	EntityMap::const_iterator ei = entitymap.begin(), ee = entitymap.end();
-	std::vector<EntityMap::const_iterator> valuerefs;
 	for (; ei != ee; ++ei)
 	{
-		ranker.insert( ei->second / m_data->norm, valuerefs.size());
-		valuerefs.push_back( ei);
+		ranker.insert( WeightedFeature( ei->second / m_weightnorm, ei->first.c_str()));
 	}
-	std::vector<Ranker::Element> result = ranker.result();
-	std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
+	std::vector<WeightedFeature> result = ranker.result();
+	std::vector<WeightedFeature>::const_iterator ri = result.begin(), re = result.end();
 	for (; ri != re; ++ri)
 	{
-		rt.push_back( SummaryElement( m_data->type, valuerefs[ ri->idx]->first, ri->weight));
+		summaries.push_back( SummaryElement( name, ri->value, ri->weight));
 	}
-	return rt;
 }
 
 std::vector<SummaryElement>
@@ -288,23 +147,51 @@ std::vector<SummaryElement>
 {
 	try
 	{
-		// Initialization:
+		std::vector<SummaryElement> rt;
+		std::vector<WeightedNeighbour> weightedNeighbours;
 		if (m_itrarsize == 0)
 		{
 			return std::vector<SummaryElement>();
 		}
-		if (!m_initialized) initializeContext();
-		if (m_itrarsize < m_cardinality)
+		else if (m_itrarsize == 1)
 		{
-			return std::vector<SummaryElement>();
+			ProximityWeightingContext::collectWeightedNeighboursForSingleFeature( 
+					weightedNeighbours, m_parameter.distance_collect,
+					m_itrar[0], m_eos_itr, 
+					doc.docno(), doc.field());
 		}
+		else
+		{
+			m_proximityWeightingContext.init(
+					m_itrar, m_itrarsize, m_eos_itr,
+					doc.docno(), doc.field());
+			m_proximityWeightingContext.collectWeightedNeighbours( 
+					weightedNeighbours, m_weightar, m_parameter.distance_collect);
+		}
+		std::vector<ForwardIndexCollector>::iterator
+			ci = m_collectors.begin(), ce = m_collectors.end();
+		for (int cidx=0; ci != ce; ++ci,++cidx)
+		{
+			ci->skipDoc( doc.docno());
 
-		// Init map of weighted entities:
-		EntityMap entitymap;
-		initEntityMap( entitymap, doc);
-
-		// Get summary from map of weighted entities
-		return getSummariesFromEntityMap( entitymap);
+			EntityMap entitymap;
+			std::vector<WeightedNeighbour>::const_iterator
+				wi = weightedNeighbours.begin(), we = weightedNeighbours.end();
+			while (wi != we)
+			{
+				strus::Index wpos = ci->skipPos( wi->pos, m_parameter.distance_collect);
+				for (; wi != we && wi->pos < wpos; ++wi){}
+				if (wi == we) break;
+				if (wi->pos == wpos)
+				{
+					entitymap[ ci->fetch( wpos)] += wi->weight;
+				}
+				++wi;
+			}
+			collectSummariesFromEntityMap( rt, m_parameter.collectorConfigs[ cidx].name, entitymap);
+			
+		}
+		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
@@ -315,88 +202,155 @@ std::string SummarizerFunctionContextAccumulateNear::debugCall( const strus::Wei
 	try
 	{
 		std::ostringstream out;
-		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
+		out << strus::string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
 	
-		// Initialization:
-		if (m_itrarsize == 0)
+		std::vector<SummaryElement> res = getSummary( doc);
+		std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
+		for (; ri != re; ++ri)
 		{
-			return std::string();
-		}
-		if (!m_initialized) initializeContext();
-		if (m_itrarsize < m_cardinality)
-		{
-			return std::string();
-		}
-	
-		// Initialize posting iterators
-		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
-		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
-		
-		callSkipDoc( doc.docno(), m_itrar, m_itrarsize, valid_itrar);
-		callSkipDoc( doc.docno(), m_structar, m_structarsize, valid_structar);
-		m_forwardindex->skipDoc( doc.docno());
-	
-		// Fetch entities and print them with weight:
-		PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
-					doc.field(), PositionWindow::MaxWin);
-		bool more = poswin.first();
-		while (more)
-		{
-			Index nextstart;
-			CandidateEntity candidate;
-			if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
+			if (ri->index() >= 0)
 			{
-				double normfactor = m_normfactorar[ candidate.windowsize-1];
-	
-				// Calculate the weights of matching entities:
-				while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
-				{
-					double ww = normfactor * candidateWeight( candidate, valid_itrar);
-					std::string keystr( m_forwardindex->fetch());
-					out << string_format( _TXT( "entity pos=%u, span=%u, weight=%.5f, value='%s'"),
-								poswin.pos(), poswin.span(), ww, keystr.c_str()) << std::endl;
-				}
-				nextstart = candidate.windowendpos;
+				out << strus::string_format( "%s[%d] %.5f = %s", ri->name().c_str(), ri->index(), ri->weight(), ri->value().c_str());
 			}
 			else
 			{
-				nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
+				out << strus::string_format( "%s %.5f = %s", ri->name().c_str(), ri->weight(), ri->value().c_str());
 			}
-			more = poswin.skip( nextstart);
+			out << std::endl;
 		}
 		return out.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
+const char* SummarizerFunctionInstanceAccumulateNear::name() const
+{
+	return THIS_METHOD_NAME;
+}
+
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
+{
+	NumericVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
+	return rt;
+}
+
+void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& configstr_, ErrorBufferInterface* errorhnd)
+
+{
+	std::string configstr = configstr_;
+	std::string name;
+	std::vector<std::string> collectTypes;
+	std::string tagType;
+	char tagSeparator = '\0';
+	if (!extractStringFromConfigString( name, configstr, "name", errorhnd))
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "name", errorhnd->fetchError());
+		}
+		else
+		{
+			throw strus::runtime_error(_TXT("missing mandatory '%s' in configuration"), "name");
+		}
+	}
+	if (!extractStringArrayFromConfigString( collectTypes, configstr, "type", ',', errorhnd))
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "type", errorhnd->fetchError());
+		}
+		else
+		{
+			throw strus::runtime_error(_TXT("missing mandatory '%s' in configuration"), "type");
+		}
+	}
+	if (!extractStringFromConfigString( tagType, configstr, "tag", errorhnd))
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "tag", errorhnd->fetchError());
+		}
+	}
+	std::string tagSeparatorStr;
+	if (extractStringFromConfigString( tagSeparatorStr, configstr, "sep", errorhnd))
+	{
+		if (tagSeparatorStr.empty())
+		{
+			tagSeparator = '\0';
+		}
+		else if (tagSeparatorStr.size() == 1)
+		{
+			tagSeparator = tagSeparatorStr[0];
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "sep", _TXT("single ascii character expected"));
+		}
+	}
+	else
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "sep", errorhnd->fetchError());
+		}
+	}
+	configstr = strus::string_conv::trim( configstr);
+	if (!configstr.empty())
+	{
+		throw strus::runtime_error(_TXT("superfluous definitions int in configuration: '%s'"), configstr.c_str());
+	}
+	collectorConfigs.push_back( CollectorConfig( name, collectTypes, tagType, tagSeparator));
+}
+
+StructView SummarizerFunctionParameterAccumulateNear::CollectorConfig::view() const
+{
+	StructView rt;
+	rt( "name", name);
+	rt( "type", collectTypes);
+	rt( "tag", tagType);
+	rt( "sep", tagSeparator);
+	return rt;
+}
+
+static StructView getStructView( const std::vector<SummarizerFunctionParameterAccumulateNear::CollectorConfig> car)
+{
+	StructView rt;
+	std::vector<SummarizerFunctionParameterAccumulateNear::CollectorConfig>::const_iterator
+		ci = car.begin(), ce = car.end();
+	for (; ci != ce; ++ci)
+	{
+		rt( ci->view());
+	}
+	return rt;
+}
+
 void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
+		if (strus::caseInsensitiveEquals( name_, "match")
+		||  strus::caseInsensitiveEquals( name_, "punct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		else if (strus::caseInsensitiveEquals( name_, "type"))
+		if (strus::caseInsensitiveEquals( name_, "collect"))
 		{
-			m_data->type = value;
+			m_parameter.addConfig( value, m_errorhnd);
 		}
-		else if (strus::caseInsensitiveEquals( name_, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		else if (strus::caseInsensitiveEquals( name_, "nofres")
+			|| strus::caseInsensitiveEquals( name_, "maxdf")
+			|| strus::caseInsensitiveEquals( name_, "dist_imm")
+			|| strus::caseInsensitiveEquals( name_, "dist_close")
+			|| strus::caseInsensitiveEquals( name_, "dist_near")
+			|| strus::caseInsensitiveEquals( name_, "dist_collect")
+			|| strus::caseInsensitiveEquals( name_, "cluster"))
 		{
-			m_data->cardinality = 0;
-			m_data->cardinality_frac = numstring_conv::todouble( value);
-		}
-		else if (strus::caseInsensitiveEquals( name_, "cofactor")
-			|| strus::caseInsensitiveEquals( name_, "norm")
-			|| strus::caseInsensitiveEquals( name_, "cprop")
-			|| strus::caseInsensitiveEquals( name_, "nofranks")
-			|| strus::caseInsensitiveEquals( name_, "range"))
-		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+			addNumericParameter( name_, parameterValue( name_, value));
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -404,47 +358,46 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 
 void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
+	if (strus::caseInsensitiveEquals( name_, "match")
+	||  strus::caseInsensitiveEquals( name_, "punct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "type")
-		|| strus::caseInsensitiveEquals( name_, "result"))
+	else if (strus::caseInsensitiveEquals( name_, "collect"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "cofactor"))
+	else if (strus::caseInsensitiveEquals( name_, "nofres"))
 	{
-		m_data->cofactor = value.tofloat();
+		m_parameter.maxNofResults = value.toint();
 	}
-	else if (strus::caseInsensitiveEquals( name_, "norm"))
+	else if (strus::caseInsensitiveEquals( name_, "maxdf"))
 	{
-		m_data->cofactor = value.tofloat();
+		m_parameter.maxdf = value.tofloat();
 	}
-	else if (strus::caseInsensitiveEquals( name_, "cprop"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_imm"))
 	{
-		m_data->cprop = value.tofloat();
-		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
-		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name_.c_str(), THIS_METHOD_NAME);
-		}
+		m_parameter.proximityConfig.setDistanceImm( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "range"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_close"))
 	{
-		m_data->range = value.touint();
+		m_parameter.proximityConfig.setDistanceClose( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "nofranks"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_near"))
 	{
-		m_data->nofranks = value.touint();
+		m_parameter.proximityConfig.setDistanceNear( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_collect"))
 	{
-		m_data->cardinality = value.touint();
-		m_data->cardinality_frac = 0.0;
+		m_parameter.distance_collect = value.toint();
+	}
+	else if (strus::caseInsensitiveEquals( name_, "cluster"))
+	{
+		m_parameter.proximityConfig.setMinClusterSize( value.toint());
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -452,14 +405,14 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::cr
 		const StorageClientInterface* storage,
 		const GlobalStatistics& stats) const
 {
-	if (m_data->type.empty())
+	if (m_parameter.collectorConfigs.empty())
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
+		m_errorhnd->info( _TXT( "warning: no elements defined to collect in '%s'"), THIS_METHOD_NAME);
 	}
 	try
 	{
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
-		return new SummarizerFunctionContextAccumulateNear( storage, m_processor, m_data, nofCollectionDocuments, m_errorhnd);
+		return new SummarizerFunctionContextAccumulateNear( storage, m_parameter, nofCollectionDocuments, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
@@ -469,20 +422,14 @@ StructView SummarizerFunctionInstanceAccumulateNear::view() const
 	try
 	{
 		StructView rt;
-		rt( paramView("type", m_data->type));
-		rt( paramView( "cofactor", m_data->cofactor));
-		rt( paramView( "nofranks", m_data->nofranks));
-		if (m_data->cardinality_frac > std::numeric_limits<float>::epsilon())
-		{
-			rt( paramView( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_data->cardinality_frac * 100 + 0.5))));
-		}
-		else
-		{
-			rt( paramView( "cardinality", m_data->cardinality));
-		}
-		rt( paramView( "range", m_data->range));
-		rt( paramView( "norm", m_data->norm));
-		rt( paramView( "cprop", m_data->cprop));
+		rt( "collect", getStructView( m_parameter.collectorConfigs));
+		rt( "maxdf", m_parameter.maxdf);
+		rt( "nofres", m_parameter.maxNofResults);
+		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
+		rt( "dist_close", m_parameter.proximityConfig.distance_close);
+		rt( "dist_near", m_parameter.proximityConfig.distance_near);
+		rt( "dist_collect", m_parameter.distance_collect);
+		rt( "cluster", m_parameter.proximityConfig.minClusterSize);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -493,7 +440,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createIns
 {
 	try
 	{
-		return new SummarizerFunctionInstanceAccumulateNear( processor, m_errorhnd);
+		return new SummarizerFunctionInstanceAccumulateNear( m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
@@ -505,17 +452,17 @@ StructView SummarizerFunctionAccumulateNear::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( name(), _TXT("Extract and weight all elements in the forward index of a given type that are within a window with features specified."));
-		rt( P::Feature, "match", _TXT( "defines the query features to inspect for near matches"), "");
-		rt( P::Feature, "punct", _TXT( "defines a sentence delimiter"), "");
-		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
-		rt( P::String, "result", _TXT( "the name of the result if not equal to type"), "");
-		rt( P::Numeric, "cofactor", _TXT( "multiplication factor for features pointing to the same result"), "");
-		rt( P::Numeric, "norm", _TXT( "normalization factor for end result weights"), "");
-		rt( P::Numeric, "nofranks", _TXT( "maximum number of ranks per document"), "");
-		rt( P::Numeric, "cardinality", _TXT( "mimimum number of features per weighted item"), "");
-		rt( P::Numeric, "range", _TXT( "maximum distance (ordinal position) of the weighted features (window size)"), "");
-		rt( P::Numeric, "cprop", _TXT("constant part of idf proportional feature weight"), "0.0:1.0");
+		FunctionDescription rt( name(), _TXT("Extract and weight neighbour elements in the forward index."));
+		rt( P::Feature, "match", _TXT( "defines the query features to use for localization and weighting of the neighbour features to collect"), "");
+		rt( P::Feature, "punct", _TXT( "defines the sentence delimiter"), "");
+		rt( P::String, "collect", _TXT( "describes a configuration of elements to collect with name,type,tag,sep in the strus configuration string syntax"), "");
+		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword and not subject for proximity weighting as fraction of the collection size"), "0:");
+		rt( P::Numeric, "nofres", _TXT( "maximum number of weighted elements returned by each collect configuration"), "1:");
+		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
+		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");
+		rt( P::Numeric, "dist_near", _TXT( "ordinal position distance considered as near for features not in the same sentence"), "1:");
+		rt( P::Numeric, "dist_collect", _TXT( "search distance for neighbour elements to collect"), "1:");
+		rt( P::Numeric, "cluster", _TXT( "part [0.0,1.0] of query features considered as relevant in a group"), "1:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());

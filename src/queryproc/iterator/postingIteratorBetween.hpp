@@ -16,7 +16,7 @@ namespace strus
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Iterator that selects the position from the first argument iterator that are between the second argument iterator and the third argument iterator
+/// \brief Iterator that selects the postings from the first argument iterator that are between the second argument iterator and the third argument iterator
 class IteratorBetween
 	:public IteratorJoin
 {
@@ -24,7 +24,7 @@ public:
 	IteratorBetween( 
 		const std::vector<Reference< PostingIteratorInterface> >& args,
 		ErrorBufferInterface* errorhnd_);
-	virtual ~IteratorBetween();
+	virtual ~IteratorBetween(){}
 
 	virtual const char* featureid() const
 	{
@@ -62,6 +62,29 @@ protected:
 	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
+
+
+class PostingJoinBetween
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinBetween( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinBetween(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference<PostingIteratorInterface> >& itrs,
+			int range,
+			unsigned int cardinality) const;
+
+	virtual const char* name() const;
+
+	virtual StructView view() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+};
+
 
 } //namespace
 #endif

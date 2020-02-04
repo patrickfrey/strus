@@ -5,10 +5,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
+#ifndef _STRUS_QUERYPROC_UTILS_RANKER_HPP_INCLUDED
+#define _STRUS_QUERYPROC_UTILS_RANKER_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/weightedDocument.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/internationalization.hpp"
 #include <set>
@@ -20,7 +19,8 @@ namespace strus
 {
 
 /// \class Ranker
-/// \brief Data structure to keep the N best ranked documents in sorted order
+/// \brief Efficient implementation of a data structure to keep the N best ranked items in sorted order
+template <typename WeightedElement>
 class Ranker
 {
 public:
@@ -34,19 +34,19 @@ public:
 	}
 	~Ranker(){}
 
-	void insert( const WeightedDocument& doc)
+	void insert( const WeightedElement& item)
 	{
 		if (m_maxNofRanks < MaxIndexSize)
 		{
-			bruteInsert( doc);
+			bruteInsert( item);
 		}
 		else
 		{
-			multisetInsert( doc);
+			multisetInsert( item);
 		}
 	}
 
-	std::vector<WeightedDocument> result( std::size_t firstRank) const
+	std::vector<WeightedElement> result( std::size_t firstRank=0) const
 	{
 		if (m_maxNofRanks < MaxIndexSize)
 		{
@@ -64,19 +64,19 @@ public:
 	}
 
 private:
-	void multisetInsert( const WeightedDocument& doc)
+	void multisetInsert( const WeightedElement& item)
 	{
-		m_rankset.insert( doc);
+		m_rankset.insert( item);
 		if (m_maxNofRanks < ++m_nofRanks)
 		{
 			m_rankset.erase( m_rankset.begin());
 		}
 	}
 
-	std::vector<WeightedDocument> multisetResult( std::size_t firstRank) const
+	std::vector<WeightedElement> multisetResult( std::size_t firstRank) const
 	{
-		std::vector<WeightedDocument> rt;
-		RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
+		std::vector<WeightedElement> rt;
+		typename RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
 		std::size_t ridx = 0;
 		for (; ri != re; ++ri,++ridx)
 		{
@@ -90,7 +90,7 @@ private:
 		return rt;
 	}
 
-	void bruteInsert_at( std::size_t idx, const WeightedDocument& doc)
+	void bruteInsert_at( std::size_t idx, const WeightedElement& doc)
 	{
 		std::size_t docix = m_brute_index[ m_maxNofRanks-1];
 		std::memmove( m_brute_index+idx+1, m_brute_index+idx, m_maxNofRanks-idx-1);
@@ -98,7 +98,7 @@ private:
 		m_brute_ar[ docix] = doc;
 	}
 
-	void bruteInsert( const WeightedDocument& doc)
+	void bruteInsert( const WeightedElement& doc)
 	{
 		if (!m_nofRanks)
 		{
@@ -156,9 +156,9 @@ private:
 		++m_nofRanks;
 	}
 
-	std::vector<WeightedDocument> bruteResult( std::size_t firstRank) const
+	std::vector<WeightedElement> bruteResult( std::size_t firstRank) const
 	{
-		std::vector<WeightedDocument> rt;
+		std::vector<WeightedElement> rt;
 		std::size_t limit = m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks;
 		for (std::size_t ridx=firstRank; ridx<limit; ++ridx)
 		{
@@ -167,9 +167,9 @@ private:
 		return rt;
 	}
 
-	const WeightedDocument& lastRank() const
+	const WeightedElement& lastRank() const
 	{
-		static const WeightedDocument emptyRank;
+		static const WeightedElement emptyRank;
 		if (m_nofRanks == 0) return emptyRank;
 		std::size_t lastElemIdx = (m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks) -1;
 		return m_brute_ar[ m_brute_index[ lastElemIdx]];
@@ -177,14 +177,14 @@ private:
 
 private:
 	typedef std::multiset<
-			WeightedDocument,
-			std::less<WeightedDocument>,
-			LocalStructAllocator<WeightedDocument> > RankSet;
+			WeightedElement,
+			std::less<WeightedElement>,
+			LocalStructAllocator<WeightedElement> > RankSet;
 	RankSet m_rankset;
 	enum {MaxIndexSize=128};
 
 	unsigned char m_brute_index[ MaxIndexSize];
-	WeightedDocument m_brute_ar[ MaxIndexSize];
+	WeightedElement m_brute_ar[ MaxIndexSize];
 	std::size_t m_maxNofRanks;
 	std::size_t m_nofRanks;
 };

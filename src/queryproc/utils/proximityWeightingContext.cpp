@@ -12,7 +12,7 @@
 #include "private/internationalization.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/static_assert.hpp"
-#include <cstring>
+#include <limits>
 #include <set>
 
 using namespace strus;
@@ -55,8 +55,7 @@ void ProximityWeightingContext::init(
 	m_stmStack.clear();
 	m_nodeScanner.init( 0, 0);
 
-	strus::Index endpos = m_field.defined() ? m_field.end() : std::numeric_limits<Position>::max();
-
+	strus::Index endpos = m_field.defined() ? m_field.end() : (strus::Index)std::numeric_limits<Position>::max();
 	strus::Index posnoar[ MaxNofArguments];		//... array parallel to m_postings
 	unsigned char prioar[ MaxNofArguments];		//... array with indices into m_postings and posnoar
 
@@ -185,7 +184,8 @@ void ProximityWeightingContext::initNeighbourMatches()
 		if (ni->featidx == eos_featidx) continue;
 
 		std::vector<Node>::iterator fi = ni+1, fe = m_nodear.end();
-		for (; fi != fe && fi->featidx != eos_featidx && ni->pos + m_config.distance_near < fi->pos; ++fi)
+		for (; fi != fe && fi->featidx != eos_featidx
+			&& ni->pos + m_length_postings[ ni->featidx] + m_config.distance_near > fi->pos; ++fi)
 		{
 			if (fi->featidx == ni->featidx) continue;
 
@@ -234,7 +234,7 @@ void ProximityWeightingContext::initNeighbourMatches()
 		if (ni->featidx == eos_featidx) continue;
 
 		std::vector<Node>::iterator fi = ni+1, fe = m_nodear.end();
-		for (; fi != fe && ni->pos + m_config.distance_near < fi->pos; ++fi)
+		for (; fi != fe && ni->pos + m_length_postings[ ni->featidx] + m_config.distance_near > fi->pos; ++fi)
 		{
 			if (fi->featidx == ni->featidx || ni->featidx == eos_featidx) continue;
 
@@ -666,11 +666,30 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 	return rt;
 }
 
-void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist, int minTouchCount) const
+static void addWeightedNeighbourWeights( std::vector<ProximityWeightingContext::WeightedNeighbour>& res, strus::Index startpos, strus::Index endpos, double weight)
+{
+	if (!res.empty())
+	{
+		std::vector<ProximityWeightingContext::WeightedNeighbour>::iterator ri = res.end(), rb = res.begin();
+		for (; ri > rb && ri->pos >= startpos; --ri)
+		{
+			ri->weight += weight;
+		}
+		startpos = res.back().pos + 1;
+	}
+	strus::Index pos = startpos;
+	for (; pos < endpos; ++pos)
+	{
+		res.push_back( ProximityWeightingContext::WeightedNeighbour( pos, weight));
+	}
+}
+
+void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const
 {
 	res.clear();
 
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+	int minTouchCount = m_config.minClusterSize * (m_nofWeightedNeighbours+1);
 
 	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
 
@@ -699,29 +718,62 @@ void ProximityWeightingContext::collectWeightedNeighbours( std::vector<WeightedN
 
 		window.pushWeight( curpos, curweight);
 		const WeightedPos& match = window.currentWeightedPos();
-		strus::Index wpos = 0;
-		if (!res.empty())
+
+		strus::Index startpos = match.pos > dist ? match.pos - dist : 1;
+		strus::Index endpos = match.pos + dist + m_length_postings[ ni->featidx];
+		if (startpos <= window.currentSentenceStart())
 		{
-			std::vector<WeightedNeighbour>::iterator ri = res.end(), rb = res.begin();
-			strus::Index cur_sent_start = window.currentSentenceStart();
-			for (; ri > rb && ri->pos >= cur_sent_start && ri->pos + dist >= match.pos; --ri)
-			{
-				ri->weight += match.weight;
-			}
-			wpos = res.back().pos + 1;
-			if (wpos + dist < match.pos)
-			{
-				wpos = match.pos - dist;
-			}
+			startpos = window.currentSentenceStart()+1;
 		}
-		for (; wpos < match.pos + dist; ++wpos)
-		{
-			res.push_back( WeightedNeighbour( wpos, match.weight));
-		}
+		addWeightedNeighbourWeights( res, startpos, endpos, match.weight);
 	}
 }
 
+void ProximityWeightingContext::collectWeightedNeighboursForSingleFeature( 
+		std::vector<WeightedNeighbour>& res,
+		strus::Index dist,
+		PostingIteratorInterface* postings,
+		PostingIteratorInterface* eos_postings, 
+		strus::Index docno,
+		const strus::IndexRange& field)
+{
+	res.clear();
 
+	bool hasPunctuation = (eos_postings != NULL && eos_postings->skipDoc(docno) == docno);
+	if (postings->skipDoc(docno) != docno) return;
+
+	strus::Index pos = postings->skipPos( field.start());
+	strus::Index endpos = field.defined() ? field.end() : (strus::Index)std::numeric_limits<Position>::max();
+	strus::Index featlen = postings->length();
+
+	if (hasPunctuation)
+	{
+		for (; pos && pos < endpos; pos = postings->skipPos( pos+1))
+		{
+			strus::Index rangeStart = pos-dist;
+			strus::Index rn = eos_postings->skipPos( rangeStart);
+			for (; rn && rn < pos; rn = eos_postings->skipPos( rn+1))
+			{
+				rangeStart = rn;
+			}
+			strus::Index rangeEnd = eos_postings->skipPos( pos);
+			if (rangeEnd > pos + dist)
+			{
+				rangeEnd = pos + dist + featlen;
+			}
+			addWeightedNeighbourWeights( res, rangeStart, rangeEnd, 1.0);
+		}
+	}
+	else
+	{
+		for (; pos && pos < endpos; pos = postings->skipPos( pos+1))
+		{
+			strus::Index rangeStart = pos > dist ? pos - dist : 1;
+			strus::Index rangeEnd = pos + featlen + dist;
+			addWeightedNeighbourWeights( res, rangeStart, rangeEnd, 1.0);
+		}
+	}
+}
 
 void ProximityWeightingContext::Config::setDistanceImm( int distance_imm_)
 {

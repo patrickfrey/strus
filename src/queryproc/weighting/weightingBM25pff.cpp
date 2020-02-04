@@ -103,7 +103,7 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 			{
 				if (m_stopword_itrarsize >= MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
 				m_stopword_itrar[ m_stopword_itrarsize] = itr;
-				m_stopword_weightar[ m_itrarsize] = idf * weight;
+				m_stopword_weightar[ m_stopword_itrarsize] = idf * weight;
 				++m_stopword_itrarsize;
 			}
 			else
@@ -153,7 +153,7 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 
 		if (m_itrarsize > 1)
 		{
-			//... only one relevant feature, fallback to BM25
+			//... more than one relevant feature, do weight with proximity weighted ff and structures
 			m_proximityWeightingContext.init( m_itrar, m_itrarsize, m_eos_itr, docno, strus::IndexRange()/*no field, weight all*/);
 			m_proximityWeightingContext.initStructures( m_structitr.get(), m_structno);
 			m_proximityWeightingContext.collectFieldStatistics();

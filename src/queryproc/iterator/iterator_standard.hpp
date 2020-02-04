@@ -76,6 +76,10 @@ PostingJoinOperatorInterface* createPostingJoinContains( ErrorBufferInterface* e
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinDifference( ErrorBufferInterface* errorhnd);
 
+/// \brief Create a join function that selects the position from the first argument iterator that are between the second argument iterator and the third argument iterator
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinBetween( ErrorBufferInterface* errorhnd);
+
 }//namespace
 #endif
 

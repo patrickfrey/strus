@@ -8,6 +8,7 @@ set( source_files
 	proximityWeightAccumulator.cpp
 	proximityWeightingContext.cpp
 	forwardIndexCollector.cpp
+	forwardIndexTextCollector.cpp
 	postingIteratorHelpers.cpp
 	sentenceIterator.cpp
 )

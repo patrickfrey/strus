@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "ranker.hpp"
+#include "private/ranker.hpp"
 #include "strus/index.hpp"
 #include "strus/constants.hpp"
 #include "strus/weightedDocument.hpp"
@@ -70,7 +70,7 @@ int main( int , const char** )
 	try
 	{
 		enum {MaxNofRanks=10,NofWeightedDocs=1000000};
-		strus::Ranker ranker( MaxNofRanks);
+		strus::Ranker<strus::WeightedDocument> ranker( MaxNofRanks);
 		typedef std::multiset<
 				strus::WeightedDocument,
 				std::less<strus::WeightedDocument>,

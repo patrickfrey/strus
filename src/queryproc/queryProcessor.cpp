@@ -63,6 +63,8 @@ QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorB
 	definePostingJoinOperator( "pred", op);
 	if (0==(op=createPostingJoinContains( m_errorhnd))) throw std::runtime_error( _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "contains", op);
+	if (0==(op=createPostingJoinBetween( m_errorhnd))) throw std::runtime_error( _TXT("error creating posting join operator"));
+	definePostingJoinOperator( "between", op);
 
 	WeightingFunctionInterface* func;
 	SummarizerFunctionInterface* sum;

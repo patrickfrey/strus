@@ -19,7 +19,6 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "proximityWeightingContext.hpp"
-#include "sentenceIterator.hpp"
 #include <vector>
 #include <cstring>
 #include <sstream>
@@ -44,7 +43,7 @@ struct WeightingFunctionParameterBM25pff
 
 	WeightingFunctionParameterBM25pff()
 		:proximityConfig()
-		,maxNofResults(1)
+		,maxNofResults(2)
 		,k1(1.5),b(0.75),avgDocLength(500)
 		,maxdf(0.5)
 	{}
@@ -92,7 +91,7 @@ public:
 
 private:
 	ProximityWeightingContext m_proximityWeightingContext;		///< proximity weighting context
-	WeightingFunctionParameterBM25pff m_parameter;			///< paramenter
+	WeightingFunctionParameterBM25pff m_parameter;			///< parameter
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];		///< posting iterators to weight
 	std::size_t m_itrarsize;					///< nof posting iterators defined to weight
 	FeatureWeights m_weightar;					///< array of feature weights parallel to m_itrar

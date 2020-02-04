@@ -9,20 +9,59 @@
 #include "private/internationalization.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include <limits>
 
 using namespace strus;
 
-#define CONTEXT "forward index collector"
+#define THIS_CONTEXT const_cast<char*>("forward index collector")
 
-void ForwardIndexCollector::defineTypeFeatureType( const std::string& type)
+ForwardIndexCollector::ForwardIndexCollector( const StorageClientInterface* storage_, char tagSeparator_, const std::string& tagtype, ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_),m_valueiterar(),m_tagtypeiter()
+	,m_lastfield(),m_tagSeparator(tagSeparator_),m_errorhnd(errorhnd_)
 {
-	if (m_typeiter.get()) throw strus::runtime_error(_TXT("more than one type feature type iterator defined for '%s'"), CONTEXT);
-	m_typeiter.reset( m_storage->createForwardIterator( type));
+	if (!tagtype.empty())
+	{
+		m_tagtypeiter.reset( m_storage->createForwardIterator( tagtype));
+		if (!m_tagtypeiter.get()) throw std::runtime_error( m_errorhnd->fetchError());
+	}
 }
 
-void ForwardIndexCollector::addValueFeatureType( const std::string& type)
+void ForwardIndexCollector::addFeatureType( const std::string& type)
 {
 	m_valueiterar.push_back( m_storage->createForwardIterator( type));
+	if (!m_valueiterar.back().get()) throw std::runtime_error( m_errorhnd->fetchError());
+}
+
+void ForwardIndexCollector::skipDoc( strus::Index docno)
+{
+	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
+	for (; vi != ve; ++vi)
+	{
+		(*vi)->skipDoc( docno);
+	}
+}
+
+strus::Index ForwardIndexCollector::skipPos( strus::Index pos, strus::Index maxlen)
+{
+	strus::Index rt = 0;
+	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
+	for (; vi != ve; ++vi)
+	{
+		strus::Index pi = (*vi)->skipPos( pos);
+		while (pi && pi < pos + maxlen && pi < rt)
+		{
+			if (m_tagtypeiter.get() && m_tagtypeiter->skipPos( pi) != pi)
+			{
+				pi = (*vi)->skipPos( pi+1);
+			}
+			else
+			{
+				rt = pi;
+				break;
+			}
+		}
+	}
+	return rt;
 }
 
 std::string ForwardIndexCollector::fetch( strus::Index pos)
@@ -39,15 +78,15 @@ std::string ForwardIndexCollector::fetch( strus::Index pos)
 		{
 			if ((*vi)->skipPos( pos) == pos)
 			{
-				if (m_typeiter.get())
+				if (m_tagtypeiter.get())
 				{
-					if (m_typeiter->skipPos( pos) == pos)
+					if (m_tagtypeiter->skipPos( pos) == pos)
 					{
-						rt.append( m_typeiter->fetch());
-						if (m_separator) rt.push_back( m_separator);
+						rt.append( m_tagtypeiter->fetch());
+						if (m_tagSeparator) rt.push_back( m_tagSeparator);
 						rt.append( (*vi)->fetch());
 
-						strus::Index endpos = m_typeiter->skipPos( pos+1);
+						strus::Index endpos = m_tagtypeiter->skipPos( pos+1);
 						m_lastfield.init( pos, endpos ? endpos : (pos+1));
 					}
 				}

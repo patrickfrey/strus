@@ -16,6 +16,7 @@
 #include "postingIteratorSucc.hpp"
 #include "postingIteratorPred.hpp"
 #include "postingIteratorUnion.hpp"
+#include "postingIteratorBetween.hpp"
 
 using namespace strus;
 
@@ -92,6 +93,11 @@ PostingJoinOperatorInterface* strus::createPostingJoinContains( ErrorBufferInter
 PostingJoinOperatorInterface* strus::createPostingJoinDifference( ErrorBufferInterface* errorhnd)
 {
 	return new PostingJoinDifference( errorhnd);
+}
+
+PostingJoinOperatorInterface* strus::createPostingJoinBetween( ErrorBufferInterface* errorhnd)
+{
+	return new PostingJoinBetween( errorhnd);
 }
 
 
