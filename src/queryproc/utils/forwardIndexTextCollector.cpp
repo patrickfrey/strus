@@ -107,7 +107,7 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 		}
 		else
 		{
-			if (!rt.empty() && rt.back() != ' ') rt.push_back(' ');
+			if (!rt.empty() && rt[ rt.size()-1] != ' ') rt.push_back(' ');
 			rt.append( m_textiter->fetch());
 		}
 	}

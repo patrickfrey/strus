@@ -126,7 +126,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 
 void SummarizerFunctionContextAccumulateNear::collectSummariesFromEntityMap( std::vector<SummaryElement>& summaries, const std::string& name, EntityMap& entitymap) const
 {
-	typedef WeightedValue<const char*,(const char*)0> WeightedFeature;
+	typedef WeightedValue<const char*> WeightedFeature;
 
 	Ranker<WeightedFeature> ranker( m_parameter.maxNofResults);
 	EntityMap::const_iterator ei = entitymap.begin(), ee = entitymap.end();
