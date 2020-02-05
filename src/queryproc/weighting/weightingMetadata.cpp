@@ -64,24 +64,6 @@ const std::vector<WeightedField>& WeightingFunctionContextMetadata::call( const 
 	return m_lastResult;
 }
 
-std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-	
-		m_metadata->skipDoc( docno);
-		double val = (double)m_metadata->getValue( m_elementHandle);
-		double res = m_weight * val;
-	
-		out << string_format( _TXT( "result=%.5f, value=%.5f"), res, val) << std::endl;
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of the weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
-
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
 	NumericVariant rt;

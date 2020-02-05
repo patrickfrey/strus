@@ -7,71 +7,52 @@
  */
 #include "sentenceIterator.hpp"
 #include "postingIteratorHelpers.hpp"
+#include "private/internationalization.hpp"
+#include <limits>
 
 using namespace strus;
 
-void SentenceIterator::init( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_)
+SentenceIterator::SentenceIterator( PostingIteratorInterface* eos_iter_, strus::Index docno, const strus::IndexRange& field_, strus::Index maxSentenceSize_)
+	:m_eos_iter(eos_iter_)
+	,m_field(field_)
+	,m_cur()
+	,m_maxSentenceSize(maxSentenceSize_)
+	,m_eof(false)
 {
-	m_delimar = delimar_;
-	m_structarSize = structarSize_;
-	m_windowsize = windowsize_;
-	m_cur.init( 0, 0);
+	if (!m_eos_iter) throw std::runtime_error(_TXT("undefined end of sentence posting iterator"));
+	if (!m_eos_iter->skipDoc( docno)) m_eof = true;
+	m_cur.init( m_field.start(), m_field.start());
 }
 
-strus::IndexRange SentenceIterator::skipPos( strus::Index posno)
+strus::IndexRange SentenceIterator::next()
 {
-	if (!posno) return strus::IndexRange();
-	if (posno < m_cur.end() && posno >= m_cur.start()) return m_cur;
-
-	if (m_cur.end() && m_cur.end() <= posno && m_cur.end() + m_windowsize >= posno)
+	while (!m_eof)
 	{
-		// ... we are close enough to the last structure element and skip seeking for it:
-		strus::Index start = m_cur.end();
-		for (;;)
+		strus::Index nextpos = m_eos_iter->skipPos( m_cur.end()+1);
+		if (!nextpos || (m_field.defined() && nextpos > m_field.end()))
 		{
-			strus::Index end = callSkipPos( start+1, m_delimar, m_structarSize);
-			if (end && end <= posno)
-			{
-				start = end;
-				continue;
-			}
-			m_cur.init( start, end);
+			m_cur.init( m_cur.end()+1, m_field.defined() ? m_field.end() :  m_cur.end()+1+m_maxSentenceSize);
+			m_eof = true;
 			break;
 		}
-	}
-	else
-	{
-		Index windowsize = m_windowsize;
-		Index startpos;
-		do
+		else
 		{
-			// Search start of structure frame:
-			startpos = posno > windowsize ? (posno - windowsize):0;
-			Index pos = callSkipPos( startpos, m_delimar, m_structarSize);
-			if (pos && pos <= posno)
+			strus::Index len = nextpos - (m_cur.end()+1);
+			if (len <= 0 || len > m_maxSentenceSize)
 			{
-				strus::Index start = pos;
-				for (;;)
-				{
-					// Search end of structure frame:
-					strus::Index end = callSkipPos( start+1, m_delimar, m_structarSize);
-					if (end && end <= posno)
-					{
-						start = end;
-						continue;
-					}
-					m_cur.init( start, end);
-					break;
-				}
-				break;
+				m_cur.setEnd( nextpos);
+				continue;
 			}
 			else
 			{
-				windowsize = windowsize * 2 + 1;
+				m_cur.init( m_cur.end()+1, nextpos);
+				return m_cur;
 			}
 		}
-		while (startpos);
 	}
+	m_cur.clear();
 	return m_cur;
 }
+
+
 

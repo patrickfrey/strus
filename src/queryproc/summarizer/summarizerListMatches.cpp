@@ -82,25 +82,6 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextListMatches::debugCall( const strus::WeightedDocument& doc)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-	
-		std::vector<SummaryElement> res = getSummary( doc);
-		std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-		for (; ri != re; ++ri)
-		{
-			out << string_format( _TXT("match %s %s"), ri->name().c_str(), ri->value().c_str()) << std::endl;
-		}
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
-
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name_, const std::string& value)
 {
 	if (strus::caseInsensitiveEquals( name_, "match"))
@@ -177,6 +158,16 @@ StructView SummarizerFunctionListMatches::view() const
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
+}
+
+const char* SummarizerFunctionInstanceListMatches::name() const
+{
+	return THIS_METHOD_NAME;
+}
+
+const char* SummarizerFunctionListMatches::name() const
+{
+	return THIS_METHOD_NAME;
 }
 
 

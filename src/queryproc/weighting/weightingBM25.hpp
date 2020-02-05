@@ -78,8 +78,6 @@ public:
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 
-	virtual std::string debugCall( const Index& docno);
-
 private:
 	double featureWeight( const Feature& feat, strus::Index docno);
 

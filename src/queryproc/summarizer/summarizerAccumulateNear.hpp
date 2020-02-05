@@ -101,8 +101,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	enum {MaxNofArguments=ProximityWeightingContext::MaxNofArguments};	///< maximum number of arguments fix because of extensive use of fixed size arrays
 	typedef ProximityWeightingContext::FeatureWeights FeatureWeights;
@@ -173,7 +171,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* name() const {return "accunear";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

@@ -51,7 +51,6 @@ void ProximityWeightingContext::init(
 	m_nodear.clear();
 	m_stmOperations.clear();
 	m_fieldStatistics.clear();
-	m_titleFields.clear();
 	m_stmStack.clear();
 	m_nodeScanner.init( 0, 0);
 
@@ -381,11 +380,6 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 								}
 								strus::IndexRange headerField = structIterator->headerField( lnk.index());
 								touchTitleNode( ni, headerField, field);
-
-								if (m_field.defined() && field.cover( m_field))
-								{
-									m_titleFields.push_back( headerField);
-								}
 							}
 						}
 					}

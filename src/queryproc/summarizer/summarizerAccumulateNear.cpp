@@ -189,50 +189,15 @@ std::vector<SummaryElement>
 				++wi;
 			}
 			collectSummariesFromEntityMap( rt, m_parameter.collectorConfigs[ cidx].name, entitymap);
-			
 		}
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-
-std::string SummarizerFunctionContextAccumulateNear::debugCall( const strus::WeightedDocument& doc)
-{
-	try
-	{
-		std::ostringstream out;
-		out << strus::string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-	
-		std::vector<SummaryElement> res = getSummary( doc);
-		std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-		for (; ri != re; ++ri)
-		{
-			if (ri->index() >= 0)
-			{
-				out << strus::string_format( "%s[%d] %.5f = %s", ri->name().c_str(), ri->index(), ri->weight(), ri->value().c_str());
-			}
-			else
-			{
-				out << strus::string_format( "%s %.5f = %s", ri->name().c_str(), ri->weight(), ri->value().c_str());
-			}
-			out << std::endl;
-		}
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
 const char* SummarizerFunctionInstanceAccumulateNear::name() const
 {
 	return THIS_METHOD_NAME;
-}
-
-static NumericVariant parameterValue( const std::string& name_, const std::string& value)
-{
-	NumericVariant rt;
-	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
-	return rt;
 }
 
 void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& configstr_, ErrorBufferInterface* errorhnd)
@@ -325,6 +290,13 @@ static StructView getStructView( const std::vector<SummarizerFunctionParameterAc
 	return rt;
 }
 
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
+{
+	NumericVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
+	return rt;
+}
+
 void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
@@ -332,7 +304,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		if (strus::caseInsensitiveEquals( name_, "match")
 		||  strus::caseInsensitiveEquals( name_, "punct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		if (strus::caseInsensitiveEquals( name_, "collect"))
 		{
@@ -350,7 +322,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarizer function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -361,11 +333,11 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	if (strus::caseInsensitiveEquals( name_, "match")
 	||  strus::caseInsensitiveEquals( name_, "punct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name_, "collect"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name_, "nofres"))
 	{
@@ -397,7 +369,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	}
 	else
 	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarizer function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 	}
 }
 
@@ -445,7 +417,10 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createIns
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-
+const char* SummarizerFunctionAccumulateNear::name() const
+{
+	return THIS_METHOD_NAME;
+}
 
 StructView SummarizerFunctionAccumulateNear::view() const
 {

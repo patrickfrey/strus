@@ -16,7 +16,7 @@ class SummarizerFunctionInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Create a summarizer for getting all positions of the matches in document
+/// \brief Create a summarizer for getting all positions of the matches in document field
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerListMatches( ErrorBufferInterface* errorhnd_);
 
@@ -28,11 +28,11 @@ SummarizerFunctionInterface* createSummarizerAttribute( ErrorBufferInterface* er
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerMetaData( ErrorBufferInterface* errorhnd_);
 
-/// \brief Create a summarizer for getting the whole forward index of a given type for a document
+/// \brief Create a summarizer for getting the whole forward index of a given type for a document field
 /// \return the summarizer reference (with ownership)
-SummarizerFunctionInterface* createSummarizerForwardIndex( ErrorBufferInterface* errorhnd_);
+SummarizerFunctionInterface* createSummarizerContent( ErrorBufferInterface* errorhnd_);
 
-/// \brief Create a summarizer for getting the best phrases of matches
+/// \brief Create a summarizer for getting the best weighted passage of a document field
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_);
 
@@ -44,9 +44,13 @@ SummarizerFunctionInterface* createSummarizerMatchVariables( ErrorBufferInterfac
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerAccumulateVariable( ErrorBufferInterface* errorhnd_);
 
-/// \brief Create a summarizer for weighting links near matches
+/// \brief Create a summarizer for weighting neighbour features of the matches
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerAccumulateNear( ErrorBufferInterface* errorhnd_);
+
+/// \brief Create a summarizer for getting the headers of the content fields covering a document field
+/// \return the summarizer reference (with ownership)
+SummarizerFunctionInterface* createSummarizerStructureHeader( ErrorBufferInterface* errorhnd_);
 
 }//namespace
 #endif

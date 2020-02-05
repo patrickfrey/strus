@@ -24,7 +24,6 @@
 
 using namespace strus;
 #define THIS_METHOD_NAME const_cast<char*>("BM25pff")
-#undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 		const StorageClientInterface* storage,
@@ -199,24 +198,6 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 		return m_lastResult;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
-}
-
-std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-
-		const std::vector<WeightedField>& res = call( docno);
-		std::vector<WeightedField>::const_iterator ri = res.begin(), re = res.end();
-		for (; ri != re; ++ri)
-		{
-			out << string_format( _TXT("result field=[%d,%d], weight=%.5f"), (int)ri->field().start(), (int)ri->field().end(), ri->weight()) << std::endl;
-		}
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)

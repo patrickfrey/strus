@@ -69,31 +69,6 @@ const std::vector<WeightedField>& WeightingFunctionContextTermFrequency::call( c
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
-std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-	
-		double res = 0.0;
-		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-		for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
-		{
-			if (docno==fi->itr->skipDoc( docno))
-			{
-				double ww = fi->weight * fi->itr->frequency();
-				res += ww;
-				out << string_format( _TXT( "[%u] result=%.5f, ff=%u"),
-							fidx, ww, (unsigned int)fi->itr->frequency()) << std::endl;			
-			}
-		}
-		out << string_format( _TXT( "sum result=%.5f"), res) << std::endl;
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
 	NumericVariant rt;

@@ -98,38 +98,6 @@ const std::vector<WeightedField>& WeightingFunctionContextScalar::call( const In
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
 }
 
-std::string WeightingFunctionContextScalar::debugCall( const Index& docno)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-	
-		if (!m_metadatahnd.empty())
-		{
-			m_metadata->skipDoc( docno);
-		}
-		unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
-		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
-		fillParameter( param);
-	
-		out << string_format( _TXT( "parameter[%u] = ("), nofParam);
-		double res = m_func->call( param, nofParam);
-		unsigned int pi=0, pe=nofParam;
-		for (unsigned int pidx=0; pi != pe; ++pi,++pidx)
-		{
-			if (pidx) out << ", ";
-			out << string_format( _TXT( ", %.5f"), param[pi]);
-		}
-		out << ")" << std::endl;
-	
-		out << string_format( _TXT( "sum result=%.5f"), res) << std::endl;
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
-
 void WeightingFunctionInstanceScalar::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try

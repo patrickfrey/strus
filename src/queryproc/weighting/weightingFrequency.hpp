@@ -51,8 +51,6 @@ public:
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 
-	virtual std::string debugCall( const Index& docno);
-
 private:
 	std::vector<Feature> m_featar;
 	std::vector<WeightedField> m_lastResult;	///< buffer for the last result calculated

@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set( source_files
+	structureSearch.cpp
 	positionWindow.cpp
 	proximityWeightAccumulator.cpp
 	proximityWeightingContext.cpp

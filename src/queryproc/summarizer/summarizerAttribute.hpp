@@ -51,8 +51,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	AttributeReaderInterface* m_attribreader;			///< attribute reader interface
 	std::string m_attribname;					///< attribute name to output
@@ -84,7 +82,7 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "attribute";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -105,7 +103,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* name() const {return "attribute";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

@@ -92,8 +92,6 @@ public:
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
 
-	std::string getWeightingDebugInfo( std::size_t fidx, const Index& docno);
-
 	void defineWeightingVariableValue( std::size_t index, const std::string& varname, double value);
 
 private:

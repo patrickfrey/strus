@@ -49,8 +49,6 @@ public:
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 
-	virtual std::string debugCall( const Index& docno);
-
 private:
 	strus::Reference<MetaDataReaderInterface> m_metadata;
 	Index m_elementHandle;

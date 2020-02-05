@@ -96,8 +96,8 @@ QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorB
 	defineSummarizerFunction( "metadata", sum);
 	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
 	defineSummarizerFunction( "attribute", sum);
-	if (0==(sum=createSummarizerForwardIndex( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
-	defineSummarizerFunction( "forwardindex", sum);
+	if (0==(sum=createSummarizerContent( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
+	defineSummarizerFunction( "content", sum);
 	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchphrase", sum);
 	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
@@ -108,6 +108,8 @@ QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorB
 	defineSummarizerFunction( "accuvar", sum);
 	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
 	defineSummarizerFunction( "accunear", sum);
+	if (0==(sum=createSummarizerStructureHeader( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
+	defineSummarizerFunction( "structheader", sum);
 
 	ScalarFunctionParserInterface* sfp;
 	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw std::runtime_error( _TXT("error creating scalar function parser"));

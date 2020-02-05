@@ -49,11 +49,6 @@ public:
 	/// \param[in] docno document number
 	/// \return the calculated best N weighted fields of the document as reference
 	virtual const std::vector<WeightedField>& call( const Index& docno)=0;
-
-	/// \brief Get debug info dumped as string of the weighting call for one document
-	/// \param[in] docno document to get the debug info from
-	/// \return the debug info as string
-	virtual std::string debugCall( const Index& docno)=0;
 };
 
 }//namespace

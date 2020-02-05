@@ -17,9 +17,9 @@ using namespace strus;
 
 ForwardIndexTextCollector::ForwardIndexTextCollector(
 		const StorageClientInterface* storage_,
+		const std::string& textType,
 		const std::string& wordType,
-		const std::string& texttype,
-		const std::string& entitytype,
+		const std::string& entityType,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_textiter(),m_entityiter(),m_typeiter(),m_errorhnd(errorhnd_)
 {
@@ -28,19 +28,36 @@ ForwardIndexTextCollector::ForwardIndexTextCollector(
 		m_typeiter.reset( m_storage->createForwardIterator( wordType));
 		if (!m_typeiter.get()) throw std::runtime_error( m_errorhnd->fetchError());
 	}
-	if (!texttype.empty())
+	if (!textType.empty())
 	{
-		m_textiter.reset( m_storage->createForwardIterator( texttype));
+		m_textiter.reset( m_storage->createForwardIterator( textType));
 		if (!m_textiter.get()) throw std::runtime_error( m_errorhnd->fetchError());
 	}
 	else
 	{
 		throw strus::runtime_error(_TXT("no type for text to collect defined in '%s'"), THIS_CONTEXT);
 	}
-	if (!entitytype.empty())
+	if (!entityType.empty())
 	{
-		m_entityiter.reset( m_storage->createForwardIterator( entitytype));
+		m_entityiter.reset( m_storage->createForwardIterator( entityType));
 		if (!m_entityiter.get()) throw std::runtime_error( m_errorhnd->fetchError());
+	}
+}
+
+ForwardIndexTextCollector::ForwardIndexTextCollector(
+		const StorageClientInterface* storage_,
+		const std::string& textType,
+		ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_),m_textiter(),m_entityiter(),m_typeiter(),m_errorhnd(errorhnd_)
+{
+	if (!textType.empty())
+	{
+		m_textiter.reset( m_storage->createForwardIterator( textType));
+		if (!m_textiter.get()) throw std::runtime_error( m_errorhnd->fetchError());
+	}
+	else
+	{
+		throw strus::runtime_error(_TXT("no type for text to collect defined in '%s'"), THIS_CONTEXT);
 	}
 }
 
@@ -65,6 +82,7 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 		{
 			if (pos == m_typeiter->skipPos( pos) && pos == m_entityiter->skipPos( pos))
 			{
+				std::string entitystr = m_entityiter->fetch();
 				strus::Index nextpos = m_typeiter->skipPos( pos+1);
 				if (!nextpos) nextpos = pos+1;
 				strus::Index pi = pos;
@@ -73,9 +91,10 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 				{
 					if (!textstr.empty()) textstr.push_back(' ');
 					textstr.append( m_textiter->fetch());
+					if (entitystr == textstr) break;
 					pi = m_textiter->skipPos( pi+1);
 				}
-				std::string entitystr = m_entityiter->fetch();
+				rt.append( textstr);
 				if (entitystr != textstr)
 				{
 					if (!rt.empty()) rt.push_back(' ');
@@ -91,9 +110,42 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 			if (!rt.empty() && rt.back() != ' ') rt.push_back(' ');
 			rt.append( m_textiter->fetch());
 		}
-		break;
 	}
 	return rt;
 }
 
+double ForwardIndexTextCollector::typedWordFraction( const strus::IndexRange& field)
+{
+	if (!m_typeiter.get())
+	{
+		strus::Index pos = m_textiter->skipPos( field.start());
+		return (pos && pos < field.end()) ? 1.0 : 0.0;
+	}
+	else
+	{
+		strus::Index typedWordCount = 0;
+		strus::Index untypedWordCount = 0;
+		strus::Index pos = m_textiter->skipPos( field.start());
+		strus::Index endpos = field.defined() ? field.end() : std::numeric_limits<strus::Index>::max();
+		for (; pos && pos < endpos; pos = m_textiter->skipPos( pos+1))
+		{
+			if (pos == m_typeiter->skipPos( pos))
+			{
+				++typedWordCount;
+			}
+			else
+			{
+				++untypedWordCount;
+			}
+		}
+		if (untypedWordCount == 0)
+		{
+			return typedWordCount == 0 ? 0.0 : 1.0;
+		}
+		else
+		{
+			return (double)typedWordCount / (double)untypedWordCount;
+		}
+	}
+}
 

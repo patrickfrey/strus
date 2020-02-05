@@ -29,17 +29,12 @@ namespace strus
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-enum {
-	MaxParaTitleSize=12
-};
 
 /// \brief Configured parameters of the MatchPhrase summarizer function
 struct SummarizerFunctionParameterMatchPhrase
@@ -58,6 +53,7 @@ struct SummarizerFunctionParameterMatchPhrase
 		:proximityConfig(o.proximityConfig)
 		,name(o.name),textType(o.textType),wordType(o.wordType),entityType(o.entityType)
 	{}
+};
 
 class SummarizerFunctionContextMatchPhrase
 	:public SummarizerFunctionContextInterface
@@ -71,9 +67,7 @@ public:
 	/// \param[in] errorhnd_ error buffer interface
 	SummarizerFunctionContextMatchPhrase(
 			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
-			MetaDataReaderInterface* metadata_,
-			const Reference<SummarizerFunctionParameterMatchPhrase>& parameter_,
+			const SummarizerFunctionParameterMatchPhrase& parameter_,
 			double nofCollectionDocuments_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
@@ -89,10 +83,9 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
-public:
-	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
+private:
+	enum {MaxNofArguments=ProximityWeightingContext::MaxNofArguments};	///< maximum number of arguments fix because of extensive use of fixed size arrays
+	typedef ProximityWeightingContext::FeatureWeights FeatureWeights;
 
 private:
 	ProximityWeightingContext m_proximityWeightingContext;		///< proximity weighting context
@@ -104,53 +97,6 @@ private:
 	double m_nofCollectionDocuments;				///< number of documents in the collection
 	const StorageClientInterface* m_storage;			///< storage client interface
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error reporting
-
-private:
-
-	double windowWeight( WeightingData& wdata, const PositionWindow& poswin, const strus::IndexRange& structframe, const strus::IndexRange& paraframe);
-
-	void fetchNoTitlePostings( WeightingData& wdata, PostingIteratorInterface** itrar, Index& cntTitleTerms, Index& cntNoTitleTerms);
-	Match findBestMatch_( WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);
-	Match findBestMatch( WeightingData& wdata);
-	Match findBestMatchNoTitle( WeightingData& wdata);
-	Match findAbstractMatch( WeightingData& wdata);
-
-	Match logFindBestMatch_( std::ostream& out, WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);
-	Match logFindBestMatchNoTitle( std::ostream& out, WeightingData& wdata);
-	Match logFindAbstractMatch( std::ostream& out, WeightingData& wdata);
-
-	Abstract getPhraseAbstract( const Match& candidate, WeightingData& wdata);
-	Abstract getParaTitleAbstract( Match& phrase_match, WeightingData& wdata);
-
-	std::string getParaTitleString( const Abstract& para_abstract);
-	std::string getPhraseString( const Abstract& phrase_abstract, WeightingData& wdata);
-	std::string getPhraseString( strus::Index firstpos, strus::Index lastpos);
-
-	std::vector<SummaryElement>
-		getSummariesFromAbstracts(
-			const Abstract& para_abstract,
-			const Abstract& phrase_abstract,
-			WeightingData& wdata);
-
-private:
-	const StorageClientInterface* m_storage;		///< storage access
-	const QueryProcessorInterface* m_processor;		///< query processor interface
-	Reference<MetaDataReaderInterface> m_metadata;		///< access metadata arguments
-	Reference<ForwardIteratorInterface> m_forwardindex;	///< forward index iterator
-	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
-	double m_nofCollectionDocuments;			///< number of documents in the collection
-	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
-	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
-	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
-	std::size_t m_itrarsize;				///< number of weighted features
-	std::size_t m_structarsize;				///< number of end of structure elements
-	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
-	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
-	unsigned int m_cardinality;				///< calculated cardinality
-	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
-	bool m_initialized;					///< true, if the structures have already been initialized
-	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
-	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -160,9 +106,8 @@ class SummarizerFunctionInstanceMatchPhrase
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_parameter( new SummarizerFunctionParameterMatchPhrase())
-		,m_processor(processor_)
+	explicit SummarizerFunctionInstanceMatchPhrase( ErrorBufferInterface* errorhnd_)
+		:m_parameter()
 		,m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
@@ -179,12 +124,11 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "matchphrase";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
 	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
-	const QueryProcessorInterface* m_processor;		///< query processor interface
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -201,7 +145,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* name() const {return "matchphrase";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

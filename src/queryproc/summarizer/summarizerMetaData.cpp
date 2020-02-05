@@ -23,7 +23,7 @@
 
 using namespace strus;
 
-#define THIS_METHOD_NAME const_cast<char*>("BM25")
+#define THIS_METHOD_NAME const_cast<char*>("metadata")
 
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& metaname_, ErrorBufferInterface* errorhnd_)
@@ -68,20 +68,6 @@ std::vector<SummaryElement>
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
-}
-
-std::string SummarizerFunctionContextMetaData::debugCall( const strus::WeightedDocument& doc)
-{
-	std::ostringstream out;
-	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	m_metadata->skipDoc( doc.docno());
-	NumericVariant value = m_metadata->getValue( m_attrib);
-	if (value.defined()) 
-	{
-		out << string_format( _TXT( "metadata name=%s, value=%s"), m_metaname.c_str(), value.tostring().c_str()) << std::endl;
-	}
-	return out.str();
 }
 
 void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& name_, const std::string& value)
@@ -158,5 +144,14 @@ StructView SummarizerFunctionMetaData::view() const
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
+}
+
+const char* SummarizerFunctionInstanceMetaData::name() const
+{
+	return THIS_METHOD_NAME;
+}
+const char* SummarizerFunctionMetaData::name() const
+{
+	return THIS_METHOD_NAME;
 }
 

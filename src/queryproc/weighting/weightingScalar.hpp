@@ -59,8 +59,6 @@ public:
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 
-	virtual std::string debugCall( const Index& docno);
-
 public:
 	enum {MaxNofParameter=64};				///< maximum number of arguments passed to the defined function
 

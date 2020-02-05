@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "summarizerForwardIndex.hpp"
+#include "summarizerContent.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -25,9 +25,9 @@
 #include <limits>
 
 using namespace strus;
-#define THIS_METHOD_NAME const_cast<char*>("forwardindex")
+#define THIS_METHOD_NAME const_cast<char*>("content")
 
-SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( const StorageClientInterface* storage_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
+SummarizerFunctionContextContent::SummarizerFunctionContextContent( const StorageClientInterface* storage_, const std::string& type_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_forwardindex(storage_->createForwardIterator(type_))
 	,m_type(type_),m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_)
 {
@@ -37,12 +37,12 @@ SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( co
 	}
 }
 
-void SummarizerFunctionContextForwardIndex::setVariableValue( const std::string&, double)
+void SummarizerFunctionContextContent::setVariableValue( const std::string&, double)
 {
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), THIS_METHOD_NAME);
 }
 
-void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
+void SummarizerFunctionContextContent::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&,
@@ -53,7 +53,7 @@ void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextForwardIndex::getSummary( const strus::WeightedDocument& doc)
+	SummarizerFunctionContextContent::getSummary( const strus::WeightedDocument& doc)
 {
 	try
 	{
@@ -72,26 +72,7 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextForwardIndex::debugCall( const strus::WeightedDocument& doc)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-	
-		std::vector<SummaryElement> res = getSummary( doc);
-		std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-		for (; ri != re; ++ri)
-		{
-			out << string_format( _TXT("match %s '%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
-		}
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
-
-void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::string& name_, const std::string& value)
+void SummarizerFunctionInstanceContent::addStringParameter( const std::string& name_, const std::string& value)
 {
 	if (strus::caseInsensitiveEquals( name_, "type"))
 	{
@@ -103,7 +84,7 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 	}
 }
 
-void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::string& name_, const NumericVariant& val)
+void SummarizerFunctionInstanceContent::addNumericParameter( const std::string& name_, const NumericVariant& val)
 {
 	if (strus::caseInsensitiveEquals( name_, "name"))
 	{
@@ -126,7 +107,7 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 }
 
 
-SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::createFunctionContext(
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceContent::createFunctionContext(
 		const StorageClientInterface* storage_,
 		const GlobalStatistics&) const
 {
@@ -136,12 +117,12 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceForwardIndex::crea
 		{
 			throw strus::runtime_error(_TXT("missing type and result definition of '%s'"), THIS_METHOD_NAME);
 		}
-		return new SummarizerFunctionContextForwardIndex( storage_, m_type, m_maxNofMatches, m_errorhnd);
+		return new SummarizerFunctionContextContent( storage_, m_type, m_maxNofMatches, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
-StructView SummarizerFunctionInstanceForwardIndex::view() const
+StructView SummarizerFunctionInstanceContent::view() const
 {
 	try
 	{
@@ -154,18 +135,18 @@ StructView SummarizerFunctionInstanceForwardIndex::view() const
 }
 
 
-SummarizerFunctionInstanceInterface* SummarizerFunctionForwardIndex::createInstance(
+SummarizerFunctionInstanceInterface* SummarizerFunctionContent::createInstance(
 		const QueryProcessorInterface*) const
 {
 	try
 	{
-		return new SummarizerFunctionInstanceForwardIndex( m_errorhnd);
+		return new SummarizerFunctionInstanceContent( m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
 
 
-StructView SummarizerFunctionForwardIndex::view() const
+StructView SummarizerFunctionContent::view() const
 {
 	try
 	{
@@ -179,4 +160,13 @@ StructView SummarizerFunctionForwardIndex::view() const
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
+const char* SummarizerFunctionInstanceContent::name() const
+{
+	return THIS_METHOD_NAME;
+}
+
+const char* SummarizerFunctionContent::name() const
+{
+	return THIS_METHOD_NAME;
+}
 

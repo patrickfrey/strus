@@ -5,9 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_QUERYPROC_STRUCTURE_ITERATOR_HPP_INCLUDED
-#define _STRUS_QUERYPROC_STRUCTURE_ITERATOR_HPP_INCLUDED
-#include "private/internationalization.hpp"
+#ifndef _STRUS_QUERYPROC_SENTENCE_ITERATOR_HPP_INCLUDED
+#define _STRUS_QUERYPROC_SENTENCE_ITERATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -18,20 +17,16 @@ namespace strus {
 class SentenceIterator
 {
 public:
-	SentenceIterator()
-		:m_delimar(0),m_structarSize(0),m_windowsize(0),m_cur(0,0){}
-	SentenceIterator( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_)
-		:m_delimar(delimar_),m_structarSize(structarSize_),m_windowsize(windowsize_),m_cur(0,0){}
+	SentenceIterator( PostingIteratorInterface* eos_iter_, strus::Index docno, const strus::IndexRange& field_, strus::Index maxSentenceSize_);
 
-	void init( Index windowsize_, PostingIteratorInterface** delimar_, std::size_t structarSize_);
-
-	strus::IndexRange skipPos( strus::Index posno);
+	strus::IndexRange next();
 
 private:
-	PostingIteratorInterface** m_delimar;
-	std::size_t m_structarSize;
-	Index m_windowsize;
+	PostingIteratorInterface* m_eos_iter;
+	strus::IndexRange m_field;
 	strus::IndexRange m_cur;
+	strus::Index m_maxSentenceSize;
+	bool m_eof;
 };
 
 }//namespace

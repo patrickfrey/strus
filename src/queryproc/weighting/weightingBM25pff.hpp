@@ -82,8 +82,6 @@ public:
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 
-	virtual std::string debugCall( const Index& docno);
-
 public:
 	enum {MaxNofArguments=ProximityWeightingContext::MaxNofArguments};	///< maximum number of arguments fix because of extensive use of fixed size arrays
 	typedef ProximityWeightingContext::FeatureWeights FeatureWeights;

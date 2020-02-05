@@ -56,7 +56,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_evalset_defined(false)
 	,m_termstatsmap()
 	,m_globstats()
-	,m_debugMode(false)
 	,m_usePosinfo(usePosinfo_)
 	,m_errorhnd(errorhnd_)
 	,m_debugtrace(0)
@@ -222,7 +221,6 @@ StructView Query::view() const
 	StructView rt;
 	rt( "eval", m_queryEval->view());
 	rt( "feature", featuresView());
-	rt( "debug", m_debugMode ? "true":"false");
 	if (!m_evalset_docnolist.empty()) rt( "docs", m_evalset_docnolist);
 	if (!m_usernames.empty()) rt( "user", m_usernames);
 	return rt;
@@ -517,11 +515,6 @@ void Query::setWeightingVariableValue(
 	}
 }
 
-void Query::setDebugMode( bool debug)
-{
-	m_debugMode = debug;
-}
-
 QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 {
 	const char* evaluationPhase = "query feature postings initialization";
@@ -796,34 +789,6 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					li->setSummarizerPrefix( m_queryEval->summarizers()[ sidx].summaryId(), ':');
 				}
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
-			}
-			if (m_debugMode)
-			{
-				// Collect debug info of weighting and summarizer functions:
-				std::vector<SummarizerDef>::const_iterator
-					zi = m_queryEval->summarizers().begin(),
-					ze = m_queryEval->summarizers().end();
-				si = summarizers.begin();
-				for (;si != se && zi != ze; ++si,++zi)
-				{
-					if (!zi->debugAttributeName().empty())
-					{
-						std::string debuginfo = (*si)->debugCall( *ri);
-						summaries.push_back( SummaryElement( std::string("debug:") + zi->debugAttributeName(), debuginfo));
-					}
-				}
-				std::vector<WeightingDef>::const_iterator
-					wi = m_queryEval->weightingFunctions().begin(),
-					we = m_queryEval->weightingFunctions().end();
-				std::size_t widx = 0;
-				for (; wi != we; ++wi,++widx)
-				{
-					if (!wi->debugAttributeName().empty())
-					{
-						std::string debuginfo = accumulator.getWeightingDebugInfo( widx, ri->docno());
-						summaries.push_back( SummaryElement( std::string("debug:") + wi->debugAttributeName(), debuginfo));
-					}
-				}
 			}
 			if (m_debugtrace)
 			{

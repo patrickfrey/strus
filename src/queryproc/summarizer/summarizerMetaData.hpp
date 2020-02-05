@@ -53,8 +53,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	strus::Reference<MetaDataReaderInterface> m_metadata;
 	std::string m_metaname;
@@ -87,7 +85,7 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "metadata";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -108,7 +106,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* name() const {return "metadata";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 	
 private:

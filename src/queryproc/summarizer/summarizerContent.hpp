@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#ifndef _STRUS_SUMMARIZER_FORWARD_INDEX_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_FORWARD_INDEX_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_CONTENT_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_CONTENT_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
@@ -27,15 +27,15 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-class SummarizerFunctionContextForwardIndex
+class SummarizerFunctionContextContent
 	:public SummarizerFunctionContextInterface
 {
 public:
-	SummarizerFunctionContextForwardIndex( 
+	SummarizerFunctionContextContent( 
 			const StorageClientInterface* storage_,
 			const std::string& type_, unsigned int maxNofMatches_,
 			ErrorBufferInterface* errorhnd_);
-	virtual ~SummarizerFunctionContextForwardIndex(){}
+	virtual ~SummarizerFunctionContextContent(){}
 
 	virtual void addSummarizationFeature(
 			const std::string& name_,
@@ -48,8 +48,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index iterator
@@ -59,15 +57,15 @@ private:
 };
 
 
-/// \class SummarizerFunctionInstanceForwardIndex
+/// \class SummarizerFunctionInstanceContent
 /// \brief Summarizer instance for retrieving meta data
-class SummarizerFunctionInstanceForwardIndex
+class SummarizerFunctionInstanceContent
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceForwardIndex( ErrorBufferInterface* errorhnd_)
+	explicit SummarizerFunctionInstanceContent( ErrorBufferInterface* errorhnd_)
 		:m_type(),m_maxNofMatches(100),m_errorhnd(errorhnd_){}
-	virtual ~SummarizerFunctionInstanceForwardIndex(){}
+	virtual ~SummarizerFunctionInstanceContent(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
@@ -81,7 +79,7 @@ public:
 			const StorageClientInterface* storage_,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "forwardindex";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -91,20 +89,20 @@ private:
 };
 
 
-class SummarizerFunctionForwardIndex
+class SummarizerFunctionContent
 	:public SummarizerFunctionInterface
 {
 public:
-	explicit SummarizerFunctionForwardIndex( ErrorBufferInterface* errorhnd_)
+	explicit SummarizerFunctionContent( ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_){}
-	SummarizerFunctionForwardIndex(){}
+	SummarizerFunctionContent(){}
 
-	virtual ~SummarizerFunctionForwardIndex(){}
+	virtual ~SummarizerFunctionContent(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* name() const {return "forwardindex";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

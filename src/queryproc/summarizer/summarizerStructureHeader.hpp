@@ -10,13 +10,10 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
-#include "strus/forwardIteratorInterface.hpp"
-#include "strus/postingIteratorInterface.hpp"
+#include "strus/structIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
-#include "proximityWeightingContext.hpp"
 #include "forwardIndexTextCollector.hpp"
-#include "strus/structIteratorInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -29,54 +26,25 @@ namespace strus
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
-class ForwardIteratorInterface;
+class QueryProcessorInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
-/// \brief Forward declaration
-class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
 struct SummarizerFunctionParameterStructureHeader
 {
-	typedef ProximityWeightingContext::Config ProximityWeightingConfig;
-	struct CollectorConfig
-	{
-		std::string name;
-		std::vector<std::string> collectTypes;
-		std::string tagType;
-		char tagSeparator;
-
-		CollectorConfig( const std::string& name_, const std::vector<std::string>& collectTypes_, const std::string& tagType_, char tagSeparator_)
-			:name(name_),collectTypes(collectTypes_),tagType(tagType_),tagSeparator(tagSeparator_){}
-		CollectorConfig( const CollectorConfig& o)
-			:name(o.name),collectTypes(o.collectTypes),tagType(o.tagType),tagSeparator(o.tagSeparator){}
-
-		StructView view() const;
-	};
-
-	ProximityWeightingConfig proximityConfig;		///< configuration for proximity weighting
-	int maxNofResults;					///< maximum number of weighted features returned
-	int distance_collect;					///< distance to matches to collect
-	double maxdf;						///< the maximum df of features not to be considered stopwords as fraction of the total collection size
-	std::vector<CollectorConfig> collectorConfigs;		///< Grouped features from forward index to collect
+	std::string textType;					///< name of the forward index feature to collect as text
+	std::string structName;					///< name of structure to inspect for headers or empty if to scan all structures
 
 	SummarizerFunctionParameterStructureHeader()
-		:proximityConfig()
-		,maxNofResults(20)
-		,distance_collect(8)
-		,maxdf(0.5)
-		,collectorConfigs()
+		:textType()
+		,structName(0)
 	{}
 	SummarizerFunctionParameterStructureHeader( const SummarizerFunctionParameterStructureHeader& o)
-		:proximityConfig(o.proximityConfig)
-		,maxNofResults(o.maxNofResults)
-		,distance_collect(o.distance_collect)
-		,maxdf(o.maxdf)
-		,collectorConfigs(o.collectorConfigs)
+		:textType(o.textType)
+		,structName(o.structName)
 	{}
-
-	void addConfig( const std::string& configstr, ErrorBufferInterface* errorhnd);
 };
 
 class SummarizerFunctionContextStructureHeader
@@ -86,7 +54,6 @@ public:
 	SummarizerFunctionContextStructureHeader(
 			const StorageClientInterface* storage_,
 			const SummarizerFunctionParameterStructureHeader& parameter_,
-			double nofCollectionDocuments_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextStructureHeader(){}
@@ -102,33 +69,13 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
-	enum {MaxNofArguments=ProximityWeightingContext::MaxNofArguments};	///< maximum number of arguments fix because of extensive use of fixed size arrays
-	typedef ProximityWeightingContext::FeatureWeights FeatureWeights;
-	typedef ProximityWeightingContext::WeightedNeighbour WeightedNeighbour;
-	
-private:
-	void initializeContext();
-
-	typedef std::map<std::string,double> EntityMap;
-	void collectSummariesFromEntityMap( std::vector<SummaryElement>& res, const std::string& name, EntityMap& emap) const;
-
-private:
-	ProximityWeightingContext m_proximityWeightingContext;		///< proximity weighting context
 	SummarizerFunctionParameterStructureHeader m_parameter;		///< parameter
-	PostingIteratorInterface* m_itrar[ MaxNofArguments];		///< posting iterators to weight
-	std::size_t m_itrarsize;					///< nof posting iterators defined to weight
-	FeatureWeights m_weightar;					///< array of feature weights parallel to m_itrar
-	PostingIteratorInterface* m_stopword_itrar[ MaxNofArguments];	///< posting iterators to weight
-	std::size_t m_stopword_itrarsize;				///< nof posting iterators defined to weight
-	FeatureWeights m_stopword_weightar;				///< array of feature weights parallel to m_itrar
-	PostingIteratorInterface* m_eos_itr;				///< posting iterators for end of sentence markers
-	double m_nofCollectionDocuments;				///< number of documents in the collection
 	const StorageClientInterface* m_storage;			///< storage client interface
-	std::vector<ForwardIndexCollector> m_collectors;		///< collector list
-	double m_weightnorm;						///< normalization factor of weights
+	strus::Reference<StructIteratorInterface> m_structiter;		///< structure iterator
+	strus::Index m_structno;					///< type of structure to scan for results or 0 if to scan all
+	std::vector<strus::IndexRange> m_headerar;			///< temporary result, header fields from which summary is constructed 
+	ForwardIndexTextCollector m_textCollector;			///< structure for collecting the summary texts
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error reporting
 };
 
@@ -174,7 +121,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* name() const {return "accunear";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

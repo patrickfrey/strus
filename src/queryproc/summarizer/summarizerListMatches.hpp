@@ -46,8 +46,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	std::vector<PostingIteratorInterface*> m_itrs;			///< iterators for summarization
@@ -78,7 +76,7 @@ public:
 			const StorageClientInterface*,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "matchpos";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -100,7 +98,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* name() const {return "matchpos";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

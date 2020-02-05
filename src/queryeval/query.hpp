@@ -87,8 +87,6 @@ public:
 	virtual void setWeightingVariableValue(
 			const std::string& name, double value);
 
-	virtual void setDebugMode( bool debug);
-
 	virtual QueryResult evaluate( int minRank, int maxNofRanks) const;
 	virtual StructView view() const;
 
@@ -244,7 +242,6 @@ private:
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
 	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query and not the query eval)
 	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
-	bool m_debugMode;						///< true if debug mode is enabled
 	bool m_usePosinfo;						///< true if position info is used
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 	DebugTraceContextInterface* m_debugtrace;			///< debug trace interface

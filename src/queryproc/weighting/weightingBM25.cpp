@@ -22,7 +22,6 @@
 
 using namespace strus;
 #define THIS_METHOD_NAME const_cast<char*>("BM25")
-#undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
@@ -135,37 +134,6 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25::call( const Inde
 		return m_lastResult;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, m_lastResult);
-}
-
-std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
-{
-	try
-	{
-		std::ostringstream out;
-
-		out << string_format( _TXT( "calculate %s"), THIS_METHOD_NAME) << std::endl;
-		double res = 0.0;
-		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-		for (int fidx=0 ;fi != fe; ++fi,++fidx)
-		{
-			double ww = featureWeight( *fi, docno);
-			if (ww < std::numeric_limits<double>::epsilon()) continue;
-	
-			unsigned int doclen = 0;
-			if (m_parameter.b)
-			{
-				m_metadata->skipDoc( docno);
-				doclen = m_metadata->getValue( m_metadata_doclen).touint();
-			}
-			out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%.5f, doclen=%u"),
-						fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,
-						fi->weight, doclen) << std::endl;
-			res += ww;
-		}
-		out << string_format( _TXT("sum result=%.5f"), res) << std::endl;
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
 }
 
 static NumericVariant parameterValue( const std::string& name_, const std::string& value)

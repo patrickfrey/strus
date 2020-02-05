@@ -76,25 +76,7 @@ public:
 			}
 			return rt;
 		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::vector<SummaryElement>());
-	}
-
-	virtual std::string debugCall( const strus::WeightedDocument& doc)
-	{
-		try
-		{
-			std::ostringstream out;
-			out << string_format( _TXT( "summarize %s"), m_name.c_str()) << std::endl;
-		
-			std::vector<SummaryElement> res = getSummary( doc);
-			std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-			for (; ri != re; ++ri)
-			{
-				out << string_format( _TXT( "name=%s, value='%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
-			}
-			return out.str();
-		}
-		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in debug call of '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, std::string());
+		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in call of '%s' summarizer function: %s"), m_name.c_str(), *m_errorhnd, std::vector<SummaryElement>());
 	}
 
 private:

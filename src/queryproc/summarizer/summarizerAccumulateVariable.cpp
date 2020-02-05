@@ -244,27 +244,6 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextAccumulateVariable::debugCall( const strus::WeightedDocument& doc)
-{
-	try
-	{
-		std::ostringstream out;
-		out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-	
-		m_forwardindex->skipDoc( doc.docno());
-	
-		// Build a bitmap with all matching documents:
-		std::vector<unsigned int> flist = getCandidateSet( doc.docno());
-	
-		// Log events that contribute to the result:
-		printPosWeights( out, flist, doc.field());
-	
-		return out.str();
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching debug of '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
-}
-
-
 void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try

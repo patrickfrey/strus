@@ -72,8 +72,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
-	virtual std::string debugCall( const strus::WeightedDocument& doc);
-
 private:
 	struct SummarizationFeature
 	{
@@ -118,7 +116,7 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
-	virtual const char* name() const {return "matchvar";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -139,7 +137,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* name() const {return "matchvar";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:

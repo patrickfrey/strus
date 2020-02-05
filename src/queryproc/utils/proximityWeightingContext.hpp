@@ -130,7 +130,7 @@ public:
 		,m_hasPunctuation(o.m_hasPunctuation),m_docno(o.m_docno),m_field(o.m_field)
 		,m_nodear(o.m_nodear)
 		,m_stmOperations(o.m_stmOperations)
-		,m_fieldStatistics(o.m_fieldStatistics),m_titleFields(o.m_titleFields)
+		,m_fieldStatistics(o.m_fieldStatistics)
 		,m_stmStack(o.m_stmStack)
 	{
 		m_nodeScanner.init( m_nodear.data(), m_nodear.size());
@@ -141,7 +141,7 @@ public:
 		,m_hasPunctuation(false),m_docno(0),m_field()
 		,m_nodear()
 		,m_stmOperations()
-		,m_fieldStatistics(),m_titleFields()
+		,m_fieldStatistics()
 		,m_stmStack()
 		,m_nodeScanner()
 	{}
@@ -207,11 +207,6 @@ public:
 	std::vector<FieldStatistics>::const_iterator stats_end() const
 		{return m_fieldStatistics.end();}
 
-	std::vector<strus::IndexRange>::const_iterator titles_begin() const
-		{return m_titleFields.begin();}
-	std::vector<strus::IndexRange>::const_iterator titles_end() const
-		{return m_titleFields.end();}
-	
 	strus::IndexRange getBestPassage( const FeatureWeights& featureWeights) const;
 
 	struct WeightedNeighbour
@@ -284,7 +279,6 @@ private:
 	std::vector<Node> m_nodear;
 	std::vector<StmOperation> m_stmOperations;
 	std::vector<FieldStatistics> m_fieldStatistics;
-	std::vector<strus::IndexRange> m_titleFields;
 	std::vector<int> m_stmStack;
 	NodeScanner m_nodeScanner;
 };

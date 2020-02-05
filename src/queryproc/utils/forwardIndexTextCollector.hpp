@@ -29,9 +29,13 @@ class ForwardIndexTextCollector
 public:
 	ForwardIndexTextCollector(
 			const StorageClientInterface* storage_,
+			const std::string& textType,
 			const std::string& wordType,
+			const std::string& entityType,
+			ErrorBufferInterface* errorhnd_);
+	ForwardIndexTextCollector(
+			const StorageClientInterface* storage_,
 			const std::string& texttype,
-			const std::string& entitytype,
 			ErrorBufferInterface* errorhnd_);
 	ForwardIndexTextCollector( const ForwardIndexTextCollector& o)
 		:m_storage(o.m_storage)
@@ -39,6 +43,8 @@ public:
 		,m_errorhnd(o.m_errorhnd){}
 
 	void skipDoc( strus::Index docno);
+
+	double typedWordFraction( const strus::IndexRange& field);
 
 	/// \brief Get the concatenated text of a field from the forward index
 	std::string fetch( const strus::IndexRange& field);

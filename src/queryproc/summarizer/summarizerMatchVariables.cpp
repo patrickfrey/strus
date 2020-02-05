@@ -113,21 +113,6 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-std::string SummarizerFunctionContextMatchVariables::debugCall( const strus::WeightedDocument& doc)
-{
-	std::ostringstream out;
-	out << string_format( _TXT( "summarize %s"), THIS_METHOD_NAME) << std::endl;
-
-	std::vector<SummaryElement> res = getSummary( doc);
-	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
-	for (; ri != re; ++ri)
-	{
-		out << string_format( _TXT( "variable name=%s, value='%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
-	}
-	return out.str();
-}
-
-
 void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name_, const std::string& value)
 {
 	try
@@ -214,4 +199,14 @@ StructView SummarizerFunctionMatchVariables::view() const
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
+
+const char* SummarizerFunctionInstanceMatchVariables::name() const
+{
+	return THIS_METHOD_NAME;
+}
+const char* SummarizerFunctionMatchVariables::name() const
+{
+	return THIS_METHOD_NAME;
+}
+
 
