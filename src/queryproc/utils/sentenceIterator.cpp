@@ -15,43 +15,52 @@ using namespace strus;
 SentenceIterator::SentenceIterator( PostingIteratorInterface* eos_iter_, strus::Index docno, const strus::IndexRange& field_, strus::Index maxSentenceSize_)
 	:m_eos_iter(eos_iter_)
 	,m_field(field_)
-	,m_cur()
 	,m_maxSentenceSize(maxSentenceSize_)
-	,m_eof(false)
 {
 	if (!m_eos_iter) throw std::runtime_error(_TXT("undefined end of sentence posting iterator"));
-	if (!m_eos_iter->skipDoc( docno)) m_eof = true;
-	m_cur.init( m_field.start(), m_field.start());
+	if (!m_eos_iter->skipDoc( docno) != docno) m_eos_iter = NULL;
 }
 
-strus::IndexRange SentenceIterator::next()
+strus::IndexRange SentenceIterator::skipPos( strus::Index pos)
 {
-	while (!m_eof)
+	strus::IndexRange rt;
+	if (!m_eos_iter) return rt;
+	if (pos < m_field.start()) pos = m_field.start();
+	for (;;)
 	{
-		strus::Index nextpos = m_eos_iter->skipPos( m_cur.end()+1);
-		if (!nextpos || (m_field.defined() && nextpos > m_field.end()))
+		strus::Index startpos = pos <= (m_field.start() + m_maxSentenceSize) ? m_field.start() : (pos - m_maxSentenceSize);
+		strus::Index si = m_eos_iter->skipPos( startpos);
+		for (; si && si < pos; startpos = si+1,si = m_eos_iter->skipPos( startpos)){}
+		strus::Index endpos = m_eos_iter->skipPos( startpos+1);
+		if (!endpos)
 		{
-			m_cur.init( m_cur.end()+1, m_field.defined() ? m_field.end() :  m_cur.end()+1+m_maxSentenceSize);
-			m_eof = true;
-			break;
-		}
-		else
-		{
-			strus::Index len = nextpos - (m_cur.end()+1);
-			if (len <= 0 || len > m_maxSentenceSize)
+			if (m_field.defined())
 			{
-				m_cur.setEnd( nextpos);
-				continue;
+				endpos = m_field.end();
+				if (startpos < endpos) rt.init( startpos, endpos);
 			}
 			else
 			{
-				m_cur.init( m_cur.end()+1, nextpos);
-				return m_cur;
+				rt.init( startpos, startpos + m_maxSentenceSize);
 			}
 		}
+		else if (m_field.defined() && !m_field.contain( endpos))
+		{
+			endpos = m_field.end();
+			if (startpos < endpos) rt.init( startpos, endpos);
+		}
+		else if (endpos - startpos <= m_maxSentenceSize)
+		{
+			rt.init( startpos, endpos);
+		}
+		else
+		{
+			pos = endpos;
+			continue;
+		}
+		break;
 	}
-	m_cur.clear();
-	return m_cur;
+	return rt;
 }
 
 

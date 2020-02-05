@@ -119,7 +119,7 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a string"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name_, "type"))
 		{
@@ -137,7 +137,7 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 {
 	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name_, "type"))
 	{

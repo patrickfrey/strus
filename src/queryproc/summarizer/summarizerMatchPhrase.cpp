@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 using namespace strus;
 
@@ -48,6 +49,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_eos_itr(0)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_storage(storage_)
+	,m_textCollector( storage_, parameter_.contentType, parameter_.wordType, parameter_.entityType, errorhnd_)
 	,m_errorhnd(errorhnd_)
 {
 	std::memset( &m_itrar, 0, sizeof(m_itrar));
@@ -101,36 +103,71 @@ std::vector<SummaryElement>
 {
 	try
 	{
+		std::vector<SummaryElement> rt;
+		strus::IndexRange bestMatch;
+
 		if (m_itrarsize == 0)
 		{
-			return std::vector<SummaryElement>();
+			return rt;
 		}
-		if (m_itrarsize == 1)
+		else if (m_itrarsize == 1)
 		{
-			double typedWordFraction( const strus::IndexRange& field);
+			strus::Index startpos = doc.field().start();
+			strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
+			if (m_eos_itr)
+			{
+				SentenceIterator sentiter( m_eos_itr, doc.docno(), doc.field(), m_parameter.proximityConfig.maxNofSummarySentenceWords);
+				strus::Index pos = m_itrar[0]->skipPos( startpos);
+				while (pos)
+				{
+					strus::IndexRange sent = sentiter.skipPos( pos);
+					if (!sent.defined()) break;
+					if (sent.contain(pos))
+					{
+						bestMatch = sent;
+						break;
+					}
+					else
+					{
+						pos = m_itrar[0]->skipPos( sent.end());
+					}
+				}
+			}
+			else
+			{
+				strus::Index pos = m_itrar[0]->skipPos( startpos);
+				if (pos && pos < endpos)
+				{
+					strus::Index dist = m_parameter.proximityConfig.nofSummarySentences
+								* m_parameter.proximityConfig.maxNofSummarySentenceWords
+								/ 2;
+					bestMatch.init( pos > (startpos + dist)
+									? (pos - dist)
+									: startpos,
+								(pos + dist) > endpos
+									? (pos + dist)
+									: endpos);
+				}
+			}
 		}
+		else
+		{
+			m_proximityWeightingContext.init( m_itrar, m_itrarsize, m_eos_itr, doc.docno(), doc.field());
+			bestMatch = m_proximityWeightingContext.getBestPassage( m_weightar);
+		}
+		if (bestMatch.defined())
+		{
+			rt.push_back( SummaryElement( "", m_textCollector.fetch( bestMatch)));
+		}
+		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
-static std::pair<std::string,std::string> parseMarker( const std::string& value)
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
 {
-	std::pair<std::string,std::string> rt;
-	if (!value.empty())
-	{
-		char sep = value[0];
-		char const* mid = std::strchr( value.c_str()+1, sep);
-		if (mid)
-		{
-			rt.first = std::string( value.c_str()+1, mid - value.c_str() - 1);
-			rt.second = std::string( mid+1);
-		}
-		else
-		{
-			rt.first = value;
-			rt.second = value;
-		}
-	}
+	NumericVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
 	return rt;
 }
 
@@ -140,34 +177,35 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 	{
 		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name_.c_str(), "matchvariables");
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a string"), name_.c_str(), "matchvariables");
 		}
-		else if (strus::caseInsensitiveEquals( name_, "type"))
+		else if (strus::caseInsensitiveEquals( name_, "content"))
 		{
-			m_parameter->m_type = value;
+			m_parameter.contentType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "matchmark"))
+		else if (strus::caseInsensitiveEquals( name_, "wordtype"))
 		{
-			m_parameter->m_matchmark = parseMarker( value);
+			m_parameter.wordType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "floatingmark"))
+		else if (strus::caseInsensitiveEquals( name_, "entity"))
 		{
-			m_parameter->m_floatingmark = parseMarker( value);
+			m_parameter.entityType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "sentencesize")
-			|| strus::caseInsensitiveEquals( name_, "paragraphsize")
-			|| strus::caseInsensitiveEquals( name_, "windowsize"))
+		else if (strus::caseInsensitiveEquals( name_, "nofres")
+			|| strus::caseInsensitiveEquals( name_, "dist_imm")
+			|| strus::caseInsensitiveEquals( name_, "dist_close")
+			|| strus::caseInsensitiveEquals( name_, "dist_near")
+			|| strus::caseInsensitiveEquals( name_, "dist_sentence")
+			|| strus::caseInsensitiveEquals( name_, "sentences")
+			|| strus::caseInsensitiveEquals( name_, "cluster")
+			|| strus::caseInsensitiveEquals( name_, "ffbase")
+			 )
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
-		}
-		else if (strus::caseInsensitiveEquals( name_, "cardinality") && !value.empty() && value[value.size()-1] == '%')
-		{
-			m_parameter->m_cardinality = 0;
-			m_parameter->m_cardinality_frac = numstring_conv::todouble( value);
+			addNumericParameter( name_, parameterValue( name_, value));
 		}
 		else
 		{
-			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd);
@@ -177,39 +215,41 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 {
 	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "paragraphsize"))
+	else if (strus::caseInsensitiveEquals( name_, "content")
+		|| strus::caseInsensitiveEquals( name_, "wordtype")
+		|| strus::caseInsensitiveEquals( name_, "entity"))
 	{
-		m_parameter->m_paragraphsize = value.touint();
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a string"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "sentencesize"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_imm"))
 	{
-		m_parameter->m_sentencesize = value.touint();
+		m_parameter.proximityConfig.setDistanceImm( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "windowsize"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_close"))
 	{
-		m_parameter->m_windowsize = value.touint();
+		m_parameter.proximityConfig.setDistanceClose( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_near"))
 	{
-		m_parameter->m_cardinality = value.touint();
-		m_parameter->m_cardinality_frac = 0.0;
+		m_parameter.proximityConfig.setDistanceNear( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "maxdf"))
+	else if (strus::caseInsensitiveEquals( name_, "dist_sentence"))
 	{
-		m_parameter->m_maxdf = (double)value;
-		if (m_parameter->m_maxdf < 0.0 || m_parameter->m_maxdf > 1.0)
-		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to a positive floating point number between 0.0 and 1.0"), name_.c_str(), THIS_METHOD_NAME);
-		}
+		m_parameter.proximityConfig.setMaxNofSummarySentenceWords( value.toint());
 	}
-	else if (strus::caseInsensitiveEquals( name_, "type")
-		|| strus::caseInsensitiveEquals( name_, "matchmark")
-		|| strus::caseInsensitiveEquals( name_, "floatingmark")
-		|| strus::caseInsensitiveEquals( name_, "metadata_title_maxpos"))
+	else if (strus::caseInsensitiveEquals( name_, "sentences"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name_.c_str(), THIS_METHOD_NAME);
+		m_parameter.proximityConfig.setNofSummarySentences( value.toint());
+	}
+	else if (strus::caseInsensitiveEquals( name_, "cluster"))
+	{
+		m_parameter.proximityConfig.setMinClusterSize( value.toint());
+	}
+	else if (strus::caseInsensitiveEquals( name_, "ffbase"))
+	{
+		m_parameter.proximityConfig.setMinFfWeight( value.tofloat());
 	}
 	else
 	{
@@ -221,26 +261,17 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 		const StorageClientInterface* storage,
 		const GlobalStatistics& stats) const
 {
-	if (m_parameter->m_type.empty())
+	if (m_parameter.contentType.empty())
 	{
-		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "emtpy content type definition (parameter '%s') in match phrase summarizer configuration"), "content");
 	}
 	try
 	{
-		strus::Reference<MetaDataReaderInterface> metadata( storage->createMetaDataReader());
-		if (!metadata.get()) throw strus::runtime_error(_TXT("failed to create meta data reader: %s"), m_errorhnd->fetchError());
-
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextMatchPhrase(
-				storage, m_processor, metadata.release(), m_parameter,
-				nofCollectionDocuments, m_errorhnd);
+				storage, m_parameter, nofCollectionDocuments, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
-}
-
-static StructView getStructViewMark( const std::pair<std::string,std::string>& mark)
-{
-	return StructView()( "start", mark.first)( "end", mark.second);
 }
 
 StructView SummarizerFunctionInstanceMatchPhrase::view() const
@@ -248,21 +279,16 @@ StructView SummarizerFunctionInstanceMatchPhrase::view() const
 	try
 	{
 		StructView rt;
-		rt( "type", m_parameter->m_type);
-		rt( "matchmark", getStructViewMark( m_parameter->m_matchmark));
-		rt( "floatingmark", getStructViewMark( m_parameter->m_floatingmark));
-		rt( "paragraphsize", m_parameter->m_paragraphsize);
-		rt( "sentencesize", m_parameter->m_sentencesize);
-		rt( "windowsize", m_parameter->m_windowsize);
-		if (m_parameter->m_cardinality_frac > std::numeric_limits<float>::epsilon())
-		{
-			rt( "cardinality", strus::string_format( "%u%%", (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5)));
-		}
-		else
-		{
-			rt( "cardinality", m_parameter->m_cardinality);
-		}
-		rt( "maxdf", m_parameter->m_maxdf);
+		rt( "content", m_parameter.contentType);
+		rt( "wordtype", m_parameter.wordType);
+		rt( "entity", m_parameter.entityType);
+		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
+		rt( "dist_close", m_parameter.proximityConfig.distance_close);
+		rt( "dist_near", m_parameter.proximityConfig.distance_near);
+		rt( "dist_sentence", m_parameter.proximityConfig.maxNofSummarySentenceWords);
+		rt( "sentences", m_parameter.proximityConfig.nofSummarySentences);
+		rt( "cluster", m_parameter.proximityConfig.minClusterSize);
+		rt( "ffbase", m_parameter.proximityConfig.minFfWeight);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -273,7 +299,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchPhrase::createInstan
 {
 	try
 	{
-		return new SummarizerFunctionInstanceMatchPhrase( processor, m_errorhnd);
+		return new SummarizerFunctionInstanceMatchPhrase( m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), THIS_METHOD_NAME, *m_errorhnd, 0);
 }
@@ -286,16 +312,16 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		FunctionDescription rt( name(), _TXT("Get best matching phrases delimited by the structure postings"));
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
 		rt( P::Feature, "punct", _TXT( "defines the delimiter for sentences"), "");
-		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
-		rt( P::Feature, "title", _TXT( "defines the title field of documents"), "");
-		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::Numeric, "paragraphsize", _TXT( "estimated size of a paragraph"), "1:");
-		rt( P::Numeric, "sentencesize", _TXT( "estimated size of a sentence, also a restriction for the maximum length of sentences in summaries"), "1:");
-		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
-		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
-		rt( P::Numeric, "maxdf", _TXT( "the maximum df (fraction of collection size) of features considered for same sentence proximity weighing"), "1:");
-		rt( P::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
-		rt( P::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
+		rt( P::String, "content", _TXT( "the forward index type of the result phrase elements"), "");
+		rt( P::String, "wordtype", _TXT( "the forward index type of the word types (optional)"), "");
+		rt( P::String, "entity", _TXT( "the forward index type of the entities in the document"), "");
+		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
+		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");
+		rt( P::Numeric, "dist_near", _TXT( "ordinal position distance considered as near for features not in the same sentence"), "1:");
+		rt( P::Numeric, "dist_sentence", _TXT( "maximal size of a sentence"), "1:");
+		rt( P::Numeric, "sentences", _TXT( "number of sentences extracted for the best match"), "1:");
+		rt( P::Numeric, "cluster", _TXT( "part [0.0,1.0] of query features considered as relevant in a group"), "1:");
+		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the minimum feature occurrence value assigned to a feature"), "0.0:1.0");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());

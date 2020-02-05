@@ -96,7 +96,9 @@ void ProximityWeightingContext::init(
 		}
 	}
 	int minClusterSize = (int)(m_config.minClusterSize * nofPostings + 0.5);
-	int min_quesize = minClusterSize > 1 ? minClusterSize : 2;
+	if (minClusterSize == 0) minClusterSize = 1;
+	int min_quesize = minClusterSize + (m_hasPunctuation ? 1 : 0);
+
 	while (quesize >= min_quesize)
 	{
 		int featidx = prioar[ 0];
@@ -144,28 +146,6 @@ void ProximityWeightingContext::init(
 			}
 		}
 #endif
-	}
-	if (quesize)
-	{
-		int featidx = prioar[ 0];
-		if (featidx != eos_featidx)
-		{
-			if (minClusterSize == 1)
-			{
-				// ... there is only one feature left, so we add all instances of it
-				strus::Index documentPos = posnoar[ featidx];
-				for (; documentPos && documentPos < endpos; documentPos = m_postings[ featidx]->skipPos( documentPos+1))
-				{
-					m_nodear.push_back( Node( featidx, documentPos));
-				}
-			}
-			else
-			{
-				// ... add the next value in the queue as last element
-				strus::Index documentPos = posnoar[ featidx];
-				m_nodear.push_back( Node( featidx, documentPos));
-			}
-		}
 	}
 	initNeighbourMatches();
 	m_nodeScanner.init( m_nodear.data(), m_nodear.size());

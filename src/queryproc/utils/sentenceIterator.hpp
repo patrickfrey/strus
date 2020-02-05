@@ -19,14 +19,12 @@ class SentenceIterator
 public:
 	SentenceIterator( PostingIteratorInterface* eos_iter_, strus::Index docno, const strus::IndexRange& field_, strus::Index maxSentenceSize_);
 
-	strus::IndexRange next();
+	strus::IndexRange skipPos( strus::Index pos);
 
 private:
 	PostingIteratorInterface* m_eos_iter;
 	strus::IndexRange m_field;
-	strus::IndexRange m_cur;
 	strus::Index m_maxSentenceSize;
-	bool m_eof;
 };
 
 }//namespace

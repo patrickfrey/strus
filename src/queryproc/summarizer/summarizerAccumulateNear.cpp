@@ -304,7 +304,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		if (strus::caseInsensitiveEquals( name_, "match")
 		||  strus::caseInsensitiveEquals( name_, "punct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		if (strus::caseInsensitiveEquals( name_, "collect"))
 		{
@@ -333,7 +333,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	if (strus::caseInsensitiveEquals( name_, "match")
 	||  strus::caseInsensitiveEquals( name_, "punct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name_, "collect"))
 	{

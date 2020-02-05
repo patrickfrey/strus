@@ -41,17 +41,16 @@ struct SummarizerFunctionParameterMatchPhrase
 {
 	typedef ProximityWeightingContext::Config ProximityWeightingConfig;
 	ProximityWeightingConfig proximityConfig;	///< configuration for proximity weighting
-	std::string name;				///< name of the summary element
-	std::string textType;				///< name of the forward index feature to collect as text
+	std::string contentType;			///< name of the forward index feature to collect as text
 	std::string wordType;				///< name of the forward index feature that contains the word type of the feature to collect in the forward index; must align with the entity type and defines the length, resp. the number of terms overed by the entity
 	std::string entityType;				///< name of the forward index feature that contains the entity assigned to the aligned text feature
 
 	SummarizerFunctionParameterMatchPhrase()
-		:proximityConfig(),name(),textType(),wordType(),entityType()
+		:proximityConfig(),contentType(),wordType(),entityType()
 	{}
 	SummarizerFunctionParameterMatchPhrase( const SummarizerFunctionParameterMatchPhrase& o)
 		:proximityConfig(o.proximityConfig)
-		,name(o.name),textType(o.textType),wordType(o.wordType),entityType(o.entityType)
+		,contentType(o.contentType),wordType(o.wordType),entityType(o.entityType)
 	{}
 };
 
@@ -96,6 +95,7 @@ private:
 	PostingIteratorInterface* m_eos_itr;				///< posting iterators for end of sentence markers
 	double m_nofCollectionDocuments;				///< number of documents in the collection
 	const StorageClientInterface* m_storage;			///< storage client interface
+	ForwardIndexTextCollector m_textCollector;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error reporting
 };
 
@@ -128,7 +128,7 @@ public:
 	virtual StructView view() const;
 
 private:
-	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
+	SummarizerFunctionParameterMatchPhrase m_parameter;	///< configured parameters
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 

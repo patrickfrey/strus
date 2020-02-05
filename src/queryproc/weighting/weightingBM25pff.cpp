@@ -214,7 +214,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		if (strus::caseInsensitiveEquals( name_, "match")
 		||  strus::caseInsensitiveEquals( name_, "punct"))
 		{
-			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name_, "metadata_doclen"))
 		{
@@ -253,7 +253,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	if (strus::caseInsensitiveEquals( name_, "match")
 	||  strus::caseInsensitiveEquals( name_, "punct"))
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name_, "metadata_doclen")
 		|| strus::caseInsensitiveEquals( name_, "struct"))
