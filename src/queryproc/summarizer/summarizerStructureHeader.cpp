@@ -73,11 +73,13 @@ std::vector<SummaryElement> SummarizerFunctionContextStructureHeader::getSummary
 	{
 		std::vector<SummaryElement> rt;
 		m_headerar.clear();
-		strus::collectFieldHeaders( m_headerar, m_structiter.get(), m_structno, doc.field());
-		std::vector<strus::IndexRange>::const_iterator hi = m_headerar.begin(), he = m_headerar.end();
+		strus::collectHeaderFields( m_headerar, m_structiter.get(), m_structno, doc.docno(), doc.field());
+		m_textCollector.skipDoc( doc.docno());
+		std::vector<HeaderField>::const_iterator hi = m_headerar.begin(), he = m_headerar.end();
 		for (int hidx=0; hi != he; ++hi,++hidx)
 		{
-			rt.push_back( SummaryElement( "", m_textCollector.fetch( *hi), 1.0, hidx));
+			
+			rt.push_back( SummaryElement( "", m_textCollector.fetch( hi->field()), 1.0, hi->level()));
 		}
 		return rt;
 	}
@@ -93,7 +95,7 @@ void SummarizerFunctionInstanceStructureHeader::addStringParameter( const std::s
 			if (!m_parameter.textType.empty()) throw strus::runtime_error(_TXT("parameter '%s' defined twice"), name_.c_str());
 			m_parameter.textType = value;
 		}
-		if (strus::caseInsensitiveEquals( name_, "struct"))
+		else if (strus::caseInsensitiveEquals( name_, "struct"))
 		{
 			if (!m_parameter.structName.empty()) throw strus::runtime_error(_TXT("parameter '%s' defined twice"), name_.c_str());
 			m_parameter.structName = value;

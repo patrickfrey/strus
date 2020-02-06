@@ -52,10 +52,37 @@ public:
 	/// \return a list of links as structure
 	virtual StructureLinkArray links( int level) const=0;
 
+	/// \brief Structure that describes a header field and its level in the hierarchy of inclusion
+	/// \note For calculating the real position in the inclusion hierarchy you have to determine if the header is covered by its content and subtract one in this case
+	class HeaderField
+	{
+	public:
+		/// \brief Default constructor
+		HeaderField()
+			:m_field(),m_level(-1){}
+		/// \brief Constructor
+		HeaderField( const strus::IndexRange& field_, int level_)
+			:m_field(field_),m_level(level_){}
+		/// \brief Copy constructor
+		HeaderField( const HeaderField& o)
+			:m_field(o.m_field),m_level(o.m_level){}
+
+		/// \brief Field (ordinal position range)
+		const strus::IndexRange& field() const	{return m_field;}
+		/// \brief level Levelcount
+		int level() const			{return m_level;}
+		/// \brief Evaluate if this is a valid field
+		bool defined() const			{return m_level>=0;}
+
+	private:
+		strus::IndexRange m_field;
+		int m_level;
+	};
+
 	/// \brief Return the header field of a defined structure
 	/// \param[in] structIndex index of the structure defined in a link retrieved with links
-	/// \return a valid field or {0,0} if not defined
-	virtual IndexRange headerField( int structIndex) const =0;
+	/// \return a valid field with level or {{0,0},-1} if not defined
+	virtual HeaderField headerField( int structIndex) const =0;
 };
 
 }//namespace

@@ -9,6 +9,7 @@
 #define _STRUS_QUERYPROC_UTILS_STRUCTURE_SEARCH_HPP_INCLUDED
 /// \brief Functions to collect structure header and content fields
 #include "strus/index.hpp"
+#include "strus/structIteratorInterface.hpp"
 #include <vector>
 
 namespace strus
@@ -18,7 +19,12 @@ class StructIteratorInterface;
 
 /// \brief Function to collect structure header and content fields
 /// \return true if found, false else
-void collectFieldHeaders( std::vector<strus::IndexRange>& res, StructIteratorInterface* structIter, strus::Index structno, const strus::IndexRange& field);
+void collectHeaderFields(
+		std::vector<StructIteratorInterface::HeaderField>& res,
+		StructIteratorInterface* structIter,
+		strus::Index structno,
+		strus::Index docno, 
+		const strus::IndexRange& field);
 
 
 }//namespace

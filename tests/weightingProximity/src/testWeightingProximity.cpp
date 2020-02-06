@@ -70,6 +70,8 @@ static strus::PseudoRandom g_random;
 
 typedef strus::test::Storage Storage;
 
+#error HIE WIITER !!!!
+
 struct TitleTreeNode
 {
 	std::vector<int> featar;
@@ -421,37 +423,6 @@ static void fillStructureList( std::vector<strus::test::StructureDef>& structure
 	}
 }
 
-struct LabeledTitle
-{
-	std::string text;
-	int hierarchy;
-
-	LabeledTitle( const std::string& text_, int hierarchy_)
-		:text(text_),hierarchy(hierarchy_){}
-	LabeledTitle( const LabeledTitle& o)
-		:text(o.text),hierarchy(o.hierarchy){}
-};
-
-static void fillTitles( std::vector<LabeledTitle>& titlelist, const TitleTreeNode& node, const strus::IndexRange& field, int depth)
-{
-	if (node.field.cover( field))
-	{
-		std::vector<int>::const_iterator fi = node.featar.begin(), fe = node.featar.end();
-		std::string titletext;
-		for (; fi != fe; ++fi)
-		{
-			if (!titletext.empty()) titletext.push_back(' ');
-			titletext.append( strus::string_format( "F%d", *fi));
-		}
-		if (!titletext.empty()) titlelist.push_back( LabeledTitle( titletext, depth));
-		std::list<TitleTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
-		for (; ci != ce; ++ci)
-		{
-			fillTitles( titlelist, *ci, field, depth+1);
-		}
-	}
-}
-
 static void fillFeatureList( std::vector<strus::test::Feature>& featurelist, const TitleTreeNode& node)
 {
 	std::vector<int>::const_iterator fi = node.featar.begin(), fe = node.featar.end();
@@ -685,9 +656,9 @@ struct Collection
 		return rt;
 	}
 
-	strus::QueryResult expectedResult( double hierarchyWeightFactor, int maxNofRanks, const Query& query, strus::StorageClientInterface* storage)
+	std::vector<strus::WeightedDocument> expectedResult( double hierarchyWeightFactor, int maxNofRanks, const Query& query, strus::StorageClientInterface* storage)
 	{
-		std::vector<strus::ResultDocument> ranks;
+		std::vector<strus::WeightedDocument> rt;
 		std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
 		for (; di != de; ++di)
 		{
@@ -703,35 +674,22 @@ struct Collection
 						ai = answer.begin(), ae = answer.end();
 					for (; ai != ae; ++ai)
 					{
-						strus::WeightedDocument wdoc( docno, *ai);
-						std::vector<strus::SummaryElement> summary;
-						summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
-
-						std::vector<LabeledTitle> titlelist;
-						fillTitles( titlelist, *ti, ai->field(), 0);
-						std::vector<LabeledTitle>::const_iterator
-							li = titlelist.begin(), le = titlelist.end();
-						for (int lidx=0; li != le; ++li,++lidx)
-						{
-							summary.push_back( strus::SummaryElement( "header", li->text, 1.0, li->hierarchy));
-						}
-						ranks.push_back( strus::ResultDocument( wdoc, summary));
+						rt.push_back( strus::WeightedDocument( docno, *ai));
 					}
 				}
 			}
 		}
-		int nofRanked = ranks.size();
-		if (maxNofRanks <= 0 || maxNofRanks > (int)ranks.size())
+		if (maxNofRanks <= 0 || maxNofRanks > (int)rt.size())
 		{
-			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
+			std::sort( rt.begin(), rt.end(), std::greater<strus::WeightedDocument>());
 		}
 		else
 		{
-			std::nth_element( ranks.begin(), ranks.begin()+maxNofRanks, ranks.end(), std::greater<strus::WeightedDocument>());
-			ranks.resize( maxNofRanks);
-			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
+			std::nth_element( rt.begin(), rt.begin()+maxNofRanks, rt.end(), std::greater<strus::WeightedDocument>());
+			rt.resize( maxNofRanks);
+			std::sort( rt.begin(), rt.end(), std::greater<strus::WeightedDocument>());
 		}
-		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks);
+		return rt;
 	}
 
 	std::map<strus::Index,std::string> docnoDocidMap( const strus::StorageClientInterface* storage) const
@@ -758,7 +716,7 @@ struct Collection
 	}
 };
 
-static strus::QueryResult evaluateQuery( strus::QueryEvalInterface* qeval, strus::StorageClientInterface* storage, const Query& query, int maxNofRanks)
+static std::vector<strus::ResultDocument> evaluateQuery( strus::QueryEvalInterface* qeval, strus::StorageClientInterface* storage, const Query& query, int maxNofRanks)
 {
 	strus::Reference<strus::QueryInterface> qry( qeval->createQuery( storage));
 	if (!qry.get()) throw std::runtime_error( g_errorhnd->fetchError());
@@ -769,7 +727,8 @@ static strus::QueryResult evaluateQuery( strus::QueryEvalInterface* qeval, strus
 		qry->pushTerm( "word", word, 1);
 		qry->defineFeature( "search");
 	}
-	return qry->evaluate( 0, maxNofRanks);
+	strus::QueryResult result = qry->evaluate( 0, maxNofRanks);
+	return result.ranks();
 }
 
 static bool compareResultAgainstExpected( const strus::ResultDocument& result, const strus::WeightedDocument& expected)
@@ -806,33 +765,14 @@ static std::string errorMessageExpectedNotFound(
 					expected.weight(), testdescr.c_str());
 }
 
-bool testResultSummaryAgainstExpected( const std::vector<strus::SummaryElement>& result, const std::vector<strus::SummaryElement>& expected)
-{
-	if (result.size() != expected.size()) return false;
-	std::vector<strus::SummaryElement>::const_iterator
-		ri = result.begin(), re = result.end();
-	std::vector<strus::SummaryElement>::const_iterator
-		ei = expected.begin(), ee = expected.end();
-	for (; ei != ee; ++ri,++ei)
-	{
-		if (ri->name() != ei->name()) return false;
-		if (ri->value() != ei->value()) return false;
-		if (!strus::Math::isequal( ri->weight(), ei->weight())) return false;
-		if (ri->index() != ei->index()) return false;
-	}
-	return true;
-}
-
-static void testResultAgainstExpected( const std::map<strus::Index,std::string>& docnoDocidMap, const std::string& testdescr, const strus::QueryResult& result, const strus::QueryResult& expected, int ranksChecked)
+static void testResultAgainstExpected( const std::map<strus::Index,std::string>& docnoDocidMap, const std::string& testdescr, const std::vector<strus::ResultDocument>& result, const std::vector<strus::WeightedDocument>& expected, int ranksChecked)
 {
 	{
-		std::vector<strus::ResultDocument>::const_iterator
-			ri = result.ranks().begin(), re = result.ranks().end();
+		std::vector<strus::ResultDocument>::const_iterator ri = result.begin(), re = result.end();
 		int ridx=0;
 		for (; ri != re && ridx < ranksChecked; ++ri,++ridx)
 		{
-			std::vector<strus::ResultDocument>::const_iterator
-				ei = expected.ranks().begin(), ee = expected.ranks().end();
+			std::vector<strus::WeightedDocument>::const_iterator ei = expected.begin(), ee = expected.end();
 			for (; ei != ee && !compareResultAgainstExpected( *ri, *ei); ++ei){}
 			if (ei == ee)
 			{
@@ -840,22 +780,13 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 					= errorMessageResultNotFound( docnoDocidMap, testdescr, *ri);
 				throw std::runtime_error( errormsg);
 			}
-			else
-			{
-				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
-				{
-					throw std::runtime_error(_TXT("summary elements of result do not match expected"));
-				}
-			}
 		}
 	}{
-		std::vector<strus::ResultDocument>::const_iterator
-			ei = expected.ranks().begin(), ee = expected.ranks().end();
+		std::vector<strus::WeightedDocument>::const_iterator ei = expected.begin(), ee = expected.end();
 		int eidx=0;
 		for (; ei != ee && eidx < ranksChecked; ++ei,++eidx)
 		{
-			std::vector<strus::ResultDocument>::const_iterator
-				ri = result.ranks().begin(), re = result.ranks().end();
+			std::vector<strus::ResultDocument>::const_iterator ri = result.begin(), re = result.end();
 			for (; ri != re && !compareResultAgainstExpected( *ri, *ei); ++ri){}
 			if (ri == re)
 			{
@@ -863,55 +794,36 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 					= errorMessageExpectedNotFound( docnoDocidMap, testdescr, *ei);
 				throw std::runtime_error( errormsg);
 			}
-			else
-			{
-				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
-				{
-					throw std::runtime_error(_TXT("summary elements of result do not match expected"));
-				}
-			}
 		}
 	}
 }
 
-static void checkResult( const std::map<strus::Index,std::string>& docnoDocidMap, int qryidx, const Query& qry, const strus::QueryResult& result, const strus::QueryResult& expected, int ranksChecked)
+static void checkResult( const std::map<strus::Index,std::string>& docnoDocidMap, int qryidx, const Query& qry, const std::vector<strus::ResultDocument>& result, const std::vector<strus::WeightedDocument>& expected, int ranksChecked)
 {
 	std::string qrystr = qry.tostring();
 	std::string testdescr = strus::string_format( "test query %d = '%s'", qryidx, qrystr.c_str());
 	testResultAgainstExpected( docnoDocidMap, testdescr, result, expected, ranksChecked);
 }
 
-static void printResult( std::ostream& out, const std::map<strus::Index,std::string>& docnoDocidMap, const strus::QueryResult& result)
+static void printResult( std::ostream& out, const std::map<strus::Index,std::string>& docnoDocidMap, const std::vector<strus::ResultDocument>& result)
 {
-	std::vector<strus::ResultDocument>::const_iterator ri = result.ranks().begin(), re = result.ranks().end();
+	std::vector<strus::ResultDocument>::const_iterator ri = result.begin(), re = result.end();
 	for (int ridx=1; ri != re; ++ri,++ridx)
 	{
 		std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( ri->docno());
 		if (di == docnoDocidMap.end()) throw std::runtime_error( strus::string_format( "unknown document number in result %d", ri->docno()));
-		out << strus::string_format( "rank %d: %s [%d,%d] %.5f",
-				ridx, di->second.c_str(),
-				(int)ri->field().start(), (int)ri->field().end(),
-				ri->weight())
-			<< std::endl;
+		out << strus::string_format( "rank %d: %s [%d,%d] %.5f", ridx, di->second.c_str(), (int)ri->field().start(), (int)ri->field().end(), ri->weight()) << std::endl;
+	}
+}
 
-		std::vector<strus::SummaryElement>::const_iterator
-			si = ri->summaryElements().begin(),
-			se = ri->summaryElements().end();
-		for (; si != se; ++si)
-		{
-			if (si->index() >= 0)
-			{
-				out << strus::string_format( "\t> %s = '%s' %.5f %d",
-						si->name().c_str(), si->value().c_str(), si->weight(), si->index())
-					<< std::endl;
-			}
-			else
-			{
-				out << strus::string_format( "\t> %s = %s %.5f",
-						si->name().c_str(), si->value().c_str(), si->weight())
-					<< std::endl;
-			}
-		}
+static void printExpected( std::ostream& out, const std::map<strus::Index,std::string>& docnoDocidMap, const std::vector<strus::WeightedDocument>& expected)
+{
+	std::vector<strus::WeightedDocument>::const_iterator ei = expected.begin(), ee = expected.end();
+	for (int eidx=1; ei != ee; ++ei,++eidx)
+	{
+		std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( ei->docno());
+		if (di == docnoDocidMap.end()) throw std::runtime_error( strus::string_format( "unknown document number in result %d", ei->docno()));
+		out << strus::string_format( "rank %d: %s [%d,%d] %.5f", eidx, di->second.c_str(), (int)ei->field().start(), (int)ei->field().end(), ei->weight()) << std::endl;
 	}
 }
 
@@ -922,7 +834,7 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 	Collection collection( nofDocuments, nofTerms, nofNodes);
 
 	double hierarchyWeightFactor = ((double)g_random.get( 0, 100000) / 100000.0) * 0.3 + 0.7;
-	int maxNofRanks = 200;
+	int maxNofRanks = 20;
 
 	strus::Reference<strus::QueryEvalInterface> qeval( strus::createQueryEval( g_errorhnd));
 	if (!qeval.get()) throw std::runtime_error( g_errorhnd->fetchError());
@@ -934,29 +846,20 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 	strus::Reference<strus::WeightingFunctionInstanceInterface> wfunc( weightingTitle->createInstance( queryproc.get()));
 	if (!wfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
 	wfunc->addNumericParameter( "hf", hierarchyWeightFactor);
-	wfunc->addNumericParameter( "results", strus::NumericVariant::asint( maxNofRanks));
 
 	const strus::SummarizerFunctionInterface* summarizerAttribute = queryproc->getSummarizerFunction( "attribute");
 	if (!summarizerAttribute) throw std::runtime_error( "undefined summarizer function 'attribute'");
-	strus::Reference<strus::SummarizerFunctionInstanceInterface> attributefunc( summarizerAttribute->createInstance( queryproc.get()));
-	if (!attributefunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	attributefunc->addStringParameter( "name", "docid");
-
-	const strus::SummarizerFunctionInterface* summarizerStructHeader = queryproc->getSummarizerFunction( "structheader");
-	if (!summarizerStructHeader) throw std::runtime_error( "undefined summarizer function 'structheader'");
-	strus::Reference<strus::SummarizerFunctionInstanceInterface> headerfunc( summarizerStructHeader->createInstance( queryproc.get()));
-	if (!headerfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	headerfunc->addStringParameter( "text", "orig");
-	if (g_random.get(0,2)==0) headerfunc->addStringParameter( "struct", "title");
+	strus::Reference<strus::SummarizerFunctionInstanceInterface> sfunc( summarizerAttribute->createInstance( queryproc.get()));
+	if (!sfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	sfunc->addStringParameter( "name", "docid");
 
 	std::vector<strus::QueryEvalInterface::FeatureParameter> fparam;
 	fparam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
-	std::vector<strus::QueryEvalInterface::FeatureParameter> noparam;
+	std::vector<strus::QueryEvalInterface::FeatureParameter> sparam;
 
 	qeval->addSelectionFeature( "search");
 	qeval->addWeightingFunction( wfunc.release(), fparam);
-	qeval->addSummarizerFunction( "docid", attributefunc.release(), noparam);
-	qeval->addSummarizerFunction( "header", headerfunc.release(), noparam);
+	qeval->addSummarizerFunction( "docid", sfunc.release(), sparam);
 
 	if (g_errorhnd->hasError())
 	{
@@ -985,7 +888,7 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 	}
 
 	std::vector<Query> queries = collection.randomQueries( nofQueryies);
-	int ranksChecked = maxNofRanks / 2;
+	int ranksChecked = maxNofRanks / 5;
 
 	if (selectQuery >= 0)
 	{
@@ -999,13 +902,15 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 		{
 			std::cerr << strus::string_format( "selecting query %d: %s", selectQuery, qrystr.c_str()) << std::endl;
 		}
-		strus::QueryResult expected = collection.expectedResult( hierarchyWeightFactor, maxNofRanks, qry, storage.sci.get());
-		strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), qry, maxNofRanks);
+		std::vector<strus::WeightedDocument>
+			expected = collection.expectedResult( hierarchyWeightFactor, maxNofRanks, qry, storage.sci.get());
+		std::vector<strus::ResultDocument>
+			result = evaluateQuery( qeval.get(), storage.sci.get(), qry, maxNofRanks);
 
 		if (g_verbosity >= 1)
 		{
 			std::cerr << "result:" << std::endl;
-			if (result.ranks().empty())
+			if (result.empty())
 			{
 				std::cerr << "(empty)" << std::endl;
 			}
@@ -1014,13 +919,13 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 				printResult( std::cerr, docnoDocidMap, result);
 			}
 			std::cerr << "expected:" << std::endl;
-			if (expected.ranks().empty())
+			if (expected.empty())
 			{
 				std::cerr << "(empty)" << std::endl;
 			}
 			else
 			{
-				printResult( std::cerr, docnoDocidMap, expected);
+				printExpected( std::cerr, docnoDocidMap, expected);
 			}
 		}
 		checkResult( docnoDocidMap, selectQuery, qry, result, expected, ranksChecked);
@@ -1035,13 +940,15 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 				std::string qrystr = qi->tostring();
 				std::cerr << strus::string_format( "issue query %d: %s", qidx, qrystr.c_str()) << std::endl;
 			}
-			strus::QueryResult expected = collection.expectedResult( hierarchyWeightFactor, maxNofRanks, *qi, storage.sci.get());
-			strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), *qi, maxNofRanks);
+			std::vector<strus::WeightedDocument>
+				expected = collection.expectedResult( hierarchyWeightFactor, maxNofRanks, *qi, storage.sci.get());
+			std::vector<strus::ResultDocument>
+				result = evaluateQuery( qeval.get(), storage.sci.get(), *qi, maxNofRanks);
 
 			if (g_verbosity >= 2)
 			{
 				std::cerr << "result:" << std::endl;
-				if (result.ranks().empty())
+				if (result.empty())
 				{
 					std::cerr << "(empty)" << std::endl;
 				}
@@ -1050,13 +957,13 @@ static void testWeightingTitle( int nofDocuments, int nofTerms, int nofNodes, in
 					printResult( std::cerr, docnoDocidMap, result);
 				}
 				std::cerr << "expected:" << std::endl;
-				if (expected.ranks().empty())
+				if (expected.empty())
 				{
 					std::cerr << "(empty)" << std::endl;
 				}
 				else
 				{
-					printResult( std::cerr, docnoDocidMap, expected);
+					printExpected( std::cerr, docnoDocidMap, expected);
 				}
 			}
 			checkResult( docnoDocidMap, qidx, *qi, result, expected, ranksChecked);

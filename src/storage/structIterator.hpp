@@ -41,7 +41,7 @@ public:
 
 	virtual StructureLinkArray links( int level) const;
 
-	virtual IndexRange headerField( int structIndex) const;
+	virtual HeaderField headerField( int structIndex) const;
 
 private:
 	const StorageClient* m_storage;					///< storage instance

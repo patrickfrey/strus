@@ -21,6 +21,7 @@ StructIterator::StructIterator( const StorageClient* storage_, const DatabaseCli
 	,m_dbadapter()
 	,m_curblock()
 	,m_docno(0)
+	,m_levels(0)
 	,m_errorhnd(errorhnd_){}
 
 StructIterator::~StructIterator(){}
@@ -115,13 +116,12 @@ StructureLinkArray StructIterator::links( int level) const
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current links: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
-strus::IndexRange StructIterator::headerField( int structIndex) const
+StructIteratorInterface::HeaderField StructIterator::headerField( int structIndex) const
 {
-	strus::IndexRange rt;
 	try
 	{
 		strus::Index start = m_curblock.headerStart( structIndex);
-		if (!start) return rt;
+		if (!start) return HeaderField();
 		int li = 0, le = m_levels;
 		for (; li != le; ++li)
 		{
@@ -129,13 +129,21 @@ strus::IndexRange StructIterator::headerField( int structIndex) const
 			strus::IndexRange candidate = scan.skip( start);
 			if (candidate.start() == start)
 			{
-				rt = candidate;
-				break;
+				StructureLinkArray lar = scan.getLinks();
+				int ki = 0, ke = lar.nofLinks();
+				for (; ki != ke; ++ki)
+				{
+					const StructureLink& lnk = lar[ ki];
+					if (lnk.header() && lnk.index() == structIndex)
+					{
+						return HeaderField( candidate, li);
+					}
+				}
 			}
 		}
-		return rt;
+		return HeaderField();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get header field: %s"), INTERFACE_NAME, *m_errorhnd, rt);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get header field: %s"), INTERFACE_NAME, *m_errorhnd, HeaderField());
 }
 
 

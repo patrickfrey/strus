@@ -46,7 +46,7 @@ public:
 
 	double typedWordFraction( const strus::IndexRange& field);
 
-	/// \brief Get the concatenated text of a field from the forward index
+	/// \brief Get the concatenated text of a field from the forward index for the current document
 	std::string fetch( const strus::IndexRange& field);
 
 private:

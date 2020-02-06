@@ -358,8 +358,8 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 										m_fieldStatistics.push_back( FieldStatistics( field));
 									}
 								}
-								strus::IndexRange headerField = structIterator->headerField( lnk.index());
-								touchTitleNode( ni, headerField, field);
+								StructIteratorInterface::HeaderField hh = structIterator->headerField( lnk.index());
+								touchTitleNode( ni, hh.field(), field);
 							}
 						}
 					}

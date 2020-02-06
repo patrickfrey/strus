@@ -306,7 +306,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 		}
-		if (strus::caseInsensitiveEquals( name_, "collect"))
+		else if (strus::caseInsensitiveEquals( name_, "collect"))
 		{
 			m_parameter.addConfig( value, m_errorhnd);
 		}

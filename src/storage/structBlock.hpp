@@ -225,7 +225,7 @@ public:
 		void reset()
 		{
 			m_aridx = 0;
-			m_cur = strus::IndexRange();
+			m_cur.clear();
 			m_curlnk = -1;
 			m_curwidth = -1;
 		}
