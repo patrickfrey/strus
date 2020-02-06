@@ -6,8 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "summarizerMatchPhrase.hpp"
-#include "proximityWeightAccumulator.hpp"
-#include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
 #include "postingIteratorHelpers.hpp"
 #include "strus/numericVariant.hpp"

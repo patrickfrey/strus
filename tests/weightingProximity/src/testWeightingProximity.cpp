@@ -70,32 +70,37 @@ static strus::PseudoRandom g_random;
 
 typedef strus::test::Storage Storage;
 
-#error HIE WIITER !!!!
-
-struct TitleTreeNode
+struct DocTreeNode
 {
-	std::vector<int> featar;
-	std::list<TitleTreeNode> chld;
+	std::vector<int> titlear;
+	std::vector<int> contentar;
+	std::list<DocTreeNode> chld;
 	strus::IndexRange field;
 
-	TitleTreeNode()
-		:featar(),chld(),field(){}
-	TitleTreeNode( const std::vector<int>& featar_, strus::Index startpos_)
-		:featar(featar_),chld(),field( startpos_, startpos_ + featar_.size()){}
-	TitleTreeNode( const TitleTreeNode& o)
-		:featar(o.featar),chld(o.chld),field(o.field){}
+	DocTreeNode()
+		:titlear(),contentar(),chld(),field(){}
+	DocTreeNode( const std::vector<int>& titlear_, const std::vector<int>& contentar_, strus::Index startpos_)
+		:titlear(titlear_),contentar(contentar_),chld(),field( startpos_, startpos_ + titlear_.size() + contentar_.size()){}
+	DocTreeNode( const DocTreeNode& o)
+		:titlear(o.titlear),contentar(o.contentar),chld(o.chld),field(o.field){}
 
-	void add( const TitleTreeNode& nd)
+	void add( const DocTreeNode& nd)
 		{chld.push_back(nd); field.setEnd( chld.back().field.end());}
 
 	void printToString( std::string& result, int indent) const
 	{
 		result.append( std::string( 2*indent, ' '));
 		result.append( strus::string_format( "[%d,%d]", (int)field.start(), (int)field.end()));
-		std::vector<int>::const_iterator fi = featar.begin(), fe = featar.end();
-		for (; fi != fe; ++fi)
+		std::vector<int>::const_iterator ti = titlear.begin(), te = titlear.end();
+		for (; ti != te; ++ti)
 		{
-			result.append( strus::string_format(" %d", *fi));
+			result.append( strus::string_format(" %d", *ti));
+		}
+		result.append( " :");
+		std::vector<int>::const_iterator ci = contentar.begin(), ce = contentar.end();
+		for (; ci != ce; ++ci)
+		{
+			result.append( strus::string_format(" %d", *ci));
 		}
 		result.append("\n");
 		std::list<TitleTreeNode>::const_iterator ci = chld.begin(), ce = chld.end();
@@ -112,25 +117,31 @@ struct TitleTreeNode
 	}
 };
 
-static TitleTreeNode createTitleTree( int nofChilds, int nofTerms, int nofFeatures, int depth, strus::Index startpos)
+static TitleTreeNode createDocTree( int nofChilds, int nofTerms, int nofFeatures, int depth, strus::Index startpos)
 {
-	std::vector<int> featar;
-	int fi = 0, fe = g_random.get( 1, nofFeatures);
+	std::vector<int> titlear;
+	std::vector<int> contentar;
+	int fi = 0, fe = g_random.get( 1, g_random.get( 1, nofFeatures));
 	for (; fi != fe; ++fi)
 	{
-		featar.push_back( g_random.get( 0, nofTerms));
+		titlear.push_back( g_random.get( 0, nofTerms));
 	}
-	if (startpos <= 0) startpos = 1;
-	TitleTreeNode rt( featar, startpos);
-	startpos += rt.featar.size();
-	if (startpos <= rt.field.start() || startpos >= strus::Constants::storage_max_position_info()) throw std::runtime_error(_TXT("test tree too complex"));
+	fi = 0, fe = g_random.get( 1, nofFeatures);
+	for (; fi != fe; ++fi)
+	{
+		contentar.push_back( g_random.get( 0, nofTerms));
+	}
 
+	if (startpos <= 0) startpos = 1;
+	DocTreeNode rt( titlear, contentar, startpos);
+	startpos += rt.titlear.size() + rt.contentar.size();
+	if (startpos <= rt.field.start() || startpos >= strus::Constants::storage_max_position_info()) throw std::runtime_error(_TXT("test document tree too complex"));
 	if (depth > 0)
 	{
 		int mi = 0, me = g_random.get( 0, nofChilds);
 		for (; mi != me; ++mi)
 		{
-			rt.add( createTitleTree( nofChilds, nofTerms, nofFeatures, depth-1, startpos));
+			rt.add( createDocTree( nofChilds, nofTerms, nofFeatures, depth-1, startpos));
 			startpos = rt.field.end();
 		}
 	}
@@ -146,29 +157,7 @@ struct Query
 	Query( const Query& o)
 		:features(o.features){}
 
-	static void shuffle( std::vector<std::vector<int> >& ar)
-	{
-		int ii=0, nn=ar.size();
-		for (; ii<nn; ++ii)
-		{
-			int ai = g_random.get( 0, ar.size());
-			int bi = g_random.get( 0, ar.size());
-			if (ai != bi) ar[ ai].swap( ar[ bi]);
-		}
-	}
-
-	static std::vector<int> serFeatureList( const std::vector<std::vector<int> >& ar)
-	{
-		std::vector<int> rt;
-		std::vector<std::vector<int> >::const_iterator ai = ar.begin(), ae = ar.end();
-		for (; ai != ae; ++ai)
-		{
-			rt.insert( rt.end(), ai->begin(), ai->end());
-		}
-		return rt;
-	}
-
-	static Query createRandomQuery( const TitleTreeNode& tree)
+	static Query createRandomQuery( const DocTreeNode& tree)
 	{
 		std::vector<std::vector<int> > features_;
 

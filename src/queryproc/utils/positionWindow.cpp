@@ -168,7 +168,7 @@ bool PositionWindow::advance( strus::Index advancepos)
 	return m_arsize >= m_cardinality;
 }
 
-		
+
 bool PositionWindow::first()
 {
 	while (!m_windowsize)

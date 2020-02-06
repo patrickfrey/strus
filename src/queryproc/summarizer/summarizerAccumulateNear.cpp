@@ -6,8 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "summarizerAccumulateNear.hpp"
-#include "proximityWeightAccumulator.hpp"
-#include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
 #include "weightedValue.hpp"
 #include "private/ranker.hpp"
