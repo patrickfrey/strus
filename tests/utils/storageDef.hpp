@@ -190,6 +190,15 @@ struct Feature
 	bool operator ==( const Feature& o) const	{return compare(o) == 0;}
 	bool operator !=( const Feature& o) const	{return compare(o) != 0;}
 
+	struct FindPosCompare
+	{
+		FindPosCompare(){}
+		bool operator()( const Feature& aa, strus::Index pos) const
+		{
+			return (strus::Index)(unsigned int)aa.pos < pos;
+		}
+	};
+
 private:
 	int compare( const Feature& o) const
 	{

@@ -66,17 +66,13 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			double nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
-			double idf = 0.0;
-		
-			if (m_nofCollectionDocuments > nofMatches * 2)//... avoid negative IDFs
-			{
-				idf = strus::Math::log10(
-						(m_nofCollectionDocuments - nofMatches + 0.5)
-						/ (nofMatches + 0.5));
-			}
+			double df = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
+			double idf = strus::Math::log10(
+						(m_nofCollectionDocuments - df + 0.5)
+						/ (df + 0.5));
 			if (idf < 0.00001)
 			{
+				//... avoid negative IDFs and to small idfs
 				idf = 0.00001;
 			}
 			m_featar.push_back( Feature( itr_, weight_, idf));

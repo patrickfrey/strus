@@ -708,7 +708,7 @@ struct Collection
 						summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
 
 						std::vector<LabeledTitle> titlelist;
-						fillTitles( titlelist, *ti, ai->field(), 0);
+						fillTitles( titlelist, *ti, ai->field(), 0/*depth*/);
 						std::vector<LabeledTitle>::const_iterator
 							li = titlelist.begin(), le = titlelist.end();
 						for (int lidx=0; li != le; ++li,++lidx)

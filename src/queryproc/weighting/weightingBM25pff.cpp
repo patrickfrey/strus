@@ -126,20 +126,17 @@ double WeightingFunctionParameterBM25pff::postingsWeight( int doclen, double fea
 	if (b)
 	{
 		double rel_doclen = (double)doclen / avgDocLength;
-		double ww = featureWeight
+		return featureWeight
 				* (ff * (k1 + 1.0))
 				/ (ff + k1
 					* (1.0 - b + b * rel_doclen));
-		return ww;
 	}
 	else
 	{
-		double ww = featureWeight
+		return featureWeight
 				* (ff * (k1 + 1.0))
 				/ (ff + k1 * 1.0);
-		return ww;
 	}
-	return 0.0;
 }
 
 const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const Index& docno)
@@ -157,6 +154,13 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 			m_proximityWeightingContext.initStructures( m_structitr.get(), m_structno);
 			m_proximityWeightingContext.collectFieldStatistics();
 
+			double stopword_ff[ MaxNofArguments];
+			int pi,pe;
+			for (pi=0,pe=m_stopword_itrarsize; pi<pe; ++pi)
+			{
+				stopword_ff[ pi] = m_stopword_itrar[ pi]->frequency();
+			}
+
 			std::vector<FieldStatistics>::const_iterator
 				si = m_proximityWeightingContext.stats_begin(),
 				se = m_proximityWeightingContext.stats_end();
@@ -166,10 +170,9 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 				// Stopword weight part (estimate):
 				int subdoclen = si->field.defined() ? (si->field.end() - si->field.start()) : doclen;
 				double ww = 0.0;
-				int pi,pe;
 				for (pi=0,pe=m_stopword_itrarsize; pi<pe; ++pi)
 				{
-					ww += m_parameter.postingsWeight( subdoclen, m_stopword_weightar[ pi], m_stopword_itrar[ pi]->frequency());
+					ww += m_parameter.postingsWeight( subdoclen, m_stopword_weightar[ pi], (stopword_ff[ pi] / doclen) * subdoclen);
 				}
 				// Proximity weight part (calculated):
 				for (pi=0,pe=m_itrarsize; pi<pe; ++pi)
@@ -226,7 +229,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 			m_structname = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "nofres")
+		else if (strus::caseInsensitiveEquals( name_, "results")
 			|| strus::caseInsensitiveEquals( name_, "k1")
 			|| strus::caseInsensitiveEquals( name_, "b")
 			|| strus::caseInsensitiveEquals( name_, "avgdoclen")
@@ -260,7 +263,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "nofres"))
+	else if (strus::caseInsensitiveEquals( name_, "results"))
 	{
 		m_parameter.maxNofResults = value.toint();
 	}
@@ -336,7 +339,7 @@ StructView WeightingFunctionInstanceBM25pff::view() const
 		rt( "metadata_doclen", m_metadata_doclen);
 		rt( "struct", m_structname);
 		rt( "maxdf", m_parameter.maxdf);
-		rt( "nofres", m_parameter.maxNofResults);
+		rt( "results", m_parameter.maxNofResults);
 		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
 		rt( "dist_close", m_parameter.proximityConfig.distance_close);
 		rt( "dist_near", m_parameter.proximityConfig.distance_near);
@@ -376,7 +379,7 @@ StructView WeightingFunctionBM25pff::view() const
 		rt( P::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
 		rt( P::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
 		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword as fraction of the collection size"), "0:");
-		rt( P::Numeric, "nofres", _TXT( "maximum number of weighted fields returned by a weighting function call for one document"), "1:");
+		rt( P::Numeric, "results", _TXT( "maximum number of weighted fields returned by a weighting function call for one document"), "1:");
 		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
 		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");
 		rt( P::Numeric, "dist_near", _TXT( "ordinal position distance considered as near for features not in the same sentence"), "1:");

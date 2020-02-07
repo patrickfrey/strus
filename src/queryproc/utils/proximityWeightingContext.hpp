@@ -11,6 +11,7 @@
 #include "strus/index.hpp"
 #include "private/skipScanArray.hpp"
 #include <string>
+#include <cstring>
 #include <vector>
 #include <map>
 #include <cstring>
@@ -86,6 +87,16 @@ public:
 		unsigned char titleScopeMatches;
 		unsigned char featidx;
 
+		Node()
+			:touched()
+			,pos(0)
+			,closeMatches(0)
+			,immediateMatches(0)
+			,sentenceMatches(0)
+			,nearMatches(0)
+			,titleScopeMatches(0)
+			,featidx(0)
+		{}
 		Node( int featidx_, Position documentPos)
 			:touched()
 			,pos(documentPos)
@@ -105,10 +116,15 @@ public:
 			,nearMatches(o.nearMatches)
 			,titleScopeMatches(o.titleScopeMatches)
 			,featidx(o.featidx){}
+		Node& operator=( const Node& o)
+			{touched=o.touched;pos=o.pos;closeMatches=o.closeMatches;
+			immediateMatches=o.immediateMatches;sentenceMatches=o.sentenceMatches;
+			nearMatches=o.nearMatches;titleScopeMatches=o.titleScopeMatches;
+			featidx=o.featidx; return *this;}
 
 		inline int touchCount() const
 		{
-			return closeMatches + immediateMatches + sentenceMatches + nearMatches;
+			return closeMatches + immediateMatches + sentenceMatches + nearMatches + titleScopeMatches;
 		}
 		/// \brief Comparator functor to find nodes with a position greator or equal to needle
 		struct SearchCompare
@@ -124,27 +140,8 @@ public:
 	typedef SkipScanArray<Node,Position,Node::SearchCompare> NodeScanner;
 
 public:
-	ProximityWeightingContext( const ProximityWeightingContext& o)
-		:m_config(o.m_config)
-		,m_nofPostings(o.m_nofPostings),m_nofWeightedNeighbours(o.m_nofWeightedNeighbours)
-		,m_hasPunctuation(o.m_hasPunctuation),m_docno(o.m_docno),m_field(o.m_field)
-		,m_nodear(o.m_nodear)
-		,m_stmOperations(o.m_stmOperations)
-		,m_fieldStatistics(o.m_fieldStatistics)
-		,m_stmStack(o.m_stmStack)
-	{
-		m_nodeScanner.init( m_nodear.data(), m_nodear.size());
-	}
-	ProximityWeightingContext( const Config& config_)
-		:m_config(config_)
-		,m_nofPostings(0),m_nofWeightedNeighbours(0)
-		,m_hasPunctuation(false),m_docno(0),m_field()
-		,m_nodear()
-		,m_stmOperations()
-		,m_fieldStatistics()
-		,m_stmStack()
-		,m_nodeScanner()
-	{}
+	ProximityWeightingContext( const ProximityWeightingContext& o);
+	ProximityWeightingContext( const Config& config_);
 
 	const Config& config() const
 	{
@@ -272,6 +269,8 @@ private:
 	PostingIteratorInterface* m_postings[ MaxNofArguments];
 	int m_nofPostings;
 	int m_nofWeightedNeighbours;
+	int m_minClusterSize;
+	unsigned char m_featureids[ MaxNofArguments];
 	Position m_length_postings[ MaxNofArguments];
 	bool m_hasPunctuation;
 	strus::Index m_docno;
