@@ -59,24 +59,24 @@ public:
 	public:
 		/// \brief Default constructor
 		HeaderField()
-			:m_field(),m_level(-1){}
+			:m_field(),m_hierarchy(-1){}
 		/// \brief Constructor
-		HeaderField( const strus::IndexRange& field_, int level_)
-			:m_field(field_),m_level(level_){}
+		HeaderField( const strus::IndexRange& field_, int hierarchy_)
+			:m_field(field_),m_hierarchy(hierarchy_){}
 		/// \brief Copy constructor
 		HeaderField( const HeaderField& o)
-			:m_field(o.m_field),m_level(o.m_level){}
+			:m_field(o.m_field),m_hierarchy(o.m_hierarchy){}
 
 		/// \brief Field (ordinal position range)
 		const strus::IndexRange& field() const	{return m_field;}
-		/// \brief level Levelcount
-		int level() const			{return m_level;}
+		/// \brief hierarchy index in the inclusion hierarchy
+		int hierarchy() const			{return m_hierarchy;}
 		/// \brief Evaluate if this is a valid field
-		bool defined() const			{return m_level>=0;}
+		bool defined() const			{return m_hierarchy>=0;}
 
 	private:
 		strus::IndexRange m_field;
-		int m_level;
+		int m_hierarchy;
 	};
 
 	/// \brief Return the header field of a defined structure

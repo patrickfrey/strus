@@ -79,7 +79,7 @@ std::vector<SummaryElement> SummarizerFunctionContextStructureHeader::getSummary
 		for (int hidx=0; hi != he; ++hi,++hidx)
 		{
 			
-			rt.push_back( SummaryElement( "", m_textCollector.fetch( hi->field()), 1.0, hi->level()));
+			rt.push_back( SummaryElement( "", m_textCollector.fetch( hi->field()), 1.0, hi->hierarchy()));
 		}
 		return rt;
 	}

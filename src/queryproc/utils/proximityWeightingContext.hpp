@@ -233,6 +233,7 @@ private:
 	double ff_weight( const Node& nd) const;
 	void initNeighbourMatches();
 	void touchTitleNode( std::vector<Node>::iterator ni, const strus::IndexRange& headerField, const strus::IndexRange& contentField);
+	void validateTouchCount();
 
 	/// \note Operation has two instances, an open operation and a close operation
 	///	Open is defined as (startpos,startpos) pair and close as (startpos,endpos) pair
@@ -250,17 +251,38 @@ private:
 		StmOperation( const StmOperation& o)
 			:startpos(o.startpos),endpos(o.endpos),fieldidx(o.fieldidx){}
 
-		bool open() const
-		{
-			return startpos == endpos;
-		}
 		bool operator < (const StmOperation& o) const
 		{
-			return endpos == o.endpos
-				? startpos == o.startpos
-					? fieldidx < o.fieldidx
-					: startpos > o.startpos
-				: endpos < o.endpos;
+			if (endpos == o.endpos)
+			{
+				switch (2 * isStartTag() + o.isStartTag())
+				{
+					case 3://... both start tags
+						return fieldidx < o.fieldidx;
+					case 2://... this is start tag and the other not
+						return false;
+					case 1://... this is an end tag and the other is a start tag
+						return true;
+					case 0://... both are end tags
+						if (startpos == o.startpos)
+						{
+							return fieldidx < o.fieldidx;
+						}
+						else
+						{
+							return startpos > o.startpos;
+						}
+				}
+				return false;
+			}
+			else
+			{
+				return endpos < o.endpos;
+			}
+		}
+		int isStartTag() const
+		{
+			return startpos == endpos;
 		}
 	};
 

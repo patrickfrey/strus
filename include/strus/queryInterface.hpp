@@ -33,6 +33,22 @@ public:
 	/// \brief Destructor
 	virtual ~QueryInterface(){}
 
+	/// \brief Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index)
+	/// \remark Has to be called before any feature is added to the query because the definition has no effect on features added before
+	/// \param[in] type_ term type
+	/// \param[in] value_ term value
+	/// \param[in] stats_ term statistics
+	virtual void defineTermStatistics(
+			const std::string& type_,
+			const std::string& value_,
+			const TermStatistics& stats_)=0;
+
+	/// \brief Define the global statistics for the case that they are defined by the client
+	/// \remark Has to be called before any feature is added to the query because the definition has no effect on features added before
+	/// \param[in] stats_ global statistics
+	virtual void defineGlobalStatistics(
+			const GlobalStatistics& stats_)=0;
+
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
@@ -63,20 +79,6 @@ public:
 	/// \param[in] set_ name of the set of the new feature created
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
 	virtual void defineFeature( const std::string& set_, double weight_=1.0)=0;
-
-	/// \brief Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index)
-	/// \param[in] type_ term type
-	/// \param[in] value_ term value
-	/// \param[in] stats_ term statistics
-	virtual void defineTermStatistics(
-			const std::string& type_,
-			const std::string& value_,
-			const TermStatistics& stats_)=0;
-
-	/// \brief Define the global statistics for the case that they are defined by the client
-	/// \param[in] stats_ global statistics
-	virtual void defineGlobalStatistics(
-			const GlobalStatistics& stats_)=0;
 
 	/// \brief Add a condition clause to the restriction on the document meta data of this query
 	/// \param[in] opr condition compare operator

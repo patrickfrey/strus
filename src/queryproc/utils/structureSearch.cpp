@@ -9,6 +9,7 @@
 #include "strus/structIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include <limits>
+#include <algorithm>
 
 using namespace strus;
 
@@ -17,16 +18,16 @@ typedef StructIteratorInterface::HeaderField HeaderField;
 void strus::collectHeaderFields( std::vector<HeaderField>& res, StructIteratorInterface* structIterator, strus::Index structno, strus::Index docno, const strus::IndexRange& contentField)
 {
 	structIterator->skipDoc( docno);
+	strus::IndexRange coverField = contentField;
 
-	int li=0, le=structIterator->levels();
-	for (; li != le; ++li)
+	int li=structIterator->levels()-1;
+	for (; li >= 0; --li)
 	{
 		strus::IndexRange field = structIterator->skipPos( li, contentField.start());
-		if (field.cover( contentField))
+		if (field.cover( coverField))
 		{
-			bool mapsToItself = false;
 			bool isHeader = false;
-			int nofContentLinks = 0;
+			bool mapsToItself = false;
 			StructureLinkArray lar = structIterator->links( li);
 			int ki=0, ke=lar.nofLinks();
 			for (; ki!=ke;++ki)
@@ -40,9 +41,15 @@ void strus::collectHeaderFields( std::vector<HeaderField>& res, StructIteratorIn
 						if (hh.defined())
 						{
 							mapsToItself |= (hh.field() == field);
-							int hlevel = field.cover( hh.field()) ? li+1 : li;
-							res.push_back( HeaderField( hh.field(), hlevel));
-							++nofContentLinks;
+							if (hh.field().start() <= coverField.start())
+							{
+								coverField.setStart( hh.field().start());
+							}
+							if (hh.field().end() >= coverField.end())
+							{
+								coverField.setEnd( hh.field().end());
+							}
+							res.push_back( HeaderField( hh.field(), li));
 						}
 					}
 					else
@@ -51,21 +58,24 @@ void strus::collectHeaderFields( std::vector<HeaderField>& res, StructIteratorIn
 					}
 				}
 			}
-			if (mapsToItself)
+			if (!mapsToItself && isHeader)
 			{
-				if (nofContentLinks == 1)
-				{
-					res.back() = HeaderField( res.back().field(), res.back().level()-1);
-				}
-			}
-			else
-			{
-				if (isHeader)
-				{
-					res.push_back( HeaderField( field, li));
-				}
+				res.push_back( HeaderField( field, li));
 			}
 		}
+	}
+	// Ensure top to down order and assign correct hierarchy level:
+	std::reverse( res.begin(), res.end());
+	std::vector<HeaderField>::iterator ri = res.begin(), re = res.end();
+	int hcnt = 0;
+	while (ri != re)
+	{
+		int lv = ri->hierarchy();
+		for (; ri != re && lv == ri->hierarchy(); ++ri)
+		{
+			*ri = HeaderField( ri->field(), hcnt);
+		}
+		++hcnt;
 	}
 }
 

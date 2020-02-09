@@ -63,6 +63,7 @@
 #include <algorithm>
 #include <cmath>
 
+#define STRUS_LOWLEVEL_DEBUG
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::FileLocatorInterface* g_fileLocator = 0;
 static int g_verbosity = 0;
@@ -91,7 +92,10 @@ struct DocTreeNode
 	void printToString( std::string& result, int indent) const
 	{
 		result.append( std::string( 2*indent, ' '));
-		result.append( strus::string_format( "[%d,%d]", (int)field.start(), (int)field.end()));
+		if (field.defined())
+		{
+			result.append( strus::string_format( "[%d,%d]", (int)field.start(), (int)field.end()));
+		}
 		std::vector<int>::const_iterator ti = titlear.begin(), te = titlear.end();
 		for (; ti != te; ++ti)
 		{
@@ -159,7 +163,10 @@ static DocTreeNode createDocTree( int nofChilds, int nofTerms, int nofFeatures, 
 	if (startpos <= 0) startpos = 1;
 	DocTreeNode rt( titlear, contentar, startpos);
 	startpos += rt.titlear.size() + rt.contentar.size();
-	if (startpos <= rt.field.start() || startpos >= strus::Constants::storage_max_position_info()) throw std::runtime_error(_TXT("test document tree too complex"));
+	if (startpos <= rt.field.start() || startpos >= strus::Constants::storage_max_position_info())
+	{
+		throw std::runtime_error( "test document tree too complex");
+	}
 	if (depth > 0)
 	{
 		int mi = 0, me = g_random.get( 0, nofChilds);
@@ -176,6 +183,8 @@ struct Query
 {
 	std::vector<int> features;
 
+	Query()
+		:features(){}
 	Query( const std::vector<int>& features_)
 		:features(features_){}
 	Query( const Query& o)
@@ -213,6 +222,7 @@ struct Query
 				return createRandomQuery( *ci);
 			}
 		}
+		return Query();
 	}
 
 	std::string tostring() const
@@ -244,14 +254,21 @@ static void fillStructureList( std::vector<strus::test::StructureDef>& structure
 {
 	strus::IndexRange header( node.field.start(), node.field.start() + node.titlear.size());
 	strus::IndexRange content( header.end(), header.end() + node.contentar.size());
-	if (header.defined() && content.defined())
+	strus::IndexRange allcontent( header.end(), node.field.end());
+	if (header.defined())
 	{
-		structurelist.push_back( strus::test::StructureDef( "title", header, content));
+		if (content.defined())
+		{
+			structurelist.push_back( strus::test::StructureDef( "title", header, content));
+		}
+		if (content != allcontent)
+		{
+			structurelist.push_back( strus::test::StructureDef( "title", header, allcontent));
+		}
 	}
 	std::list<DocTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
 	for (; ci != ce; ++ci)
 	{
-		structurelist.push_back( strus::test::StructureDef( "title", header, ci->field));
 		fillStructureList( structurelist, *ci);
 	}
 }
@@ -336,7 +353,7 @@ static void fillFeatureList( std::vector<strus::test::Feature>& featurelist, str
 		strus::Index pos = startpos + fidx;
 		if (*fi == 0/*EOS*/)
 		{
-			featurelist.push_back( strus::test::Feature( strus::test::Feature::SearchIndex, "punct", "", pos));
+			featurelist.push_back( strus::test::Feature( strus::test::Feature::SearchIndex, "eos", "", pos));
 			featurelist.push_back( strus::test::Feature( strus::test::Feature::ForwardIndex, "orig", ".", pos));
 		}
 		else
@@ -384,7 +401,7 @@ static WeightingConfig g_weightingConfig = {
 	1/*nofSummarySentences*/,
 	100/*maxNofSummarySentenceWords*/,
 	0.1/*minFfWeight*/,
-	100/*avgDocLength*/,
+	10/*avgDocLength*/,
 	0.75/*b*/,
 	1.5/*k1*/,
 	1.0/*maxdf*/
@@ -392,14 +409,33 @@ static WeightingConfig g_weightingConfig = {
 
 struct WeightedPos
 {
-	int featidx;
-	strus::Index pos;
-	double ff;
+	int featidx;			//< feature index matched
+	int qryidx;			//< query feature index counted fo the match
+	strus::Index pos;		//< document ordinal position of the match
+	double ff;			//< feature frequency value assigned
 
-	WeightedPos( int featidx_, strus::Index pos_, double ff_)
-		:featidx(featidx_),pos(pos_),ff(ff_){}
+	WeightedPos( int featidx_, int qryidx_, strus::Index pos_, double ff_)
+		:featidx(featidx_),qryidx(qryidx_),pos(pos_),ff(ff_){}
 	WeightedPos( const WeightedPos& o)
-		:featidx(o.featidx),pos(o.pos),ff(o.ff){}
+		:featidx(o.featidx),qryidx(o.qryidx),pos(o.pos),ff(o.ff){}
+};
+
+struct Statistics
+{
+	Statistics( const std::map<int,int>& dfmap_, int nofDocuments_)
+		:dfmap(dfmap_),nofDocuments(nofDocuments_){}
+	Statistics( const Statistics& o)
+		:dfmap(o.dfmap),nofDocuments(o.nofDocuments){}
+	Statistics()
+		:dfmap(),nofDocuments(){}
+
+	std::map<int,int> dfmap;
+	int nofDocuments;
+
+	bool defined() const
+	{
+		return nofDocuments != 0;
+	}
 };
 
 struct Document
@@ -477,7 +513,7 @@ struct Document
 			}
 		}
 		doc->setAttribute( "docid", docid);
-		doc->setMetaData( "doclen", strus::NumericVariant::asint( doctreelist.empty() ? 0 : doctreelist.back().field.end()));
+		doc->setMetaData( "doclen", strus::NumericVariant::asint( doctreelist.empty() ? 0 : doctreelist.back().field.end() - 1));
 
 		std::vector<strus::test::StructureDef>::const_iterator
 			xi = structurelist.begin(), xe = structurelist.end();
@@ -583,11 +619,52 @@ struct Document
 		}
 	};
 
-	void collectWeightedPos( 
+	void collectWeightedPos(
 			std::vector<WeightedPos>& res, 
-			const std::vector<int>& features,
+			const std::vector<int>& queryFeatures,
 			const strus::IndexRange& titlefield, const strus::IndexRange& contentfield) const
 	{
+		struct FeatureVisit
+		{
+			int idx;
+			std::vector<int> featidxar;
+
+			FeatureVisit() :idx(0),featidxar() {}
+			FeatureVisit( const FeatureVisit& o) :idx(o.idx),featidxar(o.featidxar){}
+		};
+		struct FeatureVisitMap
+		{
+			std::map<int,FeatureVisit> map;
+
+			explicit FeatureVisitMap( const std::vector<int>& queryFeatures)
+			{
+				std::vector<int>::const_iterator
+					qi = queryFeatures.begin(), qe = queryFeatures.end();
+				for (int qidx=0; qi != qe; ++qi,++qidx)
+				{
+					map[ *qi].featidxar.push_back( qidx);
+				}
+			}
+
+			int nextQueryFeatIndex( int featidx)
+			{
+				std::map<int,FeatureVisit>::iterator mi = map.find( featidx);
+				if (mi == map.end())
+				{
+					return -1;
+				}
+				else
+				{
+					int idx = mi->second.idx++;
+					mi->second.idx = mi->second.idx % (int)mi->second.featidxar.size();
+					return mi->second.featidxar[ idx];
+				}
+			}
+		};
+		if (titlefield.end() != contentfield.start())
+		{
+			throw std::runtime_error("title field to be expected adjacent to content field");
+		}
 		strus::SkipScanArray<FeaturePos,strus::Index,FeaturePos::FindPosCompare>
 			ar( featposlist.data(), featposlist.size());
 		int startidx = ar.upperbound( contentfield.start());
@@ -595,20 +672,22 @@ struct Document
 		if (startidx < 0) return;
 		if (endidx < 0) endidx = featposlist.size();
 
+		FeatureVisitMap featureVisitMap( queryFeatures);
 		std::vector<FeaturePos>::const_iterator
 			fi = featposlist.begin() + startidx,
 			fe = featposlist.begin() + endidx;
 		for (; fi != fe; ++fi)
 		{
-			std::vector<int>::const_iterator qi = std::find( features.begin(), features.end(), fi->featidx);
-			if (qi != features.end())
+			int qryidx = featureVisitMap.nextQueryFeatIndex( fi->featidx);
+			if (qryidx >= 0)
 			{
-				std::vector<int> othfeats = features;
-				othfeats.erase( othfeats.begin() + (qi - features.begin()));
+				std::vector<int> othfeats = queryFeatures;
+				othfeats.erase( othfeats.begin() + qryidx);
 				std::set<int> titlefeats = getTitleFeatures( titlefield, othfeats);
 
-				int minClusterSize = g_weightingConfig.minClusterSize * features.size() + 0.5;
-				int weightedNeighbours = features.size()-1;
+				int minClusterSize = g_weightingConfig.minClusterSize * queryFeatures.size() + 0.5;
+				if (minClusterSize == 0) minClusterSize = 1;
+				int weightedNeighbours = queryFeatures.size()-1;
 				TouchCounter touchCounter( weightedNeighbours, minClusterSize, g_weightingConfig.minFfWeight);
 
 				std::vector<int>::const_iterator
@@ -733,85 +812,174 @@ struct Document
 						}
 					}
 				}
-				res.push_back( WeightedPos( fi->featidx, fi->pos, touchCounter.weight()));
+				/*[-]*/if (fi->pos == 746)
+				/*[-]*/{
+				/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
+				/*[-]*/}
+				res.push_back( WeightedPos( fi->featidx, qryidx, fi->pos, touchCounter.weight()));
 			}
 		}
 	}
 
-	std::vector<WeightedPos> getWeightedPos( const std::vector<int>& features, const DocTreeNode& tree) const
+	std::vector<WeightedPos> getWeightedPos( const std::vector<int>& queryFeatures, const strus::IndexRange& titlefield, const strus::IndexRange& contentfield) const
 	{
 		std::vector<WeightedPos> rt;
-		strus::IndexRange titlefield( tree.field.start(), tree.field.start() + tree.titlear.size());
-		strus::IndexRange contentfield( tree.field.start(), tree.field.start() + tree.titlear.size());
-		collectWeightedPos( rt, features, titlefield, contentfield);
+		collectWeightedPos( rt, queryFeatures, titlefield, contentfield);
 		return rt;
 	}
 
-	static double postingsWeight_bm25ff( int collectionNofDocs, const std::map<int,int>& collectionDfMap, int doclen, int featidx, double ff)
+	static double postingsWeight_bm25pff( const Statistics& statistics, int doclen, int featidx, double ff, bool doPrint)
 	{
-		std::map<int,int>::const_iterator ni = collectionDfMap.find( featidx);
-		if (ni == collectionDfMap.end()) return 0.0;
+		std::map<int,int>::const_iterator ni = statistics.dfmap.find( featidx);
+		if (ni == statistics.dfmap.end()) return 0.0;
 		int df = ni->second;
 		double b = g_weightingConfig.b;
 		double k1 = g_weightingConfig.k1;
-		double idf = strus::Math::log10( (collectionNofDocs - df + 0.5) / (df + 0.5));
+		double idf = strus::Math::log10( (statistics.nofDocuments - df + 0.5) / (df + 0.5));
 		if (idf < 0.00001)
 		{
 			//... avoid negative IDFs and to small idfs
 			idf = 0.00001;
 		}
+
 		double featureWeight = idf;
+		double rt;
 		if (b)
 		{
 			double rel_doclen = (double)doclen / g_weightingConfig.avgDocLength;
-			return featureWeight
+			rt = featureWeight
 					* (ff * (k1 + 1.0))
 					/ (ff + k1
 						* (1.0 - b + b * rel_doclen));
 		}
 		else
 		{
-			return featureWeight
+			rt = featureWeight
 					* (ff * (k1 + 1.0))
 					/ (ff + k1 * 1.0);
 		}
+		/*[-]*/if (doPrint)
+		/*[-]*/{
+		/*[-]*/	std::cerr << strus::string_format(
+		/*[-]*/		"test weight bm25pff: {doclen=%d, idf=%.8f, ff=%.8f, df=%d, k1=%.8f, b=%.8f} => weight=%.8f",
+		/*[-]*/		doclen, idf, ff, df, k1, b, rt
+		/*[-]*/		) << std::endl;
+		/*[-]*/}
+		return rt;
 	}
 
-	void collectRanklists_bm25ff( std::vector<strus::WeightedField>& res, int collectionNofDocs, const std::map<int,int>& collectionDfMap, const std::vector<int>& queryFeatures, const DocTreeNode& node) const
+	std::map<int,double> getQueryFeatFfMap( const std::vector<WeightedPos>& wpos, const std::vector<int>& queryFeatures) const
 	{
-		!!!! wpos should be calculated global per document because touches go accross boundaries
-		std::vector<WeightedPos> wpos = getWeightedPos( queryFeatures, node);
+		// Collect the proximity weighted feature frequencies:
 		std::vector<WeightedPos>::const_iterator wi = wpos.begin(), we = wpos.end();
-		std::map<int,double> featFfMap;
+		std::map<int,double> rt;
 		for (; wi != we; ++wi)
 		{
-			featFfMap[ wi->featidx] += wi->ff;
+			if (queryFeatures.end() != std::find( queryFeatures.begin(), queryFeatures.end(), wi->featidx))
+			{
+				rt[ wi->qryidx] += wi->ff;
+			}
 		}
-		double ww;
-		std::vector<int>::const_iterator qi = queryFeatures.begin(), qe = queryFeatures.end();
-		for (; qi != qe; ++qi)
+		return rt;
+	}
+
+	int getSingleFeatFf( int featidx, const strus::IndexRange& field) const
+	{
+		int rt = 0;
+		std::vector<FeaturePos>::const_iterator fi = featposlist.begin(), fe = featposlist.end();
+		for (; fi != fe; ++fi)
 		{
-			int doclen = node.field.end() - node.field.start();
-			std::map<int,double>::const_iterator fi = featFfMap.find( *qi);
-			double ff = fi == featFfMap.end() ? 0.0 : fi->second;
-			ww += postingsWeight_bm25ff( collectionNofDocs, collectionDfMap, doclen, *qi, ff);
+			if (fi->featidx == featidx && (!field.defined() || field.contain( fi->pos))) ++rt; 
+		}
+		return rt;
+	}
+
+	double weightField( const std::vector<int>& queryFeatures, const std::map<int,double>& queryFeatFfMap, const Statistics& statistics, const strus::IndexRange& docfield) const
+	{
+		double rt = 0.0;
+		std::vector<int>::const_iterator qi = queryFeatures.begin(), qe = queryFeatures.end();
+		for (int qidx=0; qi != qe; ++qi,++qidx)
+		{
+			int doclen = docfield.end() - docfield.start();
+			std::map<int,double>::const_iterator fi = queryFeatFfMap.find( qidx);
+			double ff = fi == queryFeatFfMap.end() ? 0.0 : fi->second;
+			/*[-]*/bool doPrint = docfield.start() == 746 && docfield.end() == 749;
+			rt += postingsWeight_bm25pff( statistics, doclen, *qi, ff, doPrint);
+		}
+		return rt;
+	}
+
+	void collectRanklists_bm25pff( std::vector<strus::WeightedField>& res, const Statistics& statistics, const std::vector<int>& queryFeatures, const DocTreeNode& node) const
+	{
+		strus::IndexRange titlefield( node.field.start(), node.field.start() + node.titlear.size());
+		strus::IndexRange contentfield( titlefield.end(), titlefield.end() + node.contentar.size());
+		strus::IndexRange allcontentfield( titlefield.end(), node.field.end());
+
+		std::vector<WeightedPos> wpos = getWeightedPos( queryFeatures, titlefield, contentfield);
+		std::map<int,double> queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
+		double ww = weightField( queryFeatures, queryFeatFfMap, statistics, contentfield);
+		if (ww > 0.0)
+		{
+			res.push_back( strus::WeightedField( contentfield, ww));
+		}
+		if (contentfield != allcontentfield)
+		{
+			wpos = getWeightedPos( queryFeatures, titlefield, allcontentfield);
+			queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
+			ww = weightField( queryFeatures, queryFeatFfMap, statistics, allcontentfield);
+			if (ww > 0.0)
+			{
+				res.push_back( strus::WeightedField( allcontentfield, ww));
+			}
 		}
 		std::list<DocTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
 		for (; ci != ce; ++ci)
 		{
-			collectRanklists_bm25ff( res, collectionNofDocs, collectionDfMap, queryFeatures, *ci);
+			collectRanklists_bm25pff( res, statistics, queryFeatures, *ci);
 		}
-		if (ww > 0.0)
-		{
-			res.push_back( strus::WeightedField( node.field, ww));
-		}
-		!!!! ACCUMULATE ALSO CHILDREN WEIGHTS 
 	}
 
-	std::vector<strus::WeightedField> calculateRanklist_bm25ff( int collectionNofDocs, const std::map<int,int>& collectionDfMap, const std::vector<int>& queryFeatures, const DocTreeNode& doctree) const
+	void collectRanklists_bm25pff( std::vector<strus::WeightedField>& res, const Statistics& statistics, const std::vector<int>& queryFeatures) const
+	{
+		if (doctreelist.empty()) return;
+		if (queryFeatures.empty()) return;
+		if (queryFeatures.size() == 1)
+		{
+			// ... Fallback to bm25pff
+			int featidx = queryFeatures[0];
+			int ff = getSingleFeatFf( featidx, strus::IndexRange());
+			int doclen = doctreelist.back().field.end()-1;
+			/*[-]*/bool doPrint = false;
+			double ww = postingsWeight_bm25pff( statistics, doclen, featidx, ff, doPrint);
+			if (ww > 0.0)
+			{
+				res.push_back( strus::WeightedField( strus::IndexRange(), ww));
+			}
+		}
+		else
+		{
+			strus::IndexRange titlefield( 1, 1);//... document as a whole has no title
+			strus::IndexRange contentfield( 1, doctreelist.back().field.end());
+
+			std::vector<WeightedPos> wpos = getWeightedPos( queryFeatures, titlefield, contentfield);
+			std::map<int,double> queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
+			double ww = weightField( queryFeatures, queryFeatFfMap, statistics, contentfield);
+			if (ww > 0.0)
+			{
+				res.push_back( strus::WeightedField( strus::IndexRange(), ww));
+			}
+			std::vector<DocTreeNode>::const_iterator di = doctreelist.begin(), de = doctreelist.end();
+			for (; di != de; ++di)
+			{
+				collectRanklists_bm25pff( res, statistics, queryFeatures, *di);
+			}
+		}
+	}
+
+	std::vector<strus::WeightedField> calculateRanklist_bm25pff( const Statistics& statistics, const std::vector<int>& queryFeatures) const
 	{
 		std::vector<strus::WeightedField> rt;
-		collectRanklists_bm25ff( rt, collectionNofDocs, collectionDfMap, queryFeatures, doctree);
+		collectRanklists_bm25pff( rt, statistics, queryFeatures);
 		return rt;
 	}
 
@@ -820,21 +988,22 @@ struct Document
 struct Collection
 {
 	std::vector<Document> doclist;
-	std::map<int,int> dfmap;
+	Statistics statistics;
 
 	Collection( int nofDocuments, int nofTerms, int nofNodes)
-		:doclist(),dfmap()
+		:doclist(),statistics()
 	{
+		statistics.nofDocuments = nofDocuments;
 		int di = 0, de = nofDocuments;
 		for (; di != de; ++di)
 		{
 			doclist.push_back( Document::createRandom( di, nofTerms, nofNodes));
-			doclist.back().collectDfStats( dfmap);
+			doclist.back().collectDfStats( statistics.dfmap);
 		}
 		
 	}
 	Collection( const Collection& o)
-		:doclist(o.doclist),dfmap(o.dfmap){}
+		:doclist(o.doclist),statistics(o.statistics){}
 
 	void insert( strus::StorageClientInterface* storage, const std::string& selectDocid)
 	{
@@ -887,7 +1056,8 @@ struct Collection
 				}
 				if (g_verbosity >= 2)
 				{
-					std::cerr << "insert " << di->tostring() << std::endl;
+					std::cerr << "\ninsert " << di->docid << ":" << std::endl;
+					std::cerr << di->tostring() << std::endl;
 				}
 				strus::local_ptr<strus::StorageDocumentInterface>
 					doc( transaction->createDocument( di->docid));
@@ -940,7 +1110,7 @@ struct Collection
 		return rt;
 	}
 
-	strus::QueryResult expectedResult_bm25ff( int maxNofRanks, const Query& query, strus::StorageClientInterface* storage) const
+	strus::QueryResult expectedResult_bm25pff( int maxNofRanks, const Query& query, strus::StorageClientInterface* storage) const
 	{
 		std::vector<strus::ResultDocument> ranks;
 		std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
@@ -949,34 +1119,36 @@ struct Collection
 			strus::Index docno = storage->documentNumber( di->docid);
 			if (docno)
 			{
-				std::vector<DocTreeNode>::const_iterator
-					ti = di->doctreelist.begin(), te = di->doctreelist.end();
-				for  (; ti != te; ++ti)
+				std::vector<strus::WeightedField>
+					weightedFields = di->calculateRanklist_bm25pff( statistics, query.features);
+				std::vector<strus::WeightedField>::const_iterator
+					wi = weightedFields.begin(), we = weightedFields.end();
+				for (; wi != we; ++wi)
 				{
-					std::vector<strus::WeightedField>
-						weightedFields = di->calculateRanklist_bm25ff( doclist.size(), dfmap, query.features, *ti);
-					std::vector<strus::WeightedField>::const_iterator
-						wi = weightedFields.begin(), we = weightedFields.end();
-					for (; wi != we; ++wi)
+					strus::WeightedDocument wdoc( docno, *wi);
+					std::vector<strus::SummaryElement> summary;
+					summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
+					if (wi->field().defined())
 					{
-						strus::WeightedDocument wdoc( docno, *wi);
-						std::vector<strus::SummaryElement> summary;
-						summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
-
 						std::vector<LabeledTitle> titlelist;
-						fillTitles( titlelist, *ti, wi->field(), 0/*depth*/);
+						std::vector<DocTreeNode>::const_iterator
+							ti = di->doctreelist.begin(), te = di->doctreelist.end();
+						for (; ti != te; ++ti)
+						{
+							fillTitles( titlelist, *ti, wi->field(), 0/*depth*/);
+						}
 						std::vector<LabeledTitle>::const_iterator
 							li = titlelist.begin(), le = titlelist.end();
 						for (int lidx=0; li != le; ++li,++lidx)
 						{
 							summary.push_back( strus::SummaryElement( "header", li->text, 1.0, li->hierarchy));
 						}
-						ranks.push_back( strus::ResultDocument( wdoc, summary));
 					}
+					ranks.push_back( strus::ResultDocument( wdoc, summary));
 				}
-				!!!!! HIE WIITER: CALCULATE ALSO TOTAL DOCUMENT RANKLIST
 			}
 		}
+		int nofRanked = ranks.size();
 		if (maxNofRanks <= 0 || maxNofRanks > (int)ranks.size())
 		{
 			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
@@ -1014,14 +1186,25 @@ struct Collection
 	}
 };
 
-static strus::QueryResult evaluateQuery( strus::QueryEvalInterface* qeval, strus::StorageClientInterface* storage, const Query& query, int maxNofRanks)
+static strus::QueryResult evaluateQuery( strus::QueryEvalInterface* qeval, strus::StorageClientInterface* storage, const Query& query, int maxNofRanks, const Statistics& statistics)
 {
 	strus::Reference<strus::QueryInterface> qry( qeval->createQuery( storage));
 	if (!qry.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	if (statistics.defined())
+	{
+		strus::GlobalStatistics globstats( statistics.nofDocuments);
+		qry->defineGlobalStatistics( globstats);
+	}
 	std::vector<int>::const_iterator fi = query.features.begin(), fe = query.features.end();
 	for (; fi != fe; ++fi)
 	{
 		std::string word = strus::string_format( "f%d", *fi);
+		if (statistics.defined())
+		{
+			std::map<int,int>::const_iterator gi = statistics.dfmap.find( *fi);
+			strus::TermStatistics termstats( gi == statistics.dfmap.end() ? 0 : gi->second);
+			qry->defineTermStatistics( "word", word, termstats);
+		}
 		qry->pushTerm( "word", word, 1);
 		qry->defineFeature( "search");
 	}
@@ -1032,7 +1215,6 @@ static bool compareResultAgainstExpected( const strus::ResultDocument& result, c
 {
 	if (result.docno() != expected.docno()) return false;
 	if (result.field() != expected.field()) return false;
-	if (strus::Math::abs( result.weight() - expected.weight()) > std::numeric_limits<float>::epsilon()) return false;
 	return true;
 }
 
@@ -1043,10 +1225,19 @@ static std::string errorMessageResultNotFound(
 	std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( result.docno());
 	if (di == docnoDocidMap.end()) throw std::runtime_error("undefined document number");
 
-	return strus::string_format( "result document %s (%d) field [%d,%d] weight %.5f unexpected match in %s",
-					di->second.c_str(), (int)result.docno(),
-					(int)result.field().start(), (int)result.field().end(),
-					result.weight(), testdescr.c_str());
+	if (result.field().defined())
+	{
+		return strus::string_format( "result document %s (%d) field [%d,%d] weight %.5f unexpected match in %s",
+						di->second.c_str(), (int)result.docno(),
+						(int)result.field().start(), (int)result.field().end(),
+						result.weight(), testdescr.c_str());
+	}
+	else
+	{
+		return strus::string_format( "result document %s (%d) weight %.5f unexpected match in %s",
+						di->second.c_str(), (int)result.docno(),
+						result.weight(), testdescr.c_str());
+	}
 }
 
 static std::string errorMessageExpectedNotFound(
@@ -1056,10 +1247,40 @@ static std::string errorMessageExpectedNotFound(
 	std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( expected.docno());
 	if (di == docnoDocidMap.end()) throw std::runtime_error("undefined document number");
 
-	return strus::string_format( "expected document %s (%d) field [%d,%d] weight %.5f not found in %s, ",
-					di->second.c_str(), (int)expected.docno(), 
-					(int)expected.field().start(), (int)expected.field().end(),
-					expected.weight(), testdescr.c_str());
+	if (expected.field().defined())
+	{
+		return strus::string_format( "expected document %s (%d) field [%d,%d] weight %.5f not found in %s, ",
+						di->second.c_str(), (int)expected.docno(), 
+						(int)expected.field().start(), (int)expected.field().end(),
+						expected.weight(), testdescr.c_str());
+	}
+	else
+	{
+		return strus::string_format( "expected document %s (%d) weight %.5f not found in %s, ",
+						di->second.c_str(), (int)expected.docno(), 
+						expected.weight(), testdescr.c_str());
+	}
+}
+
+static std::string descriptionWeightedDocument(
+		const std::map<strus::Index,std::string>& docnoDocidMap,
+		const strus::WeightedDocument& doc)
+{
+	std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( doc.docno());
+	if (di == docnoDocidMap.end()) throw std::runtime_error("undefined document number");
+
+	if (doc.field().defined())
+	{
+		return strus::string_format(
+			"document %s (%d) field [%d,%d]",
+			di->second.c_str(), (int)doc.docno(), (int)doc.field().start(), (int)doc.field().end());
+	}
+	else
+	{
+		return strus::string_format(
+			"expected document %s (%d)",
+			di->second.c_str(), (int)doc.docno());
+	}
 }
 
 bool testResultSummaryAgainstExpected( const std::vector<strus::SummaryElement>& result, const std::vector<strus::SummaryElement>& expected)
@@ -1098,9 +1319,15 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 			}
 			else
 			{
+				if (!strus::Math::isequal( ri->weight(), ei->weight(), (double)std::numeric_limits<float>::epsilon()))
+				{
+					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
+					throw strus::runtime_error( "weight %.7f of result %s does not match expected %.7f", ri->weight(), descr.c_str(), ei->weight());
+				}
 				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
 				{
-					throw std::runtime_error(_TXT("summary elements of result do not match expected"));
+					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
+					throw strus::runtime_error( "summary elements of result %s do not match expected", descr.c_str());
 				}
 			}
 		}
@@ -1121,9 +1348,15 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 			}
 			else
 			{
+				if (!strus::Math::isequal( ri->weight(), ei->weight(), (double)std::numeric_limits<float>::epsilon()))
+				{
+					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
+					throw strus::runtime_error( "weight %.7f of result %s does not match expected %.7f", ri->weight(), descr.c_str(), ei->weight());
+				}
 				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
 				{
-					throw std::runtime_error(_TXT("summary elements of result do not match expected"));
+					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
+					throw strus::runtime_error( "summary elements of result %s do not match expected", descr.c_str());
 				}
 			}
 		}
@@ -1144,12 +1377,21 @@ static void printResult( std::ostream& out, const std::map<strus::Index,std::str
 	{
 		std::map<strus::Index,std::string>::const_iterator di = docnoDocidMap.find( ri->docno());
 		if (di == docnoDocidMap.end()) throw std::runtime_error( strus::string_format( "unknown document number in result %d", ri->docno()));
-		out << strus::string_format( "rank %d: %s [%d,%d] %.5f",
+		if (ri->field().defined())
+		{
+			out << strus::string_format( "rank %d: %s [%d,%d] %.5f",
 				ridx, di->second.c_str(),
 				(int)ri->field().start(), (int)ri->field().end(),
 				ri->weight())
 			<< std::endl;
-
+		}
+		else
+		{
+			out << strus::string_format( "rank %d: %s %.5f",
+				ridx, di->second.c_str(),
+				ri->weight())
+			<< std::endl;
+		}
 		std::vector<strus::SummaryElement>::const_iterator
 			si = ri->summaryElements().begin(),
 			se = ri->summaryElements().end();
@@ -1180,7 +1422,6 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 
 	Collection collection( nofDocuments, nofTerms, nofNodes);
 
-	double hierarchyWeightFactor = ((double)g_random.get( 0, 100000) / 100000.0) * 0.3 + 0.7;
 	int maxNofRanks = 200;
 
 	strus::Reference<strus::QueryEvalInterface> qeval( strus::createQueryEval( g_errorhnd));
@@ -1221,9 +1462,11 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 
 	std::vector<strus::QueryEvalInterface::FeatureParameter> fparam;
 	fparam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
+	fparam.push_back( strus::QueryEvalInterface::FeatureParameter( "punct", "punct"));
 	std::vector<strus::QueryEvalInterface::FeatureParameter> noparam;
 
 	qeval->addSelectionFeature( "search");
+	qeval->addTerm( "punct", "eos", "");
 	qeval->addWeightingFunction( wfunc.release(), fparam);
 	qeval->addSummarizerFunction( "docid", attributefunc.release(), noparam);
 	qeval->addSummarizerFunction( "header", headerfunc.release(), noparam);
@@ -1232,6 +1475,8 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
+	bool useExternStats = g_random.get( 0, 2)==1;
+
 	std::map<strus::Index,std::string> docnoDocidMap;
 	if (selectDocid.empty())
 	{
@@ -1240,6 +1485,7 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 	}
 	else
 	{
+		useExternStats = true;
 		Document data = collection.getDocument( selectDocid);
 		if (g_verbosity >= 1)
 		{
@@ -1252,6 +1498,10 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 		}
 		collection.insert( storage.sci.get(), selectDocid);
 		docnoDocidMap = collection.docnoDocidMap( storage.sci.get(), selectDocid);
+	}
+	if (g_verbosity >= 1)
+	{
+		if (useExternStats) std::cerr << "use external statistics" << std::endl;
 	}
 
 	std::vector<Query> queries = collection.randomQueries( nofQueryies);
@@ -1269,9 +1519,12 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 		{
 			std::cerr << strus::string_format( "selecting query %d: %s", selectQuery, qrystr.c_str()) << std::endl;
 		}
-		strus::QueryResult expected = collection.expectedResult_bm25ff( maxNofRanks, qry, storage.sci.get());
-		strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), qry, maxNofRanks);
-
+		strus::QueryResult expected = collection.expectedResult_bm25pff( maxNofRanks, qry, storage.sci.get());
+		strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), qry, maxNofRanks, useExternStats ? collection.statistics : Statistics());
+		if (result.ranks().empty() && g_errorhnd->hasError())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 		if (g_verbosity >= 1)
 		{
 			std::cerr << "result:" << std::endl;
@@ -1305,9 +1558,12 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 				std::string qrystr = qi->tostring();
 				std::cerr << strus::string_format( "issue query %d: %s", qidx, qrystr.c_str()) << std::endl;
 			}
-			strus::QueryResult expected = collection.expectedResult( hierarchyWeightFactor, maxNofRanks, *qi, storage.sci.get());
-			strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), *qi, maxNofRanks);
-
+			strus::QueryResult expected = collection.expectedResult_bm25pff( maxNofRanks, *qi, storage.sci.get());
+			strus::QueryResult result = evaluateQuery( qeval.get(), storage.sci.get(), *qi, maxNofRanks, useExternStats ? collection.statistics : Statistics());
+			if (result.ranks().empty() && g_errorhnd->hasError())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
 			if (g_verbosity >= 2)
 			{
 				std::cerr << "result:" << std::endl;
@@ -1337,7 +1593,7 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 
 static void printUsage()
 {
-	std::cerr << "usage: testWeightingProximity [options] <nofdocs> <nofterms> <nofnodes> <commitsize> <nofqry>" << std::endl;
+	std::cerr << "usage: testWeightingProximity [options] <method> <nofdocs> <nofterms> <nofnodes> <commitsize> <nofqry>" << std::endl;
 	std::cerr << "description: Inserts a collection of documents with hierachical title" << std::endl;
 	std::cerr << "             structures and search for example title hierarchy references." << std::endl;
 	std::cerr << "options:" << std::endl;
@@ -1348,6 +1604,7 @@ static void printUsage()
 	std::cerr << "  -W <seed>      :sepecify pseudo random number generator seed (int)" << std::endl;
 	std::cerr << "  -F <docid>     :only process insert of document with id <docid>" << std::endl;
 	std::cerr << "  -Q <qryno>     :only process query with index <qryno>" << std::endl;
+	std::cerr << "<method>         :retrieval method to test {'bm25pff'}" << std::endl;
 	std::cerr << "<nofdocs>        :number of documents inserted" << std::endl;
 	std::cerr << "<nofterms>       :number of variants of document terms" << std::endl;
 	std::cerr << "<nofnodes>       :average number of title nodes per document" << std::endl;
@@ -1428,17 +1685,19 @@ int main( int argc, const char* argv[])
 
 	try
 	{
-		if (argi + 5 > argc)
+		if (argi + 6 > argc)
 		{
 			printUsage();
 			throw std::runtime_error( "too few arguments");
 		}
-		if (argi + 5 < argc)
+		if (argi + 6 < argc)
 		{
 			printUsage();
 			throw std::runtime_error( "too many arguments");
 		}
 		int ai = 0;
+		std::string testType = argv[ argi+ai];
+		++ai;
 		int nofDocuments = strus::numstring_conv::toint( argv[ argi+ai], std::strlen(argv[ argi+ai]), std::numeric_limits<int>::max());
 		++ai;
 		int nofTerms = strus::numstring_conv::toint( argv[ argi+ai], std::strlen(argv[ argi+ai]), std::numeric_limits<int>::max());
@@ -1450,7 +1709,18 @@ int main( int argc, const char* argv[])
 		int nofQueryies = strus::numstring_conv::toint( argv[ argi+ai], std::strlen(argv[ argi+ai]), std::numeric_limits<int>::max());
 		++ai;
 
-		testWeightingBm25pff( nofDocuments, nofTerms, nofNodes, commitSize, nofQueryies, selectDocid, selectQuery);
+		if (g_verbosity >= 1)
+		{
+			std::cerr << strus::string_format("test %s using random seed %d", testType.c_str(), g_random.seed()) << std::endl;
+		}
+		if (testType == "bm25pff")
+		{
+			testWeighting_bm25pff( nofDocuments, nofTerms, nofNodes, commitSize, nofQueryies, selectDocid, selectQuery);
+		}
+		else
+		{
+			throw std::runtime_error(strus::string_format( "unknown test retrieval type '%s'", testType.c_str()));
+		}
 		std::cerr << "OK" << std::endl;
 	}
 	catch (const std::bad_alloc&)

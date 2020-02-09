@@ -22,6 +22,8 @@
 #include <iostream>
 #include <sstream>
 
+#define STRUS_LOWLEVEL_DEBUG
+
 using namespace strus;
 #define THIS_METHOD_NAME const_cast<char*>("BM25pff")
 
@@ -123,20 +125,22 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 
 double WeightingFunctionParameterBM25pff::postingsWeight( int doclen, double featureWeight, double ff) const
 {
+	double rt;
 	if (b)
 	{
 		double rel_doclen = (double)doclen / avgDocLength;
-		return featureWeight
+		rt = featureWeight
 				* (ff * (k1 + 1.0))
 				/ (ff + k1
 					* (1.0 - b + b * rel_doclen));
 	}
 	else
 	{
-		return featureWeight
+		rt = featureWeight
 				* (ff * (k1 + 1.0))
 				/ (ff + k1 * 1.0);
 	}
+	return rt;
 }
 
 const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const Index& docno)
@@ -177,7 +181,14 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 				// Proximity weight part (calculated):
 				for (pi=0,pe=m_itrarsize; pi<pe; ++pi)
 				{
-					ww += m_parameter.postingsWeight( subdoclen, m_weightar[ pi], si->ff[ m_itrarsize]);
+					ww += m_parameter.postingsWeight( subdoclen, m_weightar[ pi], si->ff[ pi]);
+					/*[-]*/if (si->field.start() == 746 && si->field.end() == 749)
+					/*[-]*/{
+					/*[-]*/	std::cerr << strus::string_format(
+					/*[-]*/		"calc weight bm25pff: {doclen=%d, idf=%.8f, ff=%.8f, k1=%.8f, b=%.8f} => total=%.8f",
+					/*[-]*/		subdoclen, m_weightar[ pi], si->ff[ pi], 1.5/*k1*/, 0.75/*b*/, ww
+					/*[-]*/		) << std::endl;
+					/*[-]*/}
 				}
 				m_lastResult.push_back( WeightedField( si->field, ww));
 			}
@@ -248,69 +259,73 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), THIS_METHOD_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' weighting function add string parameter: %s"), THIS_METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match")
-	||  strus::caseInsensitiveEquals( name_, "punct"))
+	try
 	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		if (strus::caseInsensitiveEquals( name_, "match")
+		||  strus::caseInsensitiveEquals( name_, "punct"))
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as a feature and not as a string or a numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		}
+		else if (strus::caseInsensitiveEquals( name_, "metadata_doclen")
+			|| strus::caseInsensitiveEquals( name_, "struct"))
+		{
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
+		}
+		else if (strus::caseInsensitiveEquals( name_, "results"))
+		{
+			m_parameter.maxNofResults = value.toint();
+		}
+		else if (strus::caseInsensitiveEquals( name_, "k1"))
+		{
+			m_parameter.k1 = value.tofloat();
+		}
+		else if (strus::caseInsensitiveEquals( name_, "b"))
+		{
+			m_parameter.b = value.tofloat();
+		}
+		else if (strus::caseInsensitiveEquals( name_, "avgdoclen"))
+		{
+			m_parameter.avgDocLength = value.tofloat();
+		}
+		else if (strus::caseInsensitiveEquals( name_, "maxdf"))
+		{
+			m_parameter.maxdf = value.tofloat();
+		}
+		else if (strus::caseInsensitiveEquals( name_, "dist_imm"))
+		{
+			m_parameter.proximityConfig.setDistanceImm( value.toint());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "dist_close"))
+		{
+			m_parameter.proximityConfig.setDistanceClose( value.toint());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "dist_near"))
+		{
+			m_parameter.proximityConfig.setDistanceNear( value.toint());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "cluster"))
+		{
+			m_parameter.proximityConfig.setMinClusterSize( value.tofloat());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "hotspots"))
+		{
+			m_parameter.proximityConfig.setNofHotspots( value.toint());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "ffbase"))
+		{
+			m_parameter.proximityConfig.setMinFfWeight( value.tofloat());
+		}
+		else
+		{
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
+		}
 	}
-	else if (strus::caseInsensitiveEquals( name_, "metadata_doclen")
-		|| strus::caseInsensitiveEquals( name_, "struct"))
-	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
-	}
-	else if (strus::caseInsensitiveEquals( name_, "results"))
-	{
-		m_parameter.maxNofResults = value.toint();
-	}
-	else if (strus::caseInsensitiveEquals( name_, "k1"))
-	{
-		m_parameter.k1 = value.tofloat();
-	}
-	else if (strus::caseInsensitiveEquals( name_, "b"))
-	{
-		m_parameter.b = value.tofloat();
-	}
-	else if (strus::caseInsensitiveEquals( name_, "avgdoclen"))
-	{
-		m_parameter.avgDocLength = value.tofloat();
-	}
-	else if (strus::caseInsensitiveEquals( name_, "maxdf"))
-	{
-		m_parameter.maxdf = value.tofloat();
-	}
-	else if (strus::caseInsensitiveEquals( name_, "dist_imm"))
-	{
-		m_parameter.proximityConfig.setDistanceImm( value.toint());
-	}
-	else if (strus::caseInsensitiveEquals( name_, "dist_close"))
-	{
-		m_parameter.proximityConfig.setDistanceClose( value.toint());
-	}
-	else if (strus::caseInsensitiveEquals( name_, "dist_near"))
-	{
-		m_parameter.proximityConfig.setDistanceNear( value.toint());
-	}
-	else if (strus::caseInsensitiveEquals( name_, "cluster"))
-	{
-		m_parameter.proximityConfig.setMinClusterSize( value.toint());
-	}
-	else if (strus::caseInsensitiveEquals( name_, "hotspots"))
-	{
-		m_parameter.proximityConfig.setNofHotspots( value.toint());
-	}
-	else if (strus::caseInsensitiveEquals( name_, "ffbase"))
-	{
-		m_parameter.proximityConfig.setMinFfWeight( value.tofloat());
-	}
-	else
-	{
-		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
-	}
+	CATCH_ERROR_ARG2_MAP( _TXT("error in '%s' weighting function adding numeric parameter '%s': %s"), THIS_METHOD_NAME, name_.c_str(), *m_errorhnd);
 }
 
 

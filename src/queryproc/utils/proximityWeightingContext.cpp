@@ -14,6 +14,7 @@
 #include "strus/base/static_assert.hpp"
 #include <limits>
 #include <set>
+/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -84,6 +85,8 @@ void ProximityWeightingContext::init(
 	int firstPostingIdx = 0;
 	strus::Index featureIdToStartMap[ MaxNofArguments];	// map feature id (value in m_featureids) to the next value to take as minimum value for the start of the follow position scan
 	const char* featureIdToNameMap[ MaxNofArguments];	// maps the feature id to string, used to build
+	strus::Index endpos = m_field.defined() ? m_field.end() : (strus::Index)std::numeric_limits<Position>::max();
+	strus::Index posnoar[ MaxNofArguments];			//... array parallel to m_postings, m_featureids and m_length_postings
 
 	if (true == (m_hasPunctuation = (eos_postings != NULL && eos_postings->skipDoc(docno) == docno)))
 	{
@@ -93,8 +96,19 @@ void ProximityWeightingContext::init(
 		m_featureids[ m_nofPostings] = 0;
 		featureIdToStartMap[ m_nofPostings] = field.start();
 		featureIdToNameMap[ m_nofPostings] = 0;
+
+		posnoar[ m_nofPostings] = m_postings[ m_nofPostings]->skipPos( field.start());
+		if (0 == posnoar[ m_nofPostings] || posnoar[ m_nofPostings] > endpos)
+		{
+			posnoar[ m_nofPostings] = endpos;
+			featureIdToStartMap[ m_nofPostings] = endpos;
+		}
+		else
+		{
+			featureIdToStartMap[ m_nofPostings] = posnoar[ m_nofPostings]+1;
+		}
 		++m_nofPostings;
-		firstPostingIdx = ++m_nofPostings;
+		firstPostingIdx = m_nofPostings;
 	}
 	m_nodear.clear();
 	m_stmOperations.clear();
@@ -102,27 +116,24 @@ void ProximityWeightingContext::init(
 	m_stmStack.clear();
 	m_nodeScanner.init( 0, 0);
 
-	// [2] Inialize features for the sliding window scan:
-	strus::Index endpos = m_field.defined() ? m_field.end() : (strus::Index)std::numeric_limits<Position>::max();
-	strus::Index posnoar[ MaxNofArguments];		//... array parallel to m_postings
-	unsigned char prioar[ MaxNofArguments];		//... array with indices into m_postings and posnoar
-
+	// [2] Inialize features for the sliding window scan with a queue:
+	unsigned char queue[ MaxNofArguments];	//... array with indices into m_postings and posnoar
 	int pi=0;
 	for (;pi<nofPostings; ++pi)
 	{
 		m_postings[ m_nofPostings] = postings[ pi];
 		m_length_postings[ m_nofPostings] = m_postings[ m_nofPostings]->length();
 		m_featureids[ m_nofPostings] = m_nofPostings;
-		int firstAppearanceIndex = indexStringArray( featureIdToNameMap, m_nofPostings, firstPostingIdx, featureIdToNameMap[ m_nofPostings]);
-		int featid = m_featureids[ m_nofPostings] = m_featureids[ firstAppearanceIndex];
 		featureIdToNameMap[ m_nofPostings] = m_postings[ m_nofPostings]->featureid();
 		featureIdToStartMap[ m_nofPostings] = field.start();
+
+		int firstAppearanceIndex = indexStringArray( featureIdToNameMap, m_nofPostings, firstPostingIdx, featureIdToNameMap[ m_nofPostings]);
+		int featid = m_featureids[ m_nofPostings] = m_featureids[ firstAppearanceIndex];
 
 		if (m_postings[ m_nofPostings]->skipDoc(docno) == docno)
 		{
 			posnoar[ m_nofPostings]
 				= m_postings[ m_nofPostings]->skipPos( featureIdToStartMap[ featid]);
-
 			if (0 == posnoar[ m_nofPostings] || posnoar[ m_nofPostings] > endpos)
 			{
 				m_postings[ m_nofPostings] = 0;
@@ -142,89 +153,87 @@ void ProximityWeightingContext::init(
 		++m_nofPostings;
 	}
 	// [3] Initialize the queue for the sliding window scan:
-	int quesize = 0;
+	int queueSize = 0;
 	for (pi=0; pi<m_nofPostings; ++pi)
 	{
 		if (m_postings[ pi])
 		{
-			int ki = 0;
-			for (; ki<quesize && posnoar[ki] < posnoar[ pi]; ++ki){}
+			int ki = 0, ke = queueSize;
+			for (; ki < ke && posnoar[ queue[ ki]] < posnoar[ pi]; ++ki){}
 			if (ki < pi)
 			{
-				std::memmove( prioar+ki+1, prioar+ki, pi-ki);
+				// Move bigger or equal elements one position higher in the queue
+				//	to create a slot for the new element inserted into the queue:
+				for (; ke > ki; --ke)
+				{
+					queue[ ke] = queue[ ke-1];
+				}
 			}
-			prioar[ ki] = pi;
-			++quesize;
+			// Insert at the end or in the slot freed before:
+			queue[ ki] = pi;
+			++queueSize;
 		}
 	}
 	// [4] Generate node array with sliding window scan:
-	int min_quesize = m_minClusterSize + (m_hasPunctuation ? 1 : 0);
-	while (quesize >= min_quesize)
+	int min_queueSize = m_minClusterSize + (m_hasPunctuation ? 1 : 0);
+	while (queueSize >= min_queueSize)
 	{
 		// Take first feature from queue and reinsert it:
-		int fidx = prioar[ 0];
+		int fidx = queue[ 0];
 		Position documentPos = (Position)(unsigned int)(int)posnoar[ fidx];
 		m_nodear.push_back( Node( fidx, documentPos));
 
 		// Get the next start position of the top element in the queue
-		strus::Index nextPos;
-		if (fidx == eos_featidx)
+		strus::Index nextPos = featureIdToStartMap[ m_featureids[ fidx]];
+		strus::Index jumpPos = posnoar[ queue[ (fidx == eos_featidx) ? 1 : min_queueSize-1 ]];
+		if (nextPos + m_config.distance_near < jumpPos)
 		{
-			nextPos = posnoar[ prioar[ 1]];
-		}
-		else
-		{
-			nextPos = featureIdToStartMap[ m_featureids[ fidx]];
-			if (quesize > 1)
-			{
-				strus::Index pp = posnoar[ prioar[ min_quesize-1]];
-				if (nextPos + m_config.distance_near < pp)
-				{
-					nextPos = pp - m_config.distance_near;
-				}
-			}
+			nextPos = jumpPos - m_config.distance_near;
 		}
 		if (nextPos <= documentPos)
 		{
 			throw std::runtime_error(_TXT("logic error: proximity weighting queue corrupted"));
 		}
 		posnoar[ fidx] = m_postings[ fidx]->skipPos( nextPos);
-
 		if (posnoar[ fidx] == 0 || posnoar[ fidx] >= endpos)
 		{
 			// Set start position at end of all:
 			featureIdToStartMap[ m_featureids[ fidx]] = endpos;
 
-			// Delete this element from queue:
-			std::memmove( prioar, prioar+1, quesize-1);
-			quesize--;
+			// Delete this element from queue by moving all elements
+			//	to the left eliminating the first slot:
+			std::memmove( queue, queue+1, queueSize-1);
+			queueSize--;
 		}
 		else
 		{
 			// Set new start position of this feature:
 			featureIdToStartMap[ m_featureids[ fidx]] = posnoar[ fidx]+1;
 
-			// Reinsert in queue at new position:
+			// Move all smaller elemnts towards the start of the queue overwriting the first
+			//	slot. A new slot is created at the position ki-1 in this process:
 			int ki = 1;
-			for (; ki<quesize && posnoar[ prioar[ki] ] < posnoar[ fidx]; ++ki)
+			for (; ki<queueSize && posnoar[ queue[ ki]] < posnoar[ fidx]; ++ki)
 			{
-				prioar[ ki-1] = prioar[ ki];
+				queue[ ki-1] = queue[ ki];
 			}
-			prioar[ ki-1] = fidx;
+			// Reinsert in queue at the created slot, keeping the number of elements
+			//	in the queue the same:
+			queue[ ki-1] = fidx;
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
 		{
-			// Verify validity in debug mode:
+			// Verify validity in debug mode with real sets:
 			std::set<int> check_queue_set;
-			for (int ki=0; ki<quesize; ++ki)
+			for (int ki=0; ki<queueSize; ++ki)
 			{
-				if (ki && posnoar[ prioar[ ki-1] ] > posnoar[ prioar[ ki] ])
+				if (ki && posnoar[ queue[ ki-1] ] > posnoar[ queue[ ki] ])
 				{
 					throw std::runtime_error(_TXT("logic error: queue corrupted in proximity weighting (element order)"));
 				}
-				check_queue_set.insert( prioar[ ki]);
+				check_queue_set.insert( queue[ ki]);
 			}
-			if ((int)check_queue_set.size() != quesize)
+			if ((int)check_queue_set.size() != queueSize)
 			{
 				throw std::runtime_error(_TXT("logic error: queue corrupted in proximity weighting (duplicates)"));
 			}
@@ -235,6 +244,18 @@ void ProximityWeightingContext::init(
 	m_nodeScanner.init( m_nodear.data(), m_nodear.size());
 }
 
+void ProximityWeightingContext::validateTouchCount()
+{
+	// Some validity verification when debugging:
+	std::vector<Node>::iterator ni = m_nodear.begin(), ne = m_nodear.end();
+	for (; ni != ne; ++ni)
+	{
+		if (ni->touchCount() > m_nofWeightedNeighbours)
+		{
+			throw std::runtime_error(_TXT("logic error: proximity weighting touch count exceeds number of weighted peer relations"));
+		}
+	}
+}
 
 void ProximityWeightingContext::initNeighbourMatches()
 {
@@ -299,7 +320,7 @@ void ProximityWeightingContext::initNeighbourMatches()
 		std::vector<Node>::iterator fi = ni+1, fe = m_nodear.end();
 		for (; fi != fe && ni->pos + m_length_postings[ ni->featidx] + m_config.distance_near > fi->pos; ++fi)
 		{
-			if (fi->featidx == ni->featidx || ni->featidx == eos_featidx) continue;
+			if (fi->featidx == ni->featidx || fi->featidx == eos_featidx) continue;
 
 			if (fi->touched.set( ni->featidx, true))
 			{
@@ -312,15 +333,7 @@ void ProximityWeightingContext::initNeighbourMatches()
 		}
 	}
 #ifdef STRUS_LOWLEVEL_DEBUG
-	// Some validity verification when debugging:
-	ni = m_nodear.begin(), ne = m_nodear.end();
-	for (; ni != ne; ++ni)
-	{
-		if (ni->touchCount() > (m_nofPostings - (m_hasPunctuation ? 1 : 0)))
-		{
-			throw std::runtime_error(_TXT("logic error: proximity weighting touch count exceeds number of features"));
-		}
-	}
+	validateTouchCount();
 #endif
 	// Eliminate nodes with a touch count lower than the minimum window size:
 	ni = m_nodear.begin(), ne = m_nodear.end();
@@ -339,31 +352,31 @@ void ProximityWeightingContext::initNeighbourMatches()
 	}
 }
 
-double ProximityWeightingContext::ff_weight( const Node& nd) const
+struct TouchCountWeightMap
 {
-	struct TouchCountWeightMap
+public:
+	TouchCountWeightMap()
 	{
-	public:
-		TouchCountWeightMap()
+		std::memset( &m_ar, 0, sizeof(m_ar));
+		for (int ri=1; ri<ProximityWeightingContext::MaxNofArguments; ++ri)
 		{
-			std::memset( &m_ar, 0, sizeof(m_ar));
-			for (int ri=1; ri<ProximityWeightingContext::MaxNofArguments; ++ri)
+			for (int ci=ri; ci>=0; --ci)
 			{
-				for (int ci=ri; ci>=0; --ci)
-				{
-					m_ar[ ri][ ci] = (float)(ci * ci)/(float)(ri * ri);
-				}
+				m_ar[ ri][ ci] = (float)(ci * ci)/(float)(ri * ri);
 			}
 		}
-		float const* get( int nofWeightedNeighbours) const
-		{
-			return m_ar[ nofWeightedNeighbours];
-		}
-	private:
-		float m_ar[ ProximityWeightingContext::MaxNofArguments][ ProximityWeightingContext::MaxNofArguments];
-	};
-	static TouchCountWeightMap g_touchCountWeightMap;
+	}
+	float const* get( int nofWeightedNeighbours) const
+	{
+		return m_ar[ nofWeightedNeighbours];
+	}
+private:
+	float m_ar[ ProximityWeightingContext::MaxNofArguments][ ProximityWeightingContext::MaxNofArguments];
+};
+static TouchCountWeightMap g_touchCountWeightMap;
 
+double ProximityWeightingContext::ff_weight( const Node& nd) const
+{
 	float const* wmap = g_touchCountWeightMap.get( m_nofWeightedNeighbours);
 	double ww =  0.0;
 	if (nd.immediateMatches) ww += 1.0;
@@ -400,14 +413,8 @@ void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, 
 	for (ni=start; ni<end; ++ni)
 	{
 		int tc = ni->touched.join_count( title_touched);
+		if (ni->touched.set( ni->featidx, false)) {--tc;} //... unmask own references that are not counted
 		ni->titleScopeMatches += tc;
-#ifdef STRUS_LOWLEVEL_DEBUG
-		// Some validity check when debugging:
-		if (ni->touchCount() > (m_nofPostings - (m_hasPunctuation ? 1 : 0)))
-		{
-			throw std::runtime_error(_TXT("logic error: proximity weighting touch count exceeds number of features"));
-		}
-#endif
 	}
 }
 
@@ -417,6 +424,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 	m_fieldStatistics.clear();
 	m_stmStack.clear();
 	int nofCandidates[MaxNofArguments];
+	std::memset( nofCandidates, 0, sizeof( nofCandidates));
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
 
 	structIterator->skipDoc( m_docno);
@@ -424,7 +432,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 	for (; ni != ne; ++ni)
 	{
 		int tc = ni->touchCount();
-		if (tc >= m_config.minClusterSize)
+		if (tc >= m_minClusterSize)
 		{
 			++nofCandidates[ tc];
 		}
@@ -432,7 +440,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 	{
 		int sum = 0;
 		int tc = m_nofPostings;
-		for (;tc >= m_config.minClusterSize;--tc)
+		for (;tc >= m_minClusterSize;--tc)
 		{
 			sum += nofCandidates[ tc];
 			if (sum >= m_config.nofHotspots) break;
@@ -443,9 +451,11 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 			ni = m_nodear.begin();
 			while (ni != ne)
 			{
-				if (ni->touchCount() >= tc && ni->featidx != eos_featidx)
+				if (ni->featidx != eos_featidx && ni->touchCount() >= tc)
 				{
 					strus::IndexRange field = structIterator->skipPos( li, ni->pos);
+					if (!field.defined()) break;
+
 					if (field.contain( ni->pos))
 					{
 						bool fieldUsed = false;
@@ -474,7 +484,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 					int nextidx = m_nodeScanner.upperbound( field.end(), ni-m_nodear.begin(), m_nodear.size());
 					if (nextidx > 0)
 					{
-						ni += nextidx;
+						ni = m_nodear.begin() + nextidx;
 					}
 					else
 					{
@@ -490,6 +500,9 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 		m_fieldStatistics.push_back( FieldStatistics());
 		std::sort( m_stmOperations.begin(), m_stmOperations.end());
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
+	validateTouchCount();
+#endif
 }
 
 void ProximityWeightingContext::collectFieldStatistics()
@@ -524,8 +537,8 @@ void ProximityWeightingContext::collectFieldStatistics()
 		{
 			for (; oi != oe && oi->endpos <= ni->pos; ++oi)
 			{
-				//... structure operations on the stack of currently open fields
-				if (oi->open())
+				// Structure operation on the stack of currently open fields:
+				if (oi->isStartTag())
 				{
 					m_stmStack.push_back( oi->fieldidx);
 				}
@@ -538,21 +551,15 @@ void ProximityWeightingContext::collectFieldStatistics()
 					throw std::runtime_error(_TXT("logic error: unbalanced open/close on field stack"));
 				}
 			}
-			if (m_stmStack.empty() && oi != oe)
-			{
-				//... No fields on the stack, skip forward to next start of a field
-				int nidx = m_nodeScanner.upperbound( oi->endpos, ni-m_nodear.begin(), m_nodear.size());
-				if (nidx > 0)
-				{
-					ni = ni+nidx;
-					continue;
-				}
-			}
 			for (; ni != ne && oi != oe && ni->pos < oi->endpos; ++ni)
 			{
 				if (ni->featidx != eos_featidx)
 				{
-					//... do accumulate weights for the open fields
+					/*[-]*/if (ni->pos == 746)
+					/*[-]*/{
+					/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
+					/*[-]*/}
+					// Accumulate weights for the open fields:
 					double ww = ff_weight( *ni);
 	
 					std::vector<int>::const_iterator
@@ -561,15 +568,17 @@ void ProximityWeightingContext::collectFieldStatistics()
 					{
 						m_fieldStatistics[ *ki].ff[ ni->featidx - ofs_featidx] += ww;
 					}
+					// Accumulate weights for the total stats:
 					totalStats.ff[ ni->featidx - ofs_featidx] += ww;
 				}
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		while (oi != oe)
+		// Check stack operations left to be balanced
+		for (; oi != oe; ++oi)
 		{
 			//... structure operations on the stack of currently open fields
-			if (oi->open())
+			if (oi->isStartTag())
 			{
 				m_stmStack.push_back( oi->fieldidx);
 			}
@@ -579,10 +588,19 @@ void ProximityWeightingContext::collectFieldStatistics()
 			}
 			else
 			{
-				throw std::runtime_error(_TXT("logic error: unbalanced open/close on field stack"));
+				throw std::runtime_error(_TXT("logic error: unbalanced open/close on field stack (final check)"));
 			}
 		}
 #endif
+		// Accumulate weights not covered by any structure for the total stats:
+		for (; ni != ne; ++ni)
+		{
+			if (ni->featidx != eos_featidx)
+			{
+				double ww = ff_weight( *ni);
+				totalStats.ff[ ni->featidx - ofs_featidx] += ww;
+			}
+		}
 	}
 }
 
@@ -875,7 +893,7 @@ void ProximityWeightingContext::Config::setDistanceNear( int distance_near_)
 }
 void ProximityWeightingContext::Config::setMinClusterSize( float minClusterSize_)
 {
-	if (minClusterSize_ <= 0.0 || minClusterSize_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
+	if (minClusterSize_ < 0.0 || minClusterSize_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
 	minClusterSize = minClusterSize_;
 }
 void ProximityWeightingContext::Config::setNofHotspots( float nofHotspots_)
