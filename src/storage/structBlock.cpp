@@ -288,7 +288,7 @@ void StructBlock::initFrame()
 
 strus::IndexRange StructBlock::FieldScanner::skip( strus::Index pos)
 {
-	if (pos < m_cur.end() && pos >= m_cur.start())
+	if (m_cur.contain( pos))
 	{
 		return m_cur;
 	}

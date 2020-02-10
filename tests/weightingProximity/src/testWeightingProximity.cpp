@@ -392,6 +392,7 @@ struct WeightingConfig
 	double b;
 	double k1;
 	double maxdf;
+	int maxNofRanks;
 };
 static WeightingConfig g_weightingConfig = {
 	2/*distance_imm*/,
@@ -404,7 +405,8 @@ static WeightingConfig g_weightingConfig = {
 	10/*avgDocLength*/,
 	0.75/*b*/,
 	1.5/*k1*/,
-	1.0/*maxdf*/
+	1.0/*maxdf*/,
+	500/*maxNofRanks*/
 };
 
 struct WeightedPos
@@ -597,6 +599,10 @@ struct Document
 			dist_title_cnt = 0;
 		}
 
+		int count() const
+		{
+			return dist_imm_cnt + dist_close_cnt + dist_sent_cnt + dist_near_cnt + dist_title_cnt;
+		}
 		double touch_weight( int touches) const
 		{
 			return (float)(touches * touches)/(float)(weightedNeighbours * weightedNeighbours);
@@ -608,7 +614,7 @@ struct Document
 				+ touch_weight( dist_imm_cnt + dist_close_cnt)
 				+ touch_weight( dist_imm_cnt + dist_close_cnt + dist_sent_cnt)
 				+ touch_weight( dist_imm_cnt + dist_close_cnt + dist_sent_cnt + dist_near_cnt + dist_title_cnt);
-			if (dist_imm_cnt + dist_close_cnt + dist_sent_cnt + dist_near_cnt + dist_title_cnt >= minClusterSize)
+			if (count() >= minClusterSize)
 			{
 				return (1.0 - minFfWeight) * (ww / 4) + minFfWeight;
 			}
@@ -619,10 +625,42 @@ struct Document
 		}
 	};
 
+	bool findTitleFeature( const DocTreeNode& node, strus::Index pos, int featidx) const
+	{
+		if (node.field.contain( pos) && pos >= node.field.start() + (strus::Index)node.titlear.size())
+		{
+			if (node.titlear.end() != std::find( node.titlear.begin(), node.titlear.end(), featidx))
+			{
+				return true;
+			}
+			std::list<DocTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
+			for (; ci != ce; ++ci)
+			{
+				if (findTitleFeature( *ci, pos, featidx)) return true;
+			}
+		}
+		return false;
+	}
+
+	bool hasTitleFeature( strus::Index pos, int featidx) const
+	{
+		std::vector<DocTreeNode>::const_iterator
+			ti = doctreelist.begin(), te = doctreelist.end();
+		for (; ti != te; ++ti)
+		{
+			if (findTitleFeature( *ti, pos, featidx))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void collectWeightedPos(
 			std::vector<WeightedPos>& res, 
 			const std::vector<int>& queryFeatures,
-			const strus::IndexRange& titlefield, const strus::IndexRange& contentfield) const
+			const strus::IndexRange& titlefield,
+			const strus::IndexRange& contentfield) const
 	{
 		struct FeatureVisit
 		{
@@ -681,9 +719,14 @@ struct Document
 			int qryidx = featureVisitMap.nextQueryFeatIndex( fi->featidx);
 			if (qryidx >= 0)
 			{
+				/*[-]*/if (fi->pos >= 69 && fi->pos < 106)
+				/*[-]*/{
+				/*[-]*/	std::cerr << "HALLY GALLY " << qryidx << std::endl;
+				/*[-]*/}
 				std::vector<int> othfeats = queryFeatures;
 				othfeats.erase( othfeats.begin() + qryidx);
-				std::set<int> titlefeats = getTitleFeatures( titlefield, othfeats);
+				std::vector<int> nomatchfeats;
+				std::set<int> usedfeats;
 
 				int minClusterSize = g_weightingConfig.minClusterSize * queryFeatures.size() + 0.5;
 				if (minClusterSize == 0) minClusterSize = 1;
@@ -699,33 +742,41 @@ struct Document
 						std::vector<FeaturePos>::const_iterator prev_fi = fi;
 						if (prev_fi != featposlist.begin())
 						{
-							bool gotEos = false;
-							for (--prev_fi; prev_fi >= featposlist.begin(); --prev_fi)
+							for (--prev_fi; prev_fi >= featposlist.begin()
+								&& fi->pos - prev_fi->pos < g_weightingConfig.maxNofSummarySentenceWords;
+								--prev_fi)
 							{
+								if (usedfeats.end() != usedfeats.find( prev_fi - featposlist.begin()))
+								{
+									// ... already counted as touch
+									continue;
+								}
 								if (prev_fi->featidx == 0/*EOS*/)
 								{
-									gotEos = true;
-									continue;
+									break;
 								}
 								if (*oi == prev_fi->featidx)
 								{
-									int dist = fi->pos - prev_fi->pos;
-									if (!gotEos && dist <= g_weightingConfig.distance_imm)
+									int dist = fi->pos - prev_fi->pos - 1/*feature length*/;
+									if (dist < g_weightingConfig.distance_imm)
 									{
 										touchCounter.dist_imm_cnt++;
 										gotMatch = true;
+										usedfeats.insert( prev_fi - featposlist.begin());
 										break;
 									}
-									else if (!gotEos && dist <= g_weightingConfig.distance_close)
+									else if (dist < g_weightingConfig.distance_close)
 									{
 										touchCounter.dist_close_cnt++;
 										gotMatch = true;
+										usedfeats.insert( prev_fi - featposlist.begin());
 										break;
 									}
-									else if (!gotEos && dist <= g_weightingConfig.maxNofSummarySentenceWords)
+									else if (dist < g_weightingConfig.maxNofSummarySentenceWords)
 									{
 										touchCounter.dist_sent_cnt++;
 										gotMatch = true;
+										usedfeats.insert( prev_fi - featposlist.begin());
 										break;
 									}
 								}
@@ -735,33 +786,41 @@ struct Document
 						if (!gotMatch)
 						{
 							std::vector<FeaturePos>::const_iterator next_fi = fi;
-							bool gotEos = false;
-							for (++next_fi; next_fi != featposlist.end(); ++next_fi)
+							for (++next_fi; next_fi != featposlist.end()
+								&& next_fi->pos - fi->pos - 1/*feature length*/ < g_weightingConfig.maxNofSummarySentenceWords;
+								++next_fi)
 							{
+								if (usedfeats.end() != usedfeats.find( next_fi - featposlist.begin()))
+								{
+									// ... already counted as touch
+									continue;
+								}
 								if (next_fi->featidx == 0/*EOS*/)
 								{
-									gotEos = true;
-									continue;
+									break;
 								}
 								if (*oi == next_fi->featidx)
 								{
 									int dist = next_fi->pos - fi->pos - 1/*feature length*/;
-									if (!gotEos && dist <= g_weightingConfig.distance_imm)
+									if (dist < g_weightingConfig.distance_imm)
 									{
 										touchCounter.dist_imm_cnt++;
 										gotMatch = true;
+										usedfeats.insert( next_fi - featposlist.begin());
 										break;
 									}
-									else if (!gotEos && dist <= g_weightingConfig.distance_close)
+									else if (dist < g_weightingConfig.distance_close)
 									{
 										touchCounter.dist_close_cnt++;
 										gotMatch = true;
+										usedfeats.insert( next_fi - featposlist.begin());
 										break;
 									}
-									else if (!gotEos && dist <= g_weightingConfig.maxNofSummarySentenceWords)
+									else if (dist < g_weightingConfig.maxNofSummarySentenceWords)
 									{
 										touchCounter.dist_sent_cnt++;
 										gotMatch = true;
+										usedfeats.insert( next_fi - featposlist.begin());
 										break;
 									}
 								}
@@ -773,17 +832,21 @@ struct Document
 							if (fi != featposlist.begin())
 							{
 								std::vector<FeaturePos>::const_iterator prev_fi = fi;
-								for (--prev_fi; prev_fi >= featposlist.begin(); --prev_fi)
+								for (--prev_fi; prev_fi >= featposlist.begin()
+									&& fi->pos - prev_fi->pos - 1/*feature length*/ < g_weightingConfig.distance_near;
+									--prev_fi)
 								{
+									if (usedfeats.end() != usedfeats.find( prev_fi - featposlist.begin()))
+									{
+										// ... already counted as touch
+										continue;
+									}
 									if (*oi == prev_fi->featidx)
 									{
-										int dist = fi->pos - prev_fi->pos;
-										if (dist <= g_weightingConfig.distance_near)
-										{
-											touchCounter.dist_near_cnt++;
-											gotMatch = true;
-											break;
-										}
+										touchCounter.dist_near_cnt++;
+										gotMatch = true;
+										usedfeats.insert( prev_fi - featposlist.begin());
+										break;
 									}
 								}
 							}
@@ -791,32 +854,48 @@ struct Document
 						if (!gotMatch)
 						{
 							std::vector<FeaturePos>::const_iterator next_fi = fi;
-							for (++next_fi; next_fi != featposlist.end(); ++next_fi)
+							for (++next_fi; next_fi != featposlist.end()
+								&& next_fi->pos - fi->pos - 1/*feature length*/ < g_weightingConfig.distance_near;
+								++next_fi)
 							{
+								if (usedfeats.end() != usedfeats.find( next_fi - featposlist.begin()))
+								{
+									// ... already counted as touch
+									continue;
+								}
 								if (*oi == next_fi->featidx)
 								{
-									int dist = next_fi->pos - fi->pos - 1/*feature length*/;
-									if (dist <= g_weightingConfig.distance_near)
-									{
-										touchCounter.dist_near_cnt++;
-										gotMatch = true;
-										break;
-									}
+									touchCounter.dist_near_cnt++;
+									gotMatch = true;
+									usedfeats.insert( next_fi - featposlist.begin());
+									break;
 								}
 							}
 						}
-						if (!gotMatch && titlefeats.find( fi->featidx) != titlefeats.end())
+					}{
+						if (!gotMatch)
 						{
-							touchCounter.dist_title_cnt++;
-							gotMatch = true;
+							nomatchfeats.push_back( *oi);
 						}
 					}
 				}
-				/*[-]*/if (fi->pos == 746)
+				/*[-]*/if (fi->pos >= 69 && fi->pos < 106 && qryidx == 0)
 				/*[-]*/{
-				/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
+				/*[-]*/	std::cerr << "HALLY GALLY " << qryidx << std::endl;
 				/*[-]*/}
-				res.push_back( WeightedPos( fi->featidx, qryidx, fi->pos, touchCounter.weight()));
+				if (touchCounter.count() >= minClusterSize)
+				{
+					std::vector<int>::const_iterator
+						xi = nomatchfeats.begin(), xe = nomatchfeats.end();
+					for (; xi != xe; ++xi)
+					{
+						if (hasTitleFeature( fi->pos, *xi))
+						{
+							touchCounter.dist_title_cnt++;
+						}
+					}
+					res.push_back( WeightedPos( fi->featidx, qryidx, fi->pos, touchCounter.weight()));
+				}
 			}
 		}
 	}
@@ -903,7 +982,7 @@ struct Document
 			int doclen = docfield.end() - docfield.start();
 			std::map<int,double>::const_iterator fi = queryFeatFfMap.find( qidx);
 			double ff = fi == queryFeatFfMap.end() ? 0.0 : fi->second;
-			/*[-]*/bool doPrint = docfield.start() == 746 && docfield.end() == 749;
+			/*[-]*/bool doPrint = docfield.start() == 69 && docfield.end() == 106;
 			rt += postingsWeight_bm25pff( statistics, doclen, *qi, ff, doPrint);
 		}
 		return rt;
@@ -1422,7 +1501,8 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 
 	Collection collection( nofDocuments, nofTerms, nofNodes);
 
-	int maxNofRanks = 200;
+	int maxNofRanks = g_weightingConfig.maxNofRanks;
+	int nofRanksChecked = g_weightingConfig.maxNofRanks / 10;
 
 	strus::Reference<strus::QueryEvalInterface> qeval( strus::createQueryEval( g_errorhnd));
 	if (!qeval.get()) throw std::runtime_error( g_errorhnd->fetchError());
@@ -1505,8 +1585,6 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 	}
 
 	std::vector<Query> queries = collection.randomQueries( nofQueryies);
-	int ranksChecked = maxNofRanks / 2;
-
 	if (selectQuery >= 0)
 	{
 		if (selectQuery >= (int)queries.size())
@@ -1546,7 +1624,7 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 				printResult( std::cerr, docnoDocidMap, expected);
 			}
 		}
-		checkResult( docnoDocidMap, selectQuery, qry, result, expected, ranksChecked);
+		checkResult( docnoDocidMap, selectQuery, qry, result, expected, nofRanksChecked);
 	}
 	else
 	{
@@ -1585,7 +1663,7 @@ static void testWeighting_bm25pff( int nofDocuments, int nofTerms, int nofNodes,
 					printResult( std::cerr, docnoDocidMap, expected);
 				}
 			}
-			checkResult( docnoDocidMap, qidx, *qi, result, expected, ranksChecked);
+			checkResult( docnoDocidMap, qidx, *qi, result, expected, nofRanksChecked);
 		}
 	}
 }

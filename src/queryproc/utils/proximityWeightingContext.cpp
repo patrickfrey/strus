@@ -85,7 +85,7 @@ void ProximityWeightingContext::init(
 	int firstPostingIdx = 0;
 	strus::Index featureIdToStartMap[ MaxNofArguments];	// map feature id (value in m_featureids) to the next value to take as minimum value for the start of the follow position scan
 	const char* featureIdToNameMap[ MaxNofArguments];	// maps the feature id to string, used to build
-	strus::Index endpos = m_field.defined() ? m_field.end() : (strus::Index)std::numeric_limits<Position>::max();
+	strus::Index endpos = m_field.defined() ? m_field.end() : std::numeric_limits<strus::Index>::max();
 	strus::Index posnoar[ MaxNofArguments];			//... array parallel to m_postings, m_featureids and m_length_postings
 
 	if (true == (m_hasPunctuation = (eos_postings != NULL && eos_postings->skipDoc(docno) == docno)))
@@ -136,7 +136,6 @@ void ProximityWeightingContext::init(
 				= m_postings[ m_nofPostings]->skipPos( featureIdToStartMap[ featid]);
 			if (0 == posnoar[ m_nofPostings] || posnoar[ m_nofPostings] > endpos)
 			{
-				m_postings[ m_nofPostings] = 0;
 				featureIdToStartMap[ featid] = endpos;
 			}
 			else
@@ -147,7 +146,7 @@ void ProximityWeightingContext::init(
 		else
 		{
 			m_postings[ m_nofPostings] = 0;
-			posnoar[ m_nofPostings] = endpos;
+			posnoar[ m_nofPostings] = 0;
 			featureIdToStartMap[ featid] = endpos;
 		}
 		++m_nofPostings;
@@ -156,7 +155,7 @@ void ProximityWeightingContext::init(
 	int queueSize = 0;
 	for (pi=0; pi<m_nofPostings; ++pi)
 	{
-		if (m_postings[ pi])
+		if (posnoar[ pi])
 		{
 			int ki = 0, ke = queueSize;
 			for (; ki < ke && posnoar[ queue[ ki]] < posnoar[ pi]; ++ki){}
@@ -180,21 +179,28 @@ void ProximityWeightingContext::init(
 	{
 		// Take first feature from queue and reinsert it:
 		int fidx = queue[ 0];
-		Position documentPos = (Position)(unsigned int)(int)posnoar[ fidx];
-		m_nodear.push_back( Node( fidx, documentPos));
-
-		// Get the next start position of the top element in the queue
-		strus::Index nextPos = featureIdToStartMap[ m_featureids[ fidx]];
-		strus::Index jumpPos = posnoar[ queue[ (fidx == eos_featidx) ? 1 : min_queueSize-1 ]];
-		if (nextPos + m_config.distance_near < jumpPos)
+		strus::Index documentPos = posnoar[ fidx];
+		if (documentPos < endpos)
 		{
-			nextPos = jumpPos - m_config.distance_near;
+			m_nodear.push_back( Node( fidx, documentPos));
+	
+			// Get the next start position of the top element in the queue
+			strus::Index nextPos = featureIdToStartMap[ m_featureids[ fidx]];
+			strus::Index jumpPos = posnoar[ queue[ (fidx == eos_featidx) ? 1 : min_queueSize-1 ]];
+			if (nextPos < jumpPos - m_config.distance_near)
+			{
+				nextPos = jumpPos - m_config.distance_near;
+			}
+			if (nextPos <= documentPos)
+			{
+				throw std::runtime_error(_TXT("logic error: proximity weighting queue corrupted"));
+			}
+			posnoar[ fidx] = m_postings[ fidx]->skipPos( nextPos);
 		}
-		if (nextPos <= documentPos)
+		else
 		{
-			throw std::runtime_error(_TXT("logic error: proximity weighting queue corrupted"));
+			posnoar[ fidx] = 0;
 		}
-		posnoar[ fidx] = m_postings[ fidx]->skipPos( nextPos);
 		if (posnoar[ fidx] == 0 || posnoar[ fidx] >= endpos)
 		{
 			// Set start position at end of all:
@@ -257,6 +263,52 @@ void ProximityWeightingContext::validateTouchCount()
 	}
 }
 
+void ProximityWeightingContext::markTouches( Node::TouchType touchType, std::vector<Node>::iterator ni, std::vector<Node>::iterator ne, strus::Index dist)
+{
+	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+
+	strus::Index ni_endpos = ni->pos + m_length_postings[ ni->featidx];
+	std::vector<Node>::iterator fi = ni+1, fe = ne;
+	for (; fi != fe
+		&& fi->featidx != ni->featidx
+		&& ni_endpos + dist > fi->pos; ++fi)
+	{
+		if (fi->featidx != eos_featidx)
+		{
+			if (fi->touched.set( ni->featidx, true))
+			{
+				fi->incrementTouchCount( touchType);
+			}
+			if (ni->touched.set( fi->featidx, true))
+			{
+				ni->incrementTouchCount( touchType);
+			}
+		}
+	}
+}
+
+void ProximityWeightingContext::markTouchesInSentence( Node::TouchType touchType, std::vector<Node>::iterator ni, std::vector<Node>::iterator ne, strus::Index dist)
+{
+	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+
+	strus::Index ni_endpos = ni->pos + m_length_postings[ ni->featidx];
+	std::vector<Node>::iterator fi = ni+1, fe = ne;
+	for (; fi != fe
+		&& fi->featidx != eos_featidx && fi->featidx != ni->featidx
+		&& ni_endpos + dist > fi->pos; ++fi)
+	{
+		if (fi->touched.set( ni->featidx, true))
+		{
+			fi->incrementTouchCount( touchType);
+		}
+		if (ni->touched.set( fi->featidx, true))
+		{
+			ni->incrementTouchCount( touchType);
+		}
+	}
+}
+
+
 void ProximityWeightingContext::initNeighbourMatches()
 {
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
@@ -265,71 +317,30 @@ void ProximityWeightingContext::initNeighbourMatches()
 	std::vector<Node>::iterator ni = m_nodear.begin(), ne = m_nodear.end();
 	for (; ni != ne; ++ni)
 	{
-		if (ni->featidx == eos_featidx) continue;
-
-		std::vector<Node>::iterator fi = ni+1, fe = m_nodear.end();
-		for (; fi != fe && fi->featidx != eos_featidx
-			&& ni->pos + m_length_postings[ ni->featidx] + m_config.maxNofSummarySentenceWords > fi->pos; ++fi)
+		if (ni->featidx != eos_featidx) 
 		{
-			if (fi->featidx == ni->featidx) continue;
-
-			if (ni->pos + m_length_postings[ ni->featidx] + m_config.distance_close > fi->pos)
-			{
-				if (ni->pos + m_length_postings[ ni->featidx] + m_config.distance_imm > fi->pos)
-				{
-					if (fi->touched.set( ni->featidx, true))
-					{
-						++fi->immediateMatches;
-					}
-					if (ni->touched.set( fi->featidx, true))
-					{
-						++ni->immediateMatches;
-					}
-				}
-				else
-				{
-					if (fi->touched.set( ni->featidx, true))
-					{
-						++fi->closeMatches;
-					}
-					if (ni->touched.set( fi->featidx, true))
-					{
-						++ni->closeMatches;
-					}
-				}
-			}
-			else
-			{
-				if (fi->touched.set( ni->featidx, true))
-				{
-					++fi->sentenceMatches;
-				}
-				if (ni->touched.set( fi->featidx, true))
-				{
-					++ni->sentenceMatches;
-				}
-			}
+			markTouchesInSentence( Node::ImmediateTouch, ni, ne, m_config.distance_imm);
 		}
 	}
-	// Mark near relations not in same sentence:
-	ni = m_nodear.begin(), ne = m_nodear.end();
-	for (; ni != ne; ++ni)
+	for (ni = m_nodear.begin(); ni != ne; ++ni)
 	{
-		if (ni->featidx == eos_featidx) continue;
-
-		std::vector<Node>::iterator fi = ni+1, fe = m_nodear.end();
-		for (; fi != fe && ni->pos + m_length_postings[ ni->featidx] + m_config.distance_near > fi->pos; ++fi)
+		if (ni->featidx != eos_featidx) 
 		{
-			if (fi->featidx == ni->featidx || fi->featidx == eos_featidx) continue;
-
-			if (fi->touched.set( ni->featidx, true))
-			{
-				++fi->nearMatches;
-			}
-			if (ni->touched.set( fi->featidx, true))
-			{
-				++ni->nearMatches;
-			}
+			markTouchesInSentence( Node::CloseTouch, ni, ne, m_config.distance_close);
+		}
+	}
+	for (ni = m_nodear.begin(); ni != ne; ++ni)
+	{
+		if (ni->featidx != eos_featidx) 
+		{
+			markTouchesInSentence( Node::SentenceTouch, ni, ne, m_config.maxNofSummarySentenceWords);
+		}
+	}
+	for (ni = m_nodear.begin(); ni != ne; ++ni)
+	{
+		if (ni->featidx != eos_featidx) 
+		{
+			markTouches( Node::NearTouch, ni, ne, m_config.distance_near);
 		}
 	}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -393,15 +404,19 @@ double ProximityWeightingContext::ff_weight( const Node& nd) const
 void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, const strus::IndexRange& headerField, const strus::IndexRange& contentField)
 {
 	std::vector<Node>::iterator start = ni;
-	for (; start >= m_nodear.begin() && start->pos >= (Position)contentField.start(); --start){}
+	for (; start >= m_nodear.begin() && start->pos >= contentField.start(); --start){}
 	++start;
-	std::vector<Node>::iterator end = ni;
-	for (; end != m_nodear.end() && end->pos < (Position)contentField.end(); ++end){}
+	std::vector<Node>::iterator end = m_nodear.end();
+	int nextidx = m_nodeScanner.upperbound( contentField.end(), ni-m_nodear.begin(), m_nodear.size());
+	if (nextidx > 0)
+	{
+		end = m_nodear.begin() + nextidx;
+	}
 	strus::bitset<MaxNofArguments> title_touched;
 	int ti = m_hasPunctuation ? 1 : 0, te = m_nofPostings;
 	for (; ti != te; ++ti)
 	{
-		if (ti != ni->featidx && m_postings[ ti])
+		if (m_postings[ ti])
 		{
 			strus::Index pos = m_postings[ ti]->skipPos( headerField.start());
 			if (pos && pos < headerField.end())
@@ -414,6 +429,9 @@ void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, 
 	{
 		int tc = ni->touched.join_count( title_touched);
 		if (ni->touched.set( ni->featidx, false)) {--tc;} //... unmask own references that are not counted
+#ifdef STRUS_LOWLEVEL_DEBUG
+		if (tc < 0) throw std::runtime_error(_TXT("logic error: proximity weighting counting corrupted (title matches)"));
+#endif
 		ni->titleScopeMatches += tc;
 	}
 }
@@ -455,7 +473,10 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 				{
 					strus::IndexRange field = structIterator->skipPos( li, ni->pos);
 					if (!field.defined()) break;
-
+					/*[-]*/if (field.start() == 69 && field.end() == 106)
+					/*[-]*/{
+					/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
+					/*[-]*/}
 					if (field.contain( ni->pos))
 					{
 						bool fieldUsed = false;
@@ -480,15 +501,30 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 								touchTitleNode( ni, hh.field(), field);
 							}
 						}
-					}
-					int nextidx = m_nodeScanner.upperbound( field.end(), ni-m_nodear.begin(), m_nodear.size());
-					if (nextidx > 0)
-					{
-						ni = m_nodear.begin() + nextidx;
+						int nextidx = m_nodeScanner.upperbound( field.end(), ni-m_nodear.begin(), m_nodear.size());
+						if (nextidx > 0)
+						{
+							ni = m_nodear.begin() + nextidx;
+						}
+						else
+						{
+							ni = ne;
+						}
 					}
 					else
 					{
-						ni = ne;
+						int nextidx = m_nodeScanner.upperbound( field.start(), ni-m_nodear.begin(), m_nodear.size());
+						if (nextidx > 0)
+						{
+							ni = m_nodear.begin() + nextidx;
+						}
+						else
+						{
+#ifdef STRUS_LOWLEVEL_DEBUG
+							if (nextidx == 0) throw std::runtime_error(_TXT("logic error: upperbound seek returns element that failed condition before"));
+#endif
+							ni = ne;
+						}
 					}
 				}
 				else
@@ -555,7 +591,7 @@ void ProximityWeightingContext::collectFieldStatistics()
 			{
 				if (ni->featidx != eos_featidx)
 				{
-					/*[-]*/if (ni->pos == 746)
+					/*[-]*/if (ni->pos >= 69 && ni->pos <= 106)
 					/*[-]*/{
 					/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
 					/*[-]*/}
@@ -844,7 +880,7 @@ void ProximityWeightingContext::collectWeightedNeighboursForSingleFeature(
 	if (postings->skipDoc(docno) != docno) return;
 
 	strus::Index pos = postings->skipPos( field.start());
-	strus::Index endpos = field.defined() ? field.end() : (strus::Index)std::numeric_limits<Position>::max();
+	strus::Index endpos = field.defined() ? field.end() : std::numeric_limits<strus::Index>::max();
 	strus::Index featlen = postings->length();
 
 	if (hasPunctuation)

@@ -74,12 +74,10 @@ public:
 		void setMinFfWeight( double minFfWeight_);
 	};
 
-	typedef unsigned short Position;
-
 	struct Node
 	{
 		strus::bitset<MaxNofArguments> touched;
-		Position pos;
+		strus::Index pos;
 		unsigned char closeMatches;
 		unsigned char immediateMatches;
 		unsigned char sentenceMatches;
@@ -97,7 +95,7 @@ public:
 			,titleScopeMatches(0)
 			,featidx(0)
 		{}
-		Node( int featidx_, Position documentPos)
+		Node( int featidx_, strus::Index documentPos)
 			:touched()
 			,pos(documentPos)
 			,closeMatches(0)
@@ -122,6 +120,17 @@ public:
 			nearMatches=o.nearMatches;titleScopeMatches=o.titleScopeMatches;
 			featidx=o.featidx; return *this;}
 
+		enum TouchType {ImmediateTouch,CloseTouch,NearTouch,SentenceTouch};
+		inline void incrementTouchCount( TouchType tp)
+		{
+			switch (tp)
+			{
+				case ImmediateTouch: ++immediateMatches; break;
+				case CloseTouch: ++closeMatches; break;
+				case NearTouch: ++nearMatches; break;
+				case SentenceTouch: ++sentenceMatches; break;
+			}
+		}
 		inline int touchCount() const
 		{
 			return closeMatches + immediateMatches + sentenceMatches + nearMatches + titleScopeMatches;
@@ -130,14 +139,14 @@ public:
 		struct SearchCompare
 		{
 			SearchCompare(){}
-			bool operator()( const Node& aa, Position bb) const
+			bool operator()( const Node& aa, strus::Index bb) const
 			{
 				return aa.pos < bb;
 			}
 		};
 	};
 
-	typedef SkipScanArray<Node,Position,Node::SearchCompare> NodeScanner;
+	typedef SkipScanArray<Node,strus::Index,Node::SearchCompare> NodeScanner;
 
 public:
 	ProximityWeightingContext( const ProximityWeightingContext& o);
@@ -234,19 +243,21 @@ private:
 	void initNeighbourMatches();
 	void touchTitleNode( std::vector<Node>::iterator ni, const strus::IndexRange& headerField, const strus::IndexRange& contentField);
 	void validateTouchCount();
+	void markTouches( Node::TouchType touchType, std::vector<Node>::iterator ni, std::vector<Node>::iterator ne, strus::Index dist);
+	void markTouchesInSentence( Node::TouchType touchType, std::vector<Node>::iterator ni, std::vector<Node>::iterator ne, strus::Index dist);
 
 	/// \note Operation has two instances, an open operation and a close operation
 	///	Open is defined as (startpos,startpos) pair and close as (startpos,endpos) pair
 	///	This definition makes the order of the operations in correct order established by a simple sort by (less(endpos),greater(startpos),less(structidx))
 	struct StmOperation
 	{
-		Position startpos;
-		Position endpos;
+		strus::Index startpos;
+		strus::Index endpos;
 		unsigned short fieldidx;
 
-		StmOperation( Position startpos_, int fieldidx_)
+		StmOperation( strus::Index startpos_, int fieldidx_)
 			:startpos(startpos_),endpos(startpos_),fieldidx(fieldidx_){}
-		StmOperation( Position startpos_, Position endpos_, int fieldidx_)
+		StmOperation( strus::Index startpos_, strus::Index endpos_, int fieldidx_)
 			:startpos(startpos_),endpos(endpos_),fieldidx(fieldidx_){}
 		StmOperation( const StmOperation& o)
 			:startpos(o.startpos),endpos(o.endpos),fieldidx(o.fieldidx){}
@@ -293,7 +304,7 @@ private:
 	int m_nofWeightedNeighbours;
 	int m_minClusterSize;
 	unsigned char m_featureids[ MaxNofArguments];
-	Position m_length_postings[ MaxNofArguments];
+	strus::Index m_length_postings[ MaxNofArguments];
 	bool m_hasPunctuation;
 	strus::Index m_docno;
 	strus::IndexRange m_field;
