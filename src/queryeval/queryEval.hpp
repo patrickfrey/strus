@@ -33,7 +33,7 @@ public:
 		:m_weightingSets(),m_selectionSets(),m_restrictionSets()
 		,m_exclusionSets(),m_weightingFunctions(),m_summarizers()
 		,m_weightingFormula(),m_terms(),m_varassignmap()
-		,m_usePosinfo(true),m_errorhnd(errorhnd_){}
+		,m_featureSetFlagMap(),m_errorhnd(errorhnd_){}
 
 	QueryEval( const QueryEval& o)
 		:m_weightingSets(o.m_weightingSets)
@@ -45,7 +45,7 @@ public:
 		,m_weightingFormula(o.m_weightingFormula)
 		,m_terms(o.m_terms)
 		,m_varassignmap(o.m_varassignmap)
-		,m_usePosinfo(o.m_usePosinfo)
+		,m_featureSetFlagMap(o.m_featureSetFlagMap)
 		,m_errorhnd(o.m_errorhnd)
 	{}
 
@@ -81,8 +81,7 @@ public:
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc);
 
-	virtual void usePositionInformation( bool yes)
-		{m_usePosinfo = yes;}
+	virtual void usePositionInformation( const std::string& featureSet, bool yes);
 
 	virtual StructView view() const;
 
@@ -110,11 +109,22 @@ public:/*Query*/
 	std::vector<VariableAssignment>
 		weightingVariableAssignmentList(
 			const std::string& varname) const;
+	bool usePositionInformation( const std::string& featureSet) const;
 
 private:
 	void defineVariableAssignments( const std::vector<std::string>& variables, VariableAssignment::Target target, std::size_t index);
 
 private:
+	struct FeatureSetFlags
+	{
+		bool usePosinfo;					///< true (default) if position info is used for evaluation for this feature set
+
+		FeatureSetFlags()
+			:usePosinfo(true){}
+		FeatureSetFlags( const FeatureSetFlags& o)
+			:usePosinfo(o.usePosinfo){}
+	};
+
 	std::vector<std::string> m_weightingSets;			///< posting sets used for weighting the documents matched
 	std::vector<std::string> m_selectionSets;			///< posting sets selecting the documents to match
 	std::vector<std::string> m_restrictionSets;			///< posting sets restricting the documents to match
@@ -125,7 +135,7 @@ private:
 
 	std::vector<TermConfig> m_terms;				///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 	std::multimap<std::string,VariableAssignment> m_varassignmap;	///< map of weight variable assignments
-	bool m_usePosinfo;						///< true (default) if position info is used for evaluation
+	std::map<std::string,FeatureSetFlags> m_featureSetFlagMap;	///< map of feature set names to the flags assigned
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

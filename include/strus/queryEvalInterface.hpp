@@ -129,13 +129,15 @@ public:
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc)=0;
 
-	/// \brief Set the flag to indicate wheter to use position information for evaluation or not. If set to yes=false then do not use position information in evaluation, all features that appear in a document get position 1.
-	/// \note Default is set to yes = true
-	/// \note Forces the query evluation to use a different implementation of posting iterators that are slightly more efficient for some corner cases but useless in general.
-	/// \remark Switching off position information does not make sense in the main query evaluation case. 
+	/// \brief Set the flag to indicate wheter to use position information for a defined feature set or not. If set to yes=false then do not use position information in evaluation, all features of this feature set that appear in a document get position 1.
+	/// \note Forces the query evaluation to use a different implementation of posting iterators that are slightly more efficient for some corner cases but useless in general.
+	/// \remark Switching off position information does not make sense for weighting schemes that rely on proximity or other measures depending on the ordinal position ot the query terms.
 	/// \remark Be aware that you know what you are doing when using this method. Posting join operators work differently when switching position information off for evaluation.
 	/// \note The motivation for this method is to use it in a preliminary evaluation step to get document candidates for query interpretation and expansion.
-	virtual void usePositionInformation( bool yes=true)=0;
+	/// \param[in] featureSet name to the feature set to switch position information on/off
+	/// \param[in] yes flag indicating the value set to the switch
+	/// \note Default is set to yes = true
+	virtual void usePositionInformation( const std::string& featureSet, bool yes)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on

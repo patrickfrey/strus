@@ -97,7 +97,7 @@ double WeightingFunctionContextBM25::featureWeight( const Feature& feat, strus::
 		{
 			m_metadata->skipDoc( docno);
 			double doclen = m_metadata->getValue( m_metadata_doclen);
-			double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
+			double rel_doclen = doclen / m_parameter.avgDocLength;
 
 			return feat.weight * feat.idf
 				* (ff * (m_parameter.k1 + 1.0))

@@ -203,9 +203,24 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 		std::cout << "create query for program:" << std::endl;
 		print( std::cout);
 #endif
-		return new Query( this, storage, m_usePosinfo, m_errorhnd);
+		return new Query( this, storage, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, 0);
+}
+
+void QueryEval::usePositionInformation( const std::string& featureSet, bool yes)
+{
+	try
+	{
+		m_featureSetFlagMap[ featureSet].usePosinfo = yes;
+	}
+	CATCH_ERROR_MAP( _TXT("error initializing position info flag: %s"), *m_errorhnd);
+}
+
+bool QueryEval::usePositionInformation( const std::string& featureSet) const
+{
+	std::map<std::string,FeatureSetFlags>::const_iterator fi = m_featureSetFlagMap.find( featureSet);
+	return fi == m_featureSetFlagMap.end() ? true : fi->second.usePosinfo;
 }
 
 static StructView getStructView( const std::vector<QueryEvalInterface::FeatureParameter>& o)
@@ -296,40 +311,44 @@ static StructView getStructView( const std::vector<TermConfig>& o)
 
 StructView QueryEval::view() const
 {
-	StructView rt;
-	if (!m_weightingFunctions.empty())
+	try
 	{
-		rt( "weighting", getStructView( m_weightingFunctions));
+		StructView rt;
+		if (!m_weightingFunctions.empty())
+		{
+			rt( "weighting", getStructView( m_weightingFunctions));
+		}
+		if (!m_summarizers.empty())
+		{
+			rt( "summarizers", getStructView( m_summarizers));
+		}
+		if (!m_terms.empty())
+		{
+			rt( "weighting_sets", getStructView( m_terms));
+		}
+		if (!m_weightingSets.empty())
+		{
+			rt( "weighting_sets", m_weightingSets);
+		}
+		if (!m_selectionSets.empty())
+		{
+			rt( "selection_sets", m_selectionSets);
+		}
+		if (!m_restrictionSets.empty())
+		{
+			rt( "restriction_sets", m_restrictionSets);
+		}
+		if (!m_exclusionSets.empty())
+		{
+			rt( "exclusion_sets", m_exclusionSets);
+		}
+		if (m_weightingFormula.get())
+		{
+			rt( "formula", m_weightingFormula->view());
+		}
+		return rt;
 	}
-	if (!m_summarizers.empty())
-	{
-		rt( "summarizers", getStructView( m_summarizers));
-	}
-	if (!m_terms.empty())
-	{
-		rt( "weighting_sets", getStructView( m_terms));
-	}
-	if (!m_weightingSets.empty())
-	{
-		rt( "weighting_sets", m_weightingSets);
-	}
-	if (!m_selectionSets.empty())
-	{
-		rt( "selection_sets", m_selectionSets);
-	}
-	if (!m_restrictionSets.empty())
-	{
-		rt( "restriction_sets", m_restrictionSets);
-	}
-	if (!m_exclusionSets.empty())
-	{
-		rt( "exclusion_sets", m_exclusionSets);
-	}
-	if (m_weightingFormula.get())
-	{
-		rt( "formula", m_weightingFormula->view());
-	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, StructView());
 }
 
 

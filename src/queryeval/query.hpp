@@ -44,7 +44,6 @@ public:
 	Query(
 			const QueryEval* queryEval_,
 			const StorageClientInterface* storage_,
-			bool usePosinfo_,
 			ErrorBufferInterface* errorhnd_);
 #if __cplusplus >= 201103L
 	Query( const Query& o) = delete;
@@ -209,8 +208,8 @@ private:
 	};
 
 	enum {MaxNofJoinopArguments=256};
-	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const;
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const;
+	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap, bool usePosinfo) const;
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap, bool usePosinfo) const;
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr,
@@ -242,7 +241,6 @@ private:
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
 	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query and not the query eval)
 	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
-	bool m_usePosinfo;						///< true if position info is used
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 	DebugTraceContextInterface* m_debugtrace;			///< debug trace interface
 };

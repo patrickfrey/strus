@@ -40,7 +40,7 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, bool usePosinfo_, ErrorBufferInterface* errorhnd_)
+Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, ErrorBufferInterface* errorhnd_)
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
@@ -56,7 +56,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_evalset_defined(false)
 	,m_termstatsmap()
 	,m_globstats()
-	,m_usePosinfo(usePosinfo_)
 	,m_errorhnd(errorhnd_)
 	,m_debugtrace(0)
 {
@@ -343,7 +342,7 @@ void Query::addAccess( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap, bool usePosinfo) const
 {
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
@@ -361,7 +360,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				if (m_usePosinfo)
+				if (usePosinfo)
 				{
 					joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
 				}
@@ -376,7 +375,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
-							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
+							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap, usePosinfo));
 				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
@@ -387,7 +386,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap, bool usePosinfo) const
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -397,7 +396,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			if (m_usePosinfo)
+			if (usePosinfo)
 			{
 				rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
 			}
@@ -411,7 +410,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
-			rt = createExpressionPostingIterator( m_expressions[ nidx], nodeStorageDataMap);
+			rt = createExpressionPostingIterator( m_expressions[ nidx], nodeStorageDataMap, usePosinfo);
 			if (!rt) break;
 			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt);
 			break;
@@ -553,8 +552,9 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				fi = m_features.begin(), fe = m_features.end();
 			for (; fi != fe; ++fi)
 			{
+				bool usePosinfo = m_queryEval->usePositionInformation( fi->set);
 				Reference<PostingIteratorInterface> postingsElem(
-					createNodePostingIterator( fi->node, nodeStorageDataMap));
+					createNodePostingIterator( fi->node, nodeStorageDataMap, usePosinfo));
 				if (!postingsElem.get())
 				{
 					if (m_debugtrace) m_debugtrace->close();
