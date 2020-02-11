@@ -290,7 +290,7 @@ private:
 			BM25Param p;
 			double N = primeFactorCollection.size();
 			double doclen = primeFactorCollection.factorList( ni).size();
-			double reldoclen = (doclen+1) / p.avgdoclen;
+			double reldoclen = doclen / p.avgdoclen;
 			std::map<int,int> ffMap = primeFactorCollection.queryFeatToFfMap( ni, query);
 			std::map<int,int> qfMap;
 			std::vector<int>::const_iterator qi = query.begin(), qe = query.end();
