@@ -173,7 +173,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 {
 	try
 	{
-		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
+		if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a string"), name_.c_str(), "matchvariables");
 		}
@@ -189,15 +189,14 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_parameter.entityType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "nofres")
-			|| strus::caseInsensitiveEquals( name_, "dist_imm")
+		else if (strus::caseInsensitiveEquals( name_, "dist_imm")
 			|| strus::caseInsensitiveEquals( name_, "dist_close")
 			|| strus::caseInsensitiveEquals( name_, "dist_near")
 			|| strus::caseInsensitiveEquals( name_, "dist_sentence")
 			|| strus::caseInsensitiveEquals( name_, "sentences")
 			|| strus::caseInsensitiveEquals( name_, "cluster")
 			|| strus::caseInsensitiveEquals( name_, "ffbase")
-			 )
+			)
 		{
 			addNumericParameter( name_, parameterValue( name_, value));
 		}
@@ -211,7 +210,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name_, const NumericVariant& value)
 {
-	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct") || strus::caseInsensitiveEquals( name_, "para") || strus::caseInsensitiveEquals( name_, "title"))
+	if (strus::caseInsensitiveEquals( name_, "match") || strus::caseInsensitiveEquals( name_, "punct"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
