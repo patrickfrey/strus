@@ -20,7 +20,7 @@ namespace strus {
 /// \brief Forward declaration
 class ErrorBufferInterface;
 /// \brief Forward declaration
-class StructIteratorInterface;
+class StructureIteratorInterface;
 
 /// \brief Map of all structures defined in a document
 class StorageStructMap
@@ -56,7 +56,7 @@ public:
 	/// \brief Constructor
 	/// \param[in] structitr structure iterator interface
 	/// \param[in] errorhnd reference to error buffer (ownership hold by caller)
-	StorageStructMap( StructIteratorInterface* structitr, strus::Index docno, ErrorBufferInterface* errorhnd);
+	StorageStructMap( StructureIteratorInterface* structitr, strus::Index docno, ErrorBufferInterface* errorhnd);
 
 	const_iterator begin() const				{return m_map.begin();}
 	const_iterator end() const				{return m_map.end();}

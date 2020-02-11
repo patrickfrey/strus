@@ -16,7 +16,7 @@
 #include "docIndexNode.hpp"
 #include "staticIntrusiveArray.hpp"
 #include "private/skipScanArray.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/index.hpp"
 #include "strus/base/stdint.h"

@@ -7,11 +7,12 @@
  */
 #include "proximityWeightingContext.hpp"
 #include "forwardIndexCollector.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/static_assert.hpp"
+#include "strus/structureHeaderField.hpp"
 #include <limits>
 #include <set>
 #include <iostream>
@@ -441,7 +442,7 @@ void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, 
 	}
 }
 
-void ProximityWeightingContext::initStructures( StructIteratorInterface* structIterator, strus::Index structno)
+void ProximityWeightingContext::initStructures( StructureIteratorInterface* structIterator, strus::Index structno)
 {
 	m_stmOperations.clear();
 	m_fieldStatistics.clear();
@@ -498,7 +499,7 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 										m_fieldStatistics.push_back( FieldStatistics( field));
 									}
 								}
-								StructIteratorInterface::HeaderField hh = structIterator->headerField( lnk.index());
+								StructureHeaderField hh = structIterator->headerField( lnk.index());
 								touchTitleNode( ni, hh.field(), field);
 							}
 						}

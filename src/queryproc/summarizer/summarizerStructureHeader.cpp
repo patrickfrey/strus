@@ -39,7 +39,7 @@ SummarizerFunctionContextStructureHeader::SummarizerFunctionContextStructureHead
 			ErrorBufferInterface* errorhnd_)
 	:m_parameter(parameter_)
 	,m_storage(storage_)
-	,m_structiter( storage_->createStructIterator())
+	,m_structiter( storage_->createStructureIterator())
 	,m_structno(parameter_.structName.empty() ? 0:storage_->structTypeNumber(parameter_.structName))
 	,m_headerar()
 	,m_textCollector( storage_, parameter_.textType, errorhnd_)
@@ -75,7 +75,7 @@ std::vector<SummaryElement> SummarizerFunctionContextStructureHeader::getSummary
 		m_headerar.clear();
 		strus::collectHeaderFields( m_headerar, m_structiter.get(), m_structno, doc.docno(), doc.field());
 		m_textCollector.skipDoc( doc.docno());
-		std::vector<HeaderField>::const_iterator hi = m_headerar.begin(), he = m_headerar.end();
+		std::vector<StructureHeaderField>::const_iterator hi = m_headerar.begin(), he = m_headerar.end();
 		for (int hidx=0; hi != he; ++hi,++hidx)
 		{
 			

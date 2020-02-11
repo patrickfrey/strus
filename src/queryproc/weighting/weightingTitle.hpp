@@ -15,7 +15,7 @@
 #include "strus/reference.hpp"
 #include "strus/constants.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
 #include <cstring>
@@ -66,7 +66,7 @@ public:
 	
 private:
 	const StorageClientInterface* m_storage;			///< storage client interface
-	strus::Reference<StructIteratorInterface> m_structitr;		///< structure iterator to recognize titles
+	strus::Reference<StructureIteratorInterface> m_structitr;	///< structure iterator to recognize titles
 	PostingIteratorInterface* m_postingar[ MaxNofArguments];	///< array of weighted feature postings
 	int m_postingarsize;						///< number of postings defined
 	bool m_isStopWordAr[ MaxNofArguments];				///< parallel array to m_postingar that tells if the posting is a stopword

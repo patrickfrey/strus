@@ -10,7 +10,7 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "forwardIndexTextCollector.hpp"
@@ -71,14 +71,11 @@ public:
 	virtual std::vector<SummaryElement> getSummary( const strus::WeightedDocument& doc);
 
 private:
-	typedef StructIteratorInterface::HeaderField HeaderField;
-
-private:
 	SummarizerFunctionParameterStructureHeader m_parameter;		///< parameter
 	const StorageClientInterface* m_storage;			///< storage client interface
-	strus::Reference<StructIteratorInterface> m_structiter;		///< structure iterator
+	strus::Reference<StructureIteratorInterface> m_structiter;		///< structure iterator
 	strus::Index m_structno;					///< type of structure to scan for results or 0 if to scan all
-	std::vector<HeaderField> m_headerar;			///< temporary result, header fields from which summary is constructed 
+	std::vector<StructureHeaderField> m_headerar;			///< temporary result, header fields from which summary is constructed 
 	ForwardIndexTextCollector m_textCollector;			///< structure for collecting the summary texts
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error reporting
 };

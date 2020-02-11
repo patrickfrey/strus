@@ -20,7 +20,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -289,7 +289,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				structIdMap[ m_storage->structTypeNumber( *si)] = *si;
 			}
 		}
-		strus::local_ptr<StructIteratorInterface> stitr( m_storage->createStructIterator());
+		strus::local_ptr<StructureIteratorInterface> stitr( m_storage->createStructureIterator());
 		if (!stitr.get())
 		{
 			logError( logout, m_docid, _TXT("failed to create structure iterator: %s"), m_errorhnd->fetchError());

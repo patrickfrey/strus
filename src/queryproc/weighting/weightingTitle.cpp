@@ -36,7 +36,7 @@ WeightingFunctionContextTitle::WeightingFunctionContextTitle(
 		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
-	,m_structitr(storage_->createStructIterator()),m_postingarsize(0)
+	,m_structitr(storage_->createStructureIterator()),m_postingarsize(0)
 	,m_hierarchyWeightFactor(hierarchyWeightFactor_)
 	,m_maxdf(maxdf_),m_maxNofResults(maxNofResults_),m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_lastResult(),m_errorhnd(errorhnd_)

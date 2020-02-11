@@ -6,23 +6,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Interface for an iterator on structures defined as relations of position info index ranges (directed graph)
-/// \file "structIteratorInterface.hpp"
+/// \file "structureIteratorInterface.hpp"
 #ifndef _STRUS_STRUCTURE_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STRUCTURE_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/structureLink.hpp"
+#include "strus/structureHeaderField.hpp"
 #include <vector>
 
 namespace strus
 {
 
-/// \class StructIteratorInterface
+/// \class StructureIteratorInterface
 /// \brief Structure that represents relations of position info ordinal position ranges (directed graph) per document.
-class StructIteratorInterface
+class StructureIteratorInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~StructIteratorInterface(){}
+	virtual ~StructureIteratorInterface(){}
 
 	/// \brief Load the structures of the document with a given document number
 	/// \param[in] docno the document number to fetch the structures of
@@ -52,43 +53,10 @@ public:
 	/// \return a list of links as structure
 	virtual StructureLinkArray links( int level) const=0;
 
-	/// \brief Structure that describes a header field and its level in the hierarchy of inclusion
-	/// \note For calculating the real position in the inclusion hierarchy you have to determine if the header is covered by its content and subtract one in this case
-	class HeaderField
-	{
-	public:
-		/// \brief Default constructor
-		HeaderField()
-			:m_field(),m_hierarchy(-1){}
-		/// \brief Constructor
-		HeaderField( const strus::IndexRange& field_, int hierarchy_)
-			:m_field(field_),m_hierarchy(hierarchy_){}
-		/// \brief Copy constructor
-		HeaderField( const HeaderField& o)
-			:m_field(o.m_field),m_hierarchy(o.m_hierarchy){}
-
-		/// \brief Field (ordinal position range)
-		const strus::IndexRange& field() const	{return m_field;}
-		/// \brief hierarchy index in the inclusion hierarchy
-		int hierarchy() const			{return m_hierarchy;}
-		/// \brief Evaluate if this is a valid field
-		bool defined() const			{return m_hierarchy>=0;}
-
-		/// \brief Comparison for sorting
-		bool operator < (const HeaderField& o) const
-		{
-			return m_hierarchy == o.m_hierarchy ? m_field < o.m_field : m_hierarchy < o.m_hierarchy;
-		}
-
-	private:
-		strus::IndexRange m_field;
-		int m_hierarchy;
-	};
-
 	/// \brief Return the header field of a defined structure
 	/// \param[in] structIndex index of the structure defined in a link retrieved with links
 	/// \return a valid field with level or {{0,0},-1} if not defined
-	virtual HeaderField headerField( int structIndex) const =0;
+	virtual StructureHeaderField headerField( int structIndex) const =0;
 };
 
 }//namespace

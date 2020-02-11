@@ -11,7 +11,7 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
@@ -97,7 +97,7 @@ private:
 	std::size_t m_stopword_itrarsize;				///< nof posting iterators defined to weight
 	FeatureWeights m_stopword_weightar;				///< array of feature weights parallel to m_itrar
 	PostingIteratorInterface* m_eos_itr;				///< posting iterators for end of sentence markers
-	strus::Reference<StructIteratorInterface> m_structitr;		///< structure iterator
+	strus::Reference<StructureIteratorInterface> m_structitr;	///< structure iterator
 	strus::Reference<MetaDataReaderInterface> m_metadata;		///< meta data reader
 	int m_metadata_doclen;						///< meta data doclen handle
 	strus::Index m_structno;					///< structure type number to use for select the weighted structures or 0 if you want to use all structures

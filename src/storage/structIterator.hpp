@@ -7,7 +7,8 @@
  */
 #ifndef _STRUS_STRUCTURE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_STRUCTURE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
+#include "strus/structureHeaderField.hpp"
 #include "strus/index.hpp"
 #include "structBlock.hpp"
 #include "documentBlockIteratorTemplate.hpp"
@@ -23,7 +24,7 @@ class DatabaseClientInterface;
 class StorageClient;
 
 class StructIterator
-	:public StructIteratorInterface
+	:public StructureIteratorInterface
 {
 public:
 	StructIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_);
@@ -41,7 +42,7 @@ public:
 
 	virtual StructureLinkArray links( int level) const;
 
-	virtual HeaderField headerField( int structIndex) const;
+	virtual StructureHeaderField headerField( int structIndex) const;
 
 private:
 	const StorageClient* m_storage;					///< storage instance

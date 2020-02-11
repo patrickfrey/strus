@@ -11,14 +11,14 @@
 #include "strus/base/dll_tags.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
 /// \brief strus toplevel namespace
 using namespace strus;
 
-DLL_PUBLIC StorageStructMap::StorageStructMap( StructIteratorInterface* stitr, strus::Index docno, ErrorBufferInterface* errorhnd)
+DLL_PUBLIC StorageStructMap::StorageStructMap( StructureIteratorInterface* stitr, strus::Index docno, ErrorBufferInterface* errorhnd)
 {
 	try
 	{

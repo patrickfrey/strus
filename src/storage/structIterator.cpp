@@ -116,12 +116,12 @@ StructureLinkArray StructIterator::links( int level) const
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get current links: %s"), INTERFACE_NAME, *m_errorhnd, rt);
 }
 
-StructIteratorInterface::HeaderField StructIterator::headerField( int structIndex) const
+StructureHeaderField StructIterator::headerField( int structIndex) const
 {
 	try
 	{
 		strus::Index start = m_curblock.headerStart( structIndex);
-		if (!start) return HeaderField();
+		if (!start) return StructureHeaderField();
 		int li = 0, le = m_levels;
 		for (; li != le; ++li)
 		{
@@ -136,14 +136,14 @@ StructIteratorInterface::HeaderField StructIterator::headerField( int structInde
 					const StructureLink& lnk = lar[ ki];
 					if (lnk.header() && lnk.index() == structIndex)
 					{
-						return HeaderField( candidate, li);
+						return StructureHeaderField( candidate, li);
 					}
 				}
 			}
 		}
-		return HeaderField();
+		return StructureHeaderField();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get header field: %s"), INTERFACE_NAME, *m_errorhnd, HeaderField());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get header field: %s"), INTERFACE_NAME, *m_errorhnd, StructureHeaderField());
 }
 
 

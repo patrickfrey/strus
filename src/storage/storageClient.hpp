@@ -28,7 +28,7 @@ class DocumentTermIteratorInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
-class StructIteratorInterface;
+class StructureIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
@@ -82,8 +82,8 @@ public:
 			const std::string& termtype,
 			const std::string& termid) const;
 
-	virtual StructIteratorInterface*
-		createStructIterator() const;
+	virtual StructureIteratorInterface*
+		createStructureIterator() const;
 	
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(

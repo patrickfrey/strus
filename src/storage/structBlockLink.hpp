@@ -8,7 +8,7 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_LINK_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/base/packed.h"
 #include <iostream>
 

@@ -28,7 +28,7 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
-#include "strus/structIteratorInterface.hpp"
+#include "strus/structureIteratorInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "strus/constants.hpp"
 #include "private/errorUtils.hpp"
@@ -540,7 +540,7 @@ struct Collection
 	}
 };
 
-static std::pair<strus::IndexRange,int> findQuerySource( strus::StructIteratorInterface* sitr, strus::Index structno, strus::Index pos)
+static std::pair<strus::IndexRange,int> findQuerySource( strus::StructureIteratorInterface* sitr, strus::Index structno, strus::Index pos)
 {
 	std::pair<strus::IndexRange,int> rt;
 	int li = 0, le = sitr->levels();
@@ -585,7 +585,7 @@ static std::pair<strus::IndexRange,int> findQuerySource( strus::StructIteratorIn
 	return rt;
 }
 
-static strus::IndexRange findQuerySink( strus::StructIteratorInterface* sitr, strus::Index structno, int structidx, strus::Index pos)
+static strus::IndexRange findQuerySink( strus::StructureIteratorInterface* sitr, strus::Index structno, int structidx, strus::Index pos)
 {
 	strus::IndexRange rt;
 	int li = 0, le = sitr->levels();
@@ -613,7 +613,7 @@ static strus::IndexRange findQuerySink( strus::StructIteratorInterface* sitr, st
 	return rt;
 }
 
-static void verifyQueryAnswer( Storage& storage, strus::StructIteratorInterface* sitr, const Collection::QueryAnswerPair& qa)
+static void verifyQueryAnswer( Storage& storage, strus::StructureIteratorInterface* sitr, const Collection::QueryAnswerPair& qa)
 {
 	strus::Index docno = storage.sci->documentNumber( qa.query.docid);
 	if (!docno) throw strus::runtime_error("document id unknown: %s", qa.query.docid.c_str());
@@ -668,7 +668,7 @@ static void testLargeStructures( int nofDocuments, int nofStructures, int commit
 	if (g_dumpCollection) collection.dump( std::cout);
 
 	int qi = 0, qe = nofQueryies;
-	strus::local_ptr<strus::StructIteratorInterface> sitr( storage.sci->createStructIterator());
+	strus::local_ptr<strus::StructureIteratorInterface> sitr( storage.sci->createStructureIterator());
 	if (!sitr.get()) throw std::runtime_error("failed to create structure iterator");
 
 	if (g_verbosity >= 1) {fprintf( stderr, "\n"); fflush( stderr);}

@@ -41,7 +41,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_stopword_itrarsize(0)
 	,m_stopword_weightar()
 	,m_eos_itr(0)
-	,m_structitr(storage->createStructIterator())
+	,m_structitr(storage->createStructureIterator())
 	,m_metadata(storage->createMetaDataReader())
 	,m_metadata_doclen(-1)
 	,m_structno(0)

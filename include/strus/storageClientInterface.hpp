@@ -23,7 +23,7 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
-class StructIteratorInterface;
+class StructureIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
@@ -100,8 +100,8 @@ public:
 
 	/// \brief Create an iterator on the structures (relations of ordinal position ranges with a structure name)
 	/// \return the created iterator reference (with ownership)
-	virtual StructIteratorInterface*
-		createStructIterator() const=0;
+	virtual StructureIteratorInterface*
+		createStructureIterator() const=0;
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.

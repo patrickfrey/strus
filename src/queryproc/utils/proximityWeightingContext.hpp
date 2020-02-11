@@ -21,7 +21,7 @@ namespace strus {
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
-class StructIteratorInterface;
+class StructureIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
@@ -161,7 +161,7 @@ public:
 		PostingIteratorInterface** postings, int nofPostings, PostingIteratorInterface* eos_postings, 
 		strus::Index docno, const strus::IndexRange& field);
 
-	void initStructures( StructIteratorInterface* structIterator, strus::Index structno);
+	void initStructures( StructureIteratorInterface* structIterator, strus::Index structno);
 	void collectFieldStatistics();
 
 	struct FieldStatistics

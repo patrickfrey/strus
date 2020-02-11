@@ -465,8 +465,8 @@ PostingIteratorInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating ff posting search index iterator: %s"), *m_errorhnd, 0);
 }
 
-StructIteratorInterface*
-	StorageClient::createStructIterator() const
+StructureIteratorInterface*
+	StorageClient::createStructureIterator() const
 {
 	try
 	{
