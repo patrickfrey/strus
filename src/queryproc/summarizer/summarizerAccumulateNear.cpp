@@ -153,8 +153,8 @@ std::vector<SummaryElement>
 		}
 		else if (m_itrarsize == 1)
 		{
-			ProximityWeightingContext::collectWeightedNeighboursForSingleFeature( 
-					weightedNeighbours, m_parameter.distance_collect,
+			weightedNeighbours = ProximityWeightingContext::getWeightedNeighboursForSingleFeature( 
+					m_parameter.distance_collect,
 					m_itrar[0], m_eos_itr, 
 					doc.docno(), doc.field());
 		}
@@ -163,8 +163,8 @@ std::vector<SummaryElement>
 			m_proximityWeightingContext.init(
 					m_itrar, m_itrarsize, m_eos_itr,
 					doc.docno(), doc.field());
-			m_proximityWeightingContext.collectWeightedNeighbours( 
-					weightedNeighbours, m_weightar, m_parameter.distance_collect);
+			weightedNeighbours = m_proximityWeightingContext.getWeightedNeighbours( 
+					m_weightar, m_parameter.distance_collect);
 		}
 		std::vector<ForwardIndexCollector>::iterator
 			ci = m_collectors.begin(), ce = m_collectors.end();
@@ -308,7 +308,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		{
 			m_parameter.addConfig( value, m_errorhnd);
 		}
-		else if (strus::caseInsensitiveEquals( name_, "nofres")
+		else if (strus::caseInsensitiveEquals( name_, "results")
 			|| strus::caseInsensitiveEquals( name_, "maxdf")
 			|| strus::caseInsensitiveEquals( name_, "dist_imm")
 			|| strus::caseInsensitiveEquals( name_, "dist_close")
@@ -337,7 +337,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer function '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "nofres"))
+	else if (strus::caseInsensitiveEquals( name_, "results"))
 	{
 		m_parameter.maxNofResults = value.toint();
 	}
@@ -394,7 +394,7 @@ StructView SummarizerFunctionInstanceAccumulateNear::view() const
 		StructView rt;
 		rt( "collect", getStructView( m_parameter.collectorConfigs));
 		rt( "maxdf", m_parameter.maxdf);
-		rt( "nofres", m_parameter.maxNofResults);
+		rt( "results", m_parameter.maxNofResults);
 		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
 		rt( "dist_close", m_parameter.proximityConfig.distance_close);
 		rt( "dist_near", m_parameter.proximityConfig.distance_near);
@@ -430,7 +430,7 @@ StructView SummarizerFunctionAccumulateNear::view() const
 		rt( P::Feature, "punct", _TXT( "defines the sentence delimiter"), "");
 		rt( P::String, "collect", _TXT( "describes a configuration of elements to collect with name,type,tag,sep in the strus configuration string syntax"), "");
 		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword and not subject for proximity weighting as fraction of the collection size"), "0:");
-		rt( P::Numeric, "nofres", _TXT( "maximum number of weighted elements returned by each collect configuration"), "1:");
+		rt( P::Numeric, "results", _TXT( "maximum number of weighted elements returned by each collect configuration"), "1:");
 		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
 		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");
 		rt( P::Numeric, "dist_near", _TXT( "ordinal position distance considered as near for features not in the same sentence"), "1:");

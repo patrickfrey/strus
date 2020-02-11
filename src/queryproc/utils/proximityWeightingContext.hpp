@@ -228,10 +228,13 @@ public:
 			:pos(o.pos),weight(o.weight){}
 	};
 
-	void collectWeightedNeighbours( std::vector<WeightedNeighbour>& res, const FeatureWeights& featureWeights, strus::Index dist) const;
+	std::vector<WeightedNeighbour>
+		getWeightedNeighbours(
+			const FeatureWeights& featureWeights,
+			strus::Index dist) const;
 
-	static void collectWeightedNeighboursForSingleFeature( 
-			std::vector<WeightedNeighbour>& res,
+	static std::vector<WeightedNeighbour>
+		getWeightedNeighboursForSingleFeature( 
 			strus::Index dist,
 			PostingIteratorInterface* postings,
 			PostingIteratorInterface* eos_postings, 

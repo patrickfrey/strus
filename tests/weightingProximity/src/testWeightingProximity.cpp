@@ -142,6 +142,26 @@ struct DocTreeNode
 			ci->collectFeatureOccurrencies( res);
 		}
 	}
+
+	static void collectFeaturePositions( std::vector<strus::Index>& res, const std::vector<int>& featar, strus::Index startpos, int featidx)
+	{
+		std::vector<int>::const_iterator fi = featar.begin(), fe = featar.end();
+		for (strus::Index fidx=0; fi != fe; ++fi,++fidx)
+		{
+			if (*fi == featidx) res.push_back( startpos + fidx);
+		}
+	}
+
+	void collectFeaturePositions( std::vector<strus::Index>& res, int featidx) const
+	{
+		collectFeaturePositions( res, titlear, field.start(), featidx);
+		collectFeaturePositions( res, contentar, field.start() + titlear.size(), featidx);
+		std::list<DocTreeNode>::const_iterator ci = chld.begin(), ce = chld.end();
+		for (; ci != ce; ++ci)
+		{
+			ci->collectFeaturePositions( res, featidx);
+		}
+	}
 };
 
 static DocTreeNode createDocTree( int nofChilds, int nofTerms, int nofFeatures, int depth, strus::Index startpos)
@@ -391,6 +411,7 @@ struct WeightingConfig
 	int distance_imm;
 	int distance_close;
 	int distance_near;
+	int distance_collect;
 	float minClusterSize;
 	int nofSummarySentences;
 	int maxNofSummarySentenceWords;
@@ -405,6 +426,7 @@ static WeightingConfig g_weightingConfig = {
 	2/*distance_imm*/,
 	8/*distance_close*/,
 	40/*distance_near*/,
+	6/*distance_collect*/,
 	0.0/*minClusterSize*/,
 	1/*nofSummarySentences*/,
 	100/*maxNofSummarySentenceWords*/,
@@ -1007,6 +1029,17 @@ struct Document
 		}
 		return rt;
 	}
+
+	std::vector<strus::Index> getFeaturePositions( int featidx) const
+	{
+		std::vector<strus::Index> rt;
+		std::vector<DocTreeNode>::const_iterator di = doctreelist.begin(), de = doctreelist.end();
+		for (; di != de; ++di)
+		{
+			di->collectFeaturePositions( rt, featidx);
+		}
+		return rt;
+	}
 };
 
 struct Collection
@@ -1206,6 +1239,17 @@ struct Collection
 					strus::WeightedDocument wdoc( docno, strus::IndexRange(), docweight);
 					std::vector<strus::SummaryElement> summary;
 					summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
+					std::vector<int>::const_iterator qi = query.features.begin(), qe = query.features.end();
+					for (int qidx=0; qi != qe; ++qi,++qidx)
+					{
+						std::vector<strus::Index> pos = di->getFeaturePositions( *qi);
+						std::vector<strus::Index>::const_iterator pi = pos.begin(), pe = pos.end();
+						for (; pi != pe; ++pi)
+						{
+							std::string posstr = strus::string_format( "%d", (int)*pi);
+							summary.push_back( strus::SummaryElement( "pos", posstr, 1.0, qidx));
+						}
+					}
 					ranks.push_back( strus::ResultDocument( wdoc, summary));
 				}
 			}
@@ -1269,6 +1313,8 @@ static strus::QueryResult evaluateQuery( strus::QueryEvalInterface* qeval, const
 		}
 		qry->pushTerm( "word", word, 1);
 		qry->defineFeature( "search");
+		qry->pushTerm( "word", word, 1);
+		qry->defineFeature( "hit");
 	}
 	return qry->evaluate( 0, maxNofRanks);
 }
@@ -1549,14 +1595,37 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	if (!attributefunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
 	attributefunc->addStringParameter( "name", "docid");
 
+	const strus::SummarizerFunctionInterface* summarizerPositions = queryproc->getSummarizerFunction( "matchpos");
+	if (!summarizerPositions) throw std::runtime_error( "undefined summarizer function 'matchpos'");
+	strus::Reference<strus::SummarizerFunctionInstanceInterface> posfunc( summarizerPositions->createInstance( queryproc));
+	if (!posfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	posfunc->addNumericParameter( "results", strus::NumericVariant::asint( g_weightingConfig.maxNofRanks));
+
+	const strus::SummarizerFunctionInterface* summarizerAccuNear = queryproc->getSummarizerFunction( "accunear");
+	if (!summarizerAccuNear) throw std::runtime_error( "undefined summarizer function 'accunear'");
+	strus::Reference<strus::SummarizerFunctionInstanceInterface> matchfunc( summarizerAccuNear->createInstance( queryproc));
+	if (!matchfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	matchfunc->addNumericParameter( "results", strus::NumericVariant::asint( g_weightingConfig.maxNofRanks));
+	matchfunc->addNumericParameter( "maxdf", strus::NumericVariant::asdouble( g_weightingConfig.maxdf));
+	matchfunc->addNumericParameter( "dist_imm", strus::NumericVariant::asint( g_weightingConfig.distance_imm));
+	matchfunc->addNumericParameter( "dist_close", strus::NumericVariant::asint( g_weightingConfig.distance_close));
+	matchfunc->addNumericParameter( "dist_near", strus::NumericVariant::asint( g_weightingConfig.distance_near));
+	matchfunc->addNumericParameter( "dist_collect", strus::NumericVariant::asint( 0/*only collect at matching position*/));
+	matchfunc->addNumericParameter( "cluster", strus::NumericVariant::asint( g_weightingConfig.minClusterSize));
+
 	std::vector<strus::QueryEvalInterface::FeatureParameter> fparam;
 	fparam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
 	std::vector<strus::QueryEvalInterface::FeatureParameter> noparam;
+	std::vector<strus::QueryEvalInterface::FeatureParameter> hparam;
+	hparam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "hit"));
 
 	qeval->addSelectionFeature( "search");
 	qeval->usePositionInformation( "search", false);
+	qeval->usePositionInformation( "hit", true);
 	qeval->addWeightingFunction( wfunc.release(), fparam);
 	qeval->addSummarizerFunction( "docid", attributefunc.release(), noparam);
+	qeval->addSummarizerFunction( "pos", posfunc.release(), hparam);
+	qeval->addSummarizerFunction( "matchstats", matchfunc.release(), hparam);
 
 	if (g_errorhnd->hasError())
 	{

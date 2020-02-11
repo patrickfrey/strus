@@ -61,7 +61,7 @@ std::vector<SummaryElement>
 		std::vector<PostingIteratorInterface*>::const_iterator
 			ii = m_itrs.begin(), ie = m_itrs.end();
 	
-		for (; ii != ie; ++ii)
+		for (int iidx=0; ii != ie; ++ii,++iidx)
 		{
 			if ((*ii)->skipDoc( doc.docno()) == doc.docno())
 			{
@@ -69,11 +69,11 @@ std::vector<SummaryElement>
 				strus::Index pos = (*ii)->skipPos( doc.field().start());
 				strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
 
-				for (int gidx=0; pos && pos < endpos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
+				for (; pos && pos < endpos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
 				{
 					char posstr[ 64];
-					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
-					rt.push_back( SummaryElement( "", posstr, 1.0, gidx));
+					snprintf( posstr, sizeof(posstr), "%d", (int)pos);
+					rt.push_back( SummaryElement( "", posstr, 1.0, iidx));
 				}
 			}
 		}
@@ -82,11 +82,22 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
+static NumericVariant parameterValue( const std::string& name_, const std::string& value)
+{
+	NumericVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name_.c_str(), value.c_str());
+	return rt;
+}
+
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name_, const std::string& value)
 {
 	if (strus::caseInsensitiveEquals( name_, "match"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a string"), name_.c_str(), THIS_METHOD_NAME);
+	}
+	else if (strus::caseInsensitiveEquals( name_, "results"))
+	{
+		addNumericParameter( name_, parameterValue( name_, value));
 	}
 	else
 	{
@@ -100,11 +111,7 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "name"))
-	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a string and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
-	}
-	else if (strus::caseInsensitiveEquals( name_, "N"))
+	else if (strus::caseInsensitiveEquals( name_, "results"))
 	{
 		m_maxNofMatches = val.touint();
 	}
@@ -130,7 +137,7 @@ StructView SummarizerFunctionInstanceListMatches::view() const
 	try
 	{
 		StructView rt;
-		rt( "nof", m_maxNofMatches);
+		rt( "results", m_maxNofMatches);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -152,9 +159,9 @@ StructView SummarizerFunctionListMatches::view() const
 	try
 	{
 		typedef FunctionDescription P;
-		FunctionDescription rt( name(), _TXT("Get the feature occurencies printed"));
+		FunctionDescription rt( name(), _TXT("Get the feature occurencies"));
 		rt( P::Feature, "match", _TXT( "defines the query features"), "");
-		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");
+		rt( P::Numeric, "results", _TXT( "the maximum number of results to return"), "1:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
