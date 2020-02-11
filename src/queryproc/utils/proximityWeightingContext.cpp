@@ -14,10 +14,11 @@
 #include "strus/base/static_assert.hpp"
 #include <limits>
 #include <set>
-/*[-]*/#include <iostream>
+#include <iostream>
 
 using namespace strus;
 
+#undef STRUS_LOWLEVEL_DEBUG_FIELD //... on enabling assign a tuple like 121,127
 #ifdef NDEBUG
 #undef STRUS_LOWLEVEL_DEBUG
 #else
@@ -182,8 +183,14 @@ void ProximityWeightingContext::init(
 		strus::Index documentPos = posnoar[ fidx];
 		if (documentPos < endpos)
 		{
-			m_nodear.push_back( Node( fidx, documentPos));
-	
+			if (fidx == eos_featidx && !m_nodear.empty() && m_nodear.back().featidx == eos_featidx)
+			{
+				//... do not add subsequent eos markers as they are only used as delimiters
+			}
+			else
+			{
+				m_nodear.push_back( Node( fidx, documentPos));
+			}
 			// Get the next start position of the top element in the queue
 			strus::Index nextPos = featureIdToStartMap[ m_featureids[ fidx]];
 			strus::Index jumpPos = posnoar[ queue[ (fidx == eos_featidx) ? 1 : min_queueSize-1 ]];
@@ -269,11 +276,9 @@ void ProximityWeightingContext::markTouches( Node::TouchType touchType, std::vec
 
 	strus::Index ni_endpos = ni->pos + m_length_postings[ ni->featidx];
 	std::vector<Node>::iterator fi = ni+1, fe = ne;
-	for (; fi != fe
-		&& fi->featidx != ni->featidx
-		&& ni_endpos + dist > fi->pos; ++fi)
+	for (; fi != fe && ni_endpos + dist > fi->pos; ++fi)
 	{
-		if (fi->featidx != eos_featidx)
+		if (fi->featidx != eos_featidx && fi->featidx != ni->featidx)
 		{
 			if (fi->touched.set( ni->featidx, true))
 			{
@@ -293,21 +298,21 @@ void ProximityWeightingContext::markTouchesInSentence( Node::TouchType touchType
 
 	strus::Index ni_endpos = ni->pos + m_length_postings[ ni->featidx];
 	std::vector<Node>::iterator fi = ni+1, fe = ne;
-	for (; fi != fe
-		&& fi->featidx != eos_featidx && fi->featidx != ni->featidx
-		&& ni_endpos + dist > fi->pos; ++fi)
+	for (; fi != fe && fi->featidx != eos_featidx && ni_endpos + dist > fi->pos; ++fi)
 	{
-		if (fi->touched.set( ni->featidx, true))
+		if (fi->featidx != ni->featidx)
 		{
-			fi->incrementTouchCount( touchType);
-		}
-		if (ni->touched.set( fi->featidx, true))
-		{
-			ni->incrementTouchCount( touchType);
+			if (fi->touched.set( ni->featidx, true))
+			{
+				fi->incrementTouchCount( touchType);
+			}
+			if (ni->touched.set( fi->featidx, true))
+			{
+				ni->incrementTouchCount( touchType);
+			}
 		}
 	}
 }
-
 
 void ProximityWeightingContext::initNeighbourMatches()
 {
@@ -317,28 +322,28 @@ void ProximityWeightingContext::initNeighbourMatches()
 	std::vector<Node>::iterator ni = m_nodear.begin(), ne = m_nodear.end();
 	for (; ni != ne; ++ni)
 	{
-		if (ni->featidx != eos_featidx) 
+		if (ni->featidx != eos_featidx)
 		{
 			markTouchesInSentence( Node::ImmediateTouch, ni, ne, m_config.distance_imm);
 		}
 	}
 	for (ni = m_nodear.begin(); ni != ne; ++ni)
 	{
-		if (ni->featidx != eos_featidx) 
+		if (ni->featidx != eos_featidx)
 		{
 			markTouchesInSentence( Node::CloseTouch, ni, ne, m_config.distance_close);
 		}
 	}
 	for (ni = m_nodear.begin(); ni != ne; ++ni)
 	{
-		if (ni->featidx != eos_featidx) 
+		if (ni->featidx != eos_featidx)
 		{
 			markTouchesInSentence( Node::SentenceTouch, ni, ne, m_config.maxNofSummarySentenceWords);
 		}
 	}
 	for (ni = m_nodear.begin(); ni != ne; ++ni)
 	{
-		if (ni->featidx != eos_featidx) 
+		if (ni->featidx != eos_featidx)
 		{
 			markTouches( Node::NearTouch, ni, ne, m_config.distance_near);
 		}
@@ -473,10 +478,6 @@ void ProximityWeightingContext::initStructures( StructIteratorInterface* structI
 				{
 					strus::IndexRange field = structIterator->skipPos( li, ni->pos);
 					if (!field.defined()) break;
-					/*[-]*/if (field.start() == 69 && field.end() == 106)
-					/*[-]*/{
-					/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
-					/*[-]*/}
 					if (field.contain( ni->pos))
 					{
 						bool fieldUsed = false;
@@ -591,10 +592,6 @@ void ProximityWeightingContext::collectFieldStatistics()
 			{
 				if (ni->featidx != eos_featidx)
 				{
-					/*[-]*/if (ni->pos >= 69 && ni->pos <= 106)
-					/*[-]*/{
-					/*[-]*/	std::cerr << "HALLY GALLY" << std::endl;
-					/*[-]*/}
 					// Accumulate weights for the open fields:
 					double ww = ff_weight( *ni);
 	
@@ -604,6 +601,12 @@ void ProximityWeightingContext::collectFieldStatistics()
 					{
 						m_fieldStatistics[ *ki].ff[ ni->featidx - ofs_featidx] += ww;
 					}
+#ifdef STRUS_LOWLEVEL_DEBUG_FIELD
+					if (strus::IndexRange(STRUS_LOWLEVEL_DEBUG_FIELD).contain( ni->pos))
+					{
+						std::cerr << strus::string_format( "DEBUG real weighting pos=%d, qryidx=%d, ff=%.8f, touch: {imm=%d, close=%d, sent=%d, near=%d, title=%d}", (int)ni->pos, (int)(ni->featidx - ofs_featidx), ww, (int)ni->immediateMatches, (int)ni->closeMatches, (int)ni->sentenceMatches, (int)ni->nearMatches, (int)ni->titleScopeMatches) << std::endl;
+					}
+#endif
 					// Accumulate weights for the total stats:
 					totalStats.ff[ ni->featidx - ofs_featidx] += ww;
 				}

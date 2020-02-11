@@ -182,13 +182,6 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 				for (pi=0,pe=m_itrarsize; pi<pe; ++pi)
 				{
 					ww += m_parameter.postingsWeight( subdoclen, m_weightar[ pi], si->ff[ pi]);
-					/*[-]*/if (si->field.start() == 69 && si->field.end() == 106)
-					/*[-]*/{
-					/*[-]*/	std::cerr << strus::string_format(
-					/*[-]*/		"calc weight bm25pff: {doclen=%d, idf=%.8f, ff=%.8f, k1=%.8f, b=%.8f} => total=%.8f",
-					/*[-]*/		subdoclen, m_weightar[ pi], si->ff[ pi], 1.5/*k1*/, 0.75/*b*/, ww
-					/*[-]*/		) << std::endl;
-					/*[-]*/}
 				}
 				m_lastResult.push_back( WeightedField( si->field, ww));
 			}
