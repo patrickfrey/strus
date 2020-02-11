@@ -74,6 +74,12 @@ public:
 		/// \brief Evaluate if this is a valid field
 		bool defined() const			{return m_hierarchy>=0;}
 
+		/// \brief Comparison for sorting
+		bool operator < (const HeaderField& o) const
+		{
+			return m_hierarchy == o.m_hierarchy ? m_field < o.m_field : m_hierarchy < o.m_hierarchy;
+		}
+
 	private:
 		strus::IndexRange m_field;
 		int m_hierarchy;

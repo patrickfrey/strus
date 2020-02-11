@@ -49,7 +49,7 @@ void strus::collectHeaderFields( std::vector<HeaderField>& res, StructIteratorIn
 							{
 								coverField.setEnd( hh.field().end());
 							}
-							res.push_back( HeaderField( hh.field(), li));
+							res.push_back( HeaderField( hh.field(), li + (mapsToItself?1:0)));
 						}
 					}
 					else
@@ -65,7 +65,7 @@ void strus::collectHeaderFields( std::vector<HeaderField>& res, StructIteratorIn
 		}
 	}
 	// Ensure top to down order and assign correct hierarchy level:
-	std::reverse( res.begin(), res.end());
+	std::sort( res.begin(), res.end());
 	std::vector<HeaderField>::iterator ri = res.begin(), re = res.end();
 	int hcnt = 0;
 	while (ri != re)
