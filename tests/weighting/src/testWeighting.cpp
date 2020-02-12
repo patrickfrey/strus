@@ -1782,7 +1782,7 @@ static void runRandomQueriesAndVerifyResult( QueryEvalMethod method, strus::Quer
 	}
 }
 
-static void testWeightingProximity( QueryEvalMethod method, int nofDocuments, int nofTerms, int nofNodes, int commitSize, int nofQueries, const std::string& selectDocid, int selectQuery)
+static void testWeighting( QueryEvalMethod method, int nofDocuments, int nofTerms, int nofNodes, int commitSize, int nofQueries, const std::string& selectDocid, int selectQuery)
 {
 	Storage storage( g_fileLocator, g_errorhnd);
 	storage.open( "path=storage", true);
@@ -1816,7 +1816,7 @@ static void testWeightingProximity( QueryEvalMethod method, int nofDocuments, in
 
 static void printUsage()
 {
-	std::cerr << "usage: testWeightingProximity [options] <method> <nofdocs> <nofterms> <nofnodes> <commitsize> <nofqry>" << std::endl;
+	std::cerr << "usage: testWeighting [options] <method> <nofdocs> <nofterms> <nofnodes> <commitsize> <nofqry>" << std::endl;
 	std::cerr << "description: Inserts a collection of documents with hierachical title" << std::endl;
 	std::cerr << "             structures and search for example title hierarchy references." << std::endl;
 	std::cerr << "options:" << std::endl;
@@ -1951,7 +1951,7 @@ int main( int argc, const char* argv[])
 		{
 			throw std::runtime_error(strus::string_format( "unknown test retrieval type '%s'", testType.c_str()));
 		}
-		testWeightingProximity( method, nofDocuments, nofTerms, nofNodes, commitSize, nofQueries, selectDocid, selectQuery);
+		testWeighting( method, nofDocuments, nofTerms, nofNodes, commitSize, nofQueries, selectDocid, selectQuery);
 
 		std::cerr << "OK" << std::endl;
 	}

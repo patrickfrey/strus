@@ -22,5 +22,5 @@ add_subdirectory( varSizeNodeTree )
 add_subdirectory( statsproc )
 add_subdirectory( sentenceAnalyzer )
 add_subdirectory( weightingTitle )
-add_subdirectory( weightingProximity )
+add_subdirectory( weighting )
 

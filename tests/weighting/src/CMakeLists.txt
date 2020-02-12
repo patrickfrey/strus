@@ -14,6 +14,6 @@ link_directories(
 	"${LevelDB_LIBRARY_PATH}"
 )
 
-add_executable( testWeightingProximity testWeightingProximity.cpp)
-target_link_libraries( testWeightingProximity strus_error strus_filelocator strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
+add_executable( testWeighting testWeighting.cpp)
+target_link_libraries( testWeighting strus_error strus_filelocator strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 
