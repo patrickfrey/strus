@@ -25,6 +25,7 @@
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
 #include "viewUtils.hpp"
+#include "textNormalizer.hpp"
 #include <limits>
 #include <cstdlib>
 #include <iomanip>
@@ -59,6 +60,11 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 	for (; ci != ce; ++ci)
 	{
 		m_collectors.push_back( ForwardIndexCollector( m_storage, ci->tagSeparator, ci->tagType, m_errorhnd));
+		std::vector<std::string>::const_iterator ti = ci->collectTypes.begin(), te = ci->collectTypes.end();
+		for (; ti != te; ++ti)
+		{
+			m_collectors.back().addFeatureType( *ti);
+		}
 	}
 	std::memset( &m_itrar, 0, sizeof(m_itrar));
 	std::memset( &m_stopword_itrar, 0, sizeof(m_itrar));
@@ -177,12 +183,13 @@ std::vector<SummaryElement>
 				wi = weightedNeighbours.begin(), we = weightedNeighbours.end();
 			while (wi != we)
 			{
-				strus::Index wpos = ci->skipPos( wi->pos, m_parameter.distance_collect);
+				strus::Index wpos = ci->skipPos( wi->pos);
 				for (; wi != we && wi->pos < wpos; ++wi){}
 				if (wi == we) break;
 				if (wi->pos == wpos)
 				{
-					entitymap[ ci->fetch( wpos)] += wi->weight;
+					std::string elem = strus::stripForwardIndexText( ci->fetch( wpos), m_parameter.collectorConfigs[ cidx].stripCharacters);
+					entitymap[ elem] += wi->weight;
 				}
 				++wi;
 			}
@@ -228,11 +235,23 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 			throw strus::runtime_error(_TXT("missing mandatory '%s' in configuration"), "type");
 		}
 	}
+	if (collectTypes.empty())
+	{
+		throw strus::runtime_error(_TXT("empty '%s' definition in configuration, nothing to accumulate"), "type");
+	}
 	if (!extractStringFromConfigString( tagType, configstr, "tag", errorhnd))
 	{
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "tag", errorhnd->fetchError());
+		}
+	}
+	std::string stripCharacters;
+	if (!extractStringFromConfigString( stripCharacters, configstr, "strip", errorhnd))
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "strip", errorhnd->fetchError());
 		}
 	}
 	std::string tagSeparatorStr;
@@ -263,7 +282,7 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 	{
 		throw strus::runtime_error(_TXT("superfluous definitions int in configuration: '%s'"), configstr.c_str());
 	}
-	collectorConfigs.push_back( CollectorConfig( name, collectTypes, tagType, tagSeparator));
+	collectorConfigs.push_back( CollectorConfig( name, collectTypes, tagType, stripCharacters, tagSeparator));
 }
 
 StructView SummarizerFunctionParameterAccumulateNear::CollectorConfig::view() const
@@ -272,6 +291,7 @@ StructView SummarizerFunctionParameterAccumulateNear::CollectorConfig::view() co
 	rt( "name", name);
 	rt( "type", collectTypes);
 	rt( "tag", tagType);
+	rt( "strip", stripCharacters);
 	rt( "sep", tagSeparator);
 	return rt;
 }

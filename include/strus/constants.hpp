@@ -169,7 +169,7 @@ struct Constants
 	///\brief Size of a feature frequency block that leads to flushing it to the database and opening a new one
 	static inline int maxFfBlockSize()
 	{
-		return 1024;
+		return 128;
 	}
 
 	///\brief Size of a boolean block for representing sets that leads to flushing it to the database and opening a new one

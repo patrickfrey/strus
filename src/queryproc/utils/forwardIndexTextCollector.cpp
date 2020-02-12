@@ -21,7 +21,8 @@ ForwardIndexTextCollector::ForwardIndexTextCollector(
 		const std::string& wordType,
 		const std::string& entityType,
 		ErrorBufferInterface* errorhnd_)
-	:m_storage(storage_),m_textiter(),m_entityiter(),m_typeiter(),m_errorhnd(errorhnd_)
+	:m_storage(storage_),m_textiter(),m_entityiter(),m_typeiter()
+	,m_errorhnd(errorhnd_)
 {
 	if (!wordType.empty())
 	{
@@ -68,8 +69,8 @@ void ForwardIndexTextCollector::skipDoc( strus::Index docno)
 	if (m_entityiter.get()) m_entityiter->skipDoc( docno);
 }
 
-static const char* g_openEntityBracket = "(";
-static const char* g_closeEntityBracket = "(";
+static const char* g_openEntityBracket = "[";
+static const char* g_closeEntityBracket = "] ";
 
 std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 {
@@ -83,25 +84,31 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 			if (pos == m_typeiter->skipPos( pos) && pos == m_entityiter->skipPos( pos))
 			{
 				std::string entitystr = m_entityiter->fetch();
-				strus::Index nextpos = m_typeiter->skipPos( pos+1);
-				if (!nextpos) nextpos = pos+1;
+				strus::Index nexttypepos = m_typeiter->skipPos( pos+1);
+				if (!nexttypepos || nexttypepos >= endpos) nexttypepos = endpos;
+				strus::Index nextentitypos = m_entityiter->skipPos( pos+1);
+				if (!nextentitypos || nextentitypos >= endpos) nextentitypos = endpos;
+				strus::Index nextpos = nexttypepos < nextentitypos ? nexttypepos : nextentitypos;
 				strus::Index pi = pos;
 				std::string textstr;
 				while (pi < nextpos)
 				{
-					if (!textstr.empty()) textstr.push_back(' ');
+					if (!textstr.empty() && textstr[ textstr.size()-1] != ' ')
+					{
+						textstr.push_back(' ');
+					}
 					textstr.append( m_textiter->fetch());
 					if (entitystr == textstr) break;
 					pi = m_textiter->skipPos( pi+1);
+					if (!pi) pi = endpos;
 				}
-				rt.append( textstr);
 				if (entitystr != textstr)
 				{
-					if (!rt.empty()) rt.push_back(' ');
 					rt.append( g_openEntityBracket);
 					rt.append( entitystr);
 					rt.append( g_closeEntityBracket);
 				}
+				rt.append( textstr);
 				pos = nextpos-1;
 			}
 		}

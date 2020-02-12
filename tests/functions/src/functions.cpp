@@ -7,7 +7,9 @@
  */
 #include "indexPacker.hpp"
 #include "floatConversions.hpp"
+#include "textNormalizer.hpp"
 #include "strus/base/bitOperations.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -121,6 +123,14 @@ static void testSinglePrecisionFloatConversions()
 	spFloatConversionTest( -0.1);
 }
 
+static void testStripForwardIndexText()
+{
+	if ("bla bla funzel" != strus::stripForwardIndexText( "bla, bla, funzel!", ",;-!.")) throw strus::runtime_error("strip text test %d failed", 1);
+	if ("A B C D E F" != strus::stripForwardIndexText( "A简B 体C 中D文E网F页", "简体中文网页")) throw strus::runtime_error("strip text test %d failed", 2);
+	if ("bla bla funzel" != strus::stripForwardIndexText( "bla简, bla, funzel!", ",;简-!.")) throw strus::runtime_error("strip text test %d failed", 3);
+	if ("bla简 bla funzel" != strus::stripForwardIndexText( "bla简, bla, funzel!", ",;-!.")) throw strus::runtime_error("strip text test %d failed", 4);
+}
+
 int main( int, const char**)
 {
 	try
@@ -132,6 +142,8 @@ int main( int, const char**)
 		bitOperationsTest<uint32_t>( 100);
 		std::cerr << "executing test BitOperations64" << std::endl;
 		bitOperationsTest<uint64_t>( 100);
+		std::cerr << "strip text" << std::endl;
+		testStripForwardIndexText();
 		return 0;
 	}
 	catch (const std::exception& err)

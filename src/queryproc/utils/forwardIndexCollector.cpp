@@ -15,9 +15,13 @@ using namespace strus;
 
 #define THIS_CONTEXT const_cast<char*>("forward index collector")
 
-ForwardIndexCollector::ForwardIndexCollector( const StorageClientInterface* storage_, char tagSeparator_, const std::string& tagtype, ErrorBufferInterface* errorhnd_)
+ForwardIndexCollector::ForwardIndexCollector(
+		const StorageClientInterface* storage_,
+		char tagSeparator_, const std::string& tagtype,
+		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_valueiterar(),m_tagtypeiter()
-	,m_lastfield(),m_tagSeparator(tagSeparator_),m_errorhnd(errorhnd_)
+	,m_tagSeparator(tagSeparator_)
+	,m_errorhnd(errorhnd_)
 {
 	if (!tagtype.empty())
 	{
@@ -41,24 +45,22 @@ void ForwardIndexCollector::skipDoc( strus::Index docno)
 	}
 }
 
-strus::Index ForwardIndexCollector::skipPos( strus::Index pos, strus::Index maxlen)
+strus::Index ForwardIndexCollector::skipPos( strus::Index pos)
 {
 	strus::Index rt = 0;
 	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
 	for (; vi != ve; ++vi)
 	{
 		strus::Index pi = (*vi)->skipPos( pos);
-		while (pi && pi < pos + maxlen && pi < rt)
+		while (pi && (!rt || pi < rt))
 		{
 			if (m_tagtypeiter.get() && m_tagtypeiter->skipPos( pi) != pi)
 			{
 				pi = (*vi)->skipPos( pi+1);
+				continue;
 			}
-			else
-			{
-				rt = pi;
-				break;
-			}
+			rt = pi;
+			break;
 		}
 	}
 	return rt;
@@ -67,36 +69,25 @@ strus::Index ForwardIndexCollector::skipPos( strus::Index pos, strus::Index maxl
 std::string ForwardIndexCollector::fetch( strus::Index pos)
 {
 	std::string rt;
-	if (pos && m_lastfield.contain( pos) && m_lastfield.start() != pos)
+	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
+	for (; vi != ve; ++vi)
 	{
-		// ... do not return item covered by last item returned
-	}
-	else
-	{
-		std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
-		for (; vi != ve; ++vi)
+		if ((*vi)->skipPos( pos) == pos)
 		{
-			if ((*vi)->skipPos( pos) == pos)
+			if (m_tagtypeiter.get())
 			{
-				if (m_tagtypeiter.get())
+				if (m_tagtypeiter->skipPos( pos) == pos)
 				{
-					if (m_tagtypeiter->skipPos( pos) == pos)
-					{
-						rt.append( m_tagtypeiter->fetch());
-						if (m_tagSeparator) rt.push_back( m_tagSeparator);
-						rt.append( (*vi)->fetch());
-
-						strus::Index endpos = m_tagtypeiter->skipPos( pos+1);
-						m_lastfield.init( pos, endpos ? endpos : (pos+1));
-					}
-				}
-				else
-				{
+					rt = m_tagtypeiter->fetch();
+					if (m_tagSeparator) rt.push_back( m_tagSeparator);
 					rt.append( (*vi)->fetch());
-					m_lastfield.init( pos, pos+1);
 				}
-				break;
 			}
+			else
+			{
+				rt.append( (*vi)->fetch());
+			}
+			break;
 		}
 	}
 	return rt;

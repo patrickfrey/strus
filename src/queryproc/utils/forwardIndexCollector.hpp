@@ -26,17 +26,21 @@ class ErrorBufferInterface;
 class ForwardIndexCollector
 {
 public:
-	ForwardIndexCollector( const StorageClientInterface* storage_, char tagSeparator_, const std::string& tagtype, ErrorBufferInterface* errorhnd_);
+	ForwardIndexCollector(
+			const StorageClientInterface* storage_,
+			char tagSeparator_, const std::string& tagtype,
+			ErrorBufferInterface* errorhnd_);
 	ForwardIndexCollector( const ForwardIndexCollector& o)
 		:m_storage(o.m_storage),m_valueiterar(o.m_valueiterar),m_tagtypeiter(o.m_tagtypeiter)
-		,m_lastfield(o.m_lastfield),m_tagSeparator(o.m_tagSeparator),m_errorhnd(o.m_errorhnd){}
+		,m_tagSeparator(o.m_tagSeparator)
+		,m_errorhnd(o.m_errorhnd){}
 
 	/// \brief Add forward iterator for value prioritized in order of definition (first defined used first)
 	void addFeatureType( const std::string& valuetype);
 
 	void skipDoc( strus::Index docno);
 
-	strus::Index skipPos( strus::Index pos, strus::Index maxlen);
+	strus::Index skipPos( strus::Index pos);
 
 	/// \brief Get the value from position pos or an empty string if not defined or overlapped by previously fetched item
 	std::string fetch( strus::Index pos);
@@ -46,7 +50,6 @@ private:
 	typedef strus::Reference<ForwardIteratorInterface> ForwardIteratorRef;
 	std::vector<ForwardIteratorRef> m_valueiterar;
 	ForwardIteratorRef m_tagtypeiter;
-	strus::IndexRange m_lastfield;
 	char m_tagSeparator;
 	ErrorBufferInterface* m_errorhnd;
 };

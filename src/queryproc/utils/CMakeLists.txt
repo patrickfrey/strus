@@ -11,6 +11,7 @@ set( source_files
 	forwardIndexTextCollector.cpp
 	postingIteratorHelpers.cpp
 	sentenceIterator.cpp
+	textNormalizer.cpp
 )
 
 include_directories(

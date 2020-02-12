@@ -48,6 +48,8 @@ set( STRUS_INCLUDE_DIRS                "${CMAKE_CURRENT_BINARY_DIR}/include"  "$
 set( MAIN_SOURCE_DIR                     "${PROJECT_SOURCE_DIR}/src" )
 set( MAIN_TESTS_DIR                        "${PROJECT_SOURCE_DIR}/tests" )
 set( UTILS_GENSOURCE_DIR            "${CMAKE_CURRENT_BINARY_DIR}/src/utils/" )
+set( QPROC_UTILS_LIBRARY_DIR     "${CMAKE_CURRENT_BINARY_DIR}/src/queryproc/utils/" )
+set( QPROC_UTILS_INCLUDE_DIR    "${PROJECT_SOURCE_DIR}/src/queryproc/utils/" )
 
 # Subdirectories:
 add_subdirectory( 3rdParty )

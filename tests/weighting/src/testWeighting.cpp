@@ -362,7 +362,7 @@ static void fillTitles( std::vector<LabeledTitle>& titlelist, const DocTreeNode&
 		for (; fi != fe; ++fi)
 		{
 			if (!titletext.empty()) titletext.push_back(' ');
-			titletext.append( strus::string_format( "F%d", *fi));
+			titletext.append( strus::string_format( "%d", *fi));
 		}
 		if (!titletext.empty()) titlelist.push_back( LabeledTitle( titletext, depth));
 		std::list<DocTreeNode>::const_iterator ci = node.chld.begin(), ce = node.chld.end();
@@ -371,6 +371,31 @@ static void fillTitles( std::vector<LabeledTitle>& titlelist, const DocTreeNode&
 			fillTitles( titlelist, *ci, field, depth+1);
 		}
 	}
+}
+
+static std::string getEntityString( int featidx)
+{
+	static char const* cnt[] = {"","one","two","three","four","five","six","seven","eight","nine","ten"};
+	static char const* ar[]  = {"","ten","twenty","thirty","fourty","fifty","sixty","seventy","eighty","ninety","hundred"};
+	if (featidx <= 1000)
+	{
+		if (featidx <= 100)
+		{
+			if (featidx % 10 == 0)
+			{
+				return ar[ featidx / 10];
+			}
+		}
+		else if (featidx % 10 == 0)
+		{
+			return std::string( cnt[ featidx / 100]) + "hundred" + getEntityString( featidx % 100);
+		}
+	}
+	else if (featidx <= 10000)
+	{
+		return std::string( cnt[ featidx / 1000]) + "thousand" + getEntityString( featidx % 1000);
+	}
+	return std::string();
 }
 
 static void fillFeatureList( std::vector<strus::test::Feature>& featurelist, strus::Index startpos, const std::vector<int>& featar)
@@ -388,8 +413,14 @@ static void fillFeatureList( std::vector<strus::test::Feature>& featurelist, str
 		{
 			std::string word = strus::string_format( "f%d", *fi);
 			featurelist.push_back( strus::test::Feature( strus::test::Feature::SearchIndex, "word", word, pos));
-			std::string orig = strus::string_format( "F%d", *fi);
+			std::string orig = strus::string_format( "%d", *fi);
 			featurelist.push_back( strus::test::Feature( strus::test::Feature::ForwardIndex, "orig", orig, pos));
+			std::string entitystr = getEntityString( *fi);
+			if (!entitystr.empty())
+			{
+				featurelist.push_back( strus::test::Feature( strus::test::Feature::ForwardIndex, "entity", entitystr, pos));
+			}
+			featurelist.push_back( strus::test::Feature( strus::test::Feature::ForwardIndex, "tag", (*fi & 1) == 0 ? "even":"odd", pos));
 		}
 	}
 }
@@ -1151,7 +1182,7 @@ struct Collection
 		{
 			if (g_verbosity >= 2)
 			{
-				std::cerr << "\ncheck " << di->docid << std::endl;
+				std::cerr << "check " << di->docid << std::endl;
 			}
 			strus::local_ptr<strus::StorageDocumentInterface>
 				checker( storage->createDocumentChecker( di->docid));
@@ -1648,6 +1679,7 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	if (!summarizerAccuNear) throw std::runtime_error( "undefined summarizer function 'accunear'");
 	strus::Reference<strus::SummarizerFunctionInstanceInterface> matchfunc( summarizerAccuNear->createInstance( queryproc));
 	if (!matchfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	matchfunc->addStringParameter( "collect", "name=match;tag=tag;sep='#';type=entity,orig");
 	matchfunc->addNumericParameter( "results", strus::NumericVariant::asint( g_weightingConfig.maxNofRanks));
 	matchfunc->addNumericParameter( "maxdf", strus::NumericVariant::asdouble( g_weightingConfig.maxdf));
 	matchfunc->addNumericParameter( "dist_imm", strus::NumericVariant::asint( g_weightingConfig.distance_imm));
