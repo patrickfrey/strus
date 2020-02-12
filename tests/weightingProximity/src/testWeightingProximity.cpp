@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "storageDef.hpp"
+#include "strus/base/uintCompaction.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -1015,7 +1016,7 @@ struct Document
 		return rt;
 	}
 
-	double calculate_bm25( const Statistics& statistics, const std::vector<int>& queryFeatures) const
+	double calculate_bm25( const Statistics& statistics, const std::vector<int>& queryFeatures, bool compacted_ff) const
 	{
 		double rt = 0.0;
 		std::vector<int>::const_iterator
@@ -1024,6 +1025,10 @@ struct Document
 		{
 			int featidx = *qi;
 			int ff = getSingleFeatFf( featidx, strus::IndexRange());
+			if (compacted_ff)
+			{
+				ff = strus::uintFromCompaction( strus::compactUint( ff));
+			}
 			int doclen = doctreelist.back().field.end()-1;
 			rt += postingsWeight_bm25( statistics, doclen, featidx, ff);
 		}
@@ -1139,6 +1144,44 @@ struct Collection
 		if (g_verbosity >= 1) std::fprintf( stderr, "\rinserted %d documents\n", didx);
 	}
 
+	void check( strus::StorageClientInterface* storage)
+	{
+		std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
+		for (; di != de; ++di)
+		{
+			if (g_verbosity >= 2)
+			{
+				std::cerr << "\ncheck " << di->docid << std::endl;
+			}
+			strus::local_ptr<strus::StorageDocumentInterface>
+				checker( storage->createDocumentChecker( di->docid));
+			if (!checker.get()) throw strus::runtime_error("error creating document to insert");
+
+			di->build( checker.get());
+
+			if (g_errorhnd->hasError())
+			{
+				throw strus::runtime_error( "document check failed: %s", g_errorhnd->fetchError());
+			}
+		}
+	}
+
+	void check( strus::StorageClientInterface* storage, const std::string& selectDocid)
+	{
+		Document data = getDocument( selectDocid);
+		strus::local_ptr<strus::StorageDocumentInterface>
+			checker( storage->createDocumentChecker( selectDocid));
+		if (!checker.get())
+		{
+			throw strus::runtime_error( "document check failed: %s", g_errorhnd->fetchError());
+		}
+		data.build( checker.get());
+		if (g_errorhnd->hasError())
+		{
+			throw strus::runtime_error( "document check failed: %s", g_errorhnd->fetchError());
+		}
+	}
+
 	Document getDocument( const std::string& docid)
 	{
 		std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
@@ -1224,7 +1267,7 @@ struct Collection
 		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks);
 	}
 
-	strus::QueryResult expectedResult_bm25( int maxNofRanks, const Query& query, const strus::StorageClientInterface* storage) const
+	strus::QueryResult expectedResult_bm25( int maxNofRanks, const Query& query, const strus::StorageClientInterface* storage, bool compacted_ff) const
 	{
 		std::vector<strus::ResultDocument> ranks;
 		std::vector<Document>::const_iterator di = doclist.begin(), de = doclist.end();
@@ -1233,7 +1276,7 @@ struct Collection
 			strus::Index docno = storage->documentNumber( di->docid);
 			if (docno)
 			{
-				double docweight = di->calculate_bm25( statistics, query.features);
+				double docweight = di->calculate_bm25( statistics, query.features, compacted_ff);
 				if (!strus::Math::isequal( docweight, 0.0))
 				{
 					strus::WeightedDocument wdoc( docno, strus::IndexRange(), docweight);
@@ -1640,6 +1683,8 @@ static void insertCollection( Collection& collection, Storage& storage, std::map
 	{
 		collection.insert( storage.sci.get(), commitSize);
 		docnoDocidMap = collection.docnoDocidMap( storage.sci.get());
+
+		collection.check( storage.sci.get());
 	}
 	else
 	{
@@ -1655,6 +1700,8 @@ static void insertCollection( Collection& collection, Storage& storage, std::map
 		}
 		collection.insert( storage.sci.get(), selectDocid);
 		docnoDocidMap = collection.docnoDocidMap( storage.sci.get(), selectDocid);
+
+		collection.check( storage.sci.get(), selectDocid);
 	}
 }
 
@@ -1715,7 +1762,7 @@ static void runRandomQueriesAndVerifyResult( QueryEvalMethod method, strus::Quer
 		switch (method)
 		{
 			case BM25PFF: expected = collection.expectedResult_bm25pff( g_weightingConfig.maxNofRanks, qry, storage); break;
-			case BM25: expected = collection.expectedResult_bm25( g_weightingConfig.maxNofRanks, qry, storage); break;
+			case BM25: expected = collection.expectedResult_bm25( g_weightingConfig.maxNofRanks, qry, storage, true/*compacted_ff*/); break;
 		}
 		runQueryAndVerifyResult( qeval, storage, selectQuery, qry, expected, docnoDocidMap, statistics);
 	}
@@ -1728,7 +1775,7 @@ static void runRandomQueriesAndVerifyResult( QueryEvalMethod method, strus::Quer
 			switch (method)
 			{
 				case BM25PFF: expected = collection.expectedResult_bm25pff( g_weightingConfig.maxNofRanks, *qi, storage); break;
-				case BM25: expected = collection.expectedResult_bm25( g_weightingConfig.maxNofRanks, *qi, storage); break;
+				case BM25: expected = collection.expectedResult_bm25( g_weightingConfig.maxNofRanks, *qi, storage, true/*compacted_ff*/); break;
 			}
 			runQueryAndVerifyResult( qeval, storage, qidx, *qi, expected, docnoDocidMap, statistics);
 		}

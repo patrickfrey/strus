@@ -81,9 +81,12 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 				idf = 0.00001;
 			}
 			if (m_itrarsize >= MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
-			m_itrar[ m_itrarsize] = itr;
-			m_weightar[ m_itrarsize] = idf * weight;
-			++m_itrarsize;
+			if (m_parameter.maxdf * m_nofCollectionDocuments < df)
+			{
+				m_itrar[ m_itrarsize] = itr;
+				m_weightar[ m_itrarsize] = idf * weight;
+				++m_itrarsize;
+			}
 		}
 		else
 		{
@@ -196,6 +199,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 			|| strus::caseInsensitiveEquals( name_, "sentences")
 			|| strus::caseInsensitiveEquals( name_, "cluster")
 			|| strus::caseInsensitiveEquals( name_, "ffbase")
+			|| strus::caseInsensitiveEquals( name_, "maxdf")
 			)
 		{
 			addNumericParameter( name_, parameterValue( name_, value));
@@ -248,6 +252,10 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	{
 		m_parameter.proximityConfig.setMinFfWeight( value.tofloat());
 	}
+	else if (strus::caseInsensitiveEquals( name_, "maxdf"))
+	{
+		m_parameter.maxdf = value.tofloat();
+	}
 	else
 	{
 		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), THIS_METHOD_NAME, name_.c_str());
@@ -279,6 +287,7 @@ StructView SummarizerFunctionInstanceMatchPhrase::view() const
 		rt( "content", m_parameter.contentType);
 		rt( "wordtype", m_parameter.wordType);
 		rt( "entity", m_parameter.entityType);
+		rt( "maxdf", m_parameter.maxdf);
 		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
 		rt( "dist_close", m_parameter.proximityConfig.distance_close);
 		rt( "dist_near", m_parameter.proximityConfig.distance_near);
@@ -319,6 +328,7 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		rt( P::Numeric, "sentences", _TXT( "number of sentences extracted for the best match"), "1:");
 		rt( P::Numeric, "cluster", _TXT( "part [0.0,1.0] of query features considered as relevant in a group"), "1:");
 		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the minimum feature occurrence value assigned to a feature"), "0.0:1.0");
+		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword as fraction of the collection size"), "0:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());

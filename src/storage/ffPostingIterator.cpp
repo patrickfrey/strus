@@ -116,7 +116,10 @@ int FfPostingIterator::frequency()
 		{
 			return 0;
 		}
-		m_ffIterator.skipDoc( m_docno);
+		if (m_docno != m_ffIterator.skipDoc( m_docno))
+		{
+			return 0;
+		}
 		return m_ffIterator.frequency();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);

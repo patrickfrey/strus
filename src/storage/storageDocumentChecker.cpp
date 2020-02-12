@@ -11,7 +11,7 @@
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "indexSetIterator.hpp"
-#include "uintCompaction.hpp"
+#include "strus/base/uintCompaction.hpp"
 #include "structBlockDeclaration.hpp"
 #include "strus/lib/structs.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -390,10 +390,11 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				metadata->skipDoc( m_docno);
 		
 				NumericVariant val = metadata->getValue( hnd);
-				if (val != mi->second)
+				NumericVariant conv = mi->second.convert( val.type);
+				if (val != conv)
 				{
 					logError( logout, m_docid,
-						_TXT( "document meta data does not match for '%s': '%s' != '%s'"), mi->first.c_str(), mi->second.tostring().c_str(), val.tostring().c_str());
+						_TXT( "document meta data does not match for '%s' and is not convertible: '%s' != '%s'"), mi->first.c_str(), mi->second.tostring().c_str(), val.tostring().c_str());
 				}
 			}
 		}
