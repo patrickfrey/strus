@@ -1679,7 +1679,7 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	if (!summarizerAccuNear) throw std::runtime_error( "undefined summarizer function 'accunear'");
 	strus::Reference<strus::SummarizerFunctionInstanceInterface> matchfunc( summarizerAccuNear->createInstance( queryproc));
 	if (!matchfunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	matchfunc->addStringParameter( "collect", "name=match;tag=tag;sep='#';type=entity,orig");
+	matchfunc->addStringParameter( "collect", "tag=tag;sep='#';type=entity,orig");
 	matchfunc->addNumericParameter( "results", strus::NumericVariant::asint( g_weightingConfig.maxNofRanks));
 	matchfunc->addNumericParameter( "maxdf", strus::NumericVariant::asdouble( g_weightingConfig.maxdf));
 	matchfunc->addNumericParameter( "dist_imm", strus::NumericVariant::asint( g_weightingConfig.distance_imm));
@@ -1700,7 +1700,7 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	qeval->addWeightingFunction( wfunc.release(), fparam);
 	qeval->addSummarizerFunction( "docid", attributefunc.release(), noparam);
 	qeval->addSummarizerFunction( "pos", posfunc.release(), hparam);
-	qeval->addSummarizerFunction( "matchstats", matchfunc.release(), hparam);
+	qeval->addSummarizerFunction( "near", matchfunc.release(), hparam);
 
 	if (g_errorhnd->hasError())
 	{

@@ -32,7 +32,7 @@ public:
 			ErrorBufferInterface* errorhnd_);
 	ForwardIndexCollector( const ForwardIndexCollector& o)
 		:m_storage(o.m_storage),m_valueiterar(o.m_valueiterar),m_tagtypeiter(o.m_tagtypeiter)
-		,m_tagSeparator(o.m_tagSeparator)
+		,m_tagSeparator(o.m_tagSeparator),m_curidx(o.m_curidx)
 		,m_errorhnd(o.m_errorhnd){}
 
 	/// \brief Add forward iterator for value prioritized in order of definition (first defined used first)
@@ -43,7 +43,7 @@ public:
 	strus::Index skipPos( strus::Index pos);
 
 	/// \brief Get the value from position pos or an empty string if not defined or overlapped by previously fetched item
-	std::string fetch( strus::Index pos);
+	std::string fetch();
 
 private:
 	const StorageClientInterface* m_storage;
@@ -51,6 +51,7 @@ private:
 	std::vector<ForwardIteratorRef> m_valueiterar;
 	ForwardIteratorRef m_tagtypeiter;
 	char m_tagSeparator;
+	int m_curidx;
 	ErrorBufferInterface* m_errorhnd;
 };
 

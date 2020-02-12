@@ -44,6 +44,7 @@ public:
 
 	void skipDoc( strus::Index docno);
 
+	/// \brief Evaluate the fraction of words in a field that are typed against words that are untyped
 	double typedWordFraction( const strus::IndexRange& field);
 
 	/// \brief Get the concatenated text of a field from the forward index for the current document

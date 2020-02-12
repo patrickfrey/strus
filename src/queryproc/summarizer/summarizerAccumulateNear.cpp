@@ -188,7 +188,10 @@ std::vector<SummaryElement>
 				if (wi == we) break;
 				if (wi->pos == wpos)
 				{
-					std::string elem = strus::stripForwardIndexText( ci->fetch( wpos), m_parameter.collectorConfigs[ cidx].stripCharacters);
+					std::string elem = 
+						strus::stripForwardIndexText(
+							ci->fetch(), 
+							m_parameter.collectorConfigs[ cidx].stripCharacters);
 					entitymap[ elem] += wi->weight;
 				}
 				++wi;
@@ -218,10 +221,6 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "name", errorhnd->fetchError());
-		}
-		else
-		{
-			throw strus::runtime_error(_TXT("missing mandatory '%s' in configuration"), "name");
 		}
 	}
 	if (!extractStringArrayFromConfigString( collectTypes, configstr, "type", ',', errorhnd))
@@ -448,7 +447,7 @@ StructView SummarizerFunctionAccumulateNear::view() const
 		FunctionDescription rt( name(), _TXT("Extract and weight neighbour elements in the forward index."));
 		rt( P::Feature, "match", _TXT( "defines the query features to use for localization and weighting of the neighbour features to collect"), "");
 		rt( P::Feature, "punct", _TXT( "defines the sentence delimiter"), "");
-		rt( P::String, "collect", _TXT( "describes a configuration of elements to collect with name,type,tag,sep in the strus configuration string syntax"), "");
+		rt( P::String, "collect", _TXT( "describes a configuration of elements to collect with name,type,tag,sep,strip in the strus configuration string syntax"), "");
 		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword and not subject for proximity weighting as fraction of the collection size"), "0:");
 		rt( P::Numeric, "results", _TXT( "maximum number of weighted elements returned by each collect configuration"), "1:");
 		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");

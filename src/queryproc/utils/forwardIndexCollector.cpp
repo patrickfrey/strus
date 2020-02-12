@@ -20,7 +20,7 @@ ForwardIndexCollector::ForwardIndexCollector(
 		char tagSeparator_, const std::string& tagtype,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_valueiterar(),m_tagtypeiter()
-	,m_tagSeparator(tagSeparator_)
+	,m_tagSeparator(tagSeparator_),m_curidx(-1)
 	,m_errorhnd(errorhnd_)
 {
 	if (!tagtype.empty())
@@ -43,13 +43,14 @@ void ForwardIndexCollector::skipDoc( strus::Index docno)
 	{
 		(*vi)->skipDoc( docno);
 	}
+	m_tagtypeiter->skipDoc( docno);
 }
 
 strus::Index ForwardIndexCollector::skipPos( strus::Index pos)
 {
 	strus::Index rt = 0;
 	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
-	for (; vi != ve; ++vi)
+	for (int vidx=0; vi != ve; ++vi,++vidx)
 	{
 		strus::Index pi = (*vi)->skipPos( pos);
 		while (pi && (!rt || pi < rt))
@@ -60,35 +61,27 @@ strus::Index ForwardIndexCollector::skipPos( strus::Index pos)
 				continue;
 			}
 			rt = pi;
+			m_curidx = vidx;
 			break;
 		}
 	}
 	return rt;
 }
 
-std::string ForwardIndexCollector::fetch( strus::Index pos)
+std::string ForwardIndexCollector::fetch()
 {
 	std::string rt;
-	std::vector<ForwardIteratorRef>::iterator vi = m_valueiterar.begin(), ve = m_valueiterar.end();
-	for (; vi != ve; ++vi)
+	if (m_curidx < 0) return rt;
+	
+	if (m_tagtypeiter.get())
 	{
-		if ((*vi)->skipPos( pos) == pos)
-		{
-			if (m_tagtypeiter.get())
-			{
-				if (m_tagtypeiter->skipPos( pos) == pos)
-				{
-					rt = m_tagtypeiter->fetch();
-					if (m_tagSeparator) rt.push_back( m_tagSeparator);
-					rt.append( (*vi)->fetch());
-				}
-			}
-			else
-			{
-				rt.append( (*vi)->fetch());
-			}
-			break;
-		}
+		rt.append( m_tagtypeiter->fetch());
+		if (m_tagSeparator) rt.push_back( m_tagSeparator);
+		rt.append( m_valueiterar[ m_curidx]->fetch());
+	}
+	else
+	{
+		rt.append( m_valueiterar[ m_curidx]->fetch());
 	}
 	return rt;
 }
