@@ -101,11 +101,9 @@ QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorB
 	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchphrase", sum);
 	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
-	defineSummarizerFunction( "matchpos", sum);
-	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
-	defineSummarizerFunction( "matchvar", sum);
-	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
-	defineSummarizerFunction( "accuvar", sum);
+	defineSummarizerFunction( "listmatch", sum);
+	if (0==(sum=createSummarizerAccumulateMatches( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
+	defineSummarizerFunction( "accumatch", sum);
 	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));
 	defineSummarizerFunction( "accunear", sum);
 	if (0==(sum=createSummarizerStructureHeader( m_errorhnd))) throw std::runtime_error( _TXT("error creating summarizer"));

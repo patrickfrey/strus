@@ -20,6 +20,10 @@ class ErrorBufferInterface;
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerListMatches( ErrorBufferInterface* errorhnd_);
 
+/// \brief Create a summarizer for accumulating weights of contents (taken from the forward index) referenced by variable 
+/// \return the summarizer reference (with ownership)
+SummarizerFunctionInterface* createSummarizerAccumulateMatches( ErrorBufferInterface* errorhnd_);
+
 /// \brief Create a summarizer for getting the value of a document attribute
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerAttribute( ErrorBufferInterface* errorhnd_);
@@ -35,14 +39,6 @@ SummarizerFunctionInterface* createSummarizerContent( ErrorBufferInterface* erro
 /// \brief Create a summarizer for getting the best weighted passage of a document field
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_);
-
-/// \brief Create a summarizer for getting the values (in the forward index) of referenced variables of all matches
-/// \return the summarizer reference (with ownership)
-SummarizerFunctionInterface* createSummarizerMatchVariables( ErrorBufferInterface* errorhnd_);
-
-/// \brief Create a summarizer for accumulating weights of contents (taken from the forward index) referenced by variable 
-/// \return the summarizer reference (with ownership)
-SummarizerFunctionInterface* createSummarizerAccumulateVariable( ErrorBufferInterface* errorhnd_);
 
 /// \brief Create a summarizer for weighting neighbour features of the matches
 /// \return the summarizer reference (with ownership)

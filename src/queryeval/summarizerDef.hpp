@@ -22,29 +22,24 @@ public:
 	SummarizerDef(
 			const std::string& summaryId_,
 			const Reference<SummarizerFunctionInstanceInterface>& function_,
-			const std::vector<FeatureParameter>& featureParameters_,
-			const std::string& debugAttributeName_)
+			const std::vector<FeatureParameter>& featureParameters_)
 		:m_function(function_)
 		,m_summaryId(summaryId_)
-		,m_featureParameters(featureParameters_)
-		,m_debugAttributeName(debugAttributeName_){}
+		,m_featureParameters(featureParameters_){}
 
 	SummarizerDef( const SummarizerDef& o)
 		:m_function(o.m_function)
 		,m_summaryId(o.m_summaryId)
-		,m_featureParameters(o.m_featureParameters)
-		,m_debugAttributeName(o.m_debugAttributeName){}
+		,m_featureParameters(o.m_featureParameters){}
 
 	const SummarizerFunctionInstanceInterface* function() const	{return m_function.get();}
 	const std::string& summaryId() const				{return m_summaryId;}
 	const std::vector<FeatureParameter>& featureParameters() const	{return m_featureParameters;}
-	const std::string& debugAttributeName() const			{return m_debugAttributeName;}
 
 private:
 	Reference<SummarizerFunctionInstanceInterface> m_function;	///< summarization function
 	std::string m_summaryId;					///< id of generated summary elements
 	std::vector<FeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of summarization
-	std::string m_debugAttributeName;				///< attribute where debug info is attached in case of debug enabled in query
 };
 
 }

@@ -12,8 +12,7 @@
 #include "summarizerContent.hpp"
 #include "summarizerMatchPhrase.hpp"
 #include "summarizerListMatches.hpp"
-#include "summarizerMatchVariables.hpp"
-#include "summarizerAccumulateVariable.hpp"
+#include "summarizerAccumulateMatches.hpp"
 #include "summarizerAccumulateNear.hpp"
 #include "summarizerStructureHeader.hpp"
 #include "viewUtils.hpp"
@@ -23,6 +22,11 @@ using namespace strus;
 SummarizerFunctionInterface* strus::createSummarizerListMatches( ErrorBufferInterface* errorhnd_)
 {
 	return new SummarizerFunctionListMatches( errorhnd_);
+}
+
+SummarizerFunctionInterface* strus::createSummarizerAccumulateMatches( ErrorBufferInterface* errorhnd_)
+{
+	return new SummarizerFunctionAccumulateMatches( errorhnd_);
 }
 
 SummarizerFunctionInterface* strus::createSummarizerAttribute( ErrorBufferInterface* errorhnd_)
@@ -43,16 +47,6 @@ SummarizerFunctionInterface* strus::createSummarizerContent( ErrorBufferInterfac
 SummarizerFunctionInterface* strus::createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_)
 {
 	return new SummarizerFunctionMatchPhrase( errorhnd_);
-}
-
-SummarizerFunctionInterface* strus::createSummarizerMatchVariables( ErrorBufferInterface* errorhnd_)
-{
-	return new SummarizerFunctionMatchVariables( errorhnd_);
-}
-
-SummarizerFunctionInterface* strus::createSummarizerAccumulateVariable( ErrorBufferInterface* errorhnd_)
-{
-	return new SummarizerFunctionAccumulateVariable( errorhnd_);
 }
 
 SummarizerFunctionInterface* strus::createSummarizerAccumulateNear( ErrorBufferInterface* errorhnd_)

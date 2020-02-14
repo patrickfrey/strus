@@ -7,12 +7,12 @@ set( source_files
 	summarizer_standard.cpp
 	summarizerAttribute.cpp
 	summarizerContent.cpp
-	summarizerListMatches.cpp
 	summarizerMetaData.cpp
 	summarizerStructureHeader.cpp
 	summarizerMatchPhrase.cpp
-	summarizerMatchVariables.cpp
-	summarizerAccumulateVariable.cpp
+	summarizerMatchesBase.cpp
+	summarizerListMatches.cpp
+	summarizerAccumulateMatches.cpp
 	summarizerAccumulateNear.cpp
 )
 

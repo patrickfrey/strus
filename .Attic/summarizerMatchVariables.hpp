@@ -21,6 +21,8 @@
 #include <sstream>
 #include <iostream>
 
+#error DEPRECATED
+
 namespace strus
 {
 

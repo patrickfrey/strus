@@ -24,29 +24,24 @@ public:
 	typedef QueryEvalInterface::FeatureParameter FeatureParameter;
 
 	WeightingDef()
-		:m_function(),m_featureParameters(),m_debugAttributeName(){}
+		:m_function(),m_featureParameters(){}
 
 	WeightingDef( const WeightingDef& o)
 		:m_function(o.m_function)
-		,m_featureParameters(o.m_featureParameters)
-		,m_debugAttributeName(o.m_debugAttributeName){}
+		,m_featureParameters(o.m_featureParameters){}
 
 	WeightingDef(
 			const Reference<WeightingFunctionInstanceInterface>& function_,
-			const std::vector<FeatureParameter>& featureParameters_,
-			const std::string& debugAttributeName_)
+			const std::vector<FeatureParameter>& featureParameters_)
 		:m_function(function_)
-		,m_featureParameters(featureParameters_)
-		,m_debugAttributeName(debugAttributeName_){}
+		,m_featureParameters(featureParameters_){}
 
 	const WeightingFunctionInstanceInterface* function() const	{return m_function.get();}
 	const std::vector<FeatureParameter>& featureParameters() const	{return m_featureParameters;}
-	const std::string& debugAttributeName() const			{return m_debugAttributeName;}
 
 private:
 	Reference<WeightingFunctionInstanceInterface> m_function;	///< parameterized function used for weighting
 	std::vector<FeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of weighting
-	std::string m_debugAttributeName;				///< attribute where debug info is attached in case of debug enabled in query
 };
 
 }

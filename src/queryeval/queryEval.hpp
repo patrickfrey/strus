@@ -70,13 +70,11 @@ public:
 	virtual void addSummarizerFunction(
 			const std::string& summaryId,
 			SummarizerFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			const std::string& debugAttributeName);
+			const std::vector<FeatureParameter>& featureParameters);
 
 	virtual void addWeightingFunction(
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			const std::string& debugAttributeName);
+			const std::vector<FeatureParameter>& featureParameters);
 
 	virtual void defineWeightingFormula(
 			ScalarFunctionInterface* combinefunc);

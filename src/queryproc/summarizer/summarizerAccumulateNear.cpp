@@ -161,7 +161,7 @@ std::vector<SummaryElement>
 		{
 			weightedNeighbours = ProximityWeightingContext::getWeightedNeighboursForSingleFeature( 
 					m_parameter.distance_collect,
-					m_itrar[0], m_eos_itr, 
+					m_itrar[0], m_eos_itr, m_weightar[ 0],
 					doc.docno(), doc.field());
 		}
 		else
@@ -382,7 +382,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	}
 	else if (strus::caseInsensitiveEquals( name_, "cluster"))
 	{
-		m_parameter.proximityConfig.setMinClusterSize( value.toint());
+		m_parameter.proximityConfig.setMinClusterSize( value.tofloat());
 	}
 	else
 	{

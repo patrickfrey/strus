@@ -285,7 +285,6 @@ static void parseWeightingConfig(
 		throw std::runtime_error( _TXT( "open oval bracket '(' expected after weighting function identifier"));
 	}
 	lexer.next();
-	std::string debuginfoName;
 
 	if (!lexer.current().isToken(TokCloseOvalBracket)) for (;;)
 	{
@@ -307,23 +306,7 @@ static void parseWeightingConfig(
 		}
 		lexer.next();
 
-		if (!isFeatureParam && strus::caseInsensitiveEquals( parameterName, "debug"))
-		{
-			if (!debuginfoName.empty())
-			{
-				throw std::runtime_error( _TXT("duplicate definition of 'debug' parameter"));
-			}
-			if (lexer.current().isString() || lexer.current().isToken( TokIdentifier))
-			{
-				debuginfoName = string_conv::tolower( lexer.current().value());
-				lexer.next();
-			}
-			else
-			{
-				throw std::runtime_error( _TXT("identifier or string expected as argument of 'debug' parameter"));
-			}
-		}
-		else if (lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
+		if (lexer.current().isToken(TokInteger) || lexer.current().isToken(TokFloat))
 		{
 			if (isFeatureParam)
 			{
@@ -386,7 +369,7 @@ static void parseWeightingConfig(
 		throw std::runtime_error( _TXT( "close oval bracket ')' expected at end of weighting function parameter list"));
 	}
 	lexer.next();
-	qeval.addWeightingFunction( function.get(), featureParameters, debuginfoName); 
+	qeval.addWeightingFunction( function.get(), featureParameters); 
 	(void)function.release();
 }
 
@@ -432,7 +415,6 @@ static void parseSummarizerConfig(
 		throw std::runtime_error( _TXT( "open oval bracket '(' expected after summarizer function identifier"));
 	}
 	lexer.next();
-	std::string debuginfoName;
 
 	if (!lexer.current().isToken(TokCloseOvalBracket)) for (;;)
 	{
@@ -453,23 +435,7 @@ static void parseSummarizerConfig(
 			throw std::runtime_error( _TXT( "assignment operator '=' expected after summarizer function parameter name"));
 		}
 		lexer.next();
-		if (!isFeatureParam && strus::caseInsensitiveEquals( parameterName, "debug"))
-		{
-			if (!debuginfoName.empty())
-			{
-				throw std::runtime_error( _TXT("duplicate definition of 'debug' parameter"));
-			}
-			if (lexer.current().isToken( TokIdentifier) || lexer.current().isString())
-			{
-				debuginfoName = lexer.current().value();
-				lexer.next();
-			}
-			else
-			{
-				throw std::runtime_error( _TXT("identifier or string expected as argument of 'debug' parameter"));
-			}
-		}
-		else if (lexer.current().isToken( TokInteger) || lexer.current().isToken( TokFloat))
+		if (lexer.current().isToken( TokInteger) || lexer.current().isToken( TokFloat))
 		{
 			if (isFeatureParam)
 			{
@@ -517,7 +483,7 @@ static void parseSummarizerConfig(
 	{
 		throw std::runtime_error( _TXT( "close oval bracket ')' expected at end of summarizer function parameter list"));
 	}
-	qeval.addSummarizerFunction( summaryId, function.get(), featureParameters, debuginfoName);
+	qeval.addSummarizerFunction( summaryId, function.get(), featureParameters);
 	(void)function.release();
 	lexer.next();
 }

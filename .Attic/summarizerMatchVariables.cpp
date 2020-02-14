@@ -25,6 +25,8 @@
 #include <iostream>
 #include <sstream>
 
+#error DEPRECATED
+
 using namespace strus;
 
 #define THIS_METHOD_NAME const_cast<char*>("matchvar")

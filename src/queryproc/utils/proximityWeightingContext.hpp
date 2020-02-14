@@ -67,10 +67,10 @@ public:
 		void setDistanceImm( int distance_imm_);
 		void setDistanceClose( int distance_close_);
 		void setDistanceNear( int distance_near_);
-		void setMinClusterSize( float minClusterSize_);
-		void setNofHotspots( float nofHotspots_);
-		void setNofSummarySentences( float nofSummarySentences_);
-		void setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_);
+		void setMinClusterSize( double minClusterSize_);
+		void setNofHotspots( int nofHotspots_);
+		void setNofSummarySentences( int nofSummarySentences_);
+		void setMaxNofSummarySentenceWords( int maxNofSummarySentenceWords_);
 		void setMinFfWeight( double minFfWeight_);
 	};
 
@@ -238,6 +238,7 @@ public:
 			strus::Index dist,
 			PostingIteratorInterface* postings,
 			PostingIteratorInterface* eos_postings, 
+			double featureWeight,
 			strus::Index docno,
 			const strus::IndexRange& field);
 

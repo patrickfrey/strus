@@ -28,8 +28,6 @@
 #include <iomanip>
 #include <algorithm>
 
-#undef STRUS_LOWLEVEL_DEBUG
-
 using namespace strus;
 
 void QueryEval::addTerm(
@@ -119,8 +117,7 @@ std::vector<std::string> QueryEval::getExclusionFeatureSets() const
 void QueryEval::addSummarizerFunction(
 		const std::string& summaryId,
 		SummarizerFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters,
-		const std::string& debugAttributeName)
+		const std::vector<FeatureParameter>& featureParameters)
 {
 	try
 	{
@@ -129,15 +126,14 @@ void QueryEval::addSummarizerFunction(
 			functionref->getVariables(),
 			VariableAssignment::SummarizerFunction,
 			m_summarizers.size());
-		m_summarizers.push_back( SummarizerDef( summaryId, functionref, featureParameters, debugAttributeName));
+		m_summarizers.push_back( SummarizerDef( summaryId, functionref, featureParameters));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
 }
 
 void QueryEval::addWeightingFunction(
 		WeightingFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters,
-		const std::string& debugAttributeName)
+		const std::vector<FeatureParameter>& featureParameters)
 {
 	try
 	{
@@ -154,7 +150,7 @@ void QueryEval::addWeightingFunction(
 				m_weightingSets.push_back( fi->featureSet());
 			}
 		}
-		m_weightingFunctions.push_back( WeightingDef( functionref, featureParameters, debugAttributeName));
+		m_weightingFunctions.push_back( WeightingDef( functionref, featureParameters));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
 }
@@ -199,10 +195,6 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 {
 	try
 	{
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "create query for program:" << std::endl;
-		print( std::cout);
-#endif
 		return new Query( this, storage, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, 0);
@@ -241,7 +233,6 @@ static StructView getStructView( const WeightingDef& o)
 	if (o.function())
 	{
 		StructView param( o.function()->view());
-		if (!o.debugAttributeName().empty()) param( "debug", o.debugAttributeName());
 		rt( "param", param);
 	}
 	if (!o.featureParameters().empty())
@@ -269,7 +260,6 @@ static StructView getStructView( const SummarizerDef& o)
 	if (o.function())
 	{
 		StructView param( o.function()->view());
-		if (!o.debugAttributeName().empty()) param( "debug", o.debugAttributeName());
 		rt( "param", param);
 	}
 	if (!o.featureParameters().empty())

@@ -86,15 +86,11 @@ void SummarizerFunctionInstanceContent::addStringParameter( const std::string& n
 
 void SummarizerFunctionInstanceContent::addNumericParameter( const std::string& name_, const NumericVariant& val)
 {
-	if (strus::caseInsensitiveEquals( name_, "name"))
+	if (strus::caseInsensitiveEquals( name_, "type"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "type"))
-	{
-		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name_.c_str(), THIS_METHOD_NAME);
-	}
-	else if (strus::caseInsensitiveEquals( name_, "N"))
+	else if (strus::caseInsensitiveEquals( name_, "results"))
 	{
 		m_maxNofMatches = std::min(
 			val.touint(),
@@ -128,7 +124,7 @@ StructView SummarizerFunctionInstanceContent::view() const
 	{
 		StructView rt;
 		rt( "type", m_type);
-		rt( "N", m_maxNofMatches);
+		rt( "results", m_maxNofMatches);
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summarizer introspection view: %s"), THIS_METHOD_NAME, *m_errorhnd, std::string());
@@ -153,8 +149,7 @@ StructView SummarizerFunctionContent::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Get the complete forward index"));
 		rt( P::String, "type", _TXT( "the forward index type to fetch the summary elements"), "");
-		rt( P::String, "name", _TXT( "the name of the result attribute (default is the value of 'type'')"), "");
-		rt( P::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");
+		rt( P::Numeric, "results", _TXT( "the maximum number of matches to return"), "1:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());

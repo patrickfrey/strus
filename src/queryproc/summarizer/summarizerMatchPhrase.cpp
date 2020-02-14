@@ -246,7 +246,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	}
 	else if (strus::caseInsensitiveEquals( name_, "cluster"))
 	{
-		m_parameter.proximityConfig.setMinClusterSize( value.toint());
+		m_parameter.proximityConfig.setMinClusterSize( value.tofloat());
 	}
 	else if (strus::caseInsensitiveEquals( name_, "ffbase"))
 	{

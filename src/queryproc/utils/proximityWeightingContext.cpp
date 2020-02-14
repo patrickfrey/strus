@@ -317,34 +317,51 @@ void ProximityWeightingContext::markTouchesInSentence( Node::TouchType touchType
 
 void ProximityWeightingContext::initNeighbourMatches()
 {
-	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
-
-	// Mark sentence relations (imm,close,sentence):
 	std::vector<Node>::iterator ni = m_nodear.begin(), ne = m_nodear.end();
-	for (; ni != ne; ++ni)
+	if (m_hasPunctuation)
 	{
-		if (ni->featidx != eos_featidx)
+		// Mark relations (imm,close,sentence,near):
+		for (; ni != ne; ++ni)
 		{
-			markTouchesInSentence( Node::ImmediateTouch, ni, ne, m_config.distance_imm);
+			if (ni->featidx != 0/*EOS*/)
+			{
+				markTouchesInSentence( Node::ImmediateTouch, ni, ne, m_config.distance_imm);
+			}
+		}
+		for (ni = m_nodear.begin(); ni != ne; ++ni)
+		{
+			if (ni->featidx != 0/*EOS*/)
+			{
+				markTouchesInSentence( Node::CloseTouch, ni, ne, m_config.distance_close);
+			}
+		}
+		for (ni = m_nodear.begin(); ni != ne; ++ni)
+		{
+			if (ni->featidx != 0/*EOS*/)
+			{
+				markTouchesInSentence( Node::SentenceTouch, ni, ne, m_config.maxNofSummarySentenceWords);
+			}
+		}
+		for (ni = m_nodear.begin(); ni != ne; ++ni)
+		{
+			if (ni->featidx != 0/*EOS*/)
+			{
+				markTouches( Node::NearTouch, ni, ne, m_config.distance_near);
+			}
 		}
 	}
-	for (ni = m_nodear.begin(); ni != ne; ++ni)
+	else
 	{
-		if (ni->featidx != eos_featidx)
+		// Mark relations (imm,close,near):
+		for (; ni != ne; ++ni)
 		{
-			markTouchesInSentence( Node::CloseTouch, ni, ne, m_config.distance_close);
+			markTouches( Node::ImmediateTouch, ni, ne, m_config.distance_imm);
 		}
-	}
-	for (ni = m_nodear.begin(); ni != ne; ++ni)
-	{
-		if (ni->featidx != eos_featidx)
+		for (ni = m_nodear.begin(); ni != ne; ++ni)
 		{
-			markTouchesInSentence( Node::SentenceTouch, ni, ne, m_config.maxNofSummarySentenceWords);
+			markTouches( Node::CloseTouch, ni, ne, m_config.distance_close);
 		}
-	}
-	for (ni = m_nodear.begin(); ni != ne; ++ni)
-	{
-		if (ni->featidx != eos_featidx)
+		for (ni = m_nodear.begin(); ni != ne; ++ni)
 		{
 			markTouches( Node::NearTouch, ni, ne, m_config.distance_near);
 		}
@@ -353,7 +370,7 @@ void ProximityWeightingContext::initNeighbourMatches()
 	validateTouchCount();
 #endif
 	// Eliminate nodes with a touch count lower than the minimum window size:
-	ni = m_nodear.begin(), ne = m_nodear.end();
+	ni = m_nodear.begin();
 	for (; ni != ne && m_minClusterSize <= ni->touchCount(); ++ni){}
 	if (ni != ne)
 	{
@@ -559,7 +576,7 @@ void ProximityWeightingContext::collectFieldStatistics()
 		{
 			if (ni->featidx != eos_featidx)
 			{
-				res.ff[ ni->featidx-ofs_featidx] += ff_weight( *ni);
+				res.ff[ ni->featidx - ofs_featidx] += ff_weight( *ni);
 			}
 		}
 	}
@@ -759,6 +776,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 
 	double weightsum_max = 0.0;
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+	int ofs_featidx = m_hasPunctuation ? 1 : 0;
 
 	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
 
@@ -778,7 +796,7 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 		{
 			if (ni->featidx != eos_featidx)
 			{
-				curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
+				curweight += featureWeights[ ni->featidx - ofs_featidx] * ff_weight( *ni);
 			}
 			else
 			{
@@ -832,7 +850,10 @@ static void addWeightedNeighbourWeights(
 		{
 			ri->weight += weight;
 		}
-		startpos = res.back().pos + 1;
+		if (startpos <= res.back().pos)
+		{
+			startpos = res.back().pos + 1;
+		}
 	}
 	strus::Index pos = startpos;
 	for (; pos < endpos; ++pos)
@@ -849,6 +870,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 	std::vector<ProximityWeightingContext::WeightedNeighbour> rt;
 
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+	int ofs_featidx = m_hasPunctuation ? 1 : 0;
 
 	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
 
@@ -872,7 +894,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 			{
 				int tc = ni->touchCount();
 				if (tc > max_tc) max_tc = tc;
-				curweight += featureWeights[ ni->featidx] * ff_weight( *ni);
+				curweight += featureWeights[ ni->featidx - ofs_featidx] * ff_weight( *ni);
 			}
 			else
 			{
@@ -905,6 +927,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 		strus::Index dist,
 		PostingIteratorInterface* postings,
 		PostingIteratorInterface* eos_postings, 
+		double featureWeight,
 		strus::Index docno,
 		const strus::IndexRange& field)
 {
@@ -932,7 +955,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 			{
 				rangeEnd = pos + dist + featlen;
 			}
-			addWeightedNeighbourWeights( rt, rangeStart, rangeEnd, 1.0);
+			addWeightedNeighbourWeights( rt, rangeStart, rangeEnd, featureWeight);
 		}
 	}
 	else
@@ -941,7 +964,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 		{
 			strus::Index rangeStart = pos > dist ? pos - dist : 1;
 			strus::Index rangeEnd = pos + featlen + dist;
-			addWeightedNeighbourWeights( rt, rangeStart, rangeEnd, 1.0);
+			addWeightedNeighbourWeights( rt, rangeStart, rangeEnd, featureWeight);
 		}
 	}
 	return rt;
@@ -962,23 +985,23 @@ void ProximityWeightingContext::Config::setDistanceNear( int distance_near_)
 	if (distance_near_ < 0) throw std::runtime_error(_TXT("expected positive integer value"));
 	distance_near = distance_near_;
 }
-void ProximityWeightingContext::Config::setMinClusterSize( float minClusterSize_)
+void ProximityWeightingContext::Config::setMinClusterSize( double minClusterSize_)
 {
 	if (minClusterSize_ < 0.0 || minClusterSize_ > 1.0) throw std::runtime_error(_TXT("value out of range [0.0,1.0]"));
 	minClusterSize = minClusterSize_;
 }
-void ProximityWeightingContext::Config::setNofHotspots( float nofHotspots_)
+void ProximityWeightingContext::Config::setNofHotspots( int nofHotspots_)
 {
 	if (nofHotspots_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
 	nofHotspots = nofHotspots_;
 }
-void ProximityWeightingContext::Config::setNofSummarySentences( float nofSummarySentences_)
+void ProximityWeightingContext::Config::setNofSummarySentences( int nofSummarySentences_)
 {
 	if (nofSummarySentences_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
 	if (nofSummarySentences_ >= MaxSummaryFieldSize) throw std::runtime_error(_TXT("value out of range"));
 	nofSummarySentences = nofSummarySentences_;
 }
-void ProximityWeightingContext::Config::setMaxNofSummarySentenceWords( float maxNofSummarySentenceWords_)
+void ProximityWeightingContext::Config::setMaxNofSummarySentenceWords( int maxNofSummarySentenceWords_)
 {
 	if (maxNofSummarySentenceWords_ <= 0) throw std::runtime_error(_TXT("expected positive integer value"));
 	maxNofSummarySentenceWords = maxNofSummarySentenceWords_;
