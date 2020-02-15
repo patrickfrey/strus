@@ -105,7 +105,7 @@ std::vector<SummaryElement>
 	try
 	{
 		std::vector<SummaryElement> rt;
-		strus::IndexRange bestMatch;
+		strus::WeightedField bestMatch;
 
 		if (m_itrarsize == 0)
 		{
@@ -113,41 +113,42 @@ std::vector<SummaryElement>
 		}
 		else if (m_itrarsize == 1)
 		{
-			strus::Index startpos = doc.field().start();
-			strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
-			if (m_eos_itr)
+			if (doc.docno() == m_itrar[0]->skipDoc( doc.docno()))
 			{
-				SentenceIterator sentiter( m_eos_itr, doc.docno(), doc.field(), m_parameter.proximityConfig.maxNofSummarySentenceWords);
-				strus::Index pos = m_itrar[0]->skipPos( startpos);
-				while (pos)
+				strus::Index startpos = doc.field().start();
+				strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
+				if (m_eos_itr)
 				{
-					strus::IndexRange sent = sentiter.skipPos( pos);
-					if (!sent.defined()) break;
-					if (sent.contain(pos))
+					SentenceIterator sentiter( m_eos_itr, doc.docno(), doc.field(), m_parameter.proximityConfig.maxNofSummarySentenceWords);
+					strus::Index pos = m_itrar[0]->skipPos( startpos);
+					while (pos)
 					{
-						bestMatch = sent;
-						break;
-					}
-					else
-					{
-						pos = m_itrar[0]->skipPos( sent.end());
+						strus::IndexRange sent = sentiter.skipPos( pos);
+						if (!sent.defined()) break;
+						if (sent.contain(pos))
+						{
+							bestMatch = strus::WeightedField( sent, 1.0);
+							break;
+						}
+						else
+						{
+							pos = m_itrar[0]->skipPos( sent.end());
+						}
 					}
 				}
-			}
-			else
-			{
-				strus::Index pos = m_itrar[0]->skipPos( startpos);
-				if (pos && pos < endpos)
+				else
 				{
-					strus::Index dist = m_parameter.proximityConfig.nofSummarySentences
-								* m_parameter.proximityConfig.maxNofSummarySentenceWords
-								/ 2;
-					bestMatch.init( pos > (startpos + dist)
-									? (pos - dist)
-									: startpos,
-								(pos + dist) > endpos
-									? (pos + dist)
-									: endpos);
+					strus::Index pos = m_itrar[0]->skipPos( startpos);
+					if (pos && pos < endpos)
+					{
+						strus::Index dist = m_parameter.proximityConfig.nofSummarySentences
+									* m_parameter.proximityConfig.maxNofSummarySentenceWords
+									/ 2;
+						if (pos > (startpos + dist)) startpos = (pos - dist);
+						if ((pos + dist) < endpos) endpos = (pos + dist);
+						bestMatch = strus::WeightedField( 
+								strus::IndexRange( startpos, endpos), 1.0);
+					}
 				}
 			}
 		}
@@ -156,9 +157,10 @@ std::vector<SummaryElement>
 			m_proximityWeightingContext.init( m_itrar, m_itrarsize, m_eos_itr, doc.docno(), doc.field());
 			bestMatch = m_proximityWeightingContext.getBestPassage( m_weightar);
 		}
-		if (bestMatch.defined())
+		if (bestMatch.field().defined())
 		{
-			rt.push_back( SummaryElement( "", m_textCollector.fetch( bestMatch)));
+			m_textCollector.skipDoc( doc.docno());
+			rt.push_back( SummaryElement( "", m_textCollector.fetch( bestMatch.field()), bestMatch.weight()));
 		}
 		return rt;
 	}
@@ -180,11 +182,11 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a string"), name_.c_str(), "matchvariables");
 		}
-		else if (strus::caseInsensitiveEquals( name_, "content"))
+		else if (strus::caseInsensitiveEquals( name_, "text"))
 		{
 			m_parameter.contentType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "wordtype"))
+		else if (strus::caseInsensitiveEquals( name_, "tag"))
 		{
 			m_parameter.wordType = value;
 		}
@@ -218,8 +220,8 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a feature and not as a numeric value"), name_.c_str(), THIS_METHOD_NAME);
 	}
-	else if (strus::caseInsensitiveEquals( name_, "content")
-		|| strus::caseInsensitiveEquals( name_, "wordtype")
+	else if (strus::caseInsensitiveEquals( name_, "text")
+		|| strus::caseInsensitiveEquals( name_, "tag")
 		|| strus::caseInsensitiveEquals( name_, "entity"))
 	{
 		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as a string"), name_.c_str(), THIS_METHOD_NAME);
@@ -268,7 +270,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 {
 	if (m_parameter.contentType.empty())
 	{
-		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "emtpy content type definition (parameter '%s') in match phrase summarizer configuration"), "content");
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "emtpy content type definition (parameter '%s') in match phrase summarizer configuration"), "text");
 	}
 	try
 	{
@@ -284,8 +286,8 @@ StructView SummarizerFunctionInstanceMatchPhrase::view() const
 	try
 	{
 		StructView rt;
-		rt( "content", m_parameter.contentType);
-		rt( "wordtype", m_parameter.wordType);
+		rt( "text", m_parameter.contentType);
+		rt( "tag", m_parameter.wordType);
 		rt( "entity", m_parameter.entityType);
 		rt( "maxdf", m_parameter.maxdf);
 		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
@@ -318,8 +320,8 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		FunctionDescription rt( name(), _TXT("Get best matching phrases delimited by the structure postings"));
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
 		rt( P::Feature, "punct", _TXT( "defines the delimiter for sentences"), "");
-		rt( P::String, "content", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::String, "wordtype", _TXT( "the forward index type of the word types (optional)"), "");
+		rt( P::String, "text", _TXT( "the forward index type of the result phrase elements"), "");
+		rt( P::String, "tag", _TXT( "the forward index type of the word types (optional)"), "");
 		rt( P::String, "entity", _TXT( "the forward index type of the entities in the document"), "");
 		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
 		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");

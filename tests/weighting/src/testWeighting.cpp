@@ -1772,6 +1772,15 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25pff( strus::Que
 	headerfunc->addStringParameter( "text", "orig");
 	if (g_random.get(0,2)==0) headerfunc->addStringParameter( "struct", "title");
 
+	const strus::SummarizerFunctionInterface* summarizerPhrase = queryproc->getSummarizerFunction( "matchphrase");
+	if (!summarizerPhrase) throw std::runtime_error( "undefined summarizer function 'matchphrase'");
+	strus::Reference<strus::SummarizerFunctionInstanceInterface> phrasefunc( summarizerPhrase->createInstance( queryproc));
+	if (!phrasefunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	phrasefunc->addStringParameter( "text", "orig");
+	phrasefunc->addStringParameter( "tag", "tag");
+	phrasefunc->addStringParameter( "entity", "entity");
+
+	std::vector<strus::QueryEvalInterface::FeatureParameter> noParam;
 	std::vector<strus::QueryEvalInterface::FeatureParameter> weightingParam;
 	weightingParam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
 	weightingParam.push_back( strus::QueryEvalInterface::FeatureParameter( "punct", "punct"));
@@ -1779,8 +1788,9 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25pff( strus::Que
 	qeval->addSelectionFeature( "search");
 	qeval->addTerm( "punct", "eos", "");
 	qeval->addWeightingFunction( wfunc.release(), weightingParam);
-	qeval->addSummarizerFunction( "docid", attributefunc.release());
-	qeval->addSummarizerFunction( "header", headerfunc.release());
+	qeval->addSummarizerFunction( "docid", attributefunc.release(), noParam);
+	qeval->addSummarizerFunction( "header", headerfunc.release(), noParam);
+	qeval->addSummarizerFunction( "phrase", phrasefunc.release(), weightingParam);
 
 	if (g_errorhnd->hasError())
 	{
@@ -1831,6 +1841,7 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	matchfunc->addNumericParameter( "dist_collect", strus::NumericVariant::asint( 0/*only collect at matching position*/));
 	matchfunc->addNumericParameter( "cluster", strus::NumericVariant::asdouble( g_weightingConfig.minClusterSize));
 
+	std::vector<strus::QueryEvalInterface::FeatureParameter> noParam;
 	std::vector<strus::QueryEvalInterface::FeatureParameter> weightingParam;
 	weightingParam.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "search"));
 	std::vector<strus::QueryEvalInterface::FeatureParameter> posParam;
@@ -1844,7 +1855,7 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25( strus::QueryP
 	qeval->usePositionInformation( "search", false);
 	qeval->usePositionInformation( "hit", true);
 	qeval->addWeightingFunction( wfunc.release(), weightingParam);
-	qeval->addSummarizerFunction( "docid", attributefunc.release());
+	qeval->addSummarizerFunction( "docid", attributefunc.release(), noParam);
 	qeval->addSummarizerFunction( "pos", posfunc.release(), posParam);
 	qeval->addSummarizerFunction( "match", matchfunc.release(), matchParam);
 

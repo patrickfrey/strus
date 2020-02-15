@@ -9,6 +9,7 @@
 #define _STRUS_QUERYPROC_PROXIMITY_WEIGHTING_CONTEXT_HPP_INCLUDED
 #include "strus/base/bitset.hpp"
 #include "strus/index.hpp"
+#include "strus/weightedField.hpp"
 #include "private/skipScanArray.hpp"
 #include <string>
 #include <cstring>
@@ -213,7 +214,7 @@ public:
 	std::vector<FieldStatistics>::const_iterator stats_end() const
 		{return m_fieldStatistics.end();}
 
-	strus::IndexRange getBestPassage( const FeatureWeights& featureWeights) const;
+	strus::WeightedField getBestPassage( const FeatureWeights& featureWeights) const;
 
 	struct WeightedNeighbour
 	{

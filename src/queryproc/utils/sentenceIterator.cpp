@@ -18,7 +18,7 @@ SentenceIterator::SentenceIterator( PostingIteratorInterface* eos_iter_, strus::
 	,m_maxSentenceSize(maxSentenceSize_)
 {
 	if (!m_eos_iter) throw std::runtime_error(_TXT("undefined end of sentence posting iterator"));
-	if (!m_eos_iter->skipDoc( docno) != docno) m_eos_iter = NULL;
+	if (m_eos_iter->skipDoc( docno) != docno) m_eos_iter = NULL;
 }
 
 strus::IndexRange SentenceIterator::skipPos( strus::Index pos)
@@ -37,21 +37,21 @@ strus::IndexRange SentenceIterator::skipPos( strus::Index pos)
 			if (m_field.defined())
 			{
 				endpos = m_field.end();
-				if (startpos < endpos) rt.init( startpos, endpos);
+				if (startpos < endpos) rt.init( startpos ? startpos : 1, endpos);
 			}
 			else
 			{
-				rt.init( startpos, startpos + m_maxSentenceSize);
+				rt.init( startpos ? startpos : 1, startpos + m_maxSentenceSize);
 			}
 		}
 		else if (m_field.defined() && !m_field.contain( endpos))
 		{
 			endpos = m_field.end();
-			if (startpos < endpos) rt.init( startpos, endpos);
+			if (startpos < endpos) rt.init( startpos ? startpos : 1, endpos);
 		}
 		else if (endpos - startpos <= m_maxSentenceSize)
 		{
-			rt.init( startpos, endpos);
+			rt.init( startpos ? startpos : 1, endpos);
 		}
 		else
 		{

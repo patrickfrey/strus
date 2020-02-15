@@ -369,17 +369,31 @@ void ProximityWeightingContext::initNeighbourMatches()
 #ifdef STRUS_LOWLEVEL_DEBUG
 	validateTouchCount();
 #endif
-	// Eliminate nodes with a touch count lower than the minimum window size:
+	// Eliminate nodes with a touch count lower than the minimum window size that are not EOS markers:
+	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+	bool lastFeatureWasEos = false;
 	ni = m_nodear.begin();
-	for (; ni != ne && m_minClusterSize <= ni->touchCount(); ++ni){}
+	for (; ni != ne && (ni->featidx == eos_featidx || m_minClusterSize <= ni->touchCount()); ++ni)
+	{
+		lastFeatureWasEos = (ni->featidx == eos_featidx);
+	}
 	if (ni != ne)
 	{
 		std::vector<Node>::iterator prev_ni = ni;
 		for (++ni; ni != ne; ++ni)
 		{
-			if (m_minClusterSize <= ni->touchCount())
+			if (ni->featidx == eos_featidx)
+			{
+				if (!lastFeatureWasEos)
+				{
+					*prev_ni++ = *ni;
+					lastFeatureWasEos = true;
+				}
+			}
+			else if (m_minClusterSize <= ni->touchCount())
 			{
 				*prev_ni++ = *ni;
+				lastFeatureWasEos = false;
 			}
 		}
 		m_nodear.resize( prev_ni - m_nodear.begin());
@@ -724,34 +738,28 @@ public:
 		}
 	}
 
-	strus::IndexRange getCurrentSentences( int nofSentences, strus::Index nextSentenceStart, int dist)
+	strus::WeightedField getCurrentSentence( int nofSentences, int nofSentenceWords, PostingIteratorInterface* eos_postings, strus::Index endpos)
 	{
-		strus::IndexRange rt;
-		int sent_idx_start = weightedPos[ cur_idx].sent_idx - nofSentences;
-		if (sent_idx_start < 0) sent_idx_start = 0;
-		strus::Index start = sentenceStart[ sent_idx_start & MaxSummaryFieldMask];
-		strus::Index end = weightedPos[ cur_idx].pos + dist;
-		while (sent_idx_start != weightedPos[ cur_idx].sent_idx && start + nofPositions < end)
+		if (eos_postings)
 		{
-			++sent_idx_start;
-			start = sentenceStart[ sent_idx_start & MaxSummaryFieldMask];
+			int si = weightedPos[ cur_idx].sent_idx;
+			strus::Index sentStart = sentenceStart[ si & MaxSummaryFieldMask];
+			--si;
+			strus::Index predStart = si > 0 ? sentenceStart[ si & MaxSummaryFieldMask] : 0;
+			while (si && predStart && predStart + (nofSentenceWords * nofSentences / 2) > weightedPos[ cur_idx].pos)
+			{
+				--si;
+				sentStart = predStart;
+				predStart = si > 0 ? sentenceStart[ si & MaxSummaryFieldMask] : 0;
+			}
+			strus::Index sentEnd = eos_postings->skipPos( weightedPos[ cur_idx].pos);
+			if (sentEnd == 0) sentEnd = endpos;
+			return strus::WeightedField( strus::IndexRange( sentStart, sentEnd), weightedPos[ cur_idx].weight);
 		}
-		if (start + nofPositions < end)
+		else
 		{
-			start = end - nofPositions + dist;
-			if (start >= end) start = end -1;
+			return strus::WeightedField( strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1), weightedPos[ cur_idx].weight);
 		}
-		if (nextSentenceStart <= start + nofPositions)
-		{
-			end = nextSentenceStart;
-		}
-		rt.init( start, end);
-		return rt;
-	}
-
-	strus::IndexRange getCurrentField() const
-	{
-		return strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1);
 	}
 
 	const WeightedPos& currentWeightedPos() const
@@ -770,9 +778,9 @@ public:
 	}
 };
 
-strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeights& featureWeights) const
+strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWeights& featureWeights) const
 {
-	strus::IndexRange rt;
+	strus::WeightedField rt;
 
 	double weightsum_max = 0.0;
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
@@ -809,25 +817,11 @@ strus::IndexRange ProximityWeightingContext::getBestPassage( const FeatureWeight
 		if (window.currentWeightSum() > weightsum_max)
 		{
 			weightsum_max = window.currentWeightSum();
-			if (m_hasPunctuation)
-			{
-				strus::Index nextSentenceStart = ni->pos+1;
-				std::vector<Node>::const_iterator next_ni = ni;
-				for (++next_ni;
-					next_ni != ne
-					&& next_ni->featidx != eos_featidx
-					&& next_ni->pos - ni->pos <= m_config.maxNofSummarySentenceWords;
-					++next_ni){}
-				if (next_ni != ne && next_ni->featidx != eos_featidx)
-				{
-					nextSentenceStart = next_ni->pos;
-				}
-				rt = window.getCurrentSentences( m_config.nofSummarySentences, nextSentenceStart, m_config.distance_close);
-			}
-			else
-			{
-				rt = window.getCurrentField();
-			}
+			rt = window.getCurrentSentence( 
+				m_config.nofSummarySentences,
+				m_config.maxNofSummarySentenceWords,
+				m_hasPunctuation ? m_postings[0] : 0,
+				m_nodear.back().pos);
 		}
 		if (gotEos)
 		{

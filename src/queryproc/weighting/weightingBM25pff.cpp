@@ -162,6 +162,7 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 			int pi,pe;
 			for (pi=0,pe=m_stopword_itrarsize; pi<pe; ++pi)
 			{
+				m_stopword_itrar[ pi]->skipDoc( docno);
 				stopword_ff[ pi] = m_stopword_itrar[ pi]->frequency();
 			}
 
@@ -193,10 +194,12 @@ const std::vector<WeightedField>& WeightingFunctionContextBM25pff::call( const I
 			int pi,pe;
 			for (pi=0,pe=m_itrarsize; pi<pe; ++pi)
 			{
+				m_itrar[ pi]->skipDoc( docno);
 				ww += m_parameter.postingsWeight( doclen, m_weightar[ pi], m_itrar[ pi]->frequency());
 			}
 			for (pi=0,pe=m_stopword_itrarsize; pi<pe; ++pi)
 			{
+				m_stopword_itrar[ pi]->skipDoc( docno);
 				ww += m_parameter.postingsWeight( doclen, m_stopword_weightar[ pi], m_stopword_itrar[ pi]->frequency());
 			}
 			m_lastResult.resize( 1);

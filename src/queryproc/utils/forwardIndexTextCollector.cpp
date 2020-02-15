@@ -81,35 +81,48 @@ std::string ForwardIndexTextCollector::fetch( const strus::IndexRange& field)
 	{
 		if (m_typeiter.get() && m_entityiter.get())
 		{
-			if (pos == m_typeiter->skipPos( pos) && pos == m_entityiter->skipPos( pos))
+			if (pos == m_typeiter->skipPos( pos))
 			{
-				std::string entitystr = m_entityiter->fetch();
-				strus::Index nexttypepos = m_typeiter->skipPos( pos+1);
-				if (!nexttypepos || nexttypepos >= endpos) nexttypepos = endpos;
-				strus::Index nextentitypos = m_entityiter->skipPos( pos+1);
-				if (!nextentitypos || nextentitypos >= endpos) nextentitypos = endpos;
-				strus::Index nextpos = nexttypepos < nextentitypos ? nexttypepos : nextentitypos;
-				strus::Index pi = pos;
-				std::string textstr;
-				while (pi < nextpos)
+				if (pos == m_entityiter->skipPos( pos))
 				{
-					if (!textstr.empty() && textstr[ textstr.size()-1] != ' ')
+					std::string entitystr = m_entityiter->fetch();
+					strus::Index nexttypepos = m_typeiter->skipPos( pos+1);
+					if (!nexttypepos || nexttypepos >= endpos) nexttypepos = endpos;
+					strus::Index nextentitypos = m_entityiter->skipPos( pos+1);
+					if (!nextentitypos || nextentitypos >= endpos) nextentitypos = endpos;
+					strus::Index nextpos = nexttypepos < nextentitypos ? nexttypepos : nextentitypos;
+					strus::Index pi = pos;
+					std::string textstr;
+					while (pi < nextpos)
 					{
-						textstr.push_back(' ');
+						if (!textstr.empty() && textstr[ textstr.size()-1] != ' ')
+						{
+							textstr.push_back(' ');
+						}
+						textstr.append( m_textiter->fetch());
+						if (entitystr == textstr) break;
+						pi = m_textiter->skipPos( pi+1);
+						if (!pi) pi = endpos;
 					}
-					textstr.append( m_textiter->fetch());
-					if (entitystr == textstr) break;
-					pi = m_textiter->skipPos( pi+1);
-					if (!pi) pi = endpos;
+					if (entitystr != textstr)
+					{
+						rt.append( g_openEntityBracket);
+						rt.append( entitystr);
+						rt.append( g_closeEntityBracket);
+					}
+					rt.append( textstr);
+					pos = nextpos-1;
 				}
-				if (entitystr != textstr)
+				else
 				{
-					rt.append( g_openEntityBracket);
-					rt.append( entitystr);
-					rt.append( g_closeEntityBracket);
+					if (!rt.empty() && rt[ rt.size()-1] != ' ') rt.push_back(' ');
+					rt.append( m_textiter->fetch());
 				}
-				rt.append( textstr);
-				pos = nextpos-1;
+			}
+			else
+			{
+				if (!rt.empty() && rt[ rt.size()-1] != ' ') rt.push_back(' ');
+				rt.append( m_textiter->fetch());
 			}
 		}
 		else
