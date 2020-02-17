@@ -786,7 +786,7 @@ public:
 					endpos = weightedPos[ cur_idx].pos + maxlen / 2;
 				}
 			}
-			if (endpos > field.end())
+			if (field.defined() && endpos > field.end())
 			{
 				endpos = field.end();
 			}
