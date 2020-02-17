@@ -29,12 +29,14 @@ using namespace strus;
 ProximityWeightingContext::ProximityWeightingContext( const ProximityWeightingContext& o)
 	:m_config(o.m_config)
 	,m_nofPostings(o.m_nofPostings),m_nofWeightedNeighbours(o.m_nofWeightedNeighbours)
-	,m_minClusterSize(o.m_minClusterSize)
+	,m_minClusterSize(o.m_minClusterSize),m_maxlength_postings(o.m_maxlength_postings)
 	,m_hasPunctuation(o.m_hasPunctuation),m_docno(o.m_docno),m_field(o.m_field)
 	,m_nodear(o.m_nodear)
 	,m_stmOperations(o.m_stmOperations)
 	,m_fieldStatistics(o.m_fieldStatistics)
 	,m_stmStack(o.m_stmStack)
+	,m_endOfDoc(o.m_endOfDoc)
+	,m_nodeScanner()
 {
 	std::memcpy( m_postings, o.m_postings, m_nofPostings * sizeof(m_postings[0]));
 	std::memcpy( m_featureids, o.m_featureids, m_nofPostings * sizeof(m_featureids[0]));
@@ -45,11 +47,13 @@ ProximityWeightingContext::ProximityWeightingContext( const ProximityWeightingCo
 ProximityWeightingContext::ProximityWeightingContext( const Config& config_)
 	:m_config(config_)
 	,m_nofPostings(0),m_nofWeightedNeighbours(0),m_minClusterSize(0)
+	,m_maxlength_postings(0)
 	,m_hasPunctuation(false),m_docno(0),m_field()
 	,m_nodear()
 	,m_stmOperations()
 	,m_fieldStatistics()
 	,m_stmStack()
+	,m_endOfDoc(0)
 	,m_nodeScanner()
 {
 	std::memset( m_postings, 0, MaxNofArguments * sizeof(m_postings[0]));
@@ -87,19 +91,42 @@ void ProximityWeightingContext::init(
 	int firstPostingIdx = 0;
 	strus::Index featureIdToStartMap[ MaxNofArguments];	// map feature id (value in m_featureids) to the next value to take as minimum value for the start of the follow position scan
 	const char* featureIdToNameMap[ MaxNofArguments];	// maps the feature id to string, used to build
-	strus::Index endpos = m_field.defined() ? m_field.end() : std::numeric_limits<strus::Index>::max();
+
+	// [1.1] Initialize maximum feature length needed for some boundary calculations:
+	m_maxlength_postings = 1;
+	int pi=0;
+	for (;pi<nofPostings; ++pi)
+	{
+		strus::Index pp = postings[ pi]->length();
+		if (pp > m_maxlength_postings) m_maxlength_postings = pp;
+	}
+
+	// [1.2] Define the start and end positions of features to weight:
+	strus::Index startpos = field.start();
+	strus::Index endpos = std::numeric_limits<strus::Index>::max();
+	if (m_field.defined())
+	{
+		strus::Index dist = m_config.distance_near;
+		if (dist < m_config.maxNofSummarySentenceWords)
+		{
+			dist = m_config.maxNofSummarySentenceWords;
+		}
+		endpos = m_field.end() + dist + m_maxlength_postings;
+		startpos = dist > m_field.start() ? 0 : m_field.start() - dist;
+	}
 	strus::Index posnoar[ MaxNofArguments];			//... array parallel to m_postings, m_featureids and m_length_postings
 
+	// [1.3] Define punctuation (EOS, end of sentence) feature:
 	if (true == (m_hasPunctuation = (eos_postings != NULL && eos_postings->skipDoc(docno) == docno)))
 	{
 		eos_featidx = 0;
 		m_length_postings[ m_nofPostings] = eos_postings->length();
 		m_postings[ m_nofPostings] = eos_postings;
 		m_featureids[ m_nofPostings] = 0;
-		featureIdToStartMap[ m_nofPostings] = field.start();
+		featureIdToStartMap[ m_nofPostings] = startpos;
 		featureIdToNameMap[ m_nofPostings] = 0;
 
-		posnoar[ m_nofPostings] = m_postings[ m_nofPostings]->skipPos( field.start());
+		posnoar[ m_nofPostings] = m_postings[ m_nofPostings]->skipPos( startpos);
 		if (0 == posnoar[ m_nofPostings] || posnoar[ m_nofPostings] > endpos)
 		{
 			posnoar[ m_nofPostings] = endpos;
@@ -120,14 +147,13 @@ void ProximityWeightingContext::init(
 
 	// [2] Inialize features for the sliding window scan with a queue:
 	unsigned char queue[ MaxNofArguments];	//... array with indices into m_postings and posnoar
-	int pi=0;
-	for (;pi<nofPostings; ++pi)
+	for (pi=0; pi<nofPostings; ++pi)
 	{
 		m_postings[ m_nofPostings] = postings[ pi];
 		m_length_postings[ m_nofPostings] = m_postings[ m_nofPostings]->length();
 		m_featureids[ m_nofPostings] = m_nofPostings;
 		featureIdToNameMap[ m_nofPostings] = m_postings[ m_nofPostings]->featureid();
-		featureIdToStartMap[ m_nofPostings] = field.start();
+		featureIdToStartMap[ m_nofPostings] = startpos;
 
 		int firstAppearanceIndex = indexStringArray( featureIdToNameMap, m_nofPostings, firstPostingIdx, featureIdToNameMap[ m_nofPostings]);
 		int featid = m_featureids[ m_nofPostings] = m_featureids[ firstAppearanceIndex];
@@ -254,6 +280,7 @@ void ProximityWeightingContext::init(
 		}
 #endif
 	}
+	m_endOfDoc = field.defined() ? field.end() : m_nodear.empty() ? 0 : m_nodear.back().pos;
 	initNeighbourMatches();
 	m_nodeScanner.init( m_nodear.data(), m_nodear.size());
 }
@@ -372,32 +399,33 @@ void ProximityWeightingContext::initNeighbourMatches()
 	// Eliminate nodes with a touch count lower than the minimum window size that are not EOS markers:
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
 	bool lastFeatureWasEos = false;
-	ni = m_nodear.begin();
-	for (; ni != ne && (ni->featidx == eos_featidx || m_minClusterSize <= ni->touchCount()); ++ni)
+	if (m_field.defined())
 	{
-		lastFeatureWasEos = (ni->featidx == eos_featidx);
+		for (ni = m_nodear.begin(); ni != ne && !m_field.contain( ni->pos); ++ni){}
+		m_nodear.erase( m_nodear.begin(), ni);
 	}
-	if (ni != ne)
+	std::vector<Node>::iterator prev_ni = ni = m_nodear.begin();
+	for (; ni != ne; ++ni)
 	{
-		std::vector<Node>::iterator prev_ni = ni;
-		for (++ni; ni != ne; ++ni)
+		if (ni->featidx == eos_featidx)
 		{
-			if (ni->featidx == eos_featidx)
-			{
-				if (!lastFeatureWasEos)
-				{
-					*prev_ni++ = *ni;
-					lastFeatureWasEos = true;
-				}
-			}
-			else if (m_minClusterSize <= ni->touchCount())
+			if (!lastFeatureWasEos)
 			{
 				*prev_ni++ = *ni;
-				lastFeatureWasEos = false;
+				lastFeatureWasEos = true;
 			}
 		}
-		m_nodear.resize( prev_ni - m_nodear.begin());
+		else if (m_field.defined() && m_field.end() <= ni->pos)
+		{
+			break;
+		}
+		else if (m_minClusterSize <= ni->touchCount())
+		{
+			*prev_ni++ = *ni;
+			lastFeatureWasEos = false;
+		}
 	}
+	m_nodear.resize( prev_ni - m_nodear.begin());
 }
 
 struct TouchCountWeightMap
@@ -440,6 +468,8 @@ double ProximityWeightingContext::ff_weight( const Node& nd) const
 
 void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, const strus::IndexRange& headerField, const strus::IndexRange& contentField)
 {
+	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
+
 	std::vector<Node>::iterator start = ni;
 	for (; start >= m_nodear.begin() && start->pos >= contentField.start(); --start){}
 	++start;
@@ -464,12 +494,15 @@ void ProximityWeightingContext::touchTitleNode( std::vector<Node>::iterator ni, 
 	}
 	for (ni=start; ni<end; ++ni)
 	{
-		int tc = ni->touched.join_count( title_touched);
-		if (ni->touched.set( ni->featidx, false)) {--tc;} //... unmask own references that are not counted
+		if (ni->featidx != eos_featidx)
+		{
+			int tc = ni->touched.join_count( title_touched);
+			if (ni->touched.set( ni->featidx, false)) {--tc;} //... unmask own references that are not counted
 #ifdef STRUS_LOWLEVEL_DEBUG
-		if (tc < 0) throw std::runtime_error(_TXT("logic error: proximity weighting counting corrupted (title matches)"));
+			if (tc < 0) throw std::runtime_error(_TXT("logic error: proximity weighting counting corrupted (title matches)"));
 #endif
-		ni->titleScopeMatches += tc;
+			ni->titleScopeMatches += tc;
+		}
 	}
 }
 
@@ -679,7 +712,6 @@ struct WeightedPos
 {
 	double weight;
 	strus::Index pos;
-	strus::Index sent_idx;
 };
 
 struct WeightedPosWindow
@@ -691,16 +723,14 @@ private:
 	};
 
 	WeightedPos weightedPos[ MaxSummaryFieldSize];
-	strus::Index sentenceStart[ MaxSummaryFieldSize];
 	int nofPositions;
 	int cur_idx;
 	int start_idx;
-	int sent_idx;
 	double weightsum;
 
 public:
 	explicit WeightedPosWindow( int windowSize)
-		:nofPositions(windowSize),cur_idx(0),start_idx(0),sent_idx( 0),weightsum(0.0)
+		:nofPositions(windowSize),cur_idx(0),start_idx(0),weightsum(0.0)
 
 	{
 		STRUS_STATIC_ASSERT( MaxSummaryFieldSize != 0
@@ -709,13 +739,6 @@ public:
 		if (nofPositions >= MaxSummaryFieldSize) nofPositions = MaxSummaryFieldSize-1;
 
 		std::memset( &weightedPos, 0, sizeof(weightedPos));
-		std::memset( &sentenceStart, 0, sizeof(sentenceStart));
-	}
-
-	void pushEos( strus::Index pos)
-	{
-		++sent_idx;
-		sentenceStart[ sent_idx & MaxSummaryFieldMask] = pos;
 	}
 
 	void pushWeight( strus::Index pos, double weight)
@@ -723,7 +746,6 @@ public:
 		cur_idx = (cur_idx + 1) & MaxSummaryFieldMask;
 		WeightedPos& cur = weightedPos[ cur_idx];
 		cur.pos = pos;
-		cur.sent_idx = sent_idx;
 		cur.weight = weight;
 	}
 
@@ -731,34 +753,60 @@ public:
 	{
 		WeightedPos& cur = weightedPos[ cur_idx];
 		weightsum += cur.weight;
-		while (start_idx != cur_idx && weightedPos[ start_idx].pos + nofPositions < cur.pos)
+		while (start_idx != cur_idx && weightedPos[ start_idx].pos + nofPositions <= cur.pos)
 		{
 			weightsum -= weightedPos[ start_idx].weight;
 			start_idx = (start_idx + 1) & MaxSummaryFieldMask;
 		}
 	}
 
-	strus::WeightedField getCurrentSentence( int nofSentences, int nofSentenceWords, PostingIteratorInterface* eos_postings, strus::Index endpos)
+	strus::WeightedField getCurrentSentence( int nofSentences, int nofSentenceWords, PostingIteratorInterface* eos_postings, const strus::IndexRange& field, strus::Index endOfDoc) const
 	{
 		if (eos_postings)
 		{
-			int si = weightedPos[ cur_idx].sent_idx;
-			strus::Index sentStart = sentenceStart[ si & MaxSummaryFieldMask];
-			--si;
-			strus::Index predStart = si > 0 ? sentenceStart[ si & MaxSummaryFieldMask] : 0;
-			while (si && predStart && predStart + (nofSentenceWords * nofSentences / 2) > weightedPos[ cur_idx].pos)
+			strus::Index maxlen = nofSentences * nofSentenceWords;
+			strus::Index startpos = weightedPos[ cur_idx].pos >= maxlen ? weightedPos[ cur_idx].pos - maxlen : 1;
+			strus::Index eospos[ MaxSummaryFieldSize];
+			strus::Index pp = eos_postings->skipPos( startpos);
+			int pi = 0;
+			for (; pp && pp < weightedPos[ cur_idx].pos; pp = eos_postings->skipPos( pp+1))
 			{
-				--si;
-				sentStart = predStart;
-				predStart = si > 0 ? sentenceStart[ si & MaxSummaryFieldMask] : 0;
+				eospos[ pi++] = pp;
 			}
-			strus::Index sentEnd = eos_postings->skipPos( weightedPos[ cur_idx].pos);
-			if (sentEnd == 0) sentEnd = endpos;
-			return strus::WeightedField( strus::IndexRange( sentStart, sentEnd), weightedPos[ cur_idx].weight);
+			if (!pi)
+			{
+				eospos[ pi++] = weightedPos[ cur_idx].pos >= (maxlen/2) ? (weightedPos[ cur_idx].pos - maxlen/2) : 0;
+			}
+			strus::Index endpos = eos_postings->skipPos( weightedPos[ cur_idx].pos);
+			if (!endpos)
+			{
+				endpos = endOfDoc;
+				if (endpos > weightedPos[ cur_idx].pos + maxlen / 2)
+				{
+					endpos = weightedPos[ cur_idx].pos + maxlen / 2;
+				}
+			}
+			if (endpos > field.end())
+			{
+				endpos = field.end();
+			}
+			if (pi > nofSentences)
+			{
+				startpos = eospos[ pi - nofSentences] + 1;
+				if (endpos - startpos > maxlen && nofSentences > 1)
+				{
+					startpos = eospos[ pi - nofSentences + 1] + 1;
+				}
+			}
+			else
+			{
+				startpos = eospos[ 0] + 1;
+			}
+			return strus::WeightedField( strus::IndexRange( startpos, endpos), weightsum);
 		}
 		else
 		{
-			return strus::WeightedField( strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1), weightedPos[ cur_idx].weight);
+			return strus::WeightedField( strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1), weightsum);
 		}
 	}
 
@@ -770,11 +818,6 @@ public:
 	double currentWeightSum() const
 	{
 		return weightsum;
-	}
-
-	strus::Index currentSentenceStart() const
-	{
-		return sentenceStart[ sent_idx & MaxSummaryFieldMask];
 	}
 };
 
@@ -793,27 +836,21 @@ strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWei
 	{
 		if (ni->featidx == eos_featidx)
 		{
-			window.pushEos( ni->pos);
 			++ni;
 			continue;
 		}
 		strus::Index curpos = ni->pos;
 		double curweight = 0.0;
-		bool gotEos = false;
 		for (; ni != ne && ni->pos == curpos; ++ni)
 		{
 			if (ni->featidx != eos_featidx)
 			{
-				curweight += featureWeights[ ni->featidx - ofs_featidx] * ff_weight( *ni);
-			}
-			else
-			{
-				gotEos = true;
+				double winc = featureWeights[ ni->featidx - ofs_featidx] * ff_weight( *ni);
+				curweight += winc;
 			}
 		}
 		window.pushWeight( curpos, curweight);
 		window.calculateWeightSum();
-
 		if (window.currentWeightSum() > weightsum_max)
 		{
 			weightsum_max = window.currentWeightSum();
@@ -821,12 +858,7 @@ strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWei
 				m_config.nofSummarySentences,
 				m_config.maxNofSummarySentenceWords,
 				m_hasPunctuation ? m_postings[0] : 0,
-				m_nodear.back().pos);
-		}
-		if (gotEos)
-		{
-			window.pushEos( ni->pos);
-			++ni;
+				m_field, m_endOfDoc);
 		}
 	}
 	return rt;
@@ -868,20 +900,19 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 
 	WeightedPosWindow window( m_config.nofSummarySentences * m_config.maxNofSummarySentenceWords);
 
+	strus::Index lastSentStart = 0;
 	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
 	while (ni != ne)
 	{
-		
 		if (ni->featidx == eos_featidx)
 		{
-			window.pushEos( ni->pos);
+			lastSentStart = ni->pos;
 			++ni;
 			continue;
 		}
 		strus::Index curpos = ni->pos;
 		double curweight = 0.0;
 		int max_tc = 0;
-		bool gotEos = false;
 		for (; ni != ne && ni->pos == curpos; ++ni)
 		{
 			if (ni->featidx != eos_featidx)
@@ -892,7 +923,7 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 			}
 			else
 			{
-				gotEos = true;
+				lastSentStart = ni->pos;
 			}
 		}
 		if (curweight <= std::numeric_limits<double>::min()) continue;
@@ -902,16 +933,17 @@ std::vector<ProximityWeightingContext::WeightedNeighbour>
 
 		strus::Index startpos = match.pos > dist ? match.pos - dist : 1;
 		strus::Index endpos = match.pos + dist + 1;
-		if (startpos <= window.currentSentenceStart())
+		std::vector<Node>::const_iterator xi = ni;
+		for (;xi != ne && endpos > xi->pos && xi->featidx != eos_featidx; ++xi){}
+		if (xi != ne && endpos > xi->pos && xi->featidx == eos_featidx)
 		{
-			startpos = window.currentSentenceStart()+1;
+			endpos = xi->pos;
+		}
+		if (startpos <= lastSentStart)
+		{
+			startpos = lastSentStart+1;
 		}
 		addWeightedNeighbourWeights( rt, startpos, endpos, match.weight);
-		if (gotEos)
-		{
-			window.pushEos( ni->pos);
-			++ni;
-		}
 	}
 	return rt;
 }

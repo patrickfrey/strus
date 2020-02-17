@@ -288,10 +288,6 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		{
 			m_parameter.avgDocLength = value.tofloat();
 		}
-		else if (strus::caseInsensitiveEquals( name_, "maxdf"))
-		{
-			m_parameter.maxdf = value.tofloat();
-		}
 		else if (strus::caseInsensitiveEquals( name_, "dist_imm"))
 		{
 			m_parameter.proximityConfig.setDistanceImm( value.toint());
@@ -315,6 +311,10 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		else if (strus::caseInsensitiveEquals( name_, "ffbase"))
 		{
 			m_parameter.proximityConfig.setMinFfWeight( value.tofloat());
+		}
+		else if (strus::caseInsensitiveEquals( name_, "maxdf"))
+		{
+			m_parameter.maxdf = value.tofloat();
 		}
 		else
 		{

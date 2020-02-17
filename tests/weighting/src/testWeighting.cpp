@@ -549,6 +549,13 @@ struct Statistics
 		}
 		return rt;
 	}
+	bool isStopword( int featidx) const
+	{
+		std::map<int,int>::const_iterator ni = dfmap.find( featidx);
+		if (ni == dfmap.end()) return false;
+		double df = (ni == dfmap.end()) ? 0 : ni->second;
+		return (df > g_weightingConfig.maxdf * (double)nofDocuments);
+	}
 };
 
 struct Document
@@ -821,7 +828,6 @@ struct Document
 	void collectWeightedPos(
 			std::vector<WeightedPos>& res, 
 			const std::vector<int>& queryFeatures,
-			const strus::IndexRange& titlefield,
 			const strus::IndexRange& contentfield,
 			bool includingWeightsForTitle) const
 	{
@@ -862,10 +868,6 @@ struct Document
 				}
 			}
 		};
-		if (titlefield.end() != contentfield.start())
-		{
-			throw std::runtime_error("title field to be expected adjacent to content field");
-		}
 		strus::SkipScanArray<FeaturePos,strus::Index,FeaturePos::FindPosCompare>
 			ar( featposlist.data(), featposlist.size());
 		int startidx = ar.upperbound( contentfield.start());
@@ -964,17 +966,18 @@ struct Document
 			}
 		}
 	}
-	std::vector<WeightedPos> getWeightedPos( const std::vector<int>& queryFeatures, const strus::IndexRange& titlefield, const strus::IndexRange& contentfield) const
+
+	std::vector<WeightedPos> getWeightedPos( const std::vector<int>& queryFeatures, const strus::IndexRange& contentfield) const
 	{
 		std::vector<WeightedPos> rt;
-		collectWeightedPos( rt, queryFeatures, titlefield, contentfield, false/*!includingWeightsForTitle*/);
+		collectWeightedPos( rt, queryFeatures, contentfield, false/*!includingWeightsForTitle*/);
 		return rt;
 	}
 
-	std::vector<WeightedPos> getWeightedPosIncludingTitleWeights( const std::vector<int>& queryFeatures, const strus::IndexRange& titlefield, const strus::IndexRange& contentfield) const
+	std::vector<WeightedPos> getWeightedPosIncludingTitleWeights( const std::vector<int>& queryFeatures, const strus::IndexRange& contentfield) const
 	{
 		std::vector<WeightedPos> rt;
-		collectWeightedPos( rt, queryFeatures, titlefield, contentfield, true/*includingWeightsForTitle*/);
+		collectWeightedPos( rt, queryFeatures, contentfield, true/*includingWeightsForTitle*/);
 		return rt;
 	}
 
@@ -1041,6 +1044,35 @@ struct Document
 		return rt;
 	}
 
+	std::string getContent( const strus::IndexRange& field) const
+	{
+		std::string rt;
+		std::vector<FeaturePos>::const_iterator
+			fi = featposlist.begin(), fe = featposlist.end();
+		for (; fi != fe && fi->pos < field.start(); ++fi){}
+		for (; fi != fe && fi->pos < field.end(); ++fi)
+		{
+			std::string orig = fi->featidx == 0/*EOS*/
+					? "."
+					: strus::string_format( "%d", fi->featidx);
+			std::string entitystr = getEntityString( fi->featidx);
+			if (!entitystr.empty())
+			{
+				if (!rt.empty() && rt[ rt.size()-1] != ' ') rt.push_back(' ');
+				rt.append( "[");
+				rt.append( entitystr);
+				rt.append( "] ");
+				rt.append( orig);
+			}
+			else
+			{
+				if (!rt.empty() && rt[ rt.size()-1] != ' ') rt.push_back(' ');
+				rt.append( orig);
+			}
+		}
+		return rt;
+	}
+
 	std::vector<WeightedEntity>
 		collectWeightedNearMatches( 
 			std::vector<WeightedPos> wpos, int dist,
@@ -1087,11 +1119,11 @@ struct Document
 
 	void collectRanklists_bm25pff( std::vector<strus::WeightedField>& res, const Statistics& statistics, const std::vector<int>& queryFeatures, const DocTreeNode& node) const
 	{
-		strus::IndexRange titlefield( node.field.start(), node.field.start() + node.titlear.size());
-		strus::IndexRange contentfield( titlefield.end(), titlefield.end() + node.contentar.size());
-		strus::IndexRange allcontentfield( titlefield.end(), node.field.end());
+		strus::Index contentstart = node.field.start() + node.titlear.size();
+		strus::IndexRange contentfield( contentstart, contentstart + node.contentar.size());
+		strus::IndexRange allcontentfield( contentstart, node.field.end());
 
-		std::vector<WeightedPos> wpos = getWeightedPosIncludingTitleWeights( queryFeatures, titlefield, contentfield);
+		std::vector<WeightedPos> wpos = getWeightedPosIncludingTitleWeights( queryFeatures, contentfield);
 		std::map<int,double> queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
 		double ww = weightField_bm25( queryFeatures, queryFeatFfMap, statistics, contentfield);
 		if (ww > 0.0)
@@ -1100,7 +1132,7 @@ struct Document
 		}
 		if (contentfield != allcontentfield)
 		{
-			wpos = getWeightedPosIncludingTitleWeights( queryFeatures, titlefield, allcontentfield);
+			wpos = getWeightedPosIncludingTitleWeights( queryFeatures, allcontentfield);
 			queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
 			ww = weightField_bm25( queryFeatures, queryFeatFfMap, statistics, allcontentfield);
 			if (ww > 0.0)
@@ -1133,10 +1165,9 @@ struct Document
 		}
 		else
 		{
-			strus::IndexRange titlefield( 1, 1);//... document as a whole has no title
 			strus::IndexRange contentfield( 1, doctreelist.back().field.end());
 
-			std::vector<WeightedPos> wpos = getWeightedPosIncludingTitleWeights( queryFeatures, titlefield, contentfield);
+			std::vector<WeightedPos> wpos = getWeightedPosIncludingTitleWeights( queryFeatures, contentfield);
 			std::map<int,double> queryFeatFfMap = getQueryFeatFfMap( wpos, queryFeatures);
 			double ww = weightField_bm25( queryFeatures, queryFeatFfMap, statistics, contentfield);
 			if (ww > 0.0)
@@ -1186,6 +1217,38 @@ struct Document
 			di->collectFeaturePositions( rt, featidx);
 		}
 		return rt;
+	}
+
+	strus::WeightedField getFirstMatchSentence( int featidx) const
+	{
+		if (featposlist.empty()) return strus::WeightedField();
+		strus::Index start = 1;
+		strus::Index end = featposlist.back().pos + 1;
+		std::vector<FeaturePos>::const_iterator
+			fi = featposlist.begin(), fe = featposlist.end();
+		for (; fi != fe && fi->featidx != featidx; ++fi)
+		{
+			if (fi->featidx == 0/*EOS*/) start = fi->pos + 1;
+		}
+		for (; fi != fe && fi->featidx != 0/*EOS*/; ++fi){}
+		if (fi != fe) end = fi->pos;
+		return strus::WeightedField( strus::IndexRange( start, end), 1.0);
+	}
+
+	strus::IndexRange getCoveringSentence( strus::Index pos) const
+	{
+		if (featposlist.empty()) return strus::IndexRange();
+		strus::Index start = 1;
+		strus::Index end = featposlist.back().pos + 1;
+		std::vector<FeaturePos>::const_iterator
+			fi = featposlist.begin(), fe = featposlist.end();
+		for (; fi != fe && fi->pos != pos; ++fi)
+		{
+			if (fi->featidx == 0/*EOS*/) start = fi->pos + 1;
+		}
+		for (; fi != fe && fi->featidx != 0/*EOS*/; ++fi){}
+		if (fi != fe) end = fi->pos;
+		return strus::IndexRange( start, end);
 	}
 };
 
@@ -1357,6 +1420,34 @@ struct Collection
 		return rt;
 	}
 
+	strus::WeightedField getBestSentence( const Document& doc, const std::vector<WeightedPos>& wpos, int windowSize) const
+	{
+		strus::WeightedField rt;
+		double max_weight = 0.0;
+		strus::Index bestpos = 0;
+		std::vector<WeightedPos>::const_iterator wi = wpos.begin(), we = wpos.end();
+		for (; wi != we; ++wi)
+		{
+			double weight = 0.0;
+			std::vector<WeightedPos>::const_iterator pi = wi;
+			for (; pi >= wpos.begin() && pi->pos + windowSize > wi->pos; --pi)
+			{
+				weight += pi->ff * statistics.idf( pi->featidx);
+			}
+			if (weight > max_weight)
+			{
+				bestpos = wi->pos;
+				max_weight = weight;
+			}
+		}
+		if (bestpos)
+		{
+			strus::IndexRange sent = doc.getCoveringSentence( bestpos);
+			rt = strus::WeightedField( sent, max_weight);
+		}
+		return rt;
+	}
+
 	strus::QueryResult expectedResult_bm25pff( int maxNofRanks, const Query& query, const strus::StorageClientInterface* storage) const
 	{
 		std::vector<strus::ResultDocument> ranks;
@@ -1389,6 +1480,34 @@ struct Collection
 						for (int lidx=0; li != le; ++li,++lidx)
 						{
 							summary.push_back( strus::SummaryElement( "header", li->text, 1.0, li->hierarchy));
+						}
+					}
+					std::vector<int> nonStopwordQueryFeatures;
+					std::vector<int>::const_iterator qi = query.features.begin(), qe = query.features.end();
+					for (; qi != qe; ++qi)
+					{
+						if (!statistics.isStopword( *qi)) nonStopwordQueryFeatures.push_back( *qi);
+					}
+					if (nonStopwordQueryFeatures.empty())
+					{}
+					else if (nonStopwordQueryFeatures.size() == 1)
+					{
+						strus::WeightedField firstsent = di->getFirstMatchSentence( nonStopwordQueryFeatures[0]);
+						if (firstsent.field().defined())
+						{
+							std::string content = di->getContent( firstsent.field());
+							summary.push_back( strus::SummaryElement( "phrase", content, firstsent.weight()));
+						}
+					}
+					else
+					{
+						std::vector<WeightedPos> wpos = di->getWeightedPos( nonStopwordQueryFeatures, wi->field());
+						int windowSize = g_weightingConfig.maxNofSummarySentenceWords * g_weightingConfig.nofSummarySentences;
+						strus::WeightedField bestsent = getBestSentence( *di, wpos, windowSize);
+						if (bestsent.field().defined())
+						{
+							std::string content = di->getContent( bestsent.field());
+							summary.push_back( strus::SummaryElement( "phrase", content, bestsent.weight()));
 						}
 					}
 					ranks.push_back( strus::ResultDocument( wdoc, summary));
@@ -1439,9 +1558,8 @@ struct Collection
 						}
 					}
 					collectFeatWeightNorm = std::sqrt( collectFeatWeightNorm);
-					strus::IndexRange titlefield( 1, 1);//... document as a whole has no title
 					strus::IndexRange contentfield( 1, di->doctreelist.back().field.end());
-					std::vector<WeightedPos> wpos = di->getWeightedPos( query.features, titlefield, contentfield);
+					std::vector<WeightedPos> wpos = di->getWeightedPos( query.features, contentfield);
 					std::vector<WeightedEntity> matches = di->collectWeightedNearMatches( wpos, 0/*dist*/, statistics, g_weightingConfig.maxNofRanks);
 					std::vector<WeightedEntity>::const_iterator mi = matches.begin(), me = matches.end();
 					for (; mi != me; ++mi)
@@ -1593,7 +1711,7 @@ static bool compareSummaryElement( const strus::SummaryElement& s1, const strus:
 {
 	if (s1.name() != s2.name()) return false;
 	if (s1.value() != s2.value()) return false;
-	if (!strus::Math::isequal( s1.weight(), s2.weight())) return false;
+	if (!strus::Math::isequal( s1.weight(), s2.weight(), (double)std::numeric_limits<float>::epsilon())) return false;
 	if (s1.index() != s2.index()) return false;
 	return true;
 }
@@ -1777,8 +1895,14 @@ static strus::Reference<strus::QueryEvalInterface> queryEval_bm25pff( strus::Que
 	strus::Reference<strus::SummarizerFunctionInstanceInterface> phrasefunc( summarizerPhrase->createInstance( queryproc));
 	if (!phrasefunc.get()) throw std::runtime_error( g_errorhnd->fetchError());
 	phrasefunc->addStringParameter( "text", "orig");
-	phrasefunc->addStringParameter( "tag", "tag");
 	phrasefunc->addStringParameter( "entity", "entity");
+	phrasefunc->addNumericParameter( "maxdf", strus::NumericVariant::asdouble( g_weightingConfig.maxdf));
+	phrasefunc->addNumericParameter( "sentences", strus::NumericVariant::asint( g_weightingConfig.nofSummarySentences));
+	phrasefunc->addNumericParameter( "dist_imm", strus::NumericVariant::asint( g_weightingConfig.distance_imm));
+	phrasefunc->addNumericParameter( "dist_close", strus::NumericVariant::asint( g_weightingConfig.distance_close));
+	phrasefunc->addNumericParameter( "dist_near", strus::NumericVariant::asint( g_weightingConfig.distance_near));
+	phrasefunc->addNumericParameter( "dist_sentence", strus::NumericVariant::asint( g_weightingConfig.maxNofSummarySentenceWords));
+	phrasefunc->addNumericParameter( "cluster", strus::NumericVariant::asdouble( g_weightingConfig.minClusterSize));
 
 	std::vector<strus::QueryEvalInterface::FeatureParameter> noParam;
 	std::vector<strus::QueryEvalInterface::FeatureParameter> weightingParam;

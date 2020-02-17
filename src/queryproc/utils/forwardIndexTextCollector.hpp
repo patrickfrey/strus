@@ -30,7 +30,6 @@ public:
 	ForwardIndexTextCollector(
 			const StorageClientInterface* storage_,
 			const std::string& textType,
-			const std::string& wordType,
 			const std::string& entityType,
 			ErrorBufferInterface* errorhnd_);
 	ForwardIndexTextCollector(
@@ -39,13 +38,10 @@ public:
 			ErrorBufferInterface* errorhnd_);
 	ForwardIndexTextCollector( const ForwardIndexTextCollector& o)
 		:m_storage(o.m_storage)
-		,m_textiter(o.m_textiter),m_entityiter(o.m_entityiter),m_typeiter(o.m_typeiter)
+		,m_textiter(o.m_textiter),m_entityiter(o.m_entityiter)
 		,m_errorhnd(o.m_errorhnd){}
 
 	void skipDoc( strus::Index docno);
-
-	/// \brief Evaluate the fraction of words in a field that are typed against words that are untyped
-	double typedWordFraction( const strus::IndexRange& field);
 
 	/// \brief Get the concatenated text of a field from the forward index for the current document
 	std::string fetch( const strus::IndexRange& field);
@@ -55,7 +51,6 @@ private:
 	typedef strus::Reference<ForwardIteratorInterface> ForwardIteratorRef;
 	ForwardIteratorRef m_textiter;
 	ForwardIteratorRef m_entityiter;
-	ForwardIteratorRef m_typeiter;
 	ErrorBufferInterface* m_errorhnd;
 };
 

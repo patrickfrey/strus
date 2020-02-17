@@ -42,16 +42,16 @@ struct SummarizerFunctionParameterMatchPhrase
 	typedef ProximityWeightingContext::Config ProximityWeightingConfig;
 	ProximityWeightingConfig proximityConfig;	///< configuration for proximity weighting
 	std::string contentType;			///< name of the forward index feature to collect as text
-	std::string wordType;				///< name of the forward index feature that contains the word type of the feature to collect in the forward index; must align with the entity type and defines the length, resp. the number of terms overed by the entity
 	std::string entityType;				///< name of the forward index feature that contains the entity assigned to the aligned text feature
 	double maxdf;					///< the maximum df of features not to be considered stopwords as fraction of the total collection size
 
 	SummarizerFunctionParameterMatchPhrase()
-		:proximityConfig(),contentType(),wordType(),entityType()
+		:proximityConfig(),contentType(),entityType(),maxdf(0.5)
 	{}
 	SummarizerFunctionParameterMatchPhrase( const SummarizerFunctionParameterMatchPhrase& o)
 		:proximityConfig(o.proximityConfig)
-		,contentType(o.contentType),wordType(o.wordType),entityType(o.entityType)
+		,contentType(o.contentType),entityType(o.entityType)
+		,maxdf(o.maxdf)
 	{}
 };
 

@@ -47,7 +47,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_eos_itr(0)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_storage(storage_)
-	,m_textCollector( storage_, parameter_.contentType, parameter_.wordType, parameter_.entityType, errorhnd_)
+	,m_textCollector( storage_, parameter_.contentType, parameter_.entityType, errorhnd_)
 	,m_errorhnd(errorhnd_)
 {
 	std::memset( &m_itrar, 0, sizeof(m_itrar));
@@ -82,6 +82,10 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			}
 			if (m_itrarsize >= MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
 			if (m_parameter.maxdf * m_nofCollectionDocuments < df)
+			{
+				//... stopwords are ignored
+			}
+			else
 			{
 				m_itrar[ m_itrarsize] = itr;
 				m_weightar[ m_itrarsize] = idf * weight;
@@ -186,10 +190,6 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_parameter.contentType = value;
 		}
-		else if (strus::caseInsensitiveEquals( name_, "tag"))
-		{
-			m_parameter.wordType = value;
-		}
 		else if (strus::caseInsensitiveEquals( name_, "entity"))
 		{
 			m_parameter.entityType = value;
@@ -287,7 +287,6 @@ StructView SummarizerFunctionInstanceMatchPhrase::view() const
 	{
 		StructView rt;
 		rt( "text", m_parameter.contentType);
-		rt( "tag", m_parameter.wordType);
 		rt( "entity", m_parameter.entityType);
 		rt( "maxdf", m_parameter.maxdf);
 		rt( "dist_imm", m_parameter.proximityConfig.distance_imm);
@@ -321,7 +320,6 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
 		rt( P::Feature, "punct", _TXT( "defines the delimiter for sentences"), "");
 		rt( P::String, "text", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::String, "tag", _TXT( "the forward index type of the word types (optional)"), "");
 		rt( P::String, "entity", _TXT( "the forward index type of the entities in the document"), "");
 		rt( P::Numeric, "dist_imm", _TXT( "ordinal position distance considered as immediate in the same sentence"), "1:");
 		rt( P::Numeric, "dist_close", _TXT( "ordinal position distance considered as close in the same sentence"), "1:");

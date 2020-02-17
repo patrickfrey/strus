@@ -310,6 +310,7 @@ private:
 	int m_minClusterSize;
 	unsigned char m_featureids[ MaxNofArguments];
 	strus::Index m_length_postings[ MaxNofArguments];
+	strus::Index m_maxlength_postings;
 	bool m_hasPunctuation;
 	strus::Index m_docno;
 	strus::IndexRange m_field;
@@ -317,6 +318,7 @@ private:
 	std::vector<StmOperation> m_stmOperations;
 	std::vector<FieldStatistics> m_fieldStatistics;
 	std::vector<int> m_stmStack;
+	strus::Index m_endOfDoc;
 	NodeScanner m_nodeScanner;
 };
 
