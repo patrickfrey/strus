@@ -807,7 +807,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		}
 		if (m_debugtrace) m_debugtrace->close();/*ranking*/
 		if (m_debugtrace) m_debugtrace->close();/*eval*/
-		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
+		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks, std::vector<SummaryElement>());
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());
 }
