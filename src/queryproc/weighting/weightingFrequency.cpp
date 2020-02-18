@@ -141,3 +141,11 @@ StructView WeightingFunctionTermFrequency::view() const
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
+const char* WeightingFunctionTermFrequency::name() const
+{
+	return THIS_METHOD_NAME;
+}
+const char* WeightingFunctionInstanceTermFrequency::name() const
+{
+	return THIS_METHOD_NAME;
+}

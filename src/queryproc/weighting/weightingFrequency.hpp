@@ -82,7 +82,7 @@ public:
 			const StorageClientInterface*,
 			const GlobalStatistics& stats_) const;
 
-	virtual const char* name() const {return "tf";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
@@ -104,7 +104,7 @@ public:
 	virtual WeightingFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* name() const {return "tf";}
+	virtual const char* name() const;
 	virtual StructView view() const;
 
 private:
