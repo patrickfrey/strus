@@ -760,30 +760,34 @@ public:
 		}
 	}
 
-	strus::WeightedField getCurrentSentence( int nofSentences, int nofSentenceWords, PostingIteratorInterface* eos_postings, const strus::IndexRange& field, strus::Index endOfDoc) const
+	static strus::IndexRange getSentence(
+			int nofSentences, int nofSentenceWords,
+			PostingIteratorInterface* eos_postings,
+			const strus::IndexRange& field,
+			strus::Index startpos, strus::Index pos, strus::Index endOfDoc)
 	{
 		if (eos_postings)
 		{
 			strus::Index maxlen = nofSentences * nofSentenceWords;
-			strus::Index startpos = weightedPos[ cur_idx].pos >= maxlen ? weightedPos[ cur_idx].pos - maxlen : 1;
+			startpos = pos >= maxlen ? pos - maxlen : 1;
 			strus::Index eospos[ MaxSummaryFieldSize];
 			strus::Index pp = eos_postings->skipPos( startpos);
 			int pi = 0;
-			for (; pp && pp < weightedPos[ cur_idx].pos; pp = eos_postings->skipPos( pp+1))
+			for (; pp && pp < pos; pp = eos_postings->skipPos( pp+1))
 			{
 				eospos[ pi++] = pp;
 			}
 			if (!pi)
 			{
-				eospos[ pi++] = weightedPos[ cur_idx].pos >= (maxlen/2) ? (weightedPos[ cur_idx].pos - maxlen/2) : 0;
+				eospos[ pi++] = pos >= (maxlen/2) ? (pos - maxlen/2) : 0;
 			}
-			strus::Index endpos = eos_postings->skipPos( weightedPos[ cur_idx].pos);
+			strus::Index endpos = eos_postings->skipPos( pos);
 			if (!endpos)
 			{
 				endpos = endOfDoc;
-				if (endpos > weightedPos[ cur_idx].pos + maxlen / 2)
+				if (endpos > pos + maxlen / 2)
 				{
-					endpos = weightedPos[ cur_idx].pos + maxlen / 2;
+					endpos = pos + maxlen / 2;
 				}
 			}
 			if (field.defined() && endpos > field.end())
@@ -802,17 +806,27 @@ public:
 			{
 				startpos = eospos[ 0] + 1;
 			}
-			return strus::WeightedField( strus::IndexRange( startpos, endpos), weightsum);
+			return strus::IndexRange( startpos, endpos);
 		}
 		else
 		{
-			return strus::WeightedField( strus::IndexRange( weightedPos[ start_idx].pos, weightedPos[ cur_idx].pos+1), weightsum);
+			strus::Index dist = nofSentences * nofSentenceWords / 2;
+			strus::Index endpos = pos;
+			if (endpos - startpos < dist)
+			{
+				endpos = startpos + dist;
+			}
+			return strus::IndexRange( startpos, pos+1);
 		}
 	}
 
 	const WeightedPos& currentWeightedPos() const
 	{
 		return weightedPos[ cur_idx];
+	}
+	const WeightedPos& startWeightedPos() const
+	{
+		return weightedPos[ start_idx];
 	}
 
 	double currentWeightSum() const
@@ -826,6 +840,8 @@ strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWei
 	strus::WeightedField rt;
 
 	double weightsum_max = 0.0;
+	strus::Index startpos_max = 0;
+	strus::Index pos_max = 0;
 	unsigned char eos_featidx = m_hasPunctuation ? 0 : 0xFF;
 	int ofs_featidx = m_hasPunctuation ? 1 : 0;
 
@@ -854,12 +870,18 @@ strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWei
 		if (window.currentWeightSum() > weightsum_max)
 		{
 			weightsum_max = window.currentWeightSum();
-			rt = window.getCurrentSentence( 
+			startpos_max = window.startWeightedPos().pos;
+			pos_max = window.currentWeightedPos().pos;;
+		}
+	}
+	if (weightsum_max > std::numeric_limits<double>::epsilon())
+	{
+		rt = strus::WeightedField( 
+			window.getSentence( 
 				m_config.nofSummarySentences,
 				m_config.maxNofSummarySentenceWords,
 				m_hasPunctuation ? m_postings[0] : 0,
-				m_field, m_endOfDoc);
-		}
+				m_field, startpos_max, pos_max, m_endOfDoc), weightsum_max);
 	}
 	return rt;
 }

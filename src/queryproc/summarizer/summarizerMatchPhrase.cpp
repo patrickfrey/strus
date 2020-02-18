@@ -119,7 +119,7 @@ std::vector<SummaryElement>
 		{
 			if (doc.docno() == m_itrar[0]->skipDoc( doc.docno()))
 			{
-				strus::Index startpos = doc.field().start();
+				strus::Index startpos = doc.field().defined() ? doc.field().start() : 1;
 				strus::Index endpos = doc.field().defined() ? doc.field().end() : std::numeric_limits<strus::Index>::max();
 				if (m_eos_itr)
 				{

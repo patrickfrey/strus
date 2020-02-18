@@ -870,8 +870,8 @@ struct Document
 		};
 		strus::SkipScanArray<FeaturePos,strus::Index,FeaturePos::FindPosCompare>
 			ar( featposlist.data(), featposlist.size());
-		int startidx = ar.upperbound( contentfield.start());
-		int endidx = ar.upperbound( contentfield.end());
+		int startidx = contentfield.defined() ? ar.upperbound( contentfield.start()) : 0;
+		int endidx = contentfield.defined() ? ar.upperbound( contentfield.end()) : featposlist.size();
 		if (startidx < 0) return;
 		if (endidx < 0) endidx = featposlist.size();
 
