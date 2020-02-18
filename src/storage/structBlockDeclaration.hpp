@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STRUCTURE_BLOCK_DECLARATION_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_DECLARATION_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 
 namespace strus {
 

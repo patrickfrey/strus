@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "private/stringMap.hpp"

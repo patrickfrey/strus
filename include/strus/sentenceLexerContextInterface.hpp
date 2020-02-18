@@ -9,8 +9,8 @@
 /// \file sentenceLexerContextInterface.hpp
 #ifndef _STRUS_SENTENCE_LEXER_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SENTENCE_LEXER_CONTEXT_INTERFACE_HPP_INCLUDED
-#include "strus/sentenceTerm.hpp"
-#include "strus/sentenceGuess.hpp"
+#include "strus/storage/sentenceTerm.hpp"
+#include "strus/storage/sentenceGuess.hpp"
 #include <string>
 #include <vector>
 

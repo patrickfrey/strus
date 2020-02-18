@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_DATABASE_ADAPTOR_KEY_HPP_INCLUDED
 #define _STRUS_DATABASE_ADAPTOR_KEY_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "blockKey.hpp"
 #include <utility>
 #include <string>

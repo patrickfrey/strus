@@ -8,8 +8,8 @@
 /// \brief Client interface for mapping vectors of floating point numbers of a given dimension to a list of features.
 #ifndef _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
-#include "strus/wordVector.hpp"
-#include "strus/vectorQueryResult.hpp"
+#include "strus/storage/wordVector.hpp"
+#include "strus/storage/vectorQueryResult.hpp"
 #include <vector>
 #include <string>
 

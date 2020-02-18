@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_HPP_INCLUDED
 #define _STRUS_STORAGE_HPP_INCLUDED
 #include "strus/storageClientInterface.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/thread.hpp"

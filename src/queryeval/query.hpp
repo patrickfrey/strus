@@ -8,7 +8,7 @@
 #ifndef _STRUS_QUERY_HPP_INCLUDED
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
-#include "strus/summarizationVariable.hpp"
+#include "strus/storage/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"

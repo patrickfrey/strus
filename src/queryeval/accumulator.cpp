@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "accumulator.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/storage/weightedDocument.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"

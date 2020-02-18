@@ -9,9 +9,9 @@
 /// \file weightingFunctionContextInterface.hpp
 #ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/termStatistics.hpp"
-#include "strus/weightedField.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/termStatistics.hpp"
+#include "strus/storage/weightedField.hpp"
 #include <string>
 
 namespace strus

@@ -18,7 +18,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
-#include "strus/summaryElement.hpp"
+#include "strus/storage/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"

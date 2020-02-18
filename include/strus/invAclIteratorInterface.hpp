@@ -9,7 +9,7 @@
 /// \file "invAclIteratorInterface.hpp"
 #ifndef _STRUS_INVERTED_ACL_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_INVERTED_ACL_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 
 namespace strus
 {

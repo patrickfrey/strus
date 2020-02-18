@@ -12,7 +12,7 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/reference.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/fileLocatorInterface.hpp"

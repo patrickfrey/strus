@@ -9,7 +9,7 @@
 /// \file "structureLink.hpp"
 #ifndef _STRUS_STRUCTURE_LINK_HPP_INCLUDED
 #define _STRUS_STRUCTURE_LINK_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <vector>
 
 

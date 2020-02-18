@@ -9,7 +9,7 @@
 #define _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/numericVariant.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 #include <vector>
 #include <set>

@@ -9,7 +9,7 @@
 /// \file "structureHeaderField.hpp"
 #ifndef _STRUS_STRUCTURE_HEADER_FIELD_HPP_INCLUDED
 #define _STRUS_STRUCTURE_HEADER_FIELD_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <vector>
 
 namespace strus

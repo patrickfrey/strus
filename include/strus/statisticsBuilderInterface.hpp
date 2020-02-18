@@ -10,7 +10,7 @@
 #ifndef _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
 #include "strus/timeStamp.hpp"
-#include "strus/statisticsMessage.hpp"
+#include "strus/storage/statisticsMessage.hpp"
 #include <cstdlib>
 #include <string>
 

@@ -9,7 +9,7 @@
 /// \file storageDumpInterface.hpp
 #ifndef _STRUS_STORAGE_DUMP_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DUMP_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 #include <vector>
 

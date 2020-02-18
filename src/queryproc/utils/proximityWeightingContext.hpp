@@ -8,8 +8,8 @@
 #ifndef _STRUS_QUERYPROC_PROXIMITY_WEIGHTING_CONTEXT_HPP_INCLUDED
 #define _STRUS_QUERYPROC_PROXIMITY_WEIGHTING_CONTEXT_HPP_INCLUDED
 #include "strus/base/bitset.hpp"
-#include "strus/index.hpp"
-#include "strus/weightedField.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/weightedField.hpp"
 #include "private/skipScanArray.hpp"
 #include <string>
 #include <cstring>

@@ -8,7 +8,7 @@
 #ifndef _STRUS_STRUCTURE_BLOCK_FIELD_PACKED_HPP_INCLUDED
 #define _STRUS_STRUCTURE_BLOCK_FIELD_PACKED_HPP_INCLUDED
 #include "strus/constants.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
 

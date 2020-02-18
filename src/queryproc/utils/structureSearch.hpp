@@ -8,8 +8,8 @@
 #ifndef _STRUS_QUERYPROC_UTILS_STRUCTURE_SEARCH_HPP_INCLUDED
 #define _STRUS_QUERYPROC_UTILS_STRUCTURE_SEARCH_HPP_INCLUDED
 /// \brief Functions to collect structure header and content fields
-#include "strus/index.hpp"
-#include "strus/structureHeaderField.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/structureHeaderField.hpp"
 #include <vector>
 
 namespace strus

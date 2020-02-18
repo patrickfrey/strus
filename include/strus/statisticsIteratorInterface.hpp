@@ -9,7 +9,7 @@
 /// \file statisticsIteratorInterface.hpp
 #ifndef _STRUS_STATISTICS_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/statisticsMessage.hpp"
+#include "strus/storage/statisticsMessage.hpp"
 #include <cstddef>
 
 namespace strus

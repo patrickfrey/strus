@@ -9,8 +9,8 @@
 /// \file vectorStorageDumpInterface.hpp
 #ifndef _STRUS_VECTOR_STORGE_DUMP_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_DUMP_INTERFACE_HPP_INCLUDED
-#include "strus/databaseOptions.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/databaseOptions.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 #include <vector>
 

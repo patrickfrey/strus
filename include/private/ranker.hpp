@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_QUERYPROC_UTILS_RANKER_HPP_INCLUDED
 #define _STRUS_QUERYPROC_UTILS_RANKER_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/internationalization.hpp"
 #include <set>

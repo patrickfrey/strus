@@ -9,7 +9,7 @@
 /// \file summarizationVariable.hpp
 #ifndef _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
 #define _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>
 #include <string>

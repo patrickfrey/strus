@@ -18,7 +18,7 @@
 #include "private/skipScanArray.hpp"
 #include "strus/structureIteratorInterface.hpp"
 #include "strus/constants.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/packed.h"
 #include <vector>

@@ -8,8 +8,8 @@
 /// \brief Interface for defining what to detect in a query sentence and how to weight it for guessing the most probable variants of a query
 #ifndef _STRUS_SENTENCE_ANALYZER_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SENTENCE_ANALYZER_INSTANCE_INTERFACE_HPP_INCLUDED
-#include "strus/sentenceTerm.hpp"
-#include "strus/sentenceGuess.hpp"
+#include "strus/storage/sentenceTerm.hpp"
+#include "strus/storage/sentenceGuess.hpp"
 #include <vector>
 #include <string>
 

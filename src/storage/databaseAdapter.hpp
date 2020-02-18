@@ -8,10 +8,10 @@
 /// \brief Database abstraction (wrapper) for the strus storage
 #ifndef _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #define _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/databaseOptions.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
-#include "strus/databaseOptions.hpp"
 #include "strus/reference.hpp"
 #include "databaseKey.hpp"
 #include "dataBlock.hpp"

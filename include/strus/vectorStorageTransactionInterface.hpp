@@ -8,8 +8,8 @@
 /// \brief Vector repository transaction implementation
 #ifndef _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/wordVector.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/wordVector.hpp"
 #include <vector>
 #include <string>
 namespace strus {

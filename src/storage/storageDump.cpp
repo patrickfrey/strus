@@ -8,7 +8,7 @@
 #include "storageDump.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "strus/databaseOptions.hpp"
+#include "strus/storage/databaseOptions.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "databaseKey.hpp"
 #include "extractKeyValueData.hpp"

@@ -13,7 +13,7 @@
 #include "strus/reference.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "strus/base/fileio.hpp"
-#include "strus/databaseOptions.hpp"
+#include "strus/storage/databaseOptions.hpp"
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"

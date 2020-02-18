@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_INDEX_BLOCK_DOC_INDEX_NODE_HPP_INCLUDED
 #define _STRUS_INDEX_BLOCK_DOC_INDEX_NODE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <utility>
 
 namespace strus {

@@ -9,7 +9,7 @@
 /// \file sentenceGuess.hpp
 #ifndef _STRUS_SENTENCE_GUESS_HPP_INCLUDED
 #define _STRUS_SENTENCE_GUESS_HPP_INCLUDED
-#include "strus/sentenceTerm.hpp"
+#include "strus/storage/sentenceTerm.hpp"
 #include "strus/base/math.hpp"
 #include <string>
 #include <utility>

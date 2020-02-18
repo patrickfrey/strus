@@ -9,9 +9,9 @@
 /// \file "resultDocument.hpp"
 #ifndef _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #define _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/weightedDocument.hpp"
-#include "strus/summaryElement.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/weightedDocument.hpp"
+#include "strus/storage/summaryElement.hpp"
 #include <vector>
 #include <utility>
 

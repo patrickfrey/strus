@@ -9,7 +9,7 @@
 /// \file statisticsMap.cpp
 #include "statisticsMap.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/termStatisticsChange.hpp"
+#include "strus/storage/termStatisticsChange.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/base/local_ptr.hpp"

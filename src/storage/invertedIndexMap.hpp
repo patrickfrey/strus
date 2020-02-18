@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_INVERTED_INDEX_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_INVERTED_INDEX_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "posinfoBlock.hpp"
 #include "booleanBlock.hpp"
 #include "ffBlock.hpp"

@@ -1,6 +1,6 @@
 #include "positionWindow.hpp"
 #include "strus/lib/error.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"

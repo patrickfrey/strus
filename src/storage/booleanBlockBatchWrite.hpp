@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_BOOLEAN_BLOCK_BATCH_WRITE_HPP_INCLUDED
 #define _STRUS_STORAGE_BOOLEAN_BLOCK_BATCH_WRITE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "booleanBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/reference.hpp"

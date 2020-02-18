@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_BLOCK_KEY_HPP_INCLUDED
 #define _STRUS_STORAGE_BLOCK_KEY_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
 

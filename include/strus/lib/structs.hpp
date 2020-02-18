@@ -9,7 +9,7 @@
 /// \file structs.hpp
 #ifndef _STRUS_STORAGE_STRUCTS_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_STRUCTS_LIB_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <utility>
 #include <vector>
 #include <map>

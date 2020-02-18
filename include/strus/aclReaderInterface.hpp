@@ -9,7 +9,7 @@
 /// \file "aclReaderInterface.hpp"
 #ifndef _STRUS_ACL_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_ACL_READER_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 #include <vector>
 

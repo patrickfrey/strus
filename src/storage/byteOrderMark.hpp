@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_BYTE_ORDER_MARK_HPP_INCLUDED
 #define _STRUS_STORAGE_BYTE_ORDER_MARK_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <cstring>
 
 namespace strus {

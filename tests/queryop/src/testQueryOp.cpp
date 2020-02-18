@@ -14,7 +14,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/errorUtils.hpp"
 #include <string>
 #include <cstring>

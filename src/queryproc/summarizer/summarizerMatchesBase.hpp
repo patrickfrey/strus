@@ -12,7 +12,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/summarizationVariable.hpp"
+#include "strus/storage/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/bitset.hpp"
 #include "strus/base/string_named_format.hpp"

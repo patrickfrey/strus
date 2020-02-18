@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "storageClient.hpp"
 

@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_ATTRIBUTE_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_ATTRIBUTE_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/stringMap.hpp"

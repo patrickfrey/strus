@@ -12,7 +12,7 @@
 #include "structBlockDeclaration.hpp"
 #include "structBlockLink.hpp"
 #include "strus/constants.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <cstring>
 #include <string>
 #include <vector>

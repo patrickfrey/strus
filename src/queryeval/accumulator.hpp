@@ -7,11 +7,11 @@
  */
 #ifndef _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/reference.hpp"
 #include "strus/constants.hpp"
-#include "strus/weightedField.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/storage/weightedField.hpp"
+#include "strus/storage/weightedDocument.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"

@@ -9,8 +9,8 @@
 /// \file statisticsMapInterface.hpp
 #ifndef _STRUS_STATISTICS_MAP_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_MAP_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/termStatisticsChange.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/termStatisticsChange.hpp"
 #include <string>
 #include <vector>
 

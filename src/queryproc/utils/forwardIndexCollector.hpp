@@ -9,7 +9,7 @@
 #define _STRUS_FORWARD_INDEX_COLLECTOR_HPP_INCLUDED
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/reference.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <vector>
 #include <string>
 

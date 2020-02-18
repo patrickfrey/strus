@@ -12,7 +12,7 @@
 #include "metaDataBlock.hpp"
 #include "posinfoBlock.hpp"
 #include "invTermBlock.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <utility>
 #include <vector>
 #include <string>

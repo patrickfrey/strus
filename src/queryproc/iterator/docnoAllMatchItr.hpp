@@ -9,7 +9,7 @@
 
 #ifndef _STRUS_DOCNO_ALL_MATCH_ITR_HPP_INCLUDED
 #define _STRUS_DOCNO_ALL_MATCH_ITR_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>

@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_FF_BLOCK_BATCH_WRITE_HPP_INCLUDED
 #define _STRUS_STORAGE_FF_BLOCK_BATCH_WRITE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "ffBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/reference.hpp"

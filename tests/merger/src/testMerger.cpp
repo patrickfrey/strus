@@ -5,11 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/constants.hpp"
-#include "strus/weightedDocument.hpp"
-#include "strus/resultDocument.hpp"
-#include "strus/queryResult.hpp"
+#include "strus/storage/weightedDocument.hpp"
+#include "strus/storage/resultDocument.hpp"
+#include "strus/storage/queryResult.hpp"
 #include "strus/base/math.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/base/fileio.hpp"

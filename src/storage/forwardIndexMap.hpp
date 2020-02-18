@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_FORWARD_INDEX_BLOCK_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_FORWARD_INDEX_BLOCK_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"

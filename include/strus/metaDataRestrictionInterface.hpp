@@ -9,7 +9,7 @@
 #ifndef _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
 #include "strus/numericVariant.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 
 namespace strus {

@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_QUERYPROC_SENTENCE_ITERATOR_HPP_INCLUDED
 #define _STRUS_QUERYPROC_SENTENCE_ITERATOR_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <utility>

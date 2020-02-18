@@ -11,7 +11,7 @@
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/structureIteratorInterface.hpp"
-#include "strus/summarizationVariable.hpp"
+#include "strus/storage/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "forwardIndexTextCollector.hpp"
 #include "structureSearch.hpp"

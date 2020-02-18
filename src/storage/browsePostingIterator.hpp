@@ -10,7 +10,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "strus/reference.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 
 namespace strus {

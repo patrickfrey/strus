@@ -9,10 +9,10 @@
 /// \file "storageClientInterface.hpp"
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/timeStamp.hpp"
-#include "strus/statisticsMessage.hpp"
-#include "strus/blockStatistics.hpp"
+#include "strus/storage/statisticsMessage.hpp"
+#include "strus/storage/blockStatistics.hpp"
 #include <string>
 #include <vector>
 #include <ostream>

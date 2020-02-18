@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_USER_ACL_BLOCK_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_USER_ACL_BLOCK_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "booleanBlock.hpp"
 #include "private/localStructAllocator.hpp"
 #include "blockKey.hpp"

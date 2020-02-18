@@ -9,7 +9,7 @@
 /// \file weightingFunctionInstanceInterface.hpp
 #ifndef _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
-#include "strus/globalStatistics.hpp"
+#include "strus/storage/globalStatistics.hpp"
 #include "strus/structView.hpp"
 #include <string>
 

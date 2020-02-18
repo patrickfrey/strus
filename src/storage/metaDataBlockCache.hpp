@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_METADATA_BLOCK_CACHE_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "databaseAdapter.hpp"

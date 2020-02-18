@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #define _STRUS_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/internationalization.hpp"
 #include <memory>
 #include <stdexcept>

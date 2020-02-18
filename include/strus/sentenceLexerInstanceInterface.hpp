@@ -9,7 +9,7 @@
 /// \file sentenceLexerInstanceInterface.hpp
 #ifndef _STRUS_SENTENCE_LEXER_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SENTENCE_LEXER_INSTANCE_INTERFACE_HPP_INCLUDED
-#include "strus/sentenceTerm.hpp"
+#include "strus/storage/sentenceTerm.hpp"
 #include <vector>
 #include <string>
 

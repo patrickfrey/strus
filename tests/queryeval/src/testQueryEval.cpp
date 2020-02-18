@@ -42,7 +42,7 @@
 #include "strus/storageDumpInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
-#include "strus/queryResult.hpp"
+#include "strus/storage/queryResult.hpp"
 #include "strus/reference.hpp"
 #include "private/errorUtils.hpp"
 #include <string>

@@ -10,7 +10,7 @@
 #include "databaseClient.hpp"
 #include "leveldbErrorCode.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/databaseOptions.hpp"
+#include "strus/storage/databaseOptions.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "private/internationalization.hpp"

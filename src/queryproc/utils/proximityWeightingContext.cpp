@@ -12,7 +12,7 @@
 #include "private/internationalization.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/static_assert.hpp"
-#include "strus/structureHeaderField.hpp"
+#include "strus/storage/structureHeaderField.hpp"
 #include <limits>
 #include <set>
 #include <iostream>

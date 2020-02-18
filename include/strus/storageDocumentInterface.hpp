@@ -10,7 +10,7 @@
 #ifndef _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #include <string>
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/numericVariant.hpp"
 
 namespace strus

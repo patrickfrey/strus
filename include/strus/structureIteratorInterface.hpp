@@ -9,9 +9,9 @@
 /// \file "structureIteratorInterface.hpp"
 #ifndef _STRUS_STRUCTURE_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STRUCTURE_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/structureLink.hpp"
-#include "strus/structureHeaderField.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/structureLink.hpp"
+#include "strus/storage/structureHeaderField.hpp"
 #include <vector>
 
 namespace strus

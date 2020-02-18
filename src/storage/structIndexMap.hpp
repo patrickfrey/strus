@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_STRUCTURE_INDEX_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_STRUCTURE_INDEX_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "structBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "blockKey.hpp"

@@ -8,7 +8,7 @@
 #ifndef _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
-#include "strus/resultDocument.hpp"
+#include "strus/storage/resultDocument.hpp"
 #include "strus/scalarFunctionInterface.hpp"
 #include "termConfig.hpp"
 #include "summarizerDef.hpp"

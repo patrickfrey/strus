@@ -9,7 +9,7 @@
 /// \file fieldtrees.hpp
 #ifndef _STRUS_STORAGE_FIELDTREES_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_FIELDTREES_LIB_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <utility>
 #include <vector>
 #include <list>

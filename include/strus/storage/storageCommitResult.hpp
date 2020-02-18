@@ -9,7 +9,7 @@
 /// \file "storageCommitResult.hpp"
 #ifndef _STRUS_STORAGE_COMMIT_RESULT_HPP_INCLUDED
 #define _STRUS_STORAGE_COMMIT_RESULT_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 
 namespace strus {
 

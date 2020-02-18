@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "private/localStructAllocator.hpp"
 #include "documentFrequencyCache.hpp"
 #include <cstdlib>

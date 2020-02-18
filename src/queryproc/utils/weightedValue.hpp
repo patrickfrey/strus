@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_QUERYPROC_UTILS_WEIGHTED_VALUE_HPP_INCLUDED
 #define _STRUS_QUERYPROC_UTILS_WEIGHTED_VALUE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/enable_if.hpp"
 #include "strus/base/type_traits.hpp"
 

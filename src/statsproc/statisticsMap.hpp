@@ -10,7 +10,7 @@
 #ifndef _STRUS_STATISTICS_MAP_IMPL_HPP_INCLUDED
 #define _STRUS_STATISTICS_MAP_IMPL_HPP_INCLUDED
 #include "strus/statisticsMapInterface.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/lockfreeStringMap.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "strus/base/thread.hpp"

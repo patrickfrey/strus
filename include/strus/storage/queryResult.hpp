@@ -9,8 +9,8 @@
 /// \file "queryResult.hpp"
 #ifndef _STRUS_QUERY_RESULT_HPP_INCLUDED
 #define _STRUS_QUERY_RESULT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/resultDocument.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/resultDocument.hpp"
 #include <vector>
 #include <string>
 #include <utility>

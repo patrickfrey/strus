@@ -9,10 +9,10 @@
 /// \file summarizerFunctionContextInterface.hpp
 #ifndef _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
-#include "strus/summarizationVariable.hpp"
-#include "strus/summaryElement.hpp"
-#include "strus/termStatistics.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/storage/summarizationVariable.hpp"
+#include "strus/storage/summaryElement.hpp"
+#include "strus/storage/termStatistics.hpp"
+#include "strus/storage/weightedDocument.hpp"
 #include <string>
 #include <vector>
 

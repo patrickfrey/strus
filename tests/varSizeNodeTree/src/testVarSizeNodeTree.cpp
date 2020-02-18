@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "compactNodeTrie.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/numstring.hpp"
 #include "strus/base/math.hpp"
 #include "private/stringMap.hpp"

@@ -10,7 +10,7 @@
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "strus/numericVariant.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/reference.hpp"
 #include <vector>
 #include <string>

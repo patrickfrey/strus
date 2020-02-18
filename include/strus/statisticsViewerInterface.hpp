@@ -9,7 +9,7 @@
 /// \file statisticsViewerInterface.hpp
 #ifndef _STRUS_STATISTICS_VIEWER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STATISTICS_VIEWER_INTERFACE_HPP_INCLUDED
-#include "strus/termStatisticsChange.hpp"
+#include "strus/storage/termStatisticsChange.hpp"
 
 namespace strus
 {

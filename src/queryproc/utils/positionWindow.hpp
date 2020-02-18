@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_QUERYPROC_POSITION_WINDOW_HPP_INCLUDED
 #define _STRUS_QUERYPROC_POSITION_WINDOW_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/bitset.hpp"

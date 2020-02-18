@@ -8,8 +8,8 @@
 #ifndef _STRUS_STRUCTURE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_STRUCTURE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/structureIteratorInterface.hpp"
-#include "strus/structureHeaderField.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/structureHeaderField.hpp"
+#include "strus/storage/index.hpp"
 #include "structBlock.hpp"
 #include "documentBlockIteratorTemplate.hpp"
 #include "databaseAdapter.hpp"

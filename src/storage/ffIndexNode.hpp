@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_INDEX_BLOCK_FF_INDEX_NODE_HPP_INCLUDED
 #define _STRUS_INDEX_BLOCK_FF_INDEX_NODE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/uintCompaction.hpp"
 #include <vector>
 #include <utility>

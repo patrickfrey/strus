@@ -11,7 +11,7 @@
 #define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/storageDocumentInterface.hpp"
-#include "strus/storageCommitResult.hpp"
+#include "strus/storage/storageCommitResult.hpp"
 #include "strus/numericVariant.hpp"
 
 namespace strus

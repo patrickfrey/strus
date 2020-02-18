@@ -11,7 +11,7 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/reference.hpp"
 #include "strus/constants.hpp"
 #include "strus/postingIteratorInterface.hpp"

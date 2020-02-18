@@ -6,9 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "private/ranker.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/constants.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/storage/weightedDocument.hpp"
 #include "strus/base/math.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include <stdexcept>

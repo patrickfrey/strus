@@ -11,10 +11,10 @@
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
-#include "strus/queryResult.hpp"
+#include "strus/storage/queryResult.hpp"
 #include "strus/numericVariant.hpp"
-#include "strus/termStatistics.hpp"
-#include "strus/globalStatistics.hpp"
+#include "strus/storage/termStatistics.hpp"
+#include "strus/storage/globalStatistics.hpp"
 #include "strus/structView.hpp"
 #include <string>
 #include <vector>

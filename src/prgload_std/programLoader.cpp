@@ -22,7 +22,7 @@
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/scalarFunctionInterface.hpp"
 #include "strus/debugTraceInterface.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/base/stdint.h"
 #include "strus/base/programLexer.hpp"
 #include "strus/base/numstring.hpp"

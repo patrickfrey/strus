@@ -39,9 +39,9 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/weightedField.hpp"
-#include "strus/weightedDocument.hpp"
-#include "strus/resultDocument.hpp"
+#include "strus/storage/weightedField.hpp"
+#include "strus/storage/weightedDocument.hpp"
+#include "strus/storage/resultDocument.hpp"
 #include "strus/constants.hpp"
 #include "private/errorUtils.hpp"
 #include <string>

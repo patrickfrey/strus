@@ -9,7 +9,7 @@
 /// \file "metaDataReaderInterface.hpp"
 #ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/numericVariant.hpp"
 #include <string>
 #include <vector>

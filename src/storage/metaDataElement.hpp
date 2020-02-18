@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_STORAGE_METADATA_ELEMENT_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_ELEMENT_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <utility>
 #include <string>
 

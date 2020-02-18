@@ -9,8 +9,8 @@
 /// \file weightedDocument.hpp
 #ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/weightedField.hpp"
+#include "strus/storage/index.hpp"
+#include "strus/storage/weightedField.hpp"
 #include "strus/base/math.hpp"
 #include <utility>
 #include <limits>

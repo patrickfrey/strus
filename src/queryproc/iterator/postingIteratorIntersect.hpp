@@ -8,7 +8,7 @@
 #ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "positionWindow.hpp"

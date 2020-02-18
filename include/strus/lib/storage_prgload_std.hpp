@@ -9,7 +9,7 @@
 /// \file storage_prgload_std.hpp
 #ifndef _STRUS_STORAGE_PRGLOAD_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_PRGLOAD_LIB_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/storage/index.hpp"
 #include <string>
 #include <vector>
 #include <map>
