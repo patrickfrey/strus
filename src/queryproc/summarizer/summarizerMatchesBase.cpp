@@ -76,9 +76,12 @@ enum VariableType {
 	VariableNone=0,
 	VariableTag=1,
 	VariableText=2,
-	VariablePosition=3,
+	VariablePosition=3
 };
-enum {VariableTypeShift=2,VariableTypeMask=3};
+enum {
+	VariableTypeShift=2,
+	VariableTypeMask=3
+};
 
 static void defineVariable( strus::NamedFormatString& fmt, const std::string& varname, int varidx)
 {

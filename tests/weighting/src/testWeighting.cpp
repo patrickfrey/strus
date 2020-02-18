@@ -241,7 +241,7 @@ struct Query
 			{
 				std::list<DocTreeNode>::const_iterator ci = tree.chld.begin(), ce = tree.chld.end();
 				int si = 0, se = select-2;
-				for (; si != se; ++si,++ci){}
+				for (; si != se && ci != ce; ++si,++ci){}
 				return createRandomQuery( *ci);
 			}
 		}
@@ -558,6 +558,45 @@ struct Statistics
 	}
 };
 
+struct FeatureVisit
+{
+	int idx;
+	std::vector<int> featidxar;
+
+	FeatureVisit() :idx(0),featidxar() {}
+	FeatureVisit( const FeatureVisit& o) :idx(o.idx),featidxar(o.featidxar){}
+};
+
+struct FeatureVisitMap
+{
+	std::map<int,FeatureVisit> map;
+
+	explicit FeatureVisitMap( const std::vector<int>& queryFeatures)
+	{
+		std::vector<int>::const_iterator
+			qi = queryFeatures.begin(), qe = queryFeatures.end();
+		for (int qidx=0; qi != qe; ++qi,++qidx)
+		{
+			map[ *qi].featidxar.push_back( qidx);
+		}
+	}
+
+	int nextQueryFeatIndex( int featidx)
+	{
+		std::map<int,FeatureVisit>::iterator mi = map.find( featidx);
+		if (mi == map.end())
+		{
+			return -1;
+		}
+		else
+		{
+			int idx = mi->second.idx++;
+			mi->second.idx = mi->second.idx % (int)mi->second.featidxar.size();
+			return mi->second.featidxar[ idx];
+		}
+	}
+};
+
 struct Document
 {
 	std::string docid;
@@ -831,43 +870,6 @@ struct Document
 			const strus::IndexRange& contentfield,
 			bool includingWeightsForTitle) const
 	{
-		struct FeatureVisit
-		{
-			int idx;
-			std::vector<int> featidxar;
-
-			FeatureVisit() :idx(0),featidxar() {}
-			FeatureVisit( const FeatureVisit& o) :idx(o.idx),featidxar(o.featidxar){}
-		};
-		struct FeatureVisitMap
-		{
-			std::map<int,FeatureVisit> map;
-
-			explicit FeatureVisitMap( const std::vector<int>& queryFeatures)
-			{
-				std::vector<int>::const_iterator
-					qi = queryFeatures.begin(), qe = queryFeatures.end();
-				for (int qidx=0; qi != qe; ++qi,++qidx)
-				{
-					map[ *qi].featidxar.push_back( qidx);
-				}
-			}
-
-			int nextQueryFeatIndex( int featidx)
-			{
-				std::map<int,FeatureVisit>::iterator mi = map.find( featidx);
-				if (mi == map.end())
-				{
-					return -1;
-				}
-				else
-				{
-					int idx = mi->second.idx++;
-					mi->second.idx = mi->second.idx % (int)mi->second.featidxar.size();
-					return mi->second.featidxar[ idx];
-				}
-			}
-		};
 		strus::SkipScanArray<FeaturePos,strus::Index,FeaturePos::FindPosCompare>
 			ar( featposlist.data(), featposlist.size());
 		int startidx = contentfield.defined() ? ar.upperbound( contentfield.start()) : 0;
