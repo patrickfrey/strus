@@ -180,7 +180,7 @@ struct Query
 				ci = completeNodes.back()->chld.begin(),
 				ce = completeNodes.back()->chld.end();
 
-			for (; cidx > 0; --cidx,++ci){}
+			for (; cidx > 0 && ci != ce; --cidx,++ci){}
 			bool leaveOutNode = g_random.get( 0, completeNodes.size()) == 1;
 			// ... first node never left out, because this call always returns 0 for the first node
 			if (!leaveOutNode) completeNodes.push_back( &*ci);
@@ -813,14 +813,14 @@ bool testResultSummaryAgainstExpected( const std::vector<strus::SummaryElement>&
 		ri = result.begin(), re = result.end();
 	std::vector<strus::SummaryElement>::const_iterator
 		ei = expected.begin(), ee = expected.end();
-	for (; ei != ee; ++ri,++ei)
+	for (; ei != ee && ri != re; ++ri,++ei)
 	{
 		if (ri->name() != ei->name()) return false;
 		if (ri->value() != ei->value()) return false;
 		if (!strus::Math::isequal( ri->weight(), ei->weight())) return false;
 		if (ri->index() != ei->index()) return false;
 	}
-	return true;
+	return ei == ee && ri == re;
 }
 
 static void testResultAgainstExpected( const std::map<strus::Index,std::string>& docnoDocidMap, const std::string& testdescr, const strus::QueryResult& result, const strus::QueryResult& expected, int ranksChecked)
