@@ -45,6 +45,10 @@ public:
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
+	virtual bool doPopulate() const
+	{
+		return true;
+	}
 };
 
 

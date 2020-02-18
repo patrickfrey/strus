@@ -133,6 +133,11 @@ public:
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' summarizer context: %s"), m_name.c_str(), *m_errorhnd, 0);
 	}
 
+	virtual bool doPopulate() const
+	{
+		return false;
+	}
+
 	virtual const char* name() const	{return m_name.c_str();}
 
 	virtual StructView view() const	

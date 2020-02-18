@@ -125,6 +125,11 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const;
 
+	virtual bool doPopulate() const
+	{
+		return false;
+	}
+
 	virtual const char* name() const;
 	virtual StructView view() const;
 

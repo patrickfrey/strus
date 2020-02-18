@@ -61,6 +61,11 @@ public:
 			const StorageClientInterface* storage_,
 			const GlobalStatistics& stats) const=0;
 
+	/// \brief Find out if a summarizer result should be added with accumulated weights to the result summaries list
+	/// \note Result summarizers are accumulated in the merging of results too
+	/// \return true, if the summarizers results are accumulated and populated to the result summaries, false if not
+	virtual bool doPopulate() const=0;
+
 	/// \brief Get the name of the function
 	/// \return the identifier
 	virtual const char* name() const=0;

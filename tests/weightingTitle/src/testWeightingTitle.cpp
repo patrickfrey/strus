@@ -720,6 +720,7 @@ struct Collection
 				}
 			}
 		}
+		std::vector<strus::SummaryElement> summary;
 		int nofRanked = ranks.size();
 		if (maxNofRanks <= 0 || maxNofRanks > (int)ranks.size())
 		{
@@ -731,7 +732,7 @@ struct Collection
 			ranks.resize( maxNofRanks);
 			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
 		}
-		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks);
+		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks, summary);
 	}
 
 	std::map<strus::Index,std::string> docnoDocidMap( const strus::StorageClientInterface* storage) const

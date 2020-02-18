@@ -157,6 +157,8 @@ public:
 			const StorageClientInterface* storage,
 			const GlobalStatistics&) const=0;
 
+	virtual bool doPopulate() const=0;
+
 	virtual const char* name() const
 	{
 		return m_name;

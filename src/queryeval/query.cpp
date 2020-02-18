@@ -771,7 +771,10 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		}
 
 		evaluationPhase = "building of the result";
+
 		// [7] Build the result:
+		// [7.1] Build the ranklist and the map of populated summaries;
+		std::map< std::string, std::map<std::string,double> > summaryElementMap;
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
@@ -783,6 +786,14 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			for (int sidx=0 ;si != se; ++si,++sidx)
 			{
 				std::vector<SummaryElement> summary = (*si)->getSummary( *ri);
+				if (m_queryEval->summarizers()[ sidx].function()->doPopulate())
+				{
+					std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
+					for (; li != le; ++li)
+					{
+						summaryElementMap[ li->name()][ li->value()] += li->weight();
+					}
+				}
 				std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
 				for (; li != le; ++li)
 				{
@@ -801,13 +812,26 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
 		}
+		// [7.2] Build the global summary from populated summary elements;
+		std::vector<SummaryElement> summary;
+		std::map< std::string, std::map<std::string,double> >::const_iterator
+			si = summaryElementMap.begin(), se = summaryElementMap.end();
+		for (; si != se; ++si)
+		{
+			std::map<std::string,double>::const_iterator
+				mi = si->second.begin(), me = si->second.end();
+			for (; mi != me; ++mi)
+			{
+				summary.push_back( SummaryElement( si->first, mi->first, mi->second));
+			}
+		}
 		if (m_errorhnd->hasError())
 		{
 			throw strus::runtime_error( _TXT("error evaluating query: %s"), m_errorhnd->fetchError());
 		}
 		if (m_debugtrace) m_debugtrace->close();/*ranking*/
 		if (m_debugtrace) m_debugtrace->close();/*eval*/
-		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks, std::vector<SummaryElement>());
+		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks, summary);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());
 }

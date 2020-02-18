@@ -1516,6 +1516,7 @@ struct Collection
 				}
 			}
 		}
+		std::vector<strus::SummaryElement> summary;
 		int nofRanked = ranks.size();
 		if (maxNofRanks <= 0 || maxNofRanks > (int)ranks.size())
 		{
@@ -1527,7 +1528,7 @@ struct Collection
 			ranks.resize( maxNofRanks);
 			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
 		}
-		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks);
+		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks, summary);
 	}
 
 	strus::QueryResult expectedResult_bm25( int maxNofRanks, const Query& query, const strus::StorageClientInterface* storage, bool compacted_ff) const
@@ -1572,6 +1573,7 @@ struct Collection
 				}
 			}
 		}
+		// Cut and sort ranklist:
 		int nofRanked = ranks.size();
 		if (maxNofRanks <= 0 || maxNofRanks > (int)ranks.size())
 		{
@@ -1583,7 +1585,29 @@ struct Collection
 			ranks.resize( maxNofRanks);
 			std::sort( ranks.begin(), ranks.end(), std::greater<strus::WeightedDocument>());
 		}
-		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks);
+		// Collect populdated summaries:
+		std::vector<strus::SummaryElement> summary;
+		std::map<std::string,double> matchMap;
+		std::vector<strus::ResultDocument>::const_iterator ri = ranks.begin(), re = ranks.end();
+		for (; ri != re; ++ri)
+		{
+			std::vector<strus::SummaryElement>::const_iterator
+				si = ri->summaryElements().begin(), se = ri->summaryElements().end();
+			for (;si != se; ++si)
+			{
+				if (si->name() == "match")
+				{
+					matchMap[ si->value()] += si->weight();
+				}
+			}
+		}
+		std::map<std::string,double>::const_iterator
+			mi = matchMap.begin(), me = matchMap.end();
+		for (; mi != me; ++mi)
+		{
+			summary.push_back( strus::SummaryElement( "match", mi->first, mi->second));
+		}
+		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks, summary);
 	}
 
 	std::map<strus::Index,std::string> docnoDocidMap( const strus::StorageClientInterface* storage) const
