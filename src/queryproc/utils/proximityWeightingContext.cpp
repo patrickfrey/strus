@@ -816,7 +816,7 @@ public:
 			{
 				endpos = startpos + dist;
 			}
-			return strus::IndexRange( startpos, pos+1);
+			return strus::IndexRange( startpos, endpos);
 		}
 	}
 
