@@ -213,7 +213,7 @@ public:
 		qeval->addRestrictionFeature( "res");
 		qeval->addExclusionFeature( "exc");
 	
-		const strus::WeightingFunctionInterface* weighting = qpi->getWeightingFunction( "tf");
+		const strus::WeightingFunctionInterface* weighting = qpi->getWeightingFunction( "frequency");
 		if (!weighting) throw std::runtime_error("failed to get weighting function");
 		strus::WeightingFunctionInstanceInterface* weightingInstance = weighting->createInstance( qpi);
 		if (!weightingInstance) throw std::runtime_error("failed to create weighting function instance");
