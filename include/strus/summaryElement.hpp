@@ -41,6 +41,8 @@ public:
 		{
 			m_name = id_;
 		}
+		else if (id_.empty())
+		{}
 		else
 		{
 			m_name.insert( 0, id_.c_str(), id_.size()+1);
