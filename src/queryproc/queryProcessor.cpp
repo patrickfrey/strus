@@ -74,7 +74,7 @@ QueryProcessor::QueryProcessor( const FileLocatorInterface* filelocator_, ErrorB
 	if (0==(func=createWeightingFunctionBm25pff( m_errorhnd))) throw std::runtime_error( _TXT("error creating weighting function"));
 	defineWeightingFunction( "bm25pff", func);
 	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw std::runtime_error( _TXT("error creating weighting function"));
-	defineWeightingFunction( "tf", func);
+	defineWeightingFunction( "frequency", func);
 	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw std::runtime_error( _TXT("error creating weighting function"));
 	defineWeightingFunction( "constant", func);
 	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw std::runtime_error( _TXT("error creating weighting function"));
