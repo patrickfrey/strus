@@ -163,36 +163,37 @@ bool Accumulator::nextRank(
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		++m_nofDocumentsRanked;
 
-		std::vector<WeightingElement>::iterator
-			ai = m_weightingElements.begin(), ae = m_weightingElements.end();
-		const std::vector<WeightedField>* weightedFields = 0;
-		int weightedFieldsIndex = -1;
-		double weights[ Constants::MaxNofWeightingElements];
-		// Calculate a weight for every element and call the weighting formula with the result:
-		for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
-		{
-			const std::vector<WeightedField>& wf = (*ai)->call( m_docno);
-			if (wf.size() == 1 && !wf[0].field().defined())
-			{
-				weights[ aidx] = wf[0].weight();
-			}
-			else if (wf.size() == 0)
-			{
-				weights[ aidx] = 0.0;
-			}
-			else if (weightedFields != 0)
-			{
-				throw std::runtime_error(_TXT("more than one weighting functions defining a field with a score"));
-			}
-			else
-			{
-				weights[ aidx] = 0.0;
-				weightedFields = &wf;
-				weightedFieldsIndex = aidx;
-			}
-		}
 		if (m_weightingFormula)
 		{
+			// Weighting formula defined then calculate one weight from the weighting element weights:
+			std::vector<WeightingElement>::iterator
+				ai = m_weightingElements.begin(), ae = m_weightingElements.end();
+			const std::vector<WeightedField>* weightedFields = 0;
+			int weightedFieldsIndex = -1;
+			double weights[ Constants::MaxNofWeightingElements];
+			// Calculate a weight for every element and call the weighting formula with the result:
+			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+			{
+				const std::vector<WeightedField>& wf = (*ai)->call( m_docno);
+				if (wf.size() == 1 && !wf[0].field().defined())
+				{
+					weights[ aidx] = wf[0].weight();
+				}
+				else if (wf.size() == 0)
+				{
+					weights[ aidx] = 0.0;
+				}
+				else if (weightedFields != 0)
+				{
+					throw std::runtime_error(_TXT("using a weighting formula to calculate a total score having more than one weighting functions defining a field with a score"));
+				}
+				else
+				{
+					weights[ aidx] = 0.0;
+					weightedFields = &wf;
+					weightedFieldsIndex = aidx;
+				}
+			}
 			if (weightedFields)
 			{
 				std::vector<WeightedField>::const_iterator
@@ -212,11 +213,25 @@ bool Accumulator::nextRank(
 		}
 		else
 		{
-			double weight = 0.0;
-			int fi = 0, fe = m_weightingElements.size();
-			for (; fi != fe; ++fi)
+			// No formula then summate weights:
+			const std::vector<WeightedField>* weightedFields = 0;
+			double weightsum = 0.0;
+			int ai = 0, ae = m_weightingElements.size();
+			for (; ai != ae; ++ai)
 			{
-				weight += weights[ fi];
+				const std::vector<WeightedField>& wf = m_weightingElements[ ai]->call( m_docno);
+				if (wf.size() >= 1 && wf[0].field().defined())
+				{
+					if (weightedFields)
+					{
+						throw std::runtime_error(_TXT("having more than one weighting functions defining a field with a score"));
+					}
+					weightedFields = &wf;
+				}
+				else if (wf.size() == 1)
+				{
+					weightsum += wf[0].weight();
+				}
 			}
 			if (weightedFields)
 			{
@@ -224,12 +239,12 @@ bool Accumulator::nextRank(
 					wi = weightedFields->begin(), we =  weightedFields->end();
 				for (; wi != we; ++wi)
 				{
-					m_ranker.insert( WeightedDocument( m_docno, wi->field(), weight + wi->weight()));
+					m_ranker.insert( WeightedDocument( m_docno, wi->field(), weightsum + wi->weight()));
 				}
 			}
-			else if (weight != 0.0)
+			else if (weightsum > std::numeric_limits<double>::epsilon())
 			{
-				m_ranker.insert( WeightedDocument( m_docno, strus::IndexRange(), weight));
+				m_ranker.insert( WeightedDocument( m_docno, strus::IndexRange()/*field*/, weightsum));
 			}
 		}
 		return true;
