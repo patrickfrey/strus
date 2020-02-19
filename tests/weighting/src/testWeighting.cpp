@@ -1750,7 +1750,9 @@ static bool findSummaryElement( const std::vector<strus::SummaryElement>& haysta
 	return (hi != he);
 }
 
-static bool testResultSummaryAgainstExpected( const std::vector<strus::SummaryElement>& result, const std::vector<strus::SummaryElement>& expected)
+static bool testResultSummaryAgainstExpected(
+		const std::vector<strus::SummaryElement>& result,
+		const std::vector<strus::SummaryElement>& expected)
 {
 	if (result.size() != expected.size()) return false;
 	{
@@ -1767,7 +1769,9 @@ static bool testResultSummaryAgainstExpected( const std::vector<strus::SummaryEl
 	return true;
 }
 
-static void testResultAgainstExpected( const std::map<strus::Index,std::string>& docnoDocidMap, const std::string& testdescr, const strus::QueryResult& result, const strus::QueryResult& expected, int ranksChecked)
+static void testResultAgainstExpected(
+		const std::map<strus::Index,std::string>& docnoDocidMap, const std::string& testdescr,
+		const strus::QueryResult& result, const strus::QueryResult& expected, int ranksChecked)
 {
 	{
 		std::vector<strus::ResultDocument>::const_iterator
@@ -1789,12 +1793,16 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 				if (!strus::Math::isequal( ri->weight(), ei->weight(), (double)std::numeric_limits<float>::epsilon()))
 				{
 					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
-					throw strus::runtime_error( "weight %.7f of result %s does not match expected %.7f", ri->weight(), descr.c_str(), ei->weight());
+					throw strus::runtime_error(
+						"weight %.7f of result '%s' of '%s' does not match expected %.7f",
+						ri->weight(), descr.c_str(), testdescr.c_str(), ei->weight());
 				}
 				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
 				{
 					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
-					throw strus::runtime_error( "summary elements of result %s do not match expected", descr.c_str());
+					throw strus::runtime_error(
+						"summary elements of result '%s' of '%s' do not match expected",
+						descr.c_str(), testdescr.c_str());
 				}
 			}
 		}
@@ -1818,14 +1826,23 @@ static void testResultAgainstExpected( const std::map<strus::Index,std::string>&
 				if (!strus::Math::isequal( ri->weight(), ei->weight(), (double)std::numeric_limits<float>::epsilon()))
 				{
 					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
-					throw strus::runtime_error( "weight %.7f of result %s does not match expected %.7f", ri->weight(), descr.c_str(), ei->weight());
+					throw strus::runtime_error(
+						"weight %.7f of result '%s' of '%s' does not match expected %.7f",
+						ri->weight(), descr.c_str(), testdescr.c_str(), ei->weight());
 				}
 				if (!testResultSummaryAgainstExpected( ri->summaryElements(), ei->summaryElements()))
 				{
 					std::string descr = descriptionWeightedDocument( docnoDocidMap, *ri);
-					throw strus::runtime_error( "summary elements of result %s do not match expected", descr.c_str());
+					throw strus::runtime_error(
+						"summary elements of result '%s' of '%s' do not match expected",
+						descr.c_str(), testdescr.c_str());
 				}
 			}
+		}
+	}{
+		if (!testResultSummaryAgainstExpected( result.summaryElements(), expected.summaryElements()))
+		{
+			throw strus::runtime_error( "result summary elements of '%s' do not match expected", testdescr.c_str());
 		}
 	}
 }
@@ -1835,6 +1852,28 @@ static void checkResult( const std::map<strus::Index,std::string>& docnoDocidMap
 	std::string qrystr = qry.tostring();
 	std::string testdescr = strus::string_format( "test query %d = '%s'", qryidx, qrystr.c_str());
 	testResultAgainstExpected( docnoDocidMap, testdescr, result, expected, ranksChecked);
+}
+
+static void printSummary( std::ostream& out, const std::vector<strus::SummaryElement>& summaryElements, const char* indentstr)
+{
+	std::vector<strus::SummaryElement>::const_iterator
+		si = summaryElements.begin(),
+		se = summaryElements.end();
+	for (; si != se; ++si)
+	{
+		if (si->index() >= 0)
+		{
+			out << strus::string_format( "%s%s = '%s' %.5f %d",
+					indentstr, si->name().c_str(), si->value().c_str(), si->weight(), si->index())
+				<< std::endl;
+		}
+		else
+		{
+			out << strus::string_format( "%s%s = %s %.5f",
+					indentstr, si->name().c_str(), si->value().c_str(), si->weight())
+				<< std::endl;
+		}
+	}
 }
 
 static void printResult( std::ostream& out, const std::map<strus::Index,std::string>& docnoDocidMap, const strus::QueryResult& result)
@@ -1859,25 +1898,9 @@ static void printResult( std::ostream& out, const std::map<strus::Index,std::str
 				ri->weight())
 			<< std::endl;
 		}
-		std::vector<strus::SummaryElement>::const_iterator
-			si = ri->summaryElements().begin(),
-			se = ri->summaryElements().end();
-		for (; si != se; ++si)
-		{
-			if (si->index() >= 0)
-			{
-				out << strus::string_format( "\t> %s = '%s' %.5f %d",
-						si->name().c_str(), si->value().c_str(), si->weight(), si->index())
-					<< std::endl;
-			}
-			else
-			{
-				out << strus::string_format( "\t> %s = %s %.5f",
-						si->name().c_str(), si->value().c_str(), si->weight())
-					<< std::endl;
-			}
-		}
+		printSummary( out, ri->summaryElements(), "\t> ");
 	}
+	printSummary( out, result.summaryElements(), "summary ");
 }
 
 static strus::Reference<strus::QueryEvalInterface> queryEval_bm25pff( strus::QueryProcessorInterface* queryproc)

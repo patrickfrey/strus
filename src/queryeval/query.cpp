@@ -786,18 +786,17 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 			for (int sidx=0 ;si != se; ++si,++sidx)
 			{
 				std::vector<SummaryElement> summary = (*si)->getSummary( *ri);
-				if (m_queryEval->summarizers()[ sidx].function()->doPopulate())
-				{
-					std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
-					for (; li != le; ++li)
-					{
-						summaryElementMap[ li->name()][ li->value()] += li->weight();
-					}
-				}
 				std::vector<SummaryElement>::iterator li = summary.begin(), le = summary.end();
 				for (; li != le; ++li)
 				{
 					li->setSummarizerPrefix( m_queryEval->summarizers()[ sidx].summaryId(), ':');
+				}
+				if (!ri->field().defined() && m_queryEval->summarizers()[ sidx].function()->doPopulate())
+				{
+					for (li = summary.begin(); li != le; ++li)
+					{
+						summaryElementMap[ li->name()][ li->value()] += li->weight();
+					}
 				}
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
