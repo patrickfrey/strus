@@ -33,7 +33,7 @@ class SentenceAnalyzerInstance
 public:
 	explicit SentenceAnalyzerInstance( ErrorBufferInterface* errorhnd_);
 
-	virtual void defineType(
+	virtual void defineWordType(
 			const std::string& typenam,
 			int priority);
 

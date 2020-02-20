@@ -27,7 +27,7 @@ public:
 	/// \brief Assign a type to a priority group to reduce candidate expansion
 	/// \param[in] name name of the type
 	/// \param[in] priority priority assigned to it (highest is 0, descending with increment)
-	virtual void defineType(
+	virtual void defineWordType(
 			const std::string& name,
 			int priority)=0;
 

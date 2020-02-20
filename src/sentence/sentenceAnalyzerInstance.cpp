@@ -36,7 +36,7 @@ SentenceAnalyzerInstance::SentenceAnalyzerInstance( ErrorBufferInterface* errorh
 	if (dbgi) m_debugtrace = dbgi->createTraceContext( STRUS_DBGTRACE_COMPONENT_NAME);
 }
 
-void SentenceAnalyzerInstance::defineType(
+void SentenceAnalyzerInstance::defineWordType(
 		const std::string& typenam,
 		int priority)
 {

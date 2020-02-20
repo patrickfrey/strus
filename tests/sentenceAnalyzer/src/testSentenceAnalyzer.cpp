@@ -417,7 +417,7 @@ void testSentenceAnalyer()
 		ti = typePriorityPairs.begin(), te = typePriorityPairs.end();
 	for (; ti != te; ++ti)
 	{
-		analyzer->defineType( ti->first, ti->second);
+		analyzer->defineWordType( ti->first, ti->second);
 	}
 	// Run the test:
 	TestSentenceLexerInstance lexer;
