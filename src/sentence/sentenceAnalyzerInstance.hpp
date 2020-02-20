@@ -14,6 +14,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <map>
 
 namespace strus {
 
@@ -32,112 +33,20 @@ class SentenceAnalyzerInstance
 public:
 	explicit SentenceAnalyzerInstance( ErrorBufferInterface* errorhnd_);
 
-	virtual ~SentenceAnalyzerInstance();
+	virtual void defineType(
+			const std::string& typenam,
+			int priority);
 
-	virtual void pushTerm( const std::string& type, const std::string& name, float weight);
-
-	virtual void pushNone( float weight);
-
-	virtual void pushAlt( int argc);
-
-	virtual void pushSequenceImm( int argc);
-
-	virtual void pushRepeat( int mintimes, int maxtimes);
-
-	virtual void defineSentence( const std::string& classname, float weight);
-
-	virtual bool compile();
-
-	virtual std::vector<SentenceGuess> analyzeSentence( const SentenceLexerInstanceInterface* lexer, const std::string& source, int maxNofResults, double minWeight) const;
-
-public:/*local static functions*/
-	enum OpCode {
-		OpNop,			///< No operation, goto next instruction
-		OpJmp,			///< Absolute jump to instruction address
-		OpJmpIf,		///< Jump to absolute address if the compare flag is set
-		OpJmpIfNot,		///< Jump to absolute address if the compare flag is not set
-		OpJmpDup,		///< Absolute jump to instruction address with a duplicated instance of the program
-		OpJmpDupIf,		///< Jump to absolute address with a duplicated instance of the program if the compare flag is set 
-		OpJmpDupIfNot,		///< Jump to absolute address with a duplicated instance of the program if the compare flag is not set
-		OpStartCount,		///< Push a counter one the counter stack
-		OpEndCount,		///< Pop the top counter from the counter stack
-		OpDecCount,		///< Decrement the top counter of the counter stack and set the compare flag if the decrementation result got 0
-		OpTestCount,		///< Test the top counter to be greater or equal than a value, set testflag if yes
-		OpTestType,		///< Set the compare flag if the argument type and the current token are equal, else unset it, combine subsequent OpTest.. operations with a logical AND
-		OpTestFeat,		///< Set the compare flag if the argument regular expression matches the current token, else unset it, combine subsequent OpTest.. operations with a logical AND
-		OpWeight,		///< Multiply the weight accumulated with this value, the initial weight is 1.0
-		OpAccept,		///< Push the current token to the result associated with the current state and move the input token cursor forward
-		OpReject,		///< Reject the current state and reestablish the state on top of the state stack
-		OpResult		///< Add the result associated with the current state to the list of final results
-	};
-	static const char* opCodeName( OpCode opcode)
-	{
-		static const char* ar[] = {"NOP","JMP","JIF","JIFNOT","JDUP","JDUPIF","JDUPIFNOT","CNT","ENDCNT","DEC","TCNT","TTYPE","TFEAT","WEIGHT","ACCEPT","REJECT","RESULT",0};
-		return ar[ opcode];
-	}
-
-	struct Instruction
-	{
-		OpCode opcode;
-		int arg;
-
-		Instruction()
-			:opcode(OpNop),arg(0){}
-		Instruction( OpCode opcode_, int arg_)
-			:opcode(opcode_),arg(arg_){}
-		Instruction( const Instruction& o)
-			:opcode(o.opcode),arg(o.arg){}
-		Instruction& operator = ( const Instruction& o)
-			{opcode=o.opcode; arg=o.arg; return *this;}
-	};
-
-	struct Pattern
-	{
-		Reference<RegexSearch> regex;
-		std::string str;
-
-		Pattern( const std::string& str_, ErrorBufferInterface* errorhnd);
-		Pattern( const Pattern& o);
-	};
-
-	struct Program
-	{
-		Program()
-			:instructionar(),patternar(),valuear(),weightar(),addressar(),procar(){}
-
-		std::string instructionToString( const Instruction& instr) const;
-
-		std::vector<Instruction> instructionar;
-		std::vector<Pattern> patternar;
-		std::vector<std::string> valuear;
-		std::vector<float> weightar;
-		std::vector<int> addressar;
-		std::vector<int> procar;
-	};
-
-private:
-	void printInstructions( std::ostream& out, int fromAddr, int toAddr) const;
-
-	void pushInstructionInt( OpCode opcode, int arg);
-	void insertInstructionInt( int iaddr, OpCode opcode, int arg);
-	void insertInstruction( int iaddr, OpCode opcode);
-	void eraseInstruction( int iaddr);
-	void pushInstructionFloat( OpCode opcode, float arg);
-	void pushInstructionRegex( OpCode opcode, const std::string& arg);
-	void pushInstructionString( OpCode opcode, const std::string& arg);
-	void pushInstruction( OpCode opcode);
-
-	static bool isOpCodeJmp( OpCode opcode);
-	void patchOpCodeJmpAbsolute( int istart, int iend, int addr, int patchaddr);
-	void patchOpCodeJmpOffset( int addr, int patchaddrincr);
-
-	struct ExecutionContext;
-	void analyzeTermList( ExecutionContext& exectx, const SentenceLexerContextInterface* lexer) const;
+	virtual std::vector<SentenceGuess> analyzeSentence(
+			const SentenceLexerInstanceInterface* lexer,
+			const std::string& source,
+			int maxNofResults,
+			double minWeight) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;
 	DebugTraceContextInterface* m_debugtrace;
-	Program m_program;
+	std::map<std::string,int> m_typeprioritymap;
 };
 
 }//namespace

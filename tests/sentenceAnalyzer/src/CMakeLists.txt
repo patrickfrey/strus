@@ -15,6 +15,6 @@ link_directories(
 	"${LevelDB_LIBRARY_PATH}"
 )
 
-add_executable( testSentenceAnalyzerPattern testSentenceAnalyzerPattern.cpp)
-target_link_libraries( testSentenceAnalyzerPattern strus_base strus_error strus_private_utils strus_sentence ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
+add_executable( testSentenceAnalyzer testSentenceAnalyzer.cpp)
+target_link_libraries( testSentenceAnalyzer strus_base strus_error strus_private_utils strus_sentence ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 

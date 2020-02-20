@@ -50,6 +50,10 @@ public:
 	{
 		return m_value == o.m_value && m_type == o.m_type;
 	}
+	bool operator != (const SentenceTerm& o) const
+	{
+		return m_value != o.m_value || m_type != o.m_type;
+	}
 
 private:
 	std::string m_type;
