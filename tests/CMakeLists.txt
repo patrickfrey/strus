@@ -20,7 +20,6 @@ add_subdirectory( positionWindow )
 add_subdirectory( randoc )
 add_subdirectory( varSizeNodeTree )
 add_subdirectory( statsproc )
-add_subdirectory( sentenceAnalyzer )
 add_subdirectory( weightingTitle )
 add_subdirectory( weighting )
 

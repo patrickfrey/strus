@@ -23,6 +23,8 @@
 #include <limits>
 #include <iostream>
 
+#error DEPRECATED
+
 using namespace strus;
 
 #define MODULENAME "sentence analyzer"

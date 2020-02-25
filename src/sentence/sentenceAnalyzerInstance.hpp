@@ -25,6 +25,7 @@ class DebugTraceContextInterface;
 /// \brief Forward declaration
 class SentenceLexerContextInterface;
 
+#error DEPRECATED
 
 /// \brief Implementation of the sentence analyzer detecting sentence candidates in queries
 class SentenceAnalyzerInstance

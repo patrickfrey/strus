@@ -38,6 +38,8 @@
 #include <new>
 #include <cmath>
 
+#error DEPRECATED
+
 static bool g_verbose = false;
 static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;

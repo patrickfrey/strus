@@ -18,35 +18,18 @@ namespace strus {
 /// \brief Forward declaration
 class SentenceLexerContextInterface;
 
-/// \brief Lexer interface for tokenizing query sentences
+/// \brief Lexer interface for analysis of query sentences
 class SentenceLexerInstanceInterface
 {
 public:
 	/// \brief Destructor
 	virtual ~SentenceLexerInstanceInterface(){}
 
-	/// \brief Define a separator of entities in the query
-	/// \param[in] uchr unicode character code for the separating character
-	virtual void addSeparator( int uchr)=0;
-
-	/// \brief Define a space in the query
-	/// \param[in] uchr unicode character code for the spacing character
-	virtual void addSpace( int uchr)=0;
-
-	/// \brief Define a character potentially linking tokens to an entity in the query
-	/// \param[in] uchr unicode character code for the character
-	/// \param[in] substchr ascii character code for the replacement in an entity
-	virtual void addLink( int uchr, char substchr)=0;
-
-	/// \brief Define a value between 0.0 and 1.0 for the similarity measure of features for grouping similar features
-	/// \param[in] value similarity measure
-	/// \note Interpretation depends on implementation, a reasonable default value is set by default.
-	virtual void defineGroupSimilarityDistance( double value)=0;
-	
-	/// \brief Create an interface for the traversal of a sentence specified
-	/// \param[in] source string to parse with the lexer created
-	/// \return lexer interface for sentence traversal
-	virtual SentenceLexerContextInterface* createContext( const std::string& source) const=0;
+	/// \brief Get a ranked list weighting the probability of alternative sentences forming a query
+	/// \param[in] source source string to analyze
+	/// \param[in] maxNofResults maximum number of results to return or -1 if not defined
+	/// \return the ranked list of weighted sentences
+	virtual std::vector<SentenceGuess> call( const std::string& source, int maxNofResults) const=0;
 };
 
 }//namespace

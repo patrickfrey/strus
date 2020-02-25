@@ -12,6 +12,8 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
+#error DEPRECATED
+
 using namespace strus;
 
 DLL_PUBLIC SentenceAnalyzerInstanceInterface* strus::createSentenceAnalyzerInstance_std( ErrorBufferInterface* errorhnd)
