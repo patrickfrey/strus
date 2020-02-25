@@ -28,8 +28,6 @@ class QueryProcessorInterface;
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class VectorStorageInterface;
-/// \brief Forward declaration
-class SentenceAnalyzerInstanceInterface;
 
 /// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation.
 class StorageObjectBuilderInterface
@@ -64,11 +62,6 @@ public:
 	/// \brief Creates a an interface for query evaluation
 	/// \return the query evaluation object (with ownership)
 	virtual QueryEvalInterface* createQueryEval() const=0;
-
-	/// \brief Creates a an interface for query sentence analysis
-	/// \param[in] name name of the sentence analyzer type
-	/// \return the query sentence analyzer (with ownership)
-	virtual SentenceAnalyzerInstanceInterface* createSentenceAnalyzer( const std::string& name) const=0;
 };
 
 }//namespace
