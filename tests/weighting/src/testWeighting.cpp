@@ -1465,7 +1465,7 @@ struct Collection
 					wi = weightedFields.begin(), we = weightedFields.end();
 				for (; wi != we; ++wi)
 				{
-					strus::WeightedDocument wdoc( docno, *wi);
+					strus::WeightedDocument wdoc( docno, wi->field(), wi->weight());
 					std::vector<strus::SummaryElement> summary;
 					summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
 					if (wi->field().defined())

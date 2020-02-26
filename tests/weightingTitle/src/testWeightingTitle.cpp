@@ -279,15 +279,6 @@ struct Query
 		}
 	}
 
-	strus::WeightedField verifyAnswer( const std::vector<const TitleTreeNode*>& nodestk) const
-	{
-		int nn = 0;
-		std::vector<const TitleTreeNode*>::const_iterator ni = nodestk.begin(), ne = nodestk.end();
-		for (; ni != ne; ++ni) {nn += (*ni)->featar.size();}
-		int missingFeatures = nn - (int)features.size();
-		if (missingFeatures < 0) return strus::WeightedField();
-	}
-
 	int minFeatureCount( const std::vector<const TitleTreeNode*>& nodestk) const
 	{
 		std::vector<const TitleTreeNode*>::const_iterator ni = nodestk.begin(), ne = nodestk.end();
@@ -703,7 +694,7 @@ struct Collection
 						ai = answer.begin(), ae = answer.end();
 					for (; ai != ae; ++ai)
 					{
-						strus::WeightedDocument wdoc( docno, *ai);
+						strus::WeightedDocument wdoc( docno, ai->field(), ai->weight());
 						std::vector<strus::SummaryElement> summary;
 						summary.push_back( strus::SummaryElement( "docid", di->docid, 1.0));
 
