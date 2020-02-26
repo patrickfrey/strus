@@ -188,11 +188,11 @@ static void logError(
 	{
 		if (msglen >= (int)sizeof(msgbuf))
 		{
-			char* msgptr = msgbuf;
-			msgptr[ msglen-3] = '.';
-			msgptr[ msglen-2] = '.';
-			msgptr[ msglen-1] = '.';
-			msgptr[ msglen] = 0;
+			msglen = (int)sizeof(msgbuf);
+			msgbuf[ msglen-4] = '.';
+			msgbuf[ msglen-3] = '.';
+			msgbuf[ msglen-2] = '.';
+			msgbuf[ msglen-1] = 0;
 		}
 		logout << msgbuf;
 	}
