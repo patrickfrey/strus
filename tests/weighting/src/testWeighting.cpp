@@ -314,9 +314,9 @@ struct FeaturePos
 	struct FindPosCompare
 	{
 		FindPosCompare(){}
-		bool operator()( const FeaturePos& aa, strus::Index pos) const
+		bool operator()( const FeaturePos& aa, strus::Index searchpos) const
 		{
-			return aa.pos < pos;
+			return aa.pos < searchpos;
 		}
 	};
 };
