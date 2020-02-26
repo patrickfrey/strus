@@ -28,8 +28,9 @@ public:
 	/// \brief Get a ranked list weighting the probability of alternative sentences forming a query
 	/// \param[in] source source string to analyze
 	/// \param[in] maxNofResults maximum number of results to return or -1 if not defined
+	/// \param[in] minWeight minimum weight (normalized with the first rank weight) a returned result should have
 	/// \return the ranked list of weighted sentences
-	virtual std::vector<SentenceGuess> call( const std::string& source, int maxNofResults) const=0;
+	virtual std::vector<SentenceGuess> call( const std::string& source, int maxNofResults, double minWeight) const=0;
 };
 
 }//namespace
