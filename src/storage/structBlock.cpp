@@ -72,7 +72,6 @@ void StructBlock::BlockData::init(
 	{
 		throw strus::runtime_error(_TXT("number (%d) of levels of overlapping fields exceeds maximum size (%d) allowed"), (int)fieldarsize_, (int)NofFieldLevels);
 	}
-	std::memset( this, 0, sizeof(*this));
 	m_fieldarsize = fieldarsize_;
 	int ii;
 	if (fieldar_) for (ii=0; ii != m_fieldarsize; ++ii) m_fieldar[ii] = fieldar_[ii];
