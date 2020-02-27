@@ -28,6 +28,10 @@ public:
 	/// \param[in] vec vector to define for this feature
 	virtual void defineVector( const std::string& type, const std::string& feat, const WordVector& vec)=0;
 
+	/// \brief Define a feature type without value and vector
+	/// \param[in] type to declare
+	virtual void defineFeatureType( const std::string& type)=0;
+
 	/// \brief Define a feature without vector
 	/// \param[in] type of the feature to add
 	/// \param[in] feat name of the feature to add
