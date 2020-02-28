@@ -98,8 +98,8 @@ std::vector<StructBlockDeclaration> StructBlockBuilder::declarations() const
 	for (; si != se && si->link.head; ++si)
 	{
 		StructBlockLink memberLink( si->link.structno, false/*head*/, si->link.idx);
-		IndexRangeLinkMap::inv_iterator mi = m_map.inv_first( memberLink);
-		for (; mi->link == memberLink; ++mi)
+		IndexRangeLinkMap::inv_iterator mi = m_map.inv_first( memberLink), me = m_map.inv_end();
+		for (; mi != me && mi->link == memberLink; ++mi)
 		{
 			rt.push_back( StructBlockDeclaration( si->link.structno, si->range/*src*/, mi->range/*sink*/));
 		}
@@ -595,9 +595,9 @@ StructBlock StructBlockBuilder::createBlock()
 		std::set<strus::IndexRange>::const_iterator fi = ci->begin(), fe = ci->end();
 		for (; fi != fe; ++fi)
 		{
-			IndexRangeLinkMap::const_iterator mi = m_map.first( *fi);
+			IndexRangeLinkMap::const_iterator mi = m_map.first( *fi), me = m_map.end();
 			std::set<StructBlockLink> lnkset;
-			for (; mi->range == *fi; ++mi)
+			for (; mi != me && mi->range == *fi; ++mi)
 			{
 				lnkset.insert( mi->link);
 			}
