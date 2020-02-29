@@ -403,6 +403,7 @@ void ProximityWeightingContext::initNeighbourMatches()
 	{
 		for (ni = m_nodear.begin(); ni != ne && !m_field.contain( ni->pos); ++ni){}
 		m_nodear.erase( m_nodear.begin(), ni);
+		ne = m_nodear.end();
 	}
 	std::vector<Node>::iterator prev_ni = ni = m_nodear.begin();
 	for (; ni != ne; ++ni)
@@ -871,7 +872,7 @@ strus::WeightedField ProximityWeightingContext::getBestPassage( const FeatureWei
 		{
 			weightsum_max = window.currentWeightSum();
 			startpos_max = window.startWeightedPos().pos;
-			pos_max = window.currentWeightedPos().pos;;
+			pos_max = window.currentWeightedPos().pos;
 		}
 	}
 	if (weightsum_max > std::numeric_limits<double>::epsilon())
