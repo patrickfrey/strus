@@ -32,7 +32,7 @@ public:
 	/// \brief Prepare datastructures for calling findSimilar( const WordVector&, int,double,bool)const'
 	/// \remark This method does not have to be called, because the structures for search are built implicitely on the first search. It just avoids a massive delay on the first call of find similar.
 	/// \param[in] type type of the features to search for
-	virtual void prepareSearch( const std::string& type)=0;
+	virtual void prepareSearch( const std::string& type) const=0;
 
 	/// \brief Find all features that are within maximum simiarity distance.
 	/// \param[in] type type of the features to search for
