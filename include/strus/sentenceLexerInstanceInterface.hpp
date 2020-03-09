@@ -35,10 +35,10 @@ public:
 	/// \brief Get a list of most similar terms to a list of terms
 	/// \param[in] type feature type of the similar terms to search
 	/// \param[in] termlist list of terms to group and find the most similar terms for
-	/// \param[in] dist value between 0.5 and 1.0 describing the minimum value similarity required for the result terms
+	/// \param[in] minSimilarity value between 0.5 and 1.0 describing the minimum value similarity required for the result terms
 	/// \param[in] maxNofResults the maximum number of results returned
-	/// \param[in] minWeight the minimum value of the normalized weight (divided by weight of first rank) a result must have
-	virtual std::vector<SentenceTerm> similarTerms( const std::string& type, const std::vector<SentenceTerm>& termlist, double dist, int maxNofResults, double minWeight) const=0;
+	/// \param[in] minNormalizedWeight the minimum value of the normalized weight (divided by weight of first rank) a result must have
+	virtual std::vector<SentenceTerm> similarTerms( const std::string& type, const std::vector<SentenceTerm>& termlist, double minSimilarity, int maxNofResults, double minNormalizedWeight) const=0;
 };
 
 }//namespace
