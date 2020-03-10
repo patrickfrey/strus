@@ -139,6 +139,20 @@ struct Constants
 	{
 		return 0.60;
 	}
+	/// \brief Get the default normalized cut off weight for query expansion
+	static inline double defaultQueryExpansionMinNormalizedWeight()
+	{
+		return 0.90;
+	}
+	static inline int defaultQueryExpansionMaxNofResults()
+	{
+		return 20;
+	}
+	/// \brief Get the default similarity distance for similar search in query expansion
+	static inline double defaultQueryExpansionSimilarityDistance()
+	{
+		return 0.80;
+	}
 	/// \brief Default prefix used for filenames containing the incremental changes of statistics
 	static inline const char* defaultStatisticsFilePrefix()
 	{
