@@ -841,7 +841,7 @@ struct RandomQuery
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
 			strus::Reference<strus::PostingIteratorInterface> itr(
-				storage->createTermPostingIterator( term.type, term.value, 1));
+				storage->createTermPostingIterator( term.type, term.value, 1, strus::TermStatistics()));
 			if (!itr.get())
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
