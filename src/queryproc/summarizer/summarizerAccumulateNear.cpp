@@ -79,8 +79,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
-		double weight,
-		const TermStatistics& termstats)
+		double weight)
 {
 	try
 	{
@@ -91,7 +90,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		}
 		else if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
+			double df = itr->documentFrequency();
 			double idf = strus::Math::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
 			if (idf < 0.00001)
 			{

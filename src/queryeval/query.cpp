@@ -362,15 +362,15 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				if (usePosinfo)
 				{
-					joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
+					joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length, getTermStatistics( term.type, term.value)));
 				}
 				else
 				{
-					joinargs.push_back( m_storage->createFrequencyPostingIterator( term.type, term.value));
+					joinargs.push_back( m_storage->createFrequencyPostingIterator( term.type, term.value, getTermStatistics( term.type, term.value)));
 				}
 				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
-				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
+				nodeStorageDataMap[ *ni] = joinargs.back().get();
 				break;
 			}
 			case ExpressionNode:
@@ -378,7 +378,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap, usePosinfo));
 				if (!joinargs.back().get()) throw std::runtime_error( _TXT("error creating subexpression posting iterator"));
 
-				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
+				nodeStorageDataMap[ *ni] = joinargs.back().get();
 				break;
 		}
 	}
@@ -398,27 +398,27 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 			const Term& term = m_terms[ nidx];
 			if (usePosinfo)
 			{
-				rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
+				rt = m_storage->createTermPostingIterator( term.type, term.value, term.length, getTermStatistics( term.type, term.value));
 			}
 			else
 			{
-				rt = m_storage->createFrequencyPostingIterator( term.type, term.value);
+				rt = m_storage->createFrequencyPostingIterator( term.type, term.value, getTermStatistics( term.type, term.value));
 			}
 			if (!rt) break;
-			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
+			nodeStorageDataMap[ nodeadr] = rt;
 			break;
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
 			rt = createExpressionPostingIterator( m_expressions[ nidx], nodeStorageDataMap, usePosinfo);
 			if (!rt) break;
-			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt);
+			nodeStorageDataMap[ nodeadr] = rt;
 			break;
 	}
 	return rt;
 }
 
-const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const
+PostingIteratorInterface* Query::nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const
 {
 	NodeStorageDataMap::const_iterator pi = nodeStorageDataMap.find( nodeadr);
 	if (pi == nodeStorageDataMap.end())
@@ -439,8 +439,8 @@ void Query::collectSummarizationVariables(
 	Itr vi = vrange.first, ve = vrange.second;
 	for (; vi != ve; ++vi)
 	{
-		const NodeStorageData& nd = nodeStorageData( nodeadr, nodeStorageDataMap);
-		variables.push_back( SummarizationVariable( vi->second, nd.itr));
+		PostingIteratorInterface* itr = nodeStorageData( nodeadr, nodeStorageDataMap);
+		variables.push_back( SummarizationVariable( vi->second, itr));
 	}
 
 	switch (nodeType( nodeadr))
@@ -591,7 +591,8 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					if (*si == fi->set)
 					{
 						accumulator.addSelector(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr, sidx);
+							nodeStorageData( fi->node, nodeStorageDataMap),
+							sidx);
 					}
 				}
 			}
@@ -624,9 +625,8 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					{
 						if (si->featureSet() == fi->set)
 						{
-							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
-							execContext->addWeightingFeature(
-								si->featureRole(), nd.itr, fi->weight, nd.stats);
+							PostingIteratorInterface* itr = nodeStorageData( fi->node, nodeStorageDataMap);
+							execContext->addWeightingFeature( si->featureRole(), itr, fi->weight);
 							if (m_debugtrace) m_debugtrace->event( "parameter", "%s= feature %s weight=%f", si->featureRole().c_str(), fi->set.c_str(), fi->weight);
 						}
 					}
@@ -675,7 +675,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					{
 						if (m_debugtrace) m_debugtrace->event( "feature-restriction", "name=%s", xi->c_str());
 						accumulator.addFeatureRestriction(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr, false);
+							nodeStorageData( fi->node, nodeStorageDataMap), false);
 					}
 				}
 			}
@@ -695,7 +695,7 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					{
 						if (m_debugtrace) m_debugtrace->event( "feature-exclusion", "name=%s", xi->c_str());
 						accumulator.addFeatureRestriction(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr, true);
+							nodeStorageData( fi->node, nodeStorageDataMap), true);
 					}
 				}
 			}
@@ -754,10 +754,9 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 							std::vector<SummarizationVariable> variables;
 							collectSummarizationVariables( variables, fi->node, nodeStorageDataMap);
 
-							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
+							PostingIteratorInterface* itr = nodeStorageData( fi->node, nodeStorageDataMap);
 							closure->addSummarizationFeature(
-								si->featureRole(), nd.itr,
-								variables, fi->weight, nd.stats);
+								si->featureRole(), itr, variables, fi->weight);
 						}
 					}
 				}

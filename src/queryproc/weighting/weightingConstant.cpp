@@ -31,8 +31,7 @@ WeightingFunctionContextConstant::WeightingFunctionContextConstant(
 void WeightingFunctionContextConstant::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		double weight_,
-		const TermStatistics& stats_)
+		double weight_)
 {
 	try
 	{

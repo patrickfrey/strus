@@ -33,7 +33,7 @@ unsigned int PosinfoIterator::frequency() const
 	return currentBlock().frequency_at( currentBlockCursor());
 }
 
-Index PosinfoIterator::documentFrequency() const
+GlobalCounter PosinfoIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

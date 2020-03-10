@@ -33,7 +33,7 @@ public:
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -59,7 +59,7 @@ protected:
 	Reference< PostingIteratorInterface> m_enditr;	///< end iterator
 	DocnoAllMatchItr m_docnoAllMatchItr;		///< document all match joiner
 	std::string m_featureid;			///< unique id of the feature expression
-	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;	///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

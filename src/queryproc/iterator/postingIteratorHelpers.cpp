@@ -64,16 +64,16 @@ std::vector<PostingIteratorReference>
 	return rt;
 }
 
-Index strus::minDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+GlobalCounter strus::minDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
 {
 	std::vector<PostingIteratorReference>::const_iterator
 		ai = ar.begin(), ae = ar.end();
 	if (ai == ae) return 0;
 
-	Index rt = (*ai)->documentFrequency();
+	GlobalCounter rt = (*ai)->documentFrequency();
 	for (++ai; ai != ae; ++ai)
 	{
-		Index df = (*ai)->documentFrequency();
+		GlobalCounter df = (*ai)->documentFrequency();
 		if (df < rt)
 		{
 			rt = df;
@@ -82,16 +82,16 @@ Index strus::minDocumentFrequency( const std::vector<PostingIteratorReference>& 
 	return rt;
 }
 
-Index strus::maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+GlobalCounter strus::maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
 {
 	std::vector<PostingIteratorReference>::const_iterator
 		ai = ar.begin(), ae = ar.end();
 	if (ai == ae) return 0;
 
-	Index rt = (*ai)->documentFrequency();
+	GlobalCounter rt = (*ai)->documentFrequency();
 	for (++ai; ai != ae; ++ai)
 	{
-		Index df = (*ai)->documentFrequency();
+		GlobalCounter df = (*ai)->documentFrequency();
 		if (df > rt)
 		{
 			rt = df;

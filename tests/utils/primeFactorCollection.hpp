@@ -744,7 +744,7 @@ struct PrimeFactorDocumentBuilder
 				std::string type = searchIndexFeatureType();
 				std::string value = searchIndexFeatureValue( fi);
 				strus::Reference<strus::PostingIteratorInterface>
-					pitr( storage->createTermPostingIterator( type, value, 1/*length*/));
+					pitr( storage->createTermPostingIterator( type, value, 1/*length*/, strus::TermStatistics()));
 				if (!pitr.get()) throw std::runtime_error( errorhnd->fetchError());
 
 				strus::Index dn = pitr->skipDoc( docno);
@@ -949,10 +949,10 @@ struct PrimeFactorDocumentBuilder
 			strus::Index valueno = storage->termValueNumber( oi->value);
 
 			strus::Reference<strus::PostingIteratorInterface>
-				pitr( storage->createTermPostingIterator( type, oi->value, 1/*length*/));
+				pitr( storage->createTermPostingIterator( type, oi->value, 1/*length*/, strus::TermStatistics()));
 			if (!pitr.get()) throw std::runtime_error( errorhnd->fetchError());
 			strus::Reference<strus::PostingIteratorInterface>
-				fitr( storage->createFrequencyPostingIterator( type, oi->value));
+				fitr( storage->createFrequencyPostingIterator( type, oi->value, strus::TermStatistics()));
 			if (!fitr.get()) throw std::runtime_error( errorhnd->fetchError());
 
 			std::string occurrencies;

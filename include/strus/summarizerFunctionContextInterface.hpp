@@ -35,14 +35,12 @@ public:
 	/// \param[in] postingIterator_ iterator on the matches of the summarization feature (ownership remains at caller)
 	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)
 	/// \param[in] weight_ weight of this summarization feature
-	/// \param[in] stats_ global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. 
 	/// \remark Do call this method before calling getSummary the first time for not having incomplete results
 	virtual void addSummarizationFeature(
 			const std::string& role_,
 			PostingIteratorInterface* postingIterator_,
 			const std::vector<SummarizationVariable>& variables_,
-			double weight_,
-			const TermStatistics& stats_)=0;
+			double weight_)=0;
 
 	/// \brief Set the value of a query variable
 	/// \param[in] name name of the variable

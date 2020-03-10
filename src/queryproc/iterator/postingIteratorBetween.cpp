@@ -87,7 +87,7 @@ Index IteratorBetween::skipPos( const Index& pos_)
 	}
 }
 
-Index IteratorBetween::documentFrequency() const
+GlobalCounter IteratorBetween::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

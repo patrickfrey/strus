@@ -180,20 +180,7 @@ public:
 private:
 	const TermStatistics& getTermStatistics( const std::string& type_, const std::string& value_) const;
 
-	struct NodeStorageData
-	{
-		explicit NodeStorageData( PostingIteratorInterface* itr_=0)
-			:itr(itr_),stats(){}
-		NodeStorageData( PostingIteratorInterface* itr_, TermStatistics stats_)
-			:itr(itr_),stats(stats_){}
-		NodeStorageData( const NodeStorageData& o)
-			:itr(o.itr),stats(o.stats){}
-
-		PostingIteratorInterface* itr;
-		TermStatistics stats;
-	};
-
-	typedef std::map<NodeAddress,NodeStorageData> NodeStorageDataMap;
+	typedef std::map<NodeAddress,PostingIteratorInterface*> NodeStorageDataMap;
 
 	struct WeightingVariableValueAssignment
 	{
@@ -214,7 +201,7 @@ private:
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr,
 				const NodeStorageDataMap& nodeStorageDataMap) const;
-	const NodeStorageData& nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
+	PostingIteratorInterface* nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
 
 	StructView nodeView( NodeAddress adr) const;
 	StructView variableView( NodeAddress adr) const;

@@ -34,7 +34,7 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return m_positive->documentFrequency();
 	}

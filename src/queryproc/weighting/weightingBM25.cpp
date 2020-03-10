@@ -59,14 +59,13 @@ void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
 void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		double weight_,
-		const TermStatistics& stats_)
+		double weight_)
 {
 	try
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			double df = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
+			double df = itr_->documentFrequency();
 			double idf = strus::Math::log10(
 						(m_nofCollectionDocuments - df + 0.5)
 						/ (df + 0.5));

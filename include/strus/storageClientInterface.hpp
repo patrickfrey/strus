@@ -13,6 +13,7 @@
 #include "strus/timeStamp.hpp"
 #include "strus/storage/statisticsMessage.hpp"
 #include "strus/storage/blockStatistics.hpp"
+#include "strus/storage/termStatistics.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -78,13 +79,15 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \param[in] length ordinal position length assigned to the term (may differ from 1 for terms representing multipart patterns)
+	/// \param[in] stats global term statistics
 	/// \remark the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions for handling multi-word phrases correctly.
 	/// \return the created iterator reference (with ownership)
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
 			const std::string& value,
-			const Index& length) const=0;
+			const Index& length,
+			const TermStatistics& stats) const=0;
 
 	/// \brief Create an iterator on the document term occurrence frequencies in the storage. In opposite to the term posting iterator its skip position method returns only position = 1 for any matching document
 	/// \note This posting iterator is used when disabling position information as criterion in the query. This may be suitable when using simple query evaluation methods that are just considering the number of occurrencies and not taking positions (e.g. for proximity) into account.
@@ -92,11 +95,13 @@ public:
 	/// \note In strus the use of frequeny posting iterators is encouraged in a form of initial query evaluation that decides what documents to select for feature extraction for query expansion.
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
+	/// \param[in] stats global term statistics
 	/// \return the created iterator reference (with ownership)
 	virtual PostingIteratorInterface*
 		createFrequencyPostingIterator(
 			const std::string& type,
-			const std::string& value) const=0;
+			const std::string& value,
+			const TermStatistics& stats) const=0;
 
 	/// \brief Create an iterator on the structures (relations of ordinal position ranges with a structure name)
 	/// \return the created iterator reference (with ownership)

@@ -419,7 +419,8 @@ PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
 		const std::string& termstr,
-		const Index& length) const
+		const Index& length,
+		const TermStatistics& stats) const
 {
 	try
 	{
@@ -429,7 +430,7 @@ PostingIteratorInterface*
 		{
 			return new NullPostingIterator( termstr.c_str());
 		}
-		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, m_errorhnd);
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, stats.documentFrequency(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }
@@ -437,7 +438,8 @@ PostingIteratorInterface*
 PostingIteratorInterface*
 	StorageClient::createFrequencyPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr) const
+		const std::string& termstr,
+		const TermStatistics& stats) const
 {
 	try
 	{
@@ -450,15 +452,15 @@ PostingIteratorInterface*
 		}
 		else
 		{
-			float df = documentFrequency( typeno, termno);
-			float N = nofDocumentsInserted();
+			double df = documentFrequency( typeno, termno);
+			double N = nofDocumentsInserted();
 			if (df / N > Constants::stopwordDfFactor())
 			{
-				return new FfPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+				return new FfPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), stats.documentFrequency(), m_errorhnd);
 			}
 			else
 			{
-				return new FfNoIndexSetPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+				return new FfNoIndexSetPostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), stats.documentFrequency(), m_errorhnd);
 			}
 		}
 	}

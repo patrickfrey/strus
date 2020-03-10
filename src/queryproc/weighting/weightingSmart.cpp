@@ -51,14 +51,13 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 void WeightingFunctionContextSmart::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		double weight_,
-		const TermStatistics& stats_)
+		double weight_)
 {
 	try
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			m_featar.push_back( Feature( itr_, (double)weight_, stats_));
+			m_featar.push_back( Feature( itr_, (double)weight_));
 		}
 		else
 		{

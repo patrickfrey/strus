@@ -39,7 +39,7 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -72,7 +72,7 @@ private:
 	bool m_strict;							///< true, if all elements must have different positions
 	int m_range;							///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

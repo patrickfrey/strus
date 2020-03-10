@@ -14,6 +14,7 @@
 #include "strus/base/thread.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "strus/base/atomic.hpp"
+#include "strus/storage/termStatistics.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
@@ -75,12 +76,14 @@ public:
 		createTermPostingIterator(
 			const std::string& termtype,
 			const std::string& termid,
-			const Index& length) const;
+			const Index& length,
+			const TermStatistics& stats) const;
 
 	virtual PostingIteratorInterface*
 		createFrequencyPostingIterator(
 			const std::string& termtype,
-			const std::string& termid) const;
+			const std::string& termid,
+			const TermStatistics& stats) const;
 
 	virtual StructureIteratorInterface*
 		createStructureIterator() const;

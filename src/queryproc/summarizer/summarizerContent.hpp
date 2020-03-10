@@ -41,8 +41,7 @@ public:
 			const std::string& name_,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>&,
-			double /*weight*/,
-			const TermStatistics&);
+			double /*weight*/);
 
 	virtual void setVariableValue( const std::string& name_, double value);
 

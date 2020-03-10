@@ -81,7 +81,7 @@ bool DocumentTermIterator::nextTerm( Term& value)
 	CATCH_ERROR_MAP_RETURN( _TXT("error in document term iterator next term: %s"), *m_errorhnd, false);
 }
 
-unsigned int DocumentTermIterator::termDocumentFrequency( const Index& termno) const
+int DocumentTermIterator::termDocumentFrequency( const Index& termno) const
 {
 	try
 	{

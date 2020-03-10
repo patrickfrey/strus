@@ -40,7 +40,7 @@ public:
 
 	virtual bool nextTerm( Term& value);
 
-	virtual unsigned int termDocumentFrequency( const Index& termno) const;
+	virtual int termDocumentFrequency( const Index& termno) const;
 
 	virtual std::string termValue( const Index& termno) const;
 

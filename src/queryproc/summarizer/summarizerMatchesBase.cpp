@@ -95,8 +95,7 @@ void SummarizerFunctionContextMatchesBase::addSummarizationFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
-		double weight,
-		const TermStatistics&)
+		double weight)
 {
 	try
 	{

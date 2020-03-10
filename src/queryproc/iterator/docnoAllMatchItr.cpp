@@ -97,12 +97,12 @@ Index DocnoAllMatchItr::skipDoc( const Index& docno_)
 	}
 }
 
-Index DocnoAllMatchItr::maxDocumentFrequency() const
+GlobalCounter DocnoAllMatchItr::maxDocumentFrequency() const
 {
 	return m_args[0]->documentFrequency();
 }
 
-Index DocnoAllMatchItr::minDocumentFrequency() const
+GlobalCounter DocnoAllMatchItr::minDocumentFrequency() const
 {
 	return m_args.back()->documentFrequency();
 }

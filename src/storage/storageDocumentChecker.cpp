@@ -216,9 +216,9 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			IndexSetIterator docnoIterator( m_storage->databaseClient(), DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
 			strus::local_ptr<PostingIteratorInterface> fitr(
-				m_storage->createFrequencyPostingIterator( ti->first.type, ti->first.value)); 
+				m_storage->createFrequencyPostingIterator( ti->first.type, ti->first.value, TermStatistics())); 
 			strus::local_ptr<PostingIteratorInterface> pitr(
-				m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 1)); 
+				m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 1, TermStatistics())); 
 			if (!fitr.get())
 			{
 				logError( logout, m_docid, _TXT("failed to create %s checking search index: %s"), "frequency posting iterator", m_errorhnd->fetchError());

@@ -42,7 +42,7 @@ public:
 	/// \brief Get the number of documents where the feature occurrs
 	/// \remark May not be defined exactly for composed features. In this case a substitute value should be returned, estimated from the df's of the sub expressions
 	/// \return the document frequency (aka 'df')
-	virtual Index documentFrequency() const=0;
+	virtual GlobalCounter documentFrequency() const=0;
 
 	/// \brief Get the frequency of the feature in the current document
 	/// \return the feature frequency (aka 'ff' of 'tf')

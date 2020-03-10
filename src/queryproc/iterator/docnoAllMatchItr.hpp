@@ -41,9 +41,9 @@ public:
 	Index skipDocCandidate( const Index& docno_);
 
 	/// \brief Get the minimum document frequency (first element df)
-	Index maxDocumentFrequency() const;
+	GlobalCounter maxDocumentFrequency() const;
 	/// \brief Get the minimum document frequency (last element df)
-	Index minDocumentFrequency() const;
+	GlobalCounter minDocumentFrequency() const;
 
 private:
 	std::vector<PostingIteratorReference> m_args;	///< argument posting iterators

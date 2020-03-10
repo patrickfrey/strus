@@ -8,6 +8,7 @@
 #ifndef _STRUS_STORAGE_POSTING_ITERATOR_HPP_INCLUDED
 #define _STRUS_STORAGE_POSTING_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/storage/termStatistics.hpp"
 #include "strus/reference.hpp"
 #include "posinfoIterator.hpp"
 #include "indexSetIterator.hpp"
@@ -31,6 +32,7 @@ public:
 			strus::Index termvalueno,
 			const char* termstr,
 			strus::Index length_,
+			const strus::TermStatistics& stats_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PostingIterator(){}
@@ -46,7 +48,7 @@ public:
 
 	virtual int frequency();
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{

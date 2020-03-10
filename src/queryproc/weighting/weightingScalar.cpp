@@ -51,8 +51,7 @@ WeightingFunctionContextScalar::WeightingFunctionContextScalar(
 void WeightingFunctionContextScalar::addWeightingFeature(
 		const std::string&,
 		PostingIteratorInterface* itr_,
-		double weight_,
-		const TermStatistics& stats_)
+		double weight_)
 {
 	try
 	{

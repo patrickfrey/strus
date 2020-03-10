@@ -38,7 +38,7 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -88,7 +88,7 @@ private:
 	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
 	strus::bitset<MaxNofFeatures> m_selected;			///< features matching in the current document
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the most frequent subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

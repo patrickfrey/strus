@@ -39,7 +39,7 @@ public:
 		return m_posno=1;
 	}
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -61,7 +61,7 @@ protected:
 	Index m_posno;					///< current position
 	DocnoAllMatchItr m_docnoAllMatchItr;		///< document all match joiner
 	std::string m_featureid;			///< unique id of the feature expression
-	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;	///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
@@ -88,7 +88,7 @@ public:
 		return m_posno=1;
 	}
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -110,7 +110,7 @@ private:
 	Index m_posno;					///< current position
 	DocnoMatchPrioQueue m_prioqueue;		///< priority queue for iterating on matches
 	std::string m_featureid;			///< unique id of the feature expression
-	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;	///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

@@ -80,7 +80,7 @@ public:
 		return m_featureid;
 	}
 
-	virtual strus::Index documentFrequency() const
+	virtual strus::GlobalCounter documentFrequency() const
 	{
 		return (m_maxdocno / m_divisor);
 	}

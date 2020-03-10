@@ -43,10 +43,9 @@ public:
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
 			const std::vector<SummarizationVariable>&,
-			double weight_,
-			const TermStatistics& stats_)
+			double weight_)
 	{
-		m_func->addWeightingFeature( name_, postingIterator_, weight_, stats_);
+		m_func->addWeightingFeature( name_, postingIterator_, weight_);
 	}
 
 	virtual void setVariableValue( const std::string& name_, double value)

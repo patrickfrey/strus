@@ -11,7 +11,7 @@
 
 using namespace strus;
 
-Index FfIterator::documentFrequency() const
+GlobalCounter FfIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

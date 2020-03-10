@@ -30,6 +30,7 @@ PostingIterator::PostingIterator(
 		strus::Index termtypeno,
 		strus::Index termvalueno, const char* termstr,
 		strus::Index length_,
+		const strus::TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #else
 PostingIterator::PostingIterator(
@@ -39,10 +40,11 @@ PostingIterator::PostingIterator(
 		strus::Index termvalueno,
 		const char*,
 		strus::Index length_,
+		const strus::TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
-	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
+	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno, stats_.documentFrequency())
 	,m_docno(0)
 	,m_termtypeno( termtypeno)
 	,m_termvalueno( termvalueno)
@@ -125,7 +127,7 @@ int PostingIterator::frequency()
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
-Index PostingIterator::documentFrequency() const
+GlobalCounter PostingIterator::documentFrequency() const
 {
 	try
 	{

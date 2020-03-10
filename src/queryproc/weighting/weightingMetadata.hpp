@@ -44,8 +44,7 @@ public:
 	virtual void addWeightingFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			double/*weight*/,
-			const TermStatistics&);
+			double/*weight*/);
 
 	virtual const std::vector<WeightedField>& call( const Index& docno);
 

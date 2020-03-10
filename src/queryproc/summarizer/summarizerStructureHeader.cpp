@@ -56,8 +56,7 @@ void SummarizerFunctionContextStructureHeader::addSummarizationFeature(
 			const std::string& name,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>& variables,
-			double weight,
-			const TermStatistics&)
+			double weight)
 {
 	throw strus::runtime_error(_TXT("added feature '%s' but no feature parameters expected for '%s'"), name.c_str(), THIS_METHOD_NAME);
 }

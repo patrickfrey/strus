@@ -71,8 +71,7 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			double weight_,
-			const TermStatistics& stats_);
+			double weight_);
 
 	virtual void setVariableValue( const std::string& name_, double value);
 

@@ -60,7 +60,7 @@ public:
 	/// \brief Get the local document frequency of a term
 	/// \param[in] termno internal local term number
 	/// \return the local document frequency (aka 'df')
-	virtual unsigned int termDocumentFrequency( const Index& termno) const=0;
+	virtual int termDocumentFrequency( const Index& termno) const=0;
 
 	/// \brief Get string representation of a term
 	/// \param[in] termno internal local term number

@@ -27,6 +27,7 @@ struct GlobalStatistics
 
 	GlobalCounter nofDocumentsInserted() const		{return m_nofDocumentsInserted;}
 	void setNofDocumentsInserted( const GlobalCounter& n)	{m_nofDocumentsInserted = n;}
+	bool defined() const					{return m_nofDocumentsInserted >= 0;}
 
 private:
 	GlobalCounter m_nofDocumentsInserted;	///< global number of documents inserted (-1 for undefined, if undefined then the storage value of the global number of documents is used)

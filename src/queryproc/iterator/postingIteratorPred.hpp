@@ -52,7 +52,7 @@ public:
 		return rt?(rt - 1):0;
 	}
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return m_origin->documentFrequency();
 	}

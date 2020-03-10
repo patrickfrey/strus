@@ -44,8 +44,7 @@ void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&,
-		double /*weight*/,
-		const TermStatistics&)
+		double /*weight*/)
 {
 	m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no sumarization features expected in summarization function '%s'"), THIS_METHOD_NAME);
 }

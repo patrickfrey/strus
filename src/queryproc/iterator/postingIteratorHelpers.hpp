@@ -27,8 +27,8 @@ std::vector<PostingIteratorReference>
 		std::vector<PostingIteratorReference>::const_iterator ai,
 		const std::vector<PostingIteratorReference>::const_iterator& ae);
 
-Index minDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
-Index maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
+GlobalCounter minDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
+GlobalCounter maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
 
 
 }//namespace

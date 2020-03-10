@@ -162,7 +162,7 @@ Index IteratorIntersectWithCardinality::skipPos( const Index& pos_)
 	return m_posno = m_positionWindow.skip( m_call_posno = pos_) ? m_positionWindow.pos() : 0;
 }
 
-Index IteratorIntersect::documentFrequency() const
+GlobalCounter IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
@@ -171,7 +171,7 @@ Index IteratorIntersect::documentFrequency() const
 	return m_documentFrequency;
 }
 
-Index IteratorIntersectWithCardinality::documentFrequency() const
+GlobalCounter IteratorIntersectWithCardinality::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

@@ -87,7 +87,7 @@ Index IteratorSequenceImm::skipPos( const Index& pos_)
 	}
 }
 
-Index IteratorSequenceImm::documentFrequency() const
+GlobalCounter IteratorSequenceImm::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

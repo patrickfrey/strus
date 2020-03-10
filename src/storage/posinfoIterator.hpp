@@ -10,6 +10,7 @@
 #include "posinfoBlock.hpp"
 #include "documentBlockIteratorTemplate.hpp"
 #include "databaseAdapter.hpp"
+#include "strus/storage/index.hpp"
 
 namespace strus {
 
@@ -22,13 +23,13 @@ class PosinfoIterator
 	:public DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock,DocIndexNodeCursor>
 {
 public:
-	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_)
+	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_, GlobalCounter df_)
 		:DocumentBlockIteratorTemplate<DatabaseAdapter_PosinfoBlock::Cursor,PosinfoBlock,DocIndexNodeCursor>( DatabaseAdapter_PosinfoBlock::Cursor(database_,termtypeno_,termvalueno_))
 		,m_storage(storage_)
 		,m_positionScanner()
 		,m_termtypeno(termtypeno_)
 		,m_termvalueno(termvalueno_)
-		,m_documentFrequency(-1){}
+		,m_documentFrequency(df_){}
 	~PosinfoIterator(){}
 
 	Index skipDoc( const Index& docno_)
@@ -43,7 +44,7 @@ public:
 	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
 	bool isCloseCandidate( const Index& docno_) const	{return docno_start() <= docno_ && docno_end() >= docno_;}
 
-	Index documentFrequency() const;
+	GlobalCounter documentFrequency() const;
 	unsigned int frequency() const;
 
 private:
@@ -51,7 +52,7 @@ private:
 	PosinfoBlock::PositionScanner m_positionScanner;
 	Index m_termtypeno;
 	Index m_termvalueno;
-	mutable Index m_documentFrequency;
+	mutable GlobalCounter m_documentFrequency;
 };
 
 }

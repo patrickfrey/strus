@@ -39,7 +39,7 @@ public:
 		return m_ref->featureid();
 	}
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return m_ref->documentFrequency();
 	}

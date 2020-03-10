@@ -37,7 +37,7 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -57,7 +57,7 @@ private:
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	DocnoAllMatchItr m_docnoAllMatchItr;				///< document all match joiner
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -80,7 +80,7 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -105,7 +105,7 @@ private:
 	PositionWindow m_positionWindow;
 	bool m_windowIsInitialized;					///< true, iff the window is initialized for the current document number
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

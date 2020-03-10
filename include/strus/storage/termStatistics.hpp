@@ -33,6 +33,7 @@ public:
 	/// \brief Set the global document frequency to use for the associated term
 	/// \param[in] df_ the global document frequency value
 	void setDocumentFrequency( const GlobalCounter& df_)	{m_df = df_;}
+	bool defined() const					{return m_df >= 0;}
 
 private:
 	GlobalCounter m_df;		///< global document frequency (-1 for undefined, if undefined then the value cache for the global dfs in the document frequency or what is stored in the local storage)

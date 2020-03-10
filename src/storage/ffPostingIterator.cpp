@@ -29,6 +29,7 @@ FfPostingIterator::FfPostingIterator(
 		const DatabaseClientInterface* database_,
 		const Index& termtypeno,
 		const Index& termvalueno, const char* termstr,
+		const TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #else
 FfPostingIterator::FfPostingIterator(
@@ -37,10 +38,11 @@ FfPostingIterator::FfPostingIterator(
 		const Index& termtypeno,
 		const Index& termvalueno,
 		const char*,
+		const TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
-	,m_ffIterator(storage_,database_, termtypeno, termvalueno)
+	,m_ffIterator(storage_,database_, termtypeno, termvalueno, stats_.documentFrequency())
 	,m_docno(0)
 	,m_termtypeno( termtypeno)
 	,m_termvalueno( termvalueno)
@@ -125,7 +127,7 @@ int FfPostingIterator::frequency()
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
-Index FfPostingIterator::documentFrequency() const
+GlobalCounter FfPostingIterator::documentFrequency() const
 {
 	try
 	{
@@ -143,6 +145,7 @@ FfNoIndexSetPostingIterator::FfNoIndexSetPostingIterator(
 		const DatabaseClientInterface* database_,
 		const Index& termtypeno,
 		const Index& termvalueno, const char* termstr,
+		const TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #else
 FfNoIndexSetPostingIterator::FfNoIndexSetPostingIterator(
@@ -151,9 +154,10 @@ FfNoIndexSetPostingIterator::FfNoIndexSetPostingIterator(
 		const Index& termtypeno,
 		const Index& termvalueno,
 		const char*,
+		const TermStatistics& stats_,
 		ErrorBufferInterface* errorhnd_)
 #endif
-	:m_ffIterator(storage_,database_, termtypeno, termvalueno)
+	:m_ffIterator(storage_,database_, termtypeno, termvalueno, stats_.documentFrequency())
 	,m_docno(0)
 	,m_termtypeno( termtypeno)
 	,m_termvalueno( termvalueno)
@@ -214,7 +218,7 @@ int FfNoIndexSetPostingIterator::frequency()
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in %s get frequency: %s"), INTERFACE_NAME, *m_errorhnd, 0);
 }
 
-Index FfNoIndexSetPostingIterator::documentFrequency() const
+GlobalCounter FfNoIndexSetPostingIterator::documentFrequency() const
 {
 	try
 	{

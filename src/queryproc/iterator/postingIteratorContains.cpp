@@ -83,7 +83,7 @@ Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 }
 
 
-Index IteratorContains::documentFrequency() const
+GlobalCounter IteratorContains::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
@@ -92,7 +92,7 @@ Index IteratorContains::documentFrequency() const
 	return m_documentFrequency;
 }
 
-Index IteratorContainsWithCardinality::documentFrequency() const
+GlobalCounter IteratorContainsWithCardinality::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

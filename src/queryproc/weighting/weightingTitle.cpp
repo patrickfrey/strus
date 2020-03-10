@@ -53,14 +53,13 @@ WeightingFunctionContextTitle::WeightingFunctionContextTitle(
 void WeightingFunctionContextTitle::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr,
-		double weight,
-		const TermStatistics& termstats)
+		double weight)
 {
 	try
 	{
 		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
-			double nofMatches = termstats.documentFrequency()>=0?termstats.documentFrequency():itr->documentFrequency();
+			double nofMatches = itr->documentFrequency();
 			if (!strus::Math::isequal( weight, 0.0) && !strus::Math::isequal( weight, 1.0))
 			{
 				m_errorhnd->info( _TXT("warning: weight ignored for 'title' weighting method"));
