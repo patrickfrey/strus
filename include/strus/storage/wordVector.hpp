@@ -49,6 +49,7 @@ public:
 		}
 		return rt;
 	}
+
 	WordVector& operator+=( const WordVector& o)
 	{
 		std::size_t ii = 0, nn = size() > o.size() ? o.size() : size();
@@ -57,6 +58,16 @@ public:
 		for (; ii < nn; ++ii,++wi,++oi)
 		{
 			 *wi += *oi;
+		}
+		return *this;
+	}
+
+	WordVector& operator*=( double scalar)
+	{
+		std::vector<float>::iterator wi = begin(), we = end();
+		for (; wi != we; ++wi)
+		{
+			 *wi *= scalar;
 		}
 		return *this;
 	}

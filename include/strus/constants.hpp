@@ -144,6 +144,11 @@ struct Constants
 	{
 		return 0.90;
 	}
+	/// \brief Get the default normalized cut off weight for query expansion
+	static inline double defaultQueryExpansionCoFeatureWeight()
+	{
+		return 0.70;
+	}
 	static inline int defaultQueryExpansionMaxNofResults()
 	{
 		return 20;
