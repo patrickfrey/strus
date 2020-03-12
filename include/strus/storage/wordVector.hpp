@@ -26,7 +26,7 @@ public:
 	WordVector( WordVector&& o)
 		:std::vector<float>(o){}
 	WordVector& operator= ( WordVector&& o)
-		{std::vector<float>(o)::operator =(o); return *this;}
+		{std::vector<float>::operator =(o); return *this;}
 #endif
 
 	std::string tostring( const char* separator, std::size_t maxNofElements=std::numeric_limits<std::size_t>::max()) const
