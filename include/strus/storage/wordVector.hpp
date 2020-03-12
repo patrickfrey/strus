@@ -22,6 +22,12 @@ public:
 	WordVector( std::size_t nn, float initval) :std::vector<float>(nn,initval){}
 	WordVector() :std::vector<float>(){}
 	WordVector( const std::vector<float>& o) :std::vector<float>(o){}
+#if __cplusplus >= 201103L
+	WordVector( WordVector&& o)
+		:public std::vector<float>(o){}
+	WordVector& operator= ( WordVector&& o)
+		{std::vector<float>(o)::operator =(o); return *this;}
+#endif
 
 	std::string tostring( const char* separator, std::size_t maxNofElements=std::numeric_limits<std::size_t>::max()) const
 	{
