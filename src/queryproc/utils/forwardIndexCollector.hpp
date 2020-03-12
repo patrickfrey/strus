@@ -12,6 +12,7 @@
 #include "strus/storage/index.hpp"
 #include <vector>
 #include <string>
+#include <set>
 
 namespace strus
 {
@@ -29,9 +30,12 @@ public:
 	ForwardIndexCollector(
 			const StorageClientInterface* storage_,
 			char tagSeparator_, const std::string& tagtype,
+			const std::vector<std::string>& collectTags_,
+			const std::string& stripCharacters_,
 			ErrorBufferInterface* errorhnd_);
 	ForwardIndexCollector( const ForwardIndexCollector& o)
 		:m_storage(o.m_storage),m_valueiterar(o.m_valueiterar),m_tagtypeiter(o.m_tagtypeiter)
+		,m_collectTags(o.m_collectTags),m_stripCharacters(o.m_stripCharacters)
 		,m_tagSeparator(o.m_tagSeparator),m_curidx(o.m_curidx)
 		,m_errorhnd(o.m_errorhnd){}
 
@@ -50,6 +54,8 @@ private:
 	typedef strus::Reference<ForwardIteratorInterface> ForwardIteratorRef;
 	std::vector<ForwardIteratorRef> m_valueiterar;
 	ForwardIteratorRef m_tagtypeiter;
+	std::set<std::string> m_collectTags;
+	std::string m_stripCharacters;
 	char m_tagSeparator;
 	int m_curidx;
 	ErrorBufferInterface* m_errorhnd;

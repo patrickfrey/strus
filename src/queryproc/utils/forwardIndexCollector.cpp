@@ -9,6 +9,7 @@
 #include "private/internationalization.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "textNormalizer.hpp"
 #include <limits>
 
 using namespace strus;
@@ -18,8 +19,11 @@ using namespace strus;
 ForwardIndexCollector::ForwardIndexCollector(
 		const StorageClientInterface* storage_,
 		char tagSeparator_, const std::string& tagtype,
+		const std::vector<std::string>& collectTags_,
+		const std::string& stripCharacters_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_),m_valueiterar(),m_tagtypeiter()
+	,m_collectTags(collectTags_.begin(),collectTags_.end()),m_stripCharacters(stripCharacters_)
 	,m_tagSeparator(tagSeparator_),m_curidx(-1)
 	,m_errorhnd(errorhnd_)
 {
@@ -76,8 +80,22 @@ std::string ForwardIndexCollector::fetch()
 	if (m_tagtypeiter.get())
 	{
 		rt.append( m_tagtypeiter->fetch());
-		if (m_tagSeparator) rt.push_back( m_tagSeparator);
-		rt.append( m_valueiterar[ m_curidx]->fetch());
+		if (m_collectTags.empty() || m_collectTags.find( rt) != m_collectTags.end())
+		{
+			if (m_tagSeparator) rt.push_back( m_tagSeparator);
+			if (m_stripCharacters.empty())
+			{
+				rt.append( m_valueiterar[ m_curidx]->fetch());
+			}
+			else
+			{
+				rt.append( strus::stripForwardIndexText( m_valueiterar[ m_curidx]->fetch(), m_stripCharacters));
+			}
+		}
+		else
+		{
+			rt.clear();
+		}
 	}
 	else
 	{

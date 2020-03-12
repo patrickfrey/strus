@@ -43,14 +43,15 @@ struct SummarizerFunctionParameterAccumulateNear
 	{
 		std::string name;
 		std::vector<std::string> collectTypes;
+		std::vector<std::string> collectTags;
 		std::string tagType;
 		std::string stripCharacters;
 		char tagSeparator;
 
-		CollectorConfig( const std::string& name_, const std::vector<std::string>& collectTypes_, const std::string& tagType_, const std::string& stripCharacters_, char tagSeparator_)
-			:name(name_),collectTypes(collectTypes_),tagType(tagType_),stripCharacters(stripCharacters_),tagSeparator(tagSeparator_){}
+		CollectorConfig( const std::string& name_, const std::vector<std::string>& collectTypes_, const std::vector<std::string>& collectTags_, const std::string& tagType_, const std::string& stripCharacters_, char tagSeparator_)
+			:name(name_),collectTypes(collectTypes_),collectTags(collectTags_),tagType(tagType_),stripCharacters(stripCharacters_),tagSeparator(tagSeparator_){}
 		CollectorConfig( const CollectorConfig& o)
-			:name(o.name),collectTypes(o.collectTypes),tagType(o.tagType),stripCharacters(o.stripCharacters),tagSeparator(o.tagSeparator){}
+			:name(o.name),collectTypes(o.collectTypes),collectTags(o.collectTags),tagType(o.tagType),stripCharacters(o.stripCharacters),tagSeparator(o.tagSeparator){}
 
 		StructView view() const;
 	};

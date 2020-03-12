@@ -25,7 +25,6 @@
 #include "private/errorUtils.hpp"
 #include "private/functionDescription.hpp"
 #include "viewUtils.hpp"
-#include "textNormalizer.hpp"
 #include <limits>
 #include <cstdlib>
 #include <iomanip>
@@ -59,7 +58,7 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 		ci = m_parameter.collectorConfigs.begin(), ce = m_parameter.collectorConfigs.end();
 	for (; ci != ce; ++ci)
 	{
-		m_collectors.push_back( ForwardIndexCollector( m_storage, ci->tagSeparator, ci->tagType, m_errorhnd));
+		m_collectors.push_back( ForwardIndexCollector( m_storage, ci->tagSeparator, ci->tagType, ci->collectTags, ci->stripCharacters, m_errorhnd));
 		std::vector<std::string>::const_iterator ti = ci->collectTypes.begin(), te = ci->collectTypes.end();
 		for (; ti != te; ++ti)
 		{
@@ -187,11 +186,11 @@ std::vector<SummaryElement>
 				if (wi == we) break;
 				if (wi->pos == wpos)
 				{
-					std::string elem = 
-						strus::stripForwardIndexText(
-							ci->fetch(), 
-							m_parameter.collectorConfigs[ cidx].stripCharacters);
-					entitymap[ elem] += wi->weight;
+					std::string elem = ci->fetch();
+					if (!elem.empty())
+					{
+						entitymap[ elem] += wi->weight;
+					}
 				}
 				++wi;
 			}
@@ -213,6 +212,7 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 	std::string configstr = configstr_;
 	std::string name;
 	std::vector<std::string> collectTypes;
+	std::vector<std::string> collectTags;
 	std::string tagType;
 	char tagSeparator = '\0';
 	if (!extractStringFromConfigString( name, configstr, "name", errorhnd))
@@ -236,6 +236,13 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 	if (collectTypes.empty())
 	{
 		throw strus::runtime_error(_TXT("empty '%s' definition in configuration, nothing to accumulate"), "type");
+	}
+	if (!extractStringArrayFromConfigString( collectTags, configstr, "tags", ',', errorhnd))
+	{
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "tags", errorhnd->fetchError());
+		}
 	}
 	if (!extractStringFromConfigString( tagType, configstr, "tag", errorhnd))
 	{
@@ -288,7 +295,7 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 	{
 		throw strus::runtime_error(_TXT("superfluous definitions int in configuration: '%s'"), configstr.c_str());
 	}
-	collectorConfigs.push_back( CollectorConfig( name, collectTypes, tagType, stripCharacters, tagSeparator));
+	collectorConfigs.push_back( CollectorConfig( name, collectTypes, collectTags, tagType, stripCharacters, tagSeparator));
 }
 
 StructView SummarizerFunctionParameterAccumulateNear::CollectorConfig::view() const
@@ -296,6 +303,7 @@ StructView SummarizerFunctionParameterAccumulateNear::CollectorConfig::view() co
 	StructView rt;
 	rt( "name", name);
 	rt( "type", collectTypes);
+	rt( "tags", collectTags);
 	rt( "tag", tagType);
 	rt( "strip", stripCharacters);
 	rt( "sep", tagSeparator);
