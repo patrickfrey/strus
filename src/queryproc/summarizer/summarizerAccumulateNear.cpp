@@ -251,6 +251,10 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 		{
 			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "strip", errorhnd->fetchError());
 		}
+		else
+		{
+			stripCharacters.append( strus::Constants::stripQuoteCharacters());
+		}
 	}
 	std::string tagSeparatorStr;
 	if (extractStringFromConfigString( tagSeparatorStr, configstr, "sep", errorhnd))
