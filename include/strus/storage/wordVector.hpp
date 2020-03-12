@@ -22,6 +22,7 @@ public:
 	WordVector( std::size_t nn, float initval) :std::vector<float>(nn,initval){}
 	WordVector() :std::vector<float>(){}
 	WordVector( const std::vector<float>& o) :std::vector<float>(o){}
+	WordVector( const WordVector& o) :std::vector<float>(o){}
 #if __cplusplus >= 201103L
 	WordVector( WordVector&& o)
 		:std::vector<float>(o){}
