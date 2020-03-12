@@ -278,6 +278,10 @@ void SummarizerFunctionParameterAccumulateNear::addConfig( const std::string& co
 		{
 			throw strus::runtime_error( _TXT("failed to parse '%s' in configuration: %s"), "sep", errorhnd->fetchError());
 		}
+		else
+		{
+			tagSeparator = strus::Constants::standard_word2vec_type_feature_separator();
+		}
 	}
 	configstr = strus::string_conv::trim( configstr);
 	if (!configstr.empty())
