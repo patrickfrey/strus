@@ -23,6 +23,11 @@ public:
 	WordVector() :std::vector<float>(){}
 	WordVector( const std::vector<float>& o) :std::vector<float>(o){}
 	WordVector( const WordVector& o) :std::vector<float>(o){}
+
+	WordVector& operator= ( const std::vector<float>& o)
+		{std::vector<float>::operator =(o); return *this;}
+	WordVector& operator= ( const WordVector& o)
+		{std::vector<float>::operator =(o); return *this;}
 #if __cplusplus >= 201103L
 	WordVector( WordVector&& o)
 		:std::vector<float>(o){}
