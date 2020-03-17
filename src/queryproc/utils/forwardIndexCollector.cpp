@@ -47,7 +47,10 @@ void ForwardIndexCollector::skipDoc( strus::Index docno)
 	{
 		(*vi)->skipDoc( docno);
 	}
-	m_tagtypeiter->skipDoc( docno);
+	if (m_tagtypeiter.get())
+	{
+		m_tagtypeiter->skipDoc( docno);
+	}
 }
 
 strus::Index ForwardIndexCollector::skipPos( strus::Index pos)
