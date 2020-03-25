@@ -773,7 +773,8 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 
 		// [7] Build the result:
 		// [7.1] Build the ranklist and the map of populated summaries;
-		std::map< std::string, std::map<std::string,double> > summaryElementMap;
+		typedef std::map<std::string,double> SummaryElementMap;
+		std::map< std::string, SummaryElementMap> summaryMap;
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
@@ -790,11 +791,12 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 				{
 					li->setSummarizerPrefix( m_queryEval->summarizers()[ sidx].summaryId(), ':');
 				}
-				if (!ri->field().defined() && m_queryEval->summarizers()[ sidx].function()->doPopulate())
+				if (!ri->field().defined()
+				&&  m_queryEval->summarizers()[ sidx].function()->doPopulate())
 				{
 					for (li = summary.begin(); li != le; ++li)
 					{
-						summaryElementMap[ li->name()][ li->value()] += li->weight();
+						summaryMap[ li->name()][ li->value()] += li->weight();
 					}
 				}
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
@@ -812,15 +814,23 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 		}
 		// [7.2] Build the global summary from populated summary elements;
 		std::vector<SummaryElement> summary;
-		std::map< std::string, std::map<std::string,double> >::const_iterator
-			si = summaryElementMap.begin(), se = summaryElementMap.end();
+		std::map<std::string, SummaryElementMap>::const_iterator
+			si = summaryMap.begin(), se = summaryMap.end();
 		for (; si != se; ++si)
 		{
-			std::map<std::string,double>::const_iterator
-				mi = si->second.begin(), me = si->second.end();
+			double maxweight = 0.0;
+			SummaryElementMap::const_iterator mi = si->second.begin(), me = si->second.end();
 			for (; mi != me; ++mi)
 			{
-				summary.push_back( SummaryElement( si->first, mi->first, mi->second));
+				if (maxweight < mi->second)
+				{
+					maxweight = mi->second;
+				}
+			}
+			mi = si->second.begin();
+			for (; mi != me; ++mi)
+			{
+				summary.push_back( SummaryElement( si->first, mi->first, mi->second / maxweight));
 			}
 		}
 		if (m_errorhnd->hasError())
