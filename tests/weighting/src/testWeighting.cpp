@@ -1601,11 +1601,17 @@ struct Collection
 				}
 			}
 		}
+		double maxweight = 0.0;
 		std::map<std::string,double>::const_iterator
 			mi = matchMap.begin(), me = matchMap.end();
 		for (; mi != me; ++mi)
 		{
-			summary.push_back( strus::SummaryElement( "match", mi->first, mi->second));
+			if (mi->second >maxweight) maxweight = mi->second;
+		}
+		mi = matchMap.begin();
+		for (; mi != me; ++mi)
+		{
+			summary.push_back( strus::SummaryElement( "match", mi->first, mi->second / maxweight));
 		}
 		return strus::QueryResult( 0/*evaluationPass*/, nofRanked, nofRanked/*nofVisited*/, ranks, summary);
 	}
