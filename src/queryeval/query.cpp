@@ -231,7 +231,10 @@ StructView Query::featuresView() const
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
-		rt( StructView()( "weight", fi->weight)( "set", fi->set)( "struct", nodeView( fi->node)));
+		StructView feat;
+		if (fi->weight != 1.0) feat( "weight", fi->weight);
+		feat( "set", fi->set)( "struct", nodeView( fi->node));
+		rt( feat);
 	}
 	return rt;
 }
@@ -255,28 +258,27 @@ StructView Query::variableView( NodeAddress adr) const
 
 StructView Query::nodeView( NodeAddress adr) const
 {
+	StructView rt;
+	StructView var = variableView( adr);
+
 	switch (nodeType( adr))
 	{
 		case NullNode:
-			return StructView()( "node", "NULL")( "var", variableView( adr));
+			rt( "node", "NULL");
+			break;
 		case TermNode:
 		{
 			const Term& term = m_terms[ nodeIndex( adr)];
-			return StructView()
-				("node", "term")
-				("type", term.type)
-				("value", term.value)
-				("var", variableView( adr));
+			rt("node", "term")("type", term.type)("value", term.value);
+			break;
 		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			StructView rt;
 			rt("node", "expression");
 			rt("op", expr.operation->name());
-			rt("range", expr.range);
-			rt("cardinality", expr.cardinality);
-			rt("var", variableView( adr));
+			if (expr.range) rt("range", expr.range);
+			if (expr.cardinality) rt("cardinality", expr.cardinality);
 			std::vector<NodeAddress>::const_iterator
 				ni = expr.subnodes.begin(),
 				ne = expr.subnodes.end();
@@ -286,10 +288,14 @@ StructView Query::nodeView( NodeAddress adr) const
 				arg( nodeView( *ni));
 			}
 			rt("arg", arg);
-			return rt;
+			break;
 		}
 	}
-	return StructView();
+	if (var.type() != StructView::Null)
+	{
+		rt( "var", var);
+	}
+	return rt;
 }
 
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
@@ -807,7 +813,28 @@ QueryResult Query::evaluate( int minRank, int maxNofRanks) const
 					ai = summaries.begin(), ae = summaries.end();
 				for (;ai != ae; ++ai)
 				{
-					if (m_debugtrace) m_debugtrace->event( "summary", "name=%s value='%s' weight=%f index=%d", ai->name().c_str(), ai->value().c_str(), ai->weight(), ai->index());
+					if (ai->index() != -1)
+					{
+						if (ai->weight() != 1.0)
+						{
+							m_debugtrace->event( "summary", "name=%s value='%s' weight=%f index=%d", ai->name().c_str(), ai->value().c_str(), ai->weight(), ai->index());
+						}
+						else
+						{
+							m_debugtrace->event( "summary", "name=%s value='%s' index=%d", ai->name().c_str(), ai->value().c_str(), ai->index());
+						}
+					}
+					else
+					{
+						if (ai->weight() != 1.0)
+						{
+							m_debugtrace->event( "summary", "name=%s value='%s' weight=%f", ai->name().c_str(), ai->value().c_str(), ai->weight());
+						}
+						else
+						{
+							m_debugtrace->event( "summary", "name=%s value='%s'", ai->name().c_str(), ai->value().c_str());
+						}
+					}
 				}
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
