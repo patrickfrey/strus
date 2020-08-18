@@ -61,7 +61,7 @@ private:
 	std::string m_value;
 };
 
-/// \brief Structure used as representant of a query term guess
+/// \brief List of weighted sentence terms
 typedef std::vector<SentenceTerm> SentenceTermList;
 
 /// \brief Structure used as representant of a query term with a weight
@@ -116,6 +116,9 @@ public:
 private:
 	double m_weight;
 };
+
+/// \brief List of weighted sentence terms
+typedef std::vector<WeightedSentenceTerm> WeightedSentenceTermList;
 
 }//namespace
 #endif
