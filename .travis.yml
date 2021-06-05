@@ -1,8 +1,6 @@
 language: cpp
 matrix:
   include:
-    - os: osx
-      compiler: clang
     - os: linux
       dist: xenial
       compiler: clang
