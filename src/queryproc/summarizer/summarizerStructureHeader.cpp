@@ -44,7 +44,7 @@ SummarizerFunctionContextStructureHeader::SummarizerFunctionContextStructureHead
 	,m_headerar()
 	,m_textCollector( storage_, parameter_.textType, errorhnd_)
 	,m_errorhnd(errorhnd_)
-				 
+
 {
 	if (!m_structiter.get())
 	{
@@ -77,7 +77,7 @@ std::vector<SummaryElement> SummarizerFunctionContextStructureHeader::getSummary
 		std::vector<StructureHeaderField>::const_iterator hi = m_headerar.begin(), he = m_headerar.end();
 		for (int hidx=0; hi != he; ++hi,++hidx)
 		{
-			
+
 			rt.push_back( SummaryElement( "", m_textCollector.fetch( hi->field()), 1.0, hi->hierarchy()));
 		}
 		return rt;
@@ -158,7 +158,7 @@ StructView SummarizerFunctionStructureHeader::view() const
 		FunctionDescription rt( name(), _TXT("Get the titles of the structures with contennts covering the document field."));
 		rt( P::String, "text", _TXT( "feature type in forward index where to collect the summary from"), "");
 		rt( P::String, "structno", _TXT( "name of structure type to select the structures for the title summaries (optional, use all structures if not defined)"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

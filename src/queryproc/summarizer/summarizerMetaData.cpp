@@ -25,7 +25,7 @@ using namespace strus;
 
 #define THIS_METHOD_NAME const_cast<char*>("metadata")
 
-SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
+SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 		MetaDataReaderInterface* metadata_, const std::string& metaname_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
 	,m_metaname(metaname_)
@@ -60,7 +60,7 @@ std::vector<SummaryElement>
 		std::vector<SummaryElement> rt;
 		m_metadata->skipDoc( doc.docno());
 		NumericVariant value = m_metadata->getValue( m_attrib);
-		if (value.defined()) 
+		if (value.defined())
 		{
 			rt.push_back( SummaryElement( "", value.tostring().c_str(), 1.0));
 		}
@@ -140,7 +140,7 @@ StructView SummarizerFunctionMetaData::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Get the value of a document meta data element."));
 		rt( P::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

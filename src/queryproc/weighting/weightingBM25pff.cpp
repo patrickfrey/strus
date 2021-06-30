@@ -397,7 +397,7 @@ StructView WeightingFunctionBM25pff::view() const
 		rt( P::Numeric, "hotspots", _TXT( "number that defines the number of features with most neighbour features to be used to determine the document parts to weight"), "1:");
 		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the minimum feature occurrence value assigned to a feature"), "0.0:1.0");
 		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted if not defined by structures"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

@@ -97,12 +97,12 @@ const std::vector<WeightedField>& WeightingFunctionContextSmart::call( const Ind
 		}
 		double ww = 0.0;
 		unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
-	
+
 		if (m_featar.empty())
 		{
 			double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
 			fillParameter( docno, 0, 0, param);
-	
+
 			ww += m_func->call( param, nofParam);
 		}
 		else
@@ -112,7 +112,7 @@ const std::vector<WeightedField>& WeightingFunctionContextSmart::call( const Ind
 			{
 				double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
 				fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
-	
+
 				ww += m_func->call( param, nofParam) * fi->weight();
 			}
 		}
@@ -205,7 +205,7 @@ std::vector<std::string> WeightingFunctionInstanceSmart::getVariables() const
 	try
 	{
 		if (!m_func.get()) initFunction();
-	
+
 		return m_func->getVariables();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<std::string>());
@@ -283,7 +283,7 @@ StructView WeightingFunctionSmart::view() const
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");
 		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides ff,df,qf and N. The parameter is addressed by the name of the metadata element in the expression"));
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

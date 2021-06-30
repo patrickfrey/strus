@@ -117,7 +117,7 @@ static RangeTreeNode createRandomTree( int nofChilds, int depth, const strus::In
 		if (rt.chld.empty())
 		{
 			if (field == cover) return rt;
-			//... avoid this kind of structure as it leads to overlapping of 
+			//... avoid this kind of structure as it leads to overlapping of
 			//	structures of different nodes. Having that we cannot join
 			//	contents with same header in the tree search without huge effort.
 		}
@@ -165,7 +165,7 @@ static std::pair<strus::IndexRange,strus::IndexRange>
 		std::list<RangeTreeNode>::const_iterator
 			ci = node.chld.begin(), ce = node.chld.end();
 		if (headerpos >= node.range.end()) return rt;
-	
+
 		for (; ci != ce; ++ci)
 		{
 			rt = findAnswerStructure_( *ci, headerpos, contentpos);
@@ -283,7 +283,7 @@ struct Document
 			si = structurelist.begin(), se = structurelist.end();
 		for (; si != se; ++si)
 		{
-			if (g_random.get( 1, std::numeric_limits<int>::max()) <= (int)(fraction * std::numeric_limits<int>::max()))
+			if (g_random.get( 1, std::numeric_limits<int>::max()) <= (int)(fraction * (float)std::numeric_limits<int>::max()))
 			{
 				continue;
 			}
@@ -415,7 +415,7 @@ struct Collection
 			di = doclist.begin(), de = doclist.end();
 		for (; di != de; ++di)
 		{
-			if (g_random.get( 1, std::numeric_limits<int>::max()) <= (int)(fraction * std::numeric_limits<int>::max()))
+			if (g_random.get( 1, std::numeric_limits<int>::max()) <= (int)(fraction * (float)std::numeric_limits<int>::max()))
 			{
 				continue;
 			}
@@ -527,14 +527,14 @@ struct Collection
 			const strus::test::StructureDef& studef = doc.structurelist[ stuidx];
 			strus::IndexRange hdr = studef.header();
 			strus::IndexRange mbr = studef.content();
-	
+
 			strus::Index headerpos = randomIndex( hdr);
 			strus::Index contentpos = randomIndex( mbr);
 			std::pair<strus::IndexRange,strus::IndexRange>
 				answer = findAnswerStructure( doc.structuretree, headerpos, contentpos);
 			strus::IndexRange answer_hdr = answer.first;
 			strus::IndexRange answer_mbr = answer.second;
-	
+
 			return QueryAnswerPair( Query( docid, headerpos, contentpos), Answer( answer_hdr, answer_mbr));
 		}
 	}

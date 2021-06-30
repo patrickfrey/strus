@@ -88,7 +88,7 @@ const std::vector<WeightedField>& WeightingFunctionContextScalar::call( const In
 		unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
 		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
 		fillParameter( param);
-	
+
 		double ww = m_func->call( param, nofParam);
 		m_lastResult.resize( 1);
 		m_lastResult[ 0].setWeight( ww);
@@ -176,7 +176,7 @@ std::vector<std::string> WeightingFunctionInstanceScalar::getVariables() const
 	try
 	{
 		if (!m_func.get()) initFunction();
-	
+
 		return m_func->getVariables();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), THIS_METHOD_NAME, *m_errorhnd, std::vector<std::string>());
@@ -254,7 +254,7 @@ StructView WeightingFunctionScalar::view() const
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");
 		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides N (collection size). The parameter is addressed by the name of the metadata element in the expression"));
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

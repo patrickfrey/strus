@@ -149,7 +149,7 @@ std::vector<SummaryElement>
 									/ 2;
 						if (pos > (startpos + dist)) startpos = (pos - dist);
 						if ((pos + dist) < endpos) endpos = (pos + dist);
-						bestMatch = strus::WeightedField( 
+						bestMatch = strus::WeightedField(
 								strus::IndexRange( startpos, endpos), 1.0);
 					}
 				}
@@ -328,7 +328,7 @@ StructView SummarizerFunctionMatchPhrase::view() const
 		rt( P::Numeric, "cluster", _TXT( "part [0.0,1.0] of query features considered as relevant in a group"), "1:");
 		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the minimum feature occurrence value assigned to a feature"), "0.0:1.0");
 		rt( P::Numeric, "maxdf", _TXT("the maximum df for a feature to be not considered as stopword as fraction of the collection size"), "0:");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

@@ -157,7 +157,7 @@ std::vector<SummaryElement>
 		}
 		else if (m_itrarsize == 1)
 		{
-			weightedNeighbours = ProximityWeightingContext::getWeightedNeighboursForSingleFeature( 
+			weightedNeighbours = ProximityWeightingContext::getWeightedNeighboursForSingleFeature(
 					m_parameter.distance_collect,
 					m_itrar[0], m_eos_itr, m_weightar[ 0],
 					doc.docno(), doc.field());
@@ -167,7 +167,7 @@ std::vector<SummaryElement>
 			m_proximityWeightingContext.init(
 					m_itrar, m_itrarsize, m_eos_itr,
 					doc.docno(), doc.field());
-			weightedNeighbours = m_proximityWeightingContext.getWeightedNeighbours( 
+			weightedNeighbours = m_proximityWeightingContext.getWeightedNeighbours(
 					m_weightar, m_parameter.distance_collect);
 		}
 		std::vector<ForwardIndexCollector>::iterator
@@ -470,7 +470,7 @@ StructView SummarizerFunctionAccumulateNear::view() const
 		rt( P::Numeric, "dist_near", _TXT( "ordinal position distance considered as near for features not in the same sentence"), "1:");
 		rt( P::Numeric, "dist_collect", _TXT( "search distance for neighbour elements to collect"), "1:");
 		rt( P::Numeric, "cluster", _TXT( "part [0.0,1.0] of query features considered as relevant in a group"), "1:");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

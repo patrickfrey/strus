@@ -100,7 +100,7 @@ double WeightingFunctionContextBM25::featureWeight( const Feature& feat, strus::
 
 			return feat.weight * feat.idf
 				* (ff * (m_parameter.k1 + 1.0))
-				/ (ff + m_parameter.k1 
+				/ (ff + m_parameter.k1
 					* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
 		}
 		else
@@ -237,7 +237,7 @@ StructView WeightingFunctionBM25::view() const
 		rt( P::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");
 		rt( P::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
 		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

@@ -48,7 +48,7 @@ SummarizerFunctionContextMatchesBase::SummarizerFunctionContextMatchesBase(
 	,m_cur_weight(0.0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_parameter.tagtype.empty()) 
+	if (!m_parameter.tagtype.empty())
 	{
 		m_tag_forwardindex.reset( m_storage->createForwardIterator( m_parameter.tagtype));
 		if (!m_tag_forwardindex.get())
@@ -56,7 +56,7 @@ SummarizerFunctionContextMatchesBase::SummarizerFunctionContextMatchesBase(
 			throw std::runtime_error( _TXT("error creating forward index iterator for tags"));
 		}
 	}
-	if (!m_parameter.texttype.empty()) 
+	if (!m_parameter.texttype.empty())
 	{
 		m_text_forwardindex.reset( m_storage->createForwardIterator( m_parameter.texttype));
 		if (!m_text_forwardindex.get())
@@ -186,7 +186,7 @@ bool SummarizerFunctionContextMatchesBase::next()
 							{
 								if (pos == m_tag_forwardindex->skipPos( pos))
 								{
-									m_cur_value.append( 
+									m_cur_value.append(
 										strus::stripForwardIndexText(
 											m_tag_forwardindex->fetch(),
 											m_parameter.stripCharacters));
@@ -202,7 +202,7 @@ bool SummarizerFunctionContextMatchesBase::next()
 							{
 								if (pos == m_text_forwardindex->skipPos( pos))
 								{
-									m_cur_value.append( 
+									m_cur_value.append(
 										strus::stripForwardIndexText(
 											m_text_forwardindex->fetch(),
 											m_parameter.stripCharacters));
@@ -328,7 +328,7 @@ StructView SummarizerFunctionMatchesBase::view() const
 		rt( P::String, "tag", _TXT( "the forward index feature type for the tag info to extract"), "");
 		rt( P::String, "fmt", _TXT( "format string for building the summary element values referencing variables in curly brackets"), "");
 		rt( P::Numeric, "results", _TXT( "the maximum number of the best weighted elements  to return (default 30)"), "1:");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), m_name, *m_errorhnd, FunctionDescription());
 }

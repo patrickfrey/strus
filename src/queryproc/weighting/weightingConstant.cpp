@@ -168,7 +168,7 @@ StructView WeightingFunctionConstant::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Calculate the weight of a document as sum of the the feature weights of the occurring features"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, FunctionDescription());
 }

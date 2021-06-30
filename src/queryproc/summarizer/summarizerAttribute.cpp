@@ -62,7 +62,7 @@ std::vector<SummaryElement>
 		std::vector<SummaryElement> rt;
 		m_attribreader->skipDoc( doc.docno());
 		std::string attr = m_attribreader->getValue( m_attrib);
-		if (!attr.empty()) 
+		if (!attr.empty())
 		{
 			rt.push_back( SummaryElement( "", attr, 1.0));
 		}
@@ -146,7 +146,7 @@ StructView SummarizerFunctionAttribute::view() const
 		typedef FunctionDescription P;
 		FunctionDescription rt( name(), _TXT("Get the value of a document attribute."));
 		rt( P::Attribute, "name", _TXT( "the name of the attribute to get"), "");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

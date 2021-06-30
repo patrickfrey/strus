@@ -65,7 +65,7 @@ void WeightingFunctionContextTitle::addWeightingFeature(
 				m_errorhnd->info( _TXT("warning: weight ignored for 'title' weighting method"));
 			}
 			if (m_postingarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features (%d) out of range"), m_postingarsize);
-			
+
 			m_postingar[ m_postingarsize] = itr;
 			m_isStopWordAr[ m_postingarsize] = (nofMatches > m_nofCollectionDocuments * m_maxdf);
 			++m_postingarsize;
@@ -99,7 +99,7 @@ struct StructureReference
 	{}
 	bool operator < (const StructureReference& o) const
 	{
-		return (level == o.level) 
+		return (level == o.level)
 			? structindex == o.structindex
 				? field < o.field
 				: structindex < o.structindex
@@ -127,7 +127,7 @@ struct StructureHeaderReference
 	{
 		return
 			hierarchy == o.hierarchy
-				? (level == o.level) 
+				? (level == o.level)
 					? structindex == o.structindex
 						? field == o.field
 							? queryPostingRange.second == o.queryPostingRange.second
@@ -321,7 +321,7 @@ const std::vector<WeightedField>& WeightingFunctionContextTitle::call( const Ind
 			std::sort( headerar.begin(), headerar.end());
 		}
 		{
-			// [1.5] Eliminate unused content elements and build a map structure index to 
+			// [1.5] Eliminate unused content elements and build a map structure index to
 			//	content element:
 			std::vector<StructureContentReference>::iterator
 				ci = contentar.begin(), ce = contentar.end();
@@ -569,7 +569,7 @@ StructView WeightingFunctionTitle::view() const
 		rt( P::Feature, "struct", _TXT( "defines the name of the structures used for determining titles"), "");
 		rt( P::Numeric, "hf", _TXT("hierarchy weight factor (defines the weight of a heading against the weight of its enclosing title or heading, e.g. the weight loss of a subsection title against a section title"), "0.0:1.0");
 		rt( P::Numeric, "results", _TXT("maximum number of results of 0 for unlimited"), "0..");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }

@@ -149,7 +149,7 @@ StructView SummarizerFunctionContent::view() const
 		FunctionDescription rt( name(), _TXT("Get the complete forward index"));
 		rt( P::String, "type", _TXT( "the forward index type to fetch the summary elements"), "");
 		rt( P::Numeric, "results", _TXT( "the maximum number of matches to return"), "1:");
-		return rt;
+		return std::move(rt);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), THIS_METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
