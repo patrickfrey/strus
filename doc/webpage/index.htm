@@ -54,12 +54,12 @@
 
 	<div id="content">
 		<h2>About</h2>
-		<p class="description">The open source project <i>Strus</i> provides a collection 
-		libraries and command line tools written in C++ for building a competitive, 
+		<p class="description">The open source project <i>Strus</i> provides a collection
+		libraries and command line tools written in C++ for building a competitive,
 		scalable full-text search engine.<br/>
 		The <i>Strus</i> search engine can be built using any key value store database that provides an
 		<a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound</a> seek function
-		for the stored key/value pairs. Currently, there exists an implementation based on the 
+		for the stored key/value pairs. Currently, there exists an implementation based on the
 		<a href="http://leveldb.org">LevelDB</a> library.<br/>
 		</p>
 		<h2>Demo system</h2>
@@ -107,10 +107,10 @@
 		</p>
 		<h3>The inverted case of pattern matching</h3>
 		<p class="description">
-		The documentation for doing high performance pattern matching with many thousands of patterns 
+		The documentation for doing high performance pattern matching with many thousands of patterns
 		can be found <a href="introduction_struspattern.htm">here</a>.
 		It allows you to define tokens with regular expressions in text and to define patterns with these tokens as alphabet.
-		With the help of <a href="https://01.org/hyperscan">Hyperscan</a> that builds one DFA for all regular expressions 
+		With the help of <a href="https://01.org/hyperscan">Hyperscan</a> that builds one DFA for all regular expressions
 		<i>StrusPattern</i> gets a competitive performance.
 		Approximative matching on Unicode strings with edit distance is also supported.
 		</p>
@@ -125,6 +125,15 @@
 		<table>
 
 		<tr>
+		<td><p class="timestamp">Jul 20th, 2021</p></td>
+		<td><p class="newstext">
+		After a long pause due to illness and recovery, I am trying to bring up the Wikipedia Search again.
+		During the recovery I did something completely different: <a href="http://mewa.cc">Mewa</a>, a compiler compiler for
+		prototyping compiler front-ends including a proof of concept language.
+		</p></td>
+		</tr>
+
+		<tr>
 		<td><p class="timestamp">Jan 23rd, 2021</p></td>
 		<td><p class="newstext">
 		The Intel NUC machine hosting the demo search broke down and I was not able to bring it up again yet.
@@ -132,7 +141,7 @@
 		</p></td>
 		</tr>
 
-		<tr>		
+		<tr>
 		<td><p class="timestamp">Jul 2nd, 2020</p></td>
 		<td><p class="newstext">
 		Continuing work on the web service and the replacement of the strus demo search on Wikipedia.
@@ -142,7 +151,7 @@
 		<tr>
 		<td><p class="timestamp">Apr 24th, 2020</p></td>
 		<td><p class="newstext">
-		Due to private issues the resources for further development of strus are not available from now 
+		Due to private issues the resources for further development of strus are not available from now
 		till mid of June 2020.
 		</p></td>
 		</tr>
@@ -158,17 +167,17 @@
 		<tr>
 		<td><p class="timestamp">Nov 6th, 2019</p></td>
 		<td><p class="newstext">.
-		The Wikipedia demo search will soon be replaced by a version run by the web service, 
+		The Wikipedia demo search will soon be replaced by a version run by the web service,
 		that operates as close to REST as possible.
 		</p></td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Mar 22th, 2019</p></td>
-		<td><p class="newstext">The project <a href="https://github.com/patrickfrey/strusWebService">strusWebService</a> 
+		<td><p class="newstext">The project <a href="https://github.com/patrickfrey/strusWebService">strusWebService</a>
 		is now built as part of strusAll if enabled (WITH_STRUS_WEBSERVICE=YES).
 		The JSON and XML schemas for the webrequests are now generated in the build of the <i>strusWebService</i>.
-		Currently the generated schemas are only informal (not tested yet). The next step is to rebuild the demo search on Wikipedia 
+		Currently the generated schemas are only informal (not tested yet). The next step is to rebuild the demo search on Wikipedia
 		with the webservice, using the pieces recently implemented as for example the new query sentence analysis.
 		</p></td>
 		</tr>
@@ -181,8 +190,8 @@
 
 		<tr>
 		<td><p class="timestamp">Jan 11th, 2019</p></td>
-		<td><p class="newstext">The vector storage interface for the representation of word embeddings (word2vec and friends) has been rewritten. 
-		Things that have been proven to be useless like the categorization of vectors have been dropped. 
+		<td><p class="newstext">The vector storage interface for the representation of word embeddings (word2vec and friends) has been rewritten.
+		Things that have been proven to be useless like the categorization of vectors have been dropped.
 		Some issues have been solved in the travis build. There are still some problems with the OSX build of the strusVector project.
 		</p></td>
 		</tr>
@@ -203,7 +212,7 @@
 
 		<tr>
 		<td><p class="timestamp">Oct 24th, 2018</p></td>
-		<td><p class="newstext">I gave up the idea to use <i>Tensorflow/Syntaxnet</i> for POS tagging of the Wikipedia collection 
+		<td><p class="newstext">I gave up the idea to use <i>Tensorflow/Syntaxnet</i> for POS tagging of the Wikipedia collection
 		and switched back to NLTK. I was not able to get a processing rate I needed with the hardware I have using <i>Tensorflow/Syntaxnet</i>.
 		</p></td>
 		</tr>
@@ -280,7 +289,7 @@
 		<tr>
 		<td><p class="timestamp">Sep 21th, 2017</p></td>
 		<td><p class="newstext">We opened a <a href="https://travis-ci.org/patrickfrey/strusAll">Travis build for the project strusAll</a>
-		(containing all of the <i>Strus</i> projects) with automated builds on commits on the master branch. 
+		(containing all of the <i>Strus</i> projects) with automated builds on commits on the master branch.
 		</p></td>
 		</tr>
 
@@ -295,7 +304,7 @@
 		<tr>
 		<td><p class="timestamp">Aug 20th, 2017</p></td>
 		<td><p class="newstext">We temporarily give up the support for Java bindings.
-		<i>Strus</i> will only support language bindings for value typed scripting languages 
+		<i>Strus</i> will only support language bindings for value typed scripting languages
 		like PHP, Python, Lua and Node.Js.
 		Java will be supported as proxy calling <i>Strus</i> running as a web service.
 		</p></td>
@@ -312,7 +321,7 @@
 
 		<tr>
 		<td><p class="timestamp">March 17th, 2017</p></td>
-		<td><p class="newstext"><a href="utilities.htm">Updated documentation of the domain specific languages</a> used 
+		<td><p class="newstext"><a href="utilities.htm">Updated documentation of the domain specific languages</a> used
 		by the command line utilities to describe document and query analysis, query evaluation
 		and the query language.
 		</p></td>
@@ -327,7 +336,7 @@
 
 		<tr>
 		<td><p class="timestamp">Feb 17th, 2017</p></td>
-		<td><p class="newstext">Changed status from <i>pre-Alpha</i> to <i>Alpha</i> as most 
+		<td><p class="newstext">Changed status from <i>pre-Alpha</i> to <i>Alpha</i> as most
 		of the features are available and stable. <i>Strus</i> is already successfully used in projects.
 		But the interface may still undergo changes and the versioning does not follow strict rules yet.
 		</p></td>
@@ -336,7 +345,7 @@
 		<tr>
 		<td><p class="timestamp">Feb 16th, 2017</p></td>
 		<td><p class="newstext">Improved the Wikipedia <a href="http://demo.project-strus.net/strus.html">demo search</a>.
-		The search takes references to documents close to query terms into account besides weighting 
+		The search takes references to documents close to query terms into account besides weighting
 		the appearance of query terms in documents. We also added a search for the closest vectors
 		(cosine similarity) to the entities appearing in the query. The vectors (about 10 million
 		vectors with dimension 300) were created with word2vec on the Wikipedia collection.
@@ -374,7 +383,7 @@
 		<tr>
 		<td><p class="timestamp">May 10th, 2016</p></td>
 		<td><p class="newstext">A document segmenter for JSON (based on the <a href="https://github.com/DaveGamble/cJSON">cJSON library</a>)
-		has been implemented for the Strus analyzer project. 
+		has been implemented for the Strus analyzer project.
 		Selection expressions are also formulated in the
 		abbreviated syntax of XPath as for XML.
 		</p></td>
@@ -383,7 +392,7 @@
 		<tr>
 		<td><p class="timestamp">May 4th, 2016</p></td>
 		<td><p class="newstext">A <a href="http://www.codeproject.com/Articles/1097542/Method-Call-Traces-for-Strus">new article has been published</a>,
-		that shows how to create call traces for <i>Strus</i> for debugging, statistical analysis and 
+		that shows how to create call traces for <i>Strus</i> for debugging, statistical analysis and
 		deeper understandig of the software.
 		</p></td>
 		</tr>
@@ -397,7 +406,7 @@
 
 		<tr>
 		<td><p class="timestamp">Mar 31st, 2016</p></td>
-		<td><p class="newstext">The project is now sponsored by <a href="http://www.eurospider.com">Eurospider</a>. 
+		<td><p class="newstext">The project is now sponsored by <a href="http://www.eurospider.com">Eurospider</a>.
 		The feedback from sophisticated retrieval projects and the development of new components
 		as the <a href="https://github.com/Eurospider/strusWebService">Strus webservice project</a>
 		will bring the <i>Strus</i> forward.
@@ -416,7 +425,7 @@
 		<td><p class="timestamp">Mar 21st, 2016</p></td>
 		<td><p class="newstext">License of <i>Strus</i> changed from GPLv3 to <a href="https://www.mozilla.org/en-US/MPL/2.0/">MPLv2 (Mozilla Public License, Version 2.0)</a>.
 		We were looking for a license, that on one hand protects the work done for <i>Strus</i> and on the other
-		hand allows users of <i>Strus</i> to attribute their own work in their way, even as closed 
+		hand allows users of <i>Strus</i> to attribute their own work in their way, even as closed
 		source. We think that the <i>Mozilla Public License, Version 2.0</i> meets these requirements best.
 		Fortunately <i>Strus</i> did never include nor link against any pervasively licenced code, so this
 		change of the software license is possible with the agreement of all contributors.
