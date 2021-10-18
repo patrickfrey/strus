@@ -215,7 +215,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			// Open the database created:
 			std::string path;
 			std::string src = configsource;
-	
+
 			if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 			{
 				m_errorhnd->report( ErrorCodeIncompleteConfiguration, _TXT( "missing '%s' in database configuration string"), "path");

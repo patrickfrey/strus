@@ -52,7 +52,7 @@ public:
 	///\param[in] storage_ storage to call refresh after commit or rollback
 	///\param[in] maxtypeno_ maximum type number
 	///\param[in] errorhnd_ error buffer interface
-	StorageTransaction( 
+	StorageTransaction(
 		StorageClient* storage_,
 		strus::Index maxtypeno_,
 		ErrorBufferInterface* errorhnd_);
