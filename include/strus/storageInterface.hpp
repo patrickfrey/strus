@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Toplevel interface of a storage
+/// \brief Interface of a storage of a search index
 /// \file storageInterface.hpp
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
@@ -23,7 +23,7 @@ class StatisticsProcessorInterface;
 class StorageDumpInterface;
 
 
-/// \brief Interface to the create and alter a storage for strus
+/// \brief Interface to the create and alter a storage of a search index
 class StorageInterface
 {
 public:

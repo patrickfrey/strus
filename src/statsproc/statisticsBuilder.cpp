@@ -70,9 +70,7 @@ StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxc
 	,m_errorhnd(errorhnd_)
 {
 	if (m_maxchunksize <= sizeof(StatisticsHeader)) throw std::runtime_error(_TXT("Maximum block size for statistics builder too small"));
-	ErrorCode errcode = (ErrorCode)0;
-	m_timestamp = TimeStamp::current( errcode);
-	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+	m_timestamp = getCurrentTimeStamp();
 }
 
 StatisticsBuilder::~StatisticsBuilder()
@@ -193,7 +191,7 @@ std::vector<std::string> StatisticsBuilder::getDfChangeMapBlocks()
 		}
 		std::size_t commonsize = ii;
 		std::size_t restsize = key.size() - ii;
-	
+
 		idxpos = utf8encode( idxbuf, (int32_t)commonsize);
 		if (!idxpos) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 		content.append( idxbuf, idxpos);			//[1] common size
@@ -251,9 +249,7 @@ StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
 	try
 	{
 		std::vector<std::string> blocks = getDfChangeMapBlocks();
-		ErrorCode errcode = (ErrorCode)0;
-		TimeStamp currentTimestamp = TimeStamp::current( errcode);
-		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+		TimeStamp currentTimestamp = getCurrentTimeStamp();
 
 		StatisticsIteratorInterface* rt = new InPlaceStatisticsIterator( blocks, currentTimestamp);
 		clear();

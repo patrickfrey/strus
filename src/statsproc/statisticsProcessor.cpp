@@ -58,7 +58,7 @@ StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const std::strin
 {
 	try
 	{
-		int msgChunkSize = Constants::defaultStatisticsMsgChunkSize(); 
+		int msgChunkSize = Constants::defaultStatisticsMsgChunkSize();
 		return new StatisticsBuilder( getFullPath( path), msgChunkSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
@@ -112,7 +112,7 @@ StatisticsIteratorInterface* StatisticsProcessor::createIterator( const std::str
 	{
 		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		return new StoredStatisticsIterator( filelist, timestamp);
-		
+
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
 }
@@ -125,7 +125,7 @@ std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::stri
 		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
 		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp());
 		TimeStamp tp = itr.timestamp();
-		for (; tp.defined(); tp = itr.next())
+		for (; tp >= 0; tp = itr.next())
 		{
 			rt.push_back( tp);
 		}

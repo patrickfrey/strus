@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Client interface for accessing a storage (read/write)
+/// \brief Client interface for accessing a storage of a search index (read/write)
 /// \file "storageClientInterface.hpp"
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
@@ -53,12 +53,12 @@ class AttributeReaderInterface;
 class AclReaderInterface;
 
 
-/// \brief Interface of a strus IR storage
+/// \brief Interface of a search index storage
 class StorageClientInterface
 {
 public:
 	/// \brief Destructor
-	/// \remark Should call call 'close()' but ignore errors there silently
+	/// \remark Should call 'close()' but ignore errors returned silently
 	virtual ~StorageClientInterface(){}
 
 	/// \brief Reload storage client with altered configuration
@@ -110,7 +110,7 @@ public:
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.
-	/// \param[in] maxpos maximum position visited. 
+	/// \param[in] maxpos maximum position visited.
 	/// \return the created iterator reference (with ownership)
 	/// \note This iterator use is mainly for browsing occurrencies fulfilling a condition without query involved
 	/// \remark The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings.
@@ -237,7 +237,7 @@ public:
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface (with ownership)
-	/// \note this function is thread safe, multiple concurrent transactions are allowed 
+	/// \note this function is thread safe, multiple concurrent transactions are allowed
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Creates an iterator on all storage term occurrence statistics

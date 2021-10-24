@@ -123,7 +123,7 @@ static bool isDigit( char ch)
 
 static bool isAlnum( char ch)
 {
-	return isAlpha(ch)|isDigit(ch)|(ch == '_');
+	return isAlpha(ch)||isDigit(ch)||(ch == '_');
 }
 
 static bool isSpace( char ch)

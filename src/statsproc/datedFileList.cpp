@@ -24,12 +24,11 @@
 
 using namespace strus;
 
-static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeStamp& timestamp, const std::string& extension)
+static std::string fileNameFromTimeStamp( const std::string& prefix, const TimeStamp timestamp, const std::string& extension)
 {
-	ErrorCode errcode = (ErrorCode)0;
-	std::string timestampstr( TimeStamp::tostring( timestamp, errcode));
-	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
-	return prefix + timestampstr + extension;
+	TimeStampString timestampstr = timeStampToString( timestamp);
+	if (!timestampstr.str[0]) throw std::runtime_error( _TXT("bad timestamp"));
+	return prefix + timestampstr.str + extension;
 }
 
 DatedFileList::DatedFileList( const std::string& directory_, const std::string& prefix_, const std::string& extension_)
@@ -44,9 +43,7 @@ DatedFileList::DatedFileList( const DatedFileList& o)
 
 std::string DatedFileList::newFileName()
 {
-	ErrorCode errcode = (ErrorCode)0;
-	TimeStamp newTimeStamp = TimeStamp::alloc( errcode);
-	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+	TimeStamp newTimeStamp = getCurrentTimeStamp();
 
 	std::string filename = fileNameFromTimeStamp( m_prefix, newTimeStamp, m_extension);
 	std::string rt = strus::joinFilePath( m_directory, filename);
@@ -138,9 +135,8 @@ DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, co
 	std::vector<std::string>::const_iterator fi = filelist_.begin(), fe = filelist_.end();
 	for (; fi != fe; ++fi)
 	{
-		ErrorCode errcode = (ErrorCode)0;
-		TimeStamp fileTimeStamp = TimeStamp::fromstring( fi->c_str() + prefixsize_, errcode);
-		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+		TimeStamp fileTimeStamp = timeStampFromString( fi->c_str() + prefixsize_);
+		if (fileTimeStamp < 0) throw std::runtime_error( _TXT("bad filename format, could not extract timestamp"));
 
 		m_ar.push_back( fileTimeStamp);
 	}
@@ -168,7 +164,7 @@ void DatedFileList::Iterator::loadBlob()
 	if (m_fileiter == m_filelist.end())
 	{
 		m_blob.clear();
-		m_timestamp = TimeStamp();
+		m_timestamp = -1;
 	}
 	else
 	{
@@ -177,9 +173,8 @@ void DatedFileList::Iterator::loadBlob()
 		int ec = strus::readFile( path, m_blob);
 		if (ec != 0) throw std::runtime_error(::strerror(ec));
 
-		ErrorCode errcode = (ErrorCode)0;
-		m_timestamp = TimeStamp::fromstring( m_fileiter->c_str() + m_prefixsize, errcode);
-		if (errcode) throw std::runtime_error( errorCodeToString( errcode));
+		m_timestamp = timeStampFromString( m_fileiter->c_str() + m_prefixsize);
+		if (m_timestamp < 0) throw std::runtime_error( _TXT("bad filename format, could not extract timestamp"));
 	}
 }
 
@@ -206,7 +201,7 @@ bool DatedFileList::Iterator::next()
 {
 	if (m_fileiter == m_filelist.end())
 	{
-		m_timestamp.clear();
+		m_timestamp = -1;
 		return false;
 	}
 	++m_fileiter;
@@ -218,19 +213,19 @@ TimeStamp DatedFileList::TimeStampIterator::next()
 {
 	if (m_itr == m_ar.end())
 	{
-		m_timestamp.clear();
+		m_timestamp = -1;
 		return m_timestamp;
 	}
 	++m_itr;
 	if (m_itr == m_ar.end())
 	{
-		m_timestamp.clear();
+		m_timestamp = -1;
 		return m_timestamp;
 	}
 	return m_timestamp = *m_itr;
 }
 
-std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp) const
+std::vector<std::string> DatedFileList::getFileNames( const TimeStamp timestamp) const
 {
 	if (m_directory.empty())
 	{
@@ -239,14 +234,12 @@ std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp
 	std::vector<std::string> rt;
 	std::vector<std::string> files;
 
-	ErrorCode errcode = (ErrorCode)0;
-	TimeStamp timestamp_current = TimeStamp::current( errcode);
-	if (errcode) throw std::runtime_error( errorCodeToString( errcode));
-	
+	TimeStamp timestamp_current = getCurrentTimeStamp();
+
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
 
-	std::string filterfilename_start = timestamp.defined() ? fileNameFromTimeStamp( m_prefix, timestamp, m_extension) : std::string();
+	std::string filterfilename_start = timestamp >= 0 ? fileNameFromTimeStamp( m_prefix, timestamp, m_extension) : std::string();
 	std::string filterfilename_end = fileNameFromTimeStamp( m_prefix, timestamp_current, m_extension);
 	std::vector<std::string>::const_iterator fi = files.begin(), fe = files.end();
 	for (; fi != fe; ++fi)
@@ -260,19 +253,19 @@ std::vector<std::string> DatedFileList::getFileNames( const TimeStamp& timestamp
 	return rt;
 }
 
-DatedFileList::Iterator DatedFileList::getIterator( const TimeStamp& timestamp) const
+DatedFileList::Iterator DatedFileList::getIterator( const TimeStamp timestamp) const
 {
 	std::vector<std::string> files = getFileNames( timestamp);
 	return Iterator( m_directory, m_prefix.size(), files);
 }
 
-DatedFileList::TimeStampIterator DatedFileList::getTimeStampIterator( const TimeStamp& timestamp) const
+DatedFileList::TimeStampIterator DatedFileList::getTimeStampIterator( const TimeStamp timestamp) const
 {
 	std::vector<std::string> files = getFileNames( timestamp);
 	return TimeStampIterator( m_prefix.size(), files);
 }
 
-void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)
+void DatedFileList::deleteFilesBefore( const TimeStamp timestamp)
 {
 	if (m_directory.empty())
 	{
@@ -295,9 +288,9 @@ void DatedFileList::deleteFilesBefore( const TimeStamp& timestamp)
 	}
 }
 
-std::string DatedFileList::loadBlob( const TimeStamp& timestamp) const
+std::string DatedFileList::loadBlob( const TimeStamp timestamp) const
 {
-	if (!timestamp.defined()) return std::string();
+	if (timestamp < 0) return std::string();
 	std::string filename = fileNameFromTimeStamp( m_prefix, timestamp, m_extension);
 	std::string filepath = strus::joinFilePath( m_directory, filename);
 	if (filepath.empty()) throw std::bad_alloc();
