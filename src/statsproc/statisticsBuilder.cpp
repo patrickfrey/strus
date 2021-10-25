@@ -37,11 +37,11 @@ class InPlaceStatisticsIterator
 	:public StatisticsIteratorInterface
 {
 public:
-	explicit InPlaceStatisticsIterator( std::vector<std::string>& ar_, const TimeStamp& timestamp = TimeStamp())
+	explicit InPlaceStatisticsIterator( std::vector<std::string>& ar_, const TimeStamp timestamp = -1)
 	{
 		while (!ar_.empty())
 		{
-			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), TimeStamp()));
+			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), timestamp));
 			ar_.pop_back();
 		}
 		std::reverse( m_ar.begin(), m_ar.end());
@@ -50,7 +50,7 @@ public:
 
 	virtual StatisticsMessage getNext()
 	{
-		if (m_itr == m_ar.end()) return StatisticsMessage( NULL, 0, TimeStamp(0));
+		if (m_itr == m_ar.end()) return StatisticsMessage( NULL, 0, -1);
 		return *m_itr++;
 	}
 
@@ -62,7 +62,7 @@ private:
 
 
 StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_)
-	:m_timestamp(0)
+	:m_timestamp(-1)
 	,m_dfChangeMap()
 	,m_nofDocumentsInsertedChange(0)
 	,m_maxchunksize(maxchunksize_)

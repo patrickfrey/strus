@@ -130,7 +130,7 @@ void DatedFileList::store( const std::vector<std::string>& blobs, const char* tm
 }
 
 DatedFileList::TimeStampIterator::TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_)
-	:m_timestamp()
+	:m_timestamp(-1)
 {
 	std::vector<std::string>::const_iterator fi = filelist_.begin(), fe = filelist_.end();
 	for (; fi != fe; ++fi)
@@ -179,14 +179,14 @@ void DatedFileList::Iterator::loadBlob()
 }
 
 DatedFileList::Iterator::Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_)
-	:m_timestamp(),m_blob(),m_directory(directory_),m_prefixsize(prefixsize_),m_filelist(filelist_)
+	:m_timestamp(-1),m_blob(),m_directory(directory_),m_prefixsize(prefixsize_),m_filelist(filelist_)
 {
 	m_fileiter = m_filelist.begin();
 	loadBlob();
 }
 
 DatedFileList::Iterator::Iterator()
-	:m_timestamp(),m_blob(),m_directory(),m_prefixsize(0),m_filelist()
+	:m_timestamp(-1),m_blob(),m_directory(),m_prefixsize(0),m_filelist()
 {
 	m_fileiter = m_filelist.begin();
 }

@@ -123,7 +123,7 @@ std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::stri
 	{
 		std::vector<TimeStamp> rt;
 		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
-		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp());
+		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp(-1));
 		TimeStamp tp = itr.timestamp();
 		for (; tp >= 0; tp = itr.next())
 		{

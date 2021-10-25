@@ -236,7 +236,7 @@ int main( int argc, const char* argv[])
 		}
 		else
 		{
-			strus::TimeStamp timeStampBeforeNow( ::time(NULL)-1);
+			strus::TimeStamp timeStampBeforeNow = strus::getCurrentTimeStamp() -1;
 			if (!builder->commit())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
@@ -246,7 +246,7 @@ int main( int argc, const char* argv[])
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
-			strus::TimeStamp timeStamp10MinutesBeforeNow( ::time(NULL)-600);
+			strus::TimeStamp timeStamp10MinutesBeforeNow = strus::getCurrentTimeStamp() - (600 * 1000);
 			builder->releaseStatistics( timeStamp10MinutesBeforeNow);
 		}
 		strus::StatisticsMessage msg = iterator->getNext();
