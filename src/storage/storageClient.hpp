@@ -18,6 +18,7 @@
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
+
 namespace strus {
 
 /// \brief Forward declaration
@@ -60,8 +61,8 @@ class StorageClient
 {
 public:
 	/// \param[in] database key value store database type used by this storage
-	/// \param[in] databaseConfig configuration string (not a filename!) of the database interface to create for this storage
 	/// \param[in] statisticsProc_ statistics message processor interface
+	/// \param[in] databaseConfig configuration string (not a filename!) of the database interface to create for this storage
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
 			const DatabaseInterface* database_,
@@ -87,7 +88,7 @@ public:
 
 	virtual StructureIteratorInterface*
 		createStructureIterator() const;
-	
+
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(
 			const MetaDataRestrictionInterface* restriction,
@@ -118,7 +119,7 @@ public:
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
 	virtual MetaDataRestrictionInterface* createMetaDataRestriction() const;
-	
+
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
 	virtual StatisticsIteratorInterface* createAllStatisticsIterator() const;

@@ -12,7 +12,9 @@
 #include "strus/storage/databaseOptions.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "strus/reference.hpp"
+#include "indexPacker.hpp"
 #include "databaseKey.hpp"
 #include "dataBlock.hpp"
 #include "posinfoBlock.hpp"
@@ -29,8 +31,6 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
 class MetaDataBlock;
 /// \brief Forward declaration
 class MetaDataDescription;
@@ -39,23 +39,88 @@ class InvTermBlock;
 /// \brief Forward declaration
 class DataBlock;
 
-struct DatabaseAdapter_StringIndex
+template <typename IndexType>
+struct IndexSerializer
+{};
+
+template <>
+struct IndexSerializer<strus::Index>
+{
+	static void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+	{strus::packIndex( buf, size, maxsize, idx);}
+	static void packIndex( std::string& buf, const Index& idx)
+	{strus::packIndex( buf, idx);}
+	static Index unpackIndex( const char*& ptr, const char* end)
+	{return strus::unpackIndex( ptr, end);}
+};
+
+template <>
+struct IndexSerializer<strus::GlobalCounter>
+{
+	static void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+	{strus::packGlobalCounter( buf, size, maxsize, idx);}
+	static void packIndex( std::string& buf, const Index& idx)
+	{strus::packGlobalCounter( buf, idx);}
+	static Index unpackIndex( const char*& ptr, const char* end)
+	{return strus::unpackIndex( ptr, end);}
+};
+
+template <typename IndexType>
+struct DatabaseAdapter_StringIndexTemplate
 {
 	class Cursor
 	{
 	public:
-		Cursor( char prefix_, const DatabaseClientInterface* database_);
+		Cursor( char prefix_, const DatabaseClientInterface* database_)
+			:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_)
+		{
+			if (!m_cursor.get()) throw std::runtime_error(_TXT("failed to create database cursor"));
+		}
 		Cursor( const Cursor& o)
 			:m_cursor(o.m_cursor),m_prefix(o.m_prefix){}
 
-		bool skip( const std::string& key, std::string& keyfound, Index& value);
-		bool skipPrefix( const std::string& key, std::string& keyfound, Index& value);
-		bool loadFirst( std::string& key, Index& value);
-		bool loadNext( std::string& key, Index& value);
-		bool loadNextPrefix( const std::string& key, std::string& keyfound, Index& value);
+		bool skip( const std::string& key, std::string& keyfound, IndexType& value)
+		{
+			std::string dbkey;
+			dbkey.push_back( m_prefix);
+			dbkey.append( key);
+			DatabaseCursorInterface::Slice reskey( m_cursor->seekUpperBound( dbkey.c_str(), dbkey.size(), 1));
+			return getData( reskey, keyfound, value);
+		}
+
+		bool skipPrefix( const std::string& key, std::string& keyfound, IndexType& value)
+		{
+			return skip( key, keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
+		}
+
+		bool loadFirst( std::string& key, IndexType& value)
+		{
+			DatabaseCursorInterface::Slice dbkey( m_cursor->seekFirst( &m_prefix, 1));
+			return getData( dbkey, key, value);
+		}
+
+		bool loadNext( std::string& key, IndexType& value)
+		{
+			DatabaseCursorInterface::Slice dbkey( m_cursor->seekNext());
+			return getData( dbkey, key, value);
+		}
+
+		bool loadNextPrefix( const std::string& key, std::string& keyfound, IndexType& value)
+		{
+			return loadNext( keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
+		}
 
 	private:
-		bool getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value);
+		bool getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, IndexType& value)
+		{
+			if (!dbkey.defined()) return false;
+			key = std::string( dbkey.ptr()+1, dbkey.size()-1);
+			DatabaseCursorInterface::Slice blkslice = m_cursor->value();
+			char const* vi = blkslice.ptr();
+			char const* ve = vi + blkslice.size();
+			value = IndexSerializer<IndexType>::unpackIndex( vi, ve);
+			return true;
+		}
 
 	private:
 		Reference<DatabaseCursorInterface> m_cursor;
@@ -70,8 +135,26 @@ struct DatabaseAdapter_StringIndex
 		Reader( const Reader& o)
 			:m_prefix(o.m_prefix),m_database(o.m_database){}
 
-		Index get( const std::string& key) const;
-		bool load( const std::string& key, Index& value) const;
+		IndexType get( const std::string& key) const
+		{
+			IndexType rt;
+			if (!Reader::load( key, rt)) return 0;
+			return rt;
+		}
+
+		bool load( const std::string& key, IndexType& value) const
+		{
+			std::string keystr;
+			keystr.push_back( m_prefix);
+			keystr.append( key);
+			std::string valuestr;
+			value = 0;
+			if (!m_database->readValue( keystr.c_str(), keystr.size(), valuestr, DatabaseOptions())) return false;
+
+			char const* cc = valuestr.c_str();
+			value = IndexSerializer<IndexType>::unpackIndex( cc, cc + valuestr.size());
+			return true;
+		}
 
 	private:
 		char m_prefix;
@@ -86,9 +169,33 @@ struct DatabaseAdapter_StringIndex
 		Writer( const Writer& o)
 			:m_prefix(o.m_prefix),m_database(o.m_database){}
 
-		void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
-		void remove( DatabaseTransactionInterface* transaction, const std::string& key);
-		void storeImm( const std::string& key, const Index& value);
+		void store( DatabaseTransactionInterface* transaction, const std::string& key, const IndexType& value)
+		{
+			std::string keystr;
+			keystr.push_back( m_prefix);
+			keystr.append( key);
+			std::string valuestr;
+			IndexSerializer<IndexType>::packIndex( valuestr, value);
+			transaction->write( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
+		}
+
+		void remove( DatabaseTransactionInterface* transaction, const std::string& key)
+		{
+			std::string keystr;
+			keystr.push_back( m_prefix);
+			keystr.append( key);
+			transaction->remove( keystr.c_str(), keystr.size());
+		}
+
+		void storeImm( const std::string& key, const IndexType& value)
+		{
+			std::string keystr;
+			keystr.push_back( m_prefix);
+			keystr.append( key);
+			std::string valuestr;
+			IndexSerializer<IndexType>::packIndex( valuestr, value);
+			m_database->writeImm( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
+		}
 
 	private:
 		char m_prefix;
@@ -120,6 +227,10 @@ struct DatabaseAdapter_StringIndex
 	};
 };
 
+typedef DatabaseAdapter_StringIndexTemplate<Index> DatabaseAdapter_StringIndex;
+typedef DatabaseAdapter_StringIndexTemplate<GlobalCounter> DatabaseAdapter_StringGlobalCounter;
+
+
 class DatabaseAdapter_IndexString
 {
 public:
@@ -134,7 +245,7 @@ public:
 		bool defined()		{return m_prefix != 0;}
 
 		bool load( const Index& key, std::string& value) const;
-	
+
 	private:
 		char m_prefix;
 		const DatabaseClientInterface* m_database;
@@ -175,36 +286,36 @@ public:
 };
 
 
-template <char KeyPrefix>
+template <char KeyPrefix, typename IndexType>
 struct DatabaseAdapter_TypedStringIndex
 {
 public:
 	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
+		:public DatabaseAdapter_StringIndexTemplate<IndexType>::Cursor
 	{
 	public:
 		Cursor( const DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( KeyPrefix, database_){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Cursor( KeyPrefix, database_){}
 		Cursor( const Cursor& o)
-			:DatabaseAdapter_StringIndex::Cursor(o){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Cursor(o){}
 	};
 	class Reader
-		:public DatabaseAdapter_StringIndex::Reader
+		:public DatabaseAdapter_StringIndexTemplate<IndexType>::Reader
 	{
 	public:
 		Reader( const DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Reader( KeyPrefix, database_){}
 		Reader( const Reader& o)
-			:DatabaseAdapter_StringIndex::Reader(o){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Reader(o){}
 	};
 	class Writer
-		:public DatabaseAdapter_StringIndex::Writer
+		:public DatabaseAdapter_StringIndexTemplate<IndexType>::Writer
 	{
 	public:
 		Writer( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Writer( KeyPrefix, database_){}
 		Writer( const Writer& o)
-			:DatabaseAdapter_StringIndex::Writer(o){}
+			:DatabaseAdapter_StringIndexTemplate<IndexType>::Writer(o){}
 	};
 	class ReadWriter
 		:public Reader
@@ -253,31 +364,31 @@ public:
 };
 
 struct DatabaseAdapter_TermType
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermTypePrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermTypePrefix,Index>
 {};
 
 struct DatabaseAdapter_TermValue
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermValuePrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermValuePrefix,Index>
 {};
 
 struct DatabaseAdapter_StructType
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::StructTypePrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::StructTypePrefix,Index>
 {};
 
 struct DatabaseAdapter_DocId
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::DocIdPrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::DocIdPrefix,Index>
 {};
 
 struct DatabaseAdapter_Variable
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::VariablePrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::VariablePrefix,Index>
 {};
 
 struct DatabaseAdapter_AttributeKey
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::AttributeKeyPrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::AttributeKeyPrefix,Index>
 {};
 
 struct DatabaseAdapter_UserName
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::UserNamePrefix>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::UserNamePrefix,Index>
 {};
 
 
@@ -514,7 +625,7 @@ struct DatabaseAdapter_PosinfoBlock
 		,public Writer
 	{
 	public:
-		WriteCursor( DatabaseClientInterface* database_, 
+		WriteCursor( DatabaseClientInterface* database_,
 				const Index& typeno_, const Index& termno_)
 			:Cursor(database_,typeno_,termno_)
 			,Writer(database_,typeno_,termno_){}
@@ -565,7 +676,7 @@ struct DatabaseAdapter_FfBlock
 		,public Writer
 	{
 	public:
-		WriteCursor( DatabaseClientInterface* database_, 
+		WriteCursor( DatabaseClientInterface* database_,
 				const Index& typeno_, const Index& termno_)
 			:Cursor(database_,typeno_,termno_)
 			,Writer(database_,typeno_,termno_){}
