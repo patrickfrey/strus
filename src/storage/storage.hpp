@@ -42,9 +42,9 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const;
 
-	virtual const char* getConfigDescription( const ConfigType& type) const;
+	virtual const char* getConfigDescription() const;
 
-	virtual const char** getConfigParameters( const ConfigType& type) const;
+	virtual const char** getConfigParameters() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

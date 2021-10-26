@@ -247,7 +247,7 @@ int main( int argc, const char* argv[])
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
 			strus::TimeStamp timeStamp10MinutesBeforeNow = strus::getCurrentTimeStamp() - (600 * 1000);
-			builder->releaseStatistics( timeStamp10MinutesBeforeNow);
+			statsproc->releaseStatistics( storagePath, timeStamp10MinutesBeforeNow);
 		}
 		strus::StatisticsMessage msg = iterator->getNext();
 		for (; !msg.empty(); msg = iterator->getNext())

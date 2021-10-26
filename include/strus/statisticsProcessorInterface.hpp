@@ -67,6 +67,11 @@ public:
 	/// \param[in] config configuration string of the map instance created
 	/// \return the map object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsMapInterface* createMap( const std::string& config) const=0;
+
+	/// \brief Release statistics that are older than the specified timestamp
+	/// \param[in] path file path where the the statistic blobs are stored
+	/// \param[in] timestamp minimum data a surviving (not deleted) statistics message should have
+	virtual void releaseStatistics( const std::string& path, const TimeStamp& timestamp) const=0;
 };
 
 }//namespace

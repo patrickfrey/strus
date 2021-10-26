@@ -18,6 +18,9 @@ class FileLocatorInterface;
 ///\brief Forward declaration
 class ErrorBufferInterface;
 
+#define STATISTICS_FILE_PREFIX 		"stats_"
+#define STATISTICS_FILE_EXTENSION 	".bin"
+
 class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
@@ -40,7 +43,9 @@ public:
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
 	virtual StatisticsMapInterface* createMap( const std::string& config) const;
-	
+
+	virtual void releaseStatistics( const std::string& path, const TimeStamp& timestamp) const;
+
 private:
 	std::string getFullPath( const std::string& path) const;
 

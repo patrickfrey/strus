@@ -44,9 +44,9 @@ public:
 
 	virtual bool restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const;
 
-	virtual const char* getConfigDescription( const ConfigType& type) const;
+	virtual const char* getConfigDescription() const;
 
-	virtual const char** getConfigParameters( const ConfigType& type) const;
+	virtual const char** getConfigParameters() const;
 
 private:
 	bool expandDatabaseFullPath( std::string& path) const;

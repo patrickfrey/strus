@@ -47,10 +47,6 @@ public:
 
 	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
-
-	/// \brief Release statistics that are older than a defined timestamp
-	/// \param[in] timestamp minimum data a surviving (not deleted) statistics message should have
-	virtual void releaseStatistics( const TimeStamp& timestamp)=0;
 };
 }//namespace
 #endif

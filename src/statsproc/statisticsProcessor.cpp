@@ -145,5 +145,13 @@ StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& pat
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading a change message blob: %s"), *m_errorhnd, StatisticsMessage());
 }
 
-
+void StatisticsProcessor::releaseStatistics( const std::string& path, const TimeStamp& timestamp) const
+{
+	try
+	{
+		DatedFileList fl( path/*directory*/, STATISTICS_FILE_PREFIX, STATISTICS_FILE_EXTENSION);
+		fl.deleteFilesBefore( timestamp);
+	}
+	CATCH_ERROR_MAP( _TXT("error release statistics: %s"), *m_errorhnd);
+}
 

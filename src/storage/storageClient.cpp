@@ -90,11 +90,21 @@ StorageClient::StorageClient(
 	init( databaseConfig);
 }
 
+StorageClient::~StorageClient()
+{
+	if (!m_close_called) try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
+	std::free( m_cfgparam);
+}
+
 static char const** getConfigParamList( const DatabaseInterface* db)
 {
 	char const** rt;
 	std::vector<const char*> cfgar;
-	char const** cfg = db->getConfigParameters( DatabaseInterface::CmdCreateClient);
+	char const** cfg = db->getConfigParameters();
 	for (int ci = 0; cfg[ci]; ++ci) cfgar.push_back( cfg[ci]);
 	cfgar.push_back( "acl");
 	cfgar.push_back( "statsproc");
@@ -185,16 +195,6 @@ bool StorageClient::reload( const std::string& databaseConfig)
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' reloading configuration: %s"), MODULENAME, *m_errorhnd, false);
 }
 
-StorageClient::~StorageClient()
-{
-	if (!m_close_called) try
-	{
-		storeVariables();
-	}
-	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
-	std::free( m_cfgparam);
-}
-
 long StorageClient::diskUsage() const
 {
 	return m_database->diskUsage();
@@ -283,14 +283,6 @@ static Index versionNo( Index major, Index minor)
 	return (major * 1000) + minor;
 }
 
-static unsigned int versionIndex( strus::Index version)
-{
-	static const Index ar[] = {0004,0};
-	unsigned int ii=0;
-	for (;ar[ii] && ar[ii] < version; ++ii){}
-	return ii;
-}
-
 void StorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
@@ -322,11 +314,11 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	{
 		version_ = versionNo( 0, 4);
 	}
-	if (versionIndex( version_) != versionIndex( versionNo( STRUS_STORAGE_VERSION_MAJOR, STRUS_STORAGE_VERSION_MINOR)))
+	if (version_ / 1000 != STRUS_STORAGE_VERSION_MAJOR || version_ / 1000 > STRUS_STORAGE_VERSION_MINOR)
 	{
 		unsigned int major = version_ / 1000;
 		unsigned int minor = version_ % 1000;
-		throw strus::runtime_error( _TXT( "incompatible storage version %u.%u software is %u.%u. please rebuild your storage"), major, minor, (unsigned int)STRUS_STORAGE_VERSION_MAJOR, (unsigned int)STRUS_STORAGE_VERSION_MINOR);
+		throw strus::runtime_error( _TXT( "incompatible storage version %u.%u software is %u.%u."), major, minor, (unsigned int)STRUS_STORAGE_VERSION_MAJOR, (unsigned int)STRUS_STORAGE_VERSION_MINOR);
 	}
 	(void)varstor.load( "UserNo", next_userno_);
 	if (varstor.load( "ByteOrderMark", bom))

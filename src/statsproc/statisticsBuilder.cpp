@@ -10,6 +10,7 @@
 
 #include "statisticsBuilder.hpp"
 #include "statisticsHeader.hpp"
+#include "statisticsProcessor.hpp"
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/statisticsIteratorInterface.hpp"
@@ -66,7 +67,7 @@ StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxc
 	,m_dfChangeMap()
 	,m_nofDocumentsInsertedChange(0)
 	,m_maxchunksize(maxchunksize_)
-	,m_datedFileList( path_/*directory*/, "stats_"/*prefix*/, ".bin"/*extension*/)
+	,m_datedFileList( path_/*directory*/, STATISTICS_FILE_PREFIX, STATISTICS_FILE_EXTENSION)
 	,m_errorhnd(errorhnd_)
 {
 	if (m_maxchunksize <= sizeof(StatisticsHeader)) throw std::runtime_error(_TXT("Maximum block size for statistics builder too small"));
@@ -258,14 +259,6 @@ StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message builder create iterator: %s"), *m_errorhnd, NULL);
 }
 
-void StatisticsBuilder::releaseStatistics( const TimeStamp& timestamp_)
-{
-	try
-	{
-		m_datedFileList.deleteFilesBefore( timestamp_);
-	}
-	CATCH_ERROR_MAP( _TXT("error release statistics: %s"), *m_errorhnd);
-}
 
 
 

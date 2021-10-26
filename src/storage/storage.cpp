@@ -107,29 +107,15 @@ bool Storage::createStorage(
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
 }
 
-const char* Storage::getConfigDescription( const ConfigType& type) const
+const char* Storage::getConfigDescription() const
 {
-	switch (type)
-	{
-		case CmdCreateClient:
-			return "cachedterms=<file with list of terms to cache>";
-
-		case CmdCreate:
-			return "acl=<yes/no, yes if users with different access rights exist>";
-	}
-	return 0;
+	return "cachedterms=<file with list of terms to cache (only for client)>; acl=<yes/no, yes if users with different access rights exist (only on creating the storage)>";
 }
 
-const char** Storage::getConfigParameters( const ConfigType& type) const
+const char** Storage::getConfigParameters() const
 {
-	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
-	static const char* keys_CreateStorage[]		= {"acl", 0};
-	switch (type)
-	{
-		case CmdCreateClient:	return keys_CreateStorageClient;
-		case CmdCreate:		return keys_CreateStorage;
-	}
-	return 0;
+	static const char* keys[] = {"cachedterms", "acl", 0};
+	return keys;
 }
 
 

@@ -45,8 +45,6 @@ public:
 
 	virtual StatisticsIteratorInterface* createIteratorAndRollback();
 
-	virtual void releaseStatistics( const TimeStamp& timestamp);
-
 private:
 	std::string newContent();
 	void clear();

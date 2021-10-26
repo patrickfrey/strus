@@ -285,33 +285,14 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	CATCH_ERROR_MAP_RETURN( _TXT("error destroying database: %s"), *m_errorhnd, false);
 }
 
-const char* Database::getConfigDescription( const ConfigType& type) const
+const char* Database::getConfigDescription() const
 {
-	switch (type)
-	{
-		case CmdCreateClient:
-			return "path=<LevelDB storage path>\ncreate=<yes/no, yes=do create if database does not exist yet>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>\nautocompact=<yes/no for implicitely doing a storage compaction after every commit or not, default is yes>";
-
-		case CmdCreate:
-			return "path=<LevelDB storage path>\ncompression=<yes/no>";
-
-		case CmdDestroy:
-			return "path=<LevelDB storage path>";
-	}
-	return 0;
+	return "path=<LevelDB storage path>\ncreate=<yes/no, yes=do create if database does not exist yet>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>\nautocompact=<yes/no for implicitely doing a storage compaction after every commit or not, default is yes>";
 }
 
-const char** Database::getConfigParameters( const ConfigType& type) const
+const char** Database::getConfigParameters() const
 {
-	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size","autocompact",0};
-	static const char* keys_CreateDatabase[] = {"path","compression", 0};
-	static const char* keys_DestroyDatabase[] = {"path", 0};
-	switch (type)
-	{
-		case CmdCreateClient:	return keys_CreateDatabaseClient;
-		case CmdCreate:		return keys_CreateDatabase;
-		case CmdDestroy:	return keys_DestroyDatabase;
-	}
-	return 0;
+	static const char* ar[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size","autocompact",0};
+	return ar;
 }
 
