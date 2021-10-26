@@ -42,6 +42,10 @@ public:
 	virtual bool createStorage(
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
+
+	/// \brief Get the list of known configuration parameter keys
+	///	for verification of the configuration by programs using this storage implementation.
+	virtual const char** getConfigParameters() const=0;
 };
 
 }//namespace

@@ -34,6 +34,10 @@ public:
 	/// \brief Get the disk usage in kilo byte units (approximately) of the storage
 	virtual long diskUsage() const=0;
 
+	/// \brief Get a list of configuration parameters that can be used in reload (e.g. same as for createClient)
+	/// \return NULL terminated array of config parameters
+	virtual const char** getConfigParameters() const;
+
 	/// \brief Get the interpreted configuration this storage client was created with
 	/// \return the configuration as string
 	virtual std::string config() const=0;

@@ -149,6 +149,8 @@ private:
 	KeyMapInv m_termTypeMapInv;				///< inverse map of term types
 	KeyMapInv m_termValueMapInv;				///< inverse map of term values
 
+	std::map<std::string, Index> m_termTypeCache;		///< cache for used term types, prevents a lock in the immediate allocation
+
 	DocumentFrequencyMap m_explicit_dfmap;			///< df map for features not in search index with explicit df change
 
 	int m_nofDeletedDocuments;				///< total adjustment for the number of documents deleted

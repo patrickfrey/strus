@@ -77,7 +77,18 @@ Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
-	return m_termTypeMap.getOrCreate( string_conv::tolower( name));
+	std::string name_normalized = string_conv::tolower( name);
+	auto ti = m_termTypeCache.find( name_normalized);
+	if (ti == m_termTypeCache.end())
+	{
+		Index termTypeNo = m_termTypeMap.getOrCreate( name_normalized);
+		m_termTypeCache.insert( {name_normalized,termTypeNo});
+		return termTypeNo;
+	}
+	else
+	{
+		return ti->second;
+	}
 }
 
 Index StorageTransaction::getOrCreateStructType( const std::string& name)
@@ -470,6 +481,7 @@ void StorageTransaction::reset()
 	m_termTypeMapInv.clear();
 	m_termValueMapInv.clear();
 
+	m_termTypeCache.clear();
 	m_explicit_dfmap.clear();
 
 	m_nofDeletedDocuments = 0;

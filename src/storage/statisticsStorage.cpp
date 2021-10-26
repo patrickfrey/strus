@@ -72,7 +72,7 @@ bool Storage::createStorage(
 		strus::local_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
-		DatabaseAdapter_Variable::Writer stor( database.get());
+		DatabaseAdapter_Variable<GlobalCounter>::Writer stor( database.get());
 
 		stor.store( transaction.get(), "TermNo", 1);
 		stor.store( transaction.get(), "TypeNo", 1);
@@ -89,5 +89,11 @@ bool Storage::createStorage(
 		return transaction->commit();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
+}
+
+const char** StatisticsStorage::getConfigParameters( const ConfigType& type) const
+{
+	static const char ar[] = {NULL};
+	return 0;
 }
 

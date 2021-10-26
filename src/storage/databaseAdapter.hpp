@@ -379,8 +379,9 @@ struct DatabaseAdapter_DocId
 	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::DocIdPrefix,Index>
 {};
 
+template <typename IndexType>
 struct DatabaseAdapter_Variable
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::VariablePrefix,Index>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::VariablePrefix,IndexType>
 {};
 
 struct DatabaseAdapter_AttributeKey

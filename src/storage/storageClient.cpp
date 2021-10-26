@@ -305,7 +305,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	Index next_userno_;
 	Index version_;
 
-	DatabaseAdapter_Variable::Reader varstor( database_);
+	DatabaseAdapter_Variable<Index>::Reader varstor( database_);
 	if (!varstor.load( "TermNo", next_termno_)
 	||  !varstor.load( "TypeNo", next_typeno_)
 	||  !varstor.load( "DocNo", next_docno_)
@@ -358,7 +358,7 @@ void StorageClient::getVariablesWriteBatch(
 		DatabaseTransactionInterface* transaction,
 		int nof_documents_incr)
 {
-	DatabaseAdapter_Variable::Writer varstor( m_database.get());
+	DatabaseAdapter_Variable<Index>::Writer varstor( m_database.get());
 	varstor.store( transaction, "TermNo", m_next_termno.value());
 	varstor.store( transaction, "TypeNo", m_next_typeno.value());
 	varstor.store( transaction, "StructNo", m_next_structno.value());

@@ -99,6 +99,55 @@ public:
 	/// \note the method does not have to be called necessarily
 	/// \note it calls compactDatabase of the underlying database and can therefore last some time (some minutes in case of leveldb after large inserts).
 	virtual void compaction();
+
+public:/*StorageTransaction*/
+	void getVariablesWriteBatch(
+			DatabaseTransactionInterface* transaction,
+			int nof_documents_incr);
+
+	void declareNofDocumentsInserted( int incr);
+
+	KeyAllocatorInterface* createTypenoAllocator();
+
+	Index allocTypenoImm( const std::string& name);		///< immediate allocation of a term type
+
+public:/*StorageTransaction,StorageMetaDataTransaction*/
+	friend class TransactionLock;
+	class TransactionLock
+	{
+	public:
+		TransactionLock( StorageClient* storage_)
+			:m_mutex(&storage_->m_transaction_mutex)
+		{
+			m_mutex->lock();
+		}
+		~TransactionLock()
+		{
+			m_mutex->unlock();
+		}
+
+	private:
+		strus::mutex* m_mutex;
+	};
+
+private:
+	void init( const std::string& databaseConfig);
+	void loadVariables( DatabaseClientInterface* database_);
+	void storeVariables();
+
+private:
+	const DatabaseInterface* m_dbtype;			///< type of key value store database interface
+	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
+	char const** m_cfgparam;				///< list of configuration parameters
+	strus::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
+	strus::AtomicCounter<GlobalCounter> m_nof_documents;	///< number of documents in the collection
+
+	strus::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	strus::mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno
+
+	bool m_close_called;					///< true if close was already called
+	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }//namespace

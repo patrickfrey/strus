@@ -40,6 +40,9 @@ public:
 	virtual bool createStorage(
 			const std::string& configsource,
 			const DatabaseInterface* database) const;
+
+	virtual const char** getConfigParameters() const;
+
 private:
 	ErrorBufferInterface* m_errorhnd;
 	const FileLocatorInterface* m_filelocator;

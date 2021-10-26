@@ -14,6 +14,7 @@
 #include "strus/base/thread.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include "strus/base/atomic.hpp"
+#include "strus/base/string_view.hpp"
 #include "strus/storage/termStatistics.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
@@ -168,8 +169,6 @@ public:
 	virtual StorageDumpInterface* createDump(
 			const std::string& keyprefix) const;
 
-	virtual const char** getConfigParameters() const;
-
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
 	virtual void close();
@@ -178,6 +177,7 @@ public:
 	virtual long diskUsage() const;
 	virtual BlockStatistics blockStatistics() const;
 
+	virtual const char** getConfigParameters() const;
 	virtual std::string config() const;
 
 public:/*Storage (constructor)*/

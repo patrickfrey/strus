@@ -88,7 +88,7 @@ bool Storage::createStorage(
 		strus::local_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
-		DatabaseAdapter_Variable::Writer stor( database.get());
+		DatabaseAdapter_Variable<Index>::Writer stor( database.get());
 	
 		stor.store( transaction.get(), "TermNo", 1);
 		stor.store( transaction.get(), "TypeNo", 1);

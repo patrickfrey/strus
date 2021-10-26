@@ -75,3 +75,6 @@ tests/scalarfunc/src/scalarFunction
 # deploy to obs tar:
 strus-*.tar.gz
 
+# KDevelop project
+.kdev4/
+strus.kdev4
