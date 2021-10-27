@@ -56,10 +56,17 @@ public:
 			const std::string& type,
 			const std::string& term) const=0;
 
-	/// \brief Create an insert/update transaction object
-	/// \return the created transaction interface (with ownership)
-	/// \note this function is thread safe, multiple concurrent transactions are allowed
-	virtual StatisticsStorageTransactionInterface* createTransaction()=0;
+	/// \brief Get the latest timestamp associated with the storage name (putStatisticsMessage)
+	/// \param[in] storagename name of the storage
+	/// \param[in] timestamp timestamp associated with the storage name
+	virtual TimeStamp storageTimeStamp( const std::string& storagename) const=0;
+
+	/// \brief Store the contents of a statistics message, related to a storage transaction, into the statistics storage
+	/// \param[in] msg statistics message
+	/// \param[in] storagename name of the storage, these statistics came from. Stores the timestamp associated with the storage name if it is higher than the previous.
+	/// \param[in] timestamp timestamp of the statistics message
+	/// \return true on success, false on failure (error buffer is initialized with error)
+	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storagename, const TimeStamp timestamp) const=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface

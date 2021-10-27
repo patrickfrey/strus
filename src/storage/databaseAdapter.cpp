@@ -299,6 +299,84 @@ void DatabaseAdapter_DocFrequency::storeImm( DatabaseClientInterface* database, 
 	database->writeImm( dbkey.ptr(), dbkey.size(), dfstr.c_str(), dfstr.size());
 }
 
+DatabaseAdapter_DocFrequencyStatistics::Cursor::Cursor( const DatabaseClientInterface* database_)
+	:m_cursor( database_->createCursor( DatabaseOptions()))
+{
+	if (!m_cursor.get()) throw std::runtime_error(_TXT("failed to create database cursor"));
+}
+
+bool DatabaseAdapter_DocFrequencyStatistics::Cursor::loadFirst( Index& typeno, std::string& termstr, GlobalCounter& df)
+{
+	char prefix = (char)KeyPrefix;
+	DatabaseCursorInterface::Slice key( m_cursor->seekFirst( &prefix, 1));
+	return getData( key, typeno, termstr, df);
+}
+
+bool DatabaseAdapter_DocFrequencyStatistics::Cursor::loadNext( Index& typeno, std::string& termstr, GlobalCounter& df)
+{
+	DatabaseCursorInterface::Slice key( m_cursor->seekNext());
+	return getData( key, typeno, termstr, df);
+}
+
+bool DatabaseAdapter_DocFrequencyStatistics::Cursor::getData( const DatabaseCursorInterface::Slice& key, Index& typeno, std::string& termstr, GlobalCounter& df)
+{
+	if (!key.defined()) return false;
+	char const* ki = key.ptr()+1;
+	char const* ke = ki + key.size()-1;
+	typeno = unpackIndex( ki, ke);
+	termstr.clear();
+	termstr.append( ki, ke-ki);
+	DatabaseCursorInterface::Slice blkslice = m_cursor->value();
+	char const* vi = blkslice.ptr();
+	char const* ve = vi + blkslice.size();
+	df = unpackGlobalCounter( vi, ve);
+	return true;
+}
+
+GlobalCounter DatabaseAdapter_DocFrequencyStatistics::get( const DatabaseClientInterface* database, const Index& typeno, const std::string& termstr)
+{
+	GlobalCounter rt;
+	if (!load( database, typeno, termstr, rt)) return 0;
+	return rt;
+}
+
+bool DatabaseAdapter_DocFrequencyStatistics::load( const DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, GlobalCounter& df)
+{
+	DatabaseKey dbkey( KeyPrefix, typeno);
+	dbkey.addElem( termstr);
+	std::string dfstr;
+	df = 0;
+	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, DatabaseOptions().useCache())) return false;
+
+	char const* cc = dfstr.c_str();
+	df = unpackGlobalCounter( cc, cc + dfstr.size());
+	return true;
+}
+
+void DatabaseAdapter_DocFrequencyStatistics::store( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr, const GlobalCounter& df)
+{
+	DatabaseKey dbkey( KeyPrefix, typeno);
+	dbkey.addElem( termstr);
+	std::string dfstr;
+	packGlobalCounter( dfstr, df);
+	transaction->write( dbkey.ptr(), dbkey.size(), dfstr.c_str(), dfstr.size());
+}
+
+void DatabaseAdapter_DocFrequencyStatistics::remove( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr)
+{
+	DatabaseKey dbkey( KeyPrefix, typeno);
+	dbkey.addElem( termstr);
+	transaction->remove( dbkey.ptr(), dbkey.size());
+}
+
+void DatabaseAdapter_DocFrequencyStatistics::storeImm( DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, const GlobalCounter& df)
+{
+	DatabaseKey dbkey( KeyPrefix, typeno);
+	dbkey.addElem( termstr);
+	std::string dfstr;
+	packGlobalCounter( dfstr, df);
+	database->writeImm( dbkey.ptr(), dbkey.size(), dfstr.c_str(), dfstr.size());
+}
 
 bool DatabaseAdapter_MetaDataDescr::load( const DatabaseClientInterface* database, std::string& descr)
 {

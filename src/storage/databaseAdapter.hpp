@@ -392,6 +392,10 @@ struct DatabaseAdapter_UserName
 	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::UserNamePrefix,Index>
 {};
 
+struct DatabaseAdapter_StorageTimestamp
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TimestampPrefix,GlobalCounter>
+{};
+
 
 struct DatabaseAdapter_DataBlock
 {
@@ -1044,6 +1048,32 @@ public:
 	static void storeImm( DatabaseClientInterface* database, const Index& typeno, const Index& termno, const Index& df);
 private:
 	enum {KeyPrefix=DatabaseKey::DocFrequencyPrefix};
+};
+
+class DatabaseAdapter_DocFrequencyStatistics
+{
+public:
+	class Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_);
+
+		bool loadFirst( Index& typeno, std::string& termstr, GlobalCounter& df);
+		bool loadNext( Index& typeno, std::string& termstr, GlobalCounter& df);
+	private:
+		bool getData( const DatabaseCursorInterface::Slice& key, Index& typeno, std::string& termstr, GlobalCounter& df);
+
+	private:
+		Reference<DatabaseCursorInterface> m_cursor;
+	};
+public:
+	static GlobalCounter get( const DatabaseClientInterface* database, const Index& typeno, const std::string& termstr);
+	static bool load( const DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, GlobalCounter& df);
+	static void store( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr, const GlobalCounter& df);
+	static void remove( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr);
+	static void storeImm( DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, const GlobalCounter& df);
+private:
+	enum {KeyPrefix=DatabaseKey::GlobalDocFrequencyPrefix};
 };
 
 class DatabaseAdapter_MetaDataDescr

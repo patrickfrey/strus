@@ -23,7 +23,6 @@
 #include "private/databaseClientUndefinedStub.hpp"
 #include "databaseKey.hpp"
 #include "byteOrderMark.hpp"
-#include "statisticsStorageTransaction.hpp"
 #include "extractKeyValueData.hpp"
 #include "databaseAdapter.hpp"
 #include "indexPacker.hpp"
@@ -91,13 +90,6 @@ void StaticticsStorageClient::init( const std::string& databaseConfig)
 
 	m_database = db;
 	m_close_called = false;
-	if (m_statisticsProc)
-	{
-		if (!extractStringFromConfigString( m_statisticsPath, databaseConfigCopy, "path", m_errorhnd))
-		{
-			throw strus::runtime_error(_TXT("variable '%s' not defined in configuration"), "path");
-		}
-	}
 	loadVariables( m_database.get());
 }
 
@@ -209,12 +201,39 @@ Index StaticticsStorageClient::getTermType( const std::string& name) const
 	return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
-StaticticsStorageTransactionInterface* StaticticsStorageClient::createTransaction()
+Index StaticticsStorageClient::allocTypenoImm( const std::string& name)
+{
+	Index rt;
+	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
+
+	strus::scoped_lock lock( m_immalloc_typeno_mutex);
+	if (!stor.load( name, rt))
+	{
+		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
+	}
+	return rt;
+}
+
+Index StaticticsStorageClient::nofDocuments() const
+{
+	return m_nof_documents.value();
+}
+
+Index StaticticsStorageClient::documentFrequency( const std::string& type, const std::string& term) const
 {
 	try
 	{
-		return new StaticticsStorageTransaction( this, m_next_typeno.value(), m_errorhnd);
+		Index typeno = getTermType( type);
+		if (typeno)
+		{
+			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		}
+		else
+		{
+			return 0;
+		}
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
+
 

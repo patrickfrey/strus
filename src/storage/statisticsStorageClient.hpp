@@ -20,8 +20,6 @@
 namespace strus {
 
 /// \brief Forward declaration
-class StatisticsStorageTransactionInterface;
-/// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseInterface;
@@ -52,7 +50,9 @@ public:
 			const std::string& type,
 			const std::string& term) const;
 
-	virtual StatisticsStorageTransactionInterface* createTransaction();
+	virtual TimeStamp storageTimeStamp( const std::string& storagename) const;
+
+	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storagename, const TimeStamp timestamp) const;
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
@@ -60,37 +60,11 @@ public:
 
 	virtual void compaction();
 
-public:/*StorageTransaction*/
+private:
 	void getVariablesWriteBatch(
 			DatabaseTransactionInterface* transaction,
 			int nof_documents_incr);
 
-	void declareNofDocumentsInserted( int incr);
-
-	KeyAllocatorInterface* createTypenoAllocator();
-
-	Index allocTypenoImm( const std::string& name);		///< immediate allocation of a term type
-
-public:/*StorageTransaction,StorageMetaDataTransaction*/
-	friend class TransactionLock;
-	class TransactionLock
-	{
-	public:
-		TransactionLock( StorageClient* storage_)
-			:m_mutex(&storage_->m_transaction_mutex)
-		{
-			m_mutex->lock();
-		}
-		~TransactionLock()
-		{
-			m_mutex->unlock();
-		}
-
-	private:
-		strus::mutex* m_mutex;
-	};
-
-private:
 	void init( const std::string& databaseConfig);
 	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();

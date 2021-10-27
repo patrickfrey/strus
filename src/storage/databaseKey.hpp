@@ -44,8 +44,12 @@ public:
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
 
-		MetaDataDescrPrefix='M'	///< []                        ->  [string]
+		MetaDataDescrPrefix='M',///< []                        ->  [string]
+
+		GlobalDocFrequencyPrefix='F',	///< [typeno,term string]      ->  [global counter]
+		TimestampPrefix='W'		///< [storagename string]      ->  [timestamp]
 	};
+
 	static const char* keyPrefixName( KeyPrefix i)
 	{
 		switch (i)
@@ -75,6 +79,9 @@ public:
 			case DocFrequencyPrefix: return "term document frequency";
 
 			case MetaDataDescrPrefix: return "meta data description";
+
+			case GlobalDocFrequencyPrefix: return "global term document frequency";
+			case TimestampPrefix: return "storage timestamp";
 		}
 		return 0;
 	}
