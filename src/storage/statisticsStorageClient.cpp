@@ -198,7 +198,11 @@ void StaticticsStorageClient::getVariablesWriteBatch(
 
 Index StaticticsStorageClient::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
+	try
+	{
+		return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term type: %s"), *m_errorhnd, 0);
 }
 
 Index StaticticsStorageClient::allocTypenoImm( const std::string& name)
@@ -226,7 +230,7 @@ Index StaticticsStorageClient::documentFrequency( const std::string& type, const
 		Index typeno = getTermType( type);
 		if (typeno)
 		{
-			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+			return DatabaseAdapter_DocFrequencyStatistics::get( m_database.get(), typeno, term);
 		}
 		else
 		{
@@ -236,4 +240,100 @@ Index StaticticsStorageClient::documentFrequency( const std::string& type, const
 	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
 
+TimeStamp StaticticsStorageClient::storageTimeStamp( const std::string& storageid) const
+{
+	try {
+		DatabaseAdapter_StorageTimestamp::Reader reader( m_database.get());
+		return reader.get( storageid, -1);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting a storage timestamp: %s"), *m_errorhnd, 0);
+}
+
+bool StaticticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid) const
+{
+	try {
+		strus::Reference<StatisticsViewerInterface> viewer( m_statisticsProc->createViewer( msg.ptr(), msg.size()));
+		if (!viewer.get()) return false;
+		int nofDocumentsDiff = viewer->nofDocumentsInsertedChange();
+		TermStatisticsChange rec;
+		std::map<std::string,Index> typenoCache;
+
+		strus::scoped_lock lock( m_transaction_mutex);
+		Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+		if (!transaction.get()) return false;
+
+		// Update list of term df changes:
+		while (nextDfChange( rec))
+		{
+			std::string typestr( strus::string_conv::tolower( rec.type()));
+			auto ti = typenoCache.find( typestr);
+			Index typeno;
+			if (ti == typenoCache.end())
+			{
+				typeno = allocTypenoImm( typestr);
+				typenoCache.insert( {typestr,typeno});
+			}
+			else
+			{
+				typeno = ti->second;
+			}
+			std::string term( rec->value());
+			GlobalCounter df = DatabaseAdapter_DocFrequencyStatistics::get( m_database.get(), typeno, term);
+			df += rec.increment();
+
+			DatabaseAdapter_DocFrequencyStatistics::store( transaction.get(), typeno, term, df);
+		}
+		// Update TimeStamp:
+		DatabaseAdapter_StorageTimestamp::ReaderWriter timestamp_db( m_database.get());
+		TimeStamp oldTimeStamp = timestamp_db.get( storageid, -1);
+		TimeStamp newTimeStamp = msg.timestamp();
+		if (newTimeStamp > oldTimeStamp)
+		{
+			timestamp_db.store( transaction.get(), storageid, newTimeStamp);
+		}
+		// Update NofDocuments:
+		getVariablesWriteBatch( transaction.get(), nofDocumentsDiff);
+		if (transaction->commit())
+		{
+			m_nof_documents.increment( nofDocumentsDiff);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error in put statistics message: %s"), *m_errorhnd, 0);
+}
+
+const StatisticsProcessorInterface* StaticticsStorageClient::getStatisticsProcessor() const
+{
+	return m_statisticsProc;
+}
+
+void StaticticsStorageClient::close()
+{
+	try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage: %s"), *m_errorhnd);
+
+	if (!m_close_called)
+	{
+		m_database->compactDatabase();
+		m_database->close();
+		m_close_called = true;
+	}
+}
+
+void StaticticsStorageClient::compaction()
+{
+	try
+	{
+		storeVariables();
+		m_database->compactDatabase();
+	}
+	CATCH_ERROR_MAP( _TXT("error in compaction of storage: %s"), *m_errorhnd);
+}
 

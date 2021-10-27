@@ -14,6 +14,7 @@
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/timeStamp.hpp"
 #include "indexPacker.hpp"
 #include "databaseKey.hpp"
 #include "dataBlock.hpp"
@@ -135,10 +136,10 @@ struct DatabaseAdapter_StringIndexTemplate
 		Reader( const Reader& o)
 			:m_prefix(o.m_prefix),m_database(o.m_database){}
 
-		IndexType get( const std::string& key) const
+		IndexType get( const std::string& key, IndexType default_ = 0) const
 		{
 			IndexType rt;
-			if (!Reader::load( key, rt)) return 0;
+			if (!Reader::load( key, rt)) return default_;
 			return rt;
 		}
 
@@ -393,7 +394,7 @@ struct DatabaseAdapter_UserName
 {};
 
 struct DatabaseAdapter_StorageTimestamp
-	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TimestampPrefix,GlobalCounter>
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TimestampPrefix,TimeStamp>
 {};
 
 

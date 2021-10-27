@@ -50,9 +50,9 @@ public:
 			const std::string& type,
 			const std::string& term) const;
 
-	virtual TimeStamp storageTimeStamp( const std::string& storagename) const;
+	virtual TimeStamp storageTimeStamp( const std::string& storageid) const;
 
-	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storagename, const TimeStamp timestamp) const;
+	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid) const;
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
@@ -68,7 +68,9 @@ private:
 	void init( const std::string& databaseConfig);
 	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();
+
 	Index getTermType( const std::string& name) const;
+	Index allocTypenoImm( const std::string& name);
 
 private:
 	const DatabaseInterface* m_dbtype;			///< type of key value store database interface
