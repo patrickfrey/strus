@@ -43,12 +43,12 @@ public:
 
 	virtual void rollback();
 
-	virtual StatisticsIteratorInterface* createIteratorAndRollback();
+	virtual std::vector<StatisticsMessage> getMessages() const;
 
 private:
-	std::string newContent();
+	std::string newContent( int nofDocs) const;
 	void clear();
-	std::vector<std::string> getDfChangeMapBlocks();
+	std::vector<std::string> getDfChangeMapBlocks() const;
 
 private:
 	TimeStamp m_timestamp;

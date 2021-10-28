@@ -321,16 +321,15 @@ void StatisticsStorageClient::close()
 {
 	try
 	{
-		storeVariables();
+		if (!m_close_called)
+		{
+			storeVariables();
+			m_database->compactDatabase();
+			m_database->close();
+			m_close_called = true;
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage: %s"), *m_errorhnd);
-
-	if (!m_close_called)
-	{
-		m_database->compactDatabase();
-		m_database->close();
-		m_close_called = true;
-	}
 }
 
 void StatisticsStorageClient::compaction()

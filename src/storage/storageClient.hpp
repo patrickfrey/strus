@@ -123,13 +123,13 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createAllStatisticsIterator() const;
-
 	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp) const;
 
 	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const;
 
 	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const;
+
+	virtual std::vector<StatisticsMessage> loadAllStatisticsMessages() const;
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 

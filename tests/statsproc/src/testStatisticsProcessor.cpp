@@ -161,6 +161,29 @@ static unsigned int getUintValue( const char* arg)
 	return rt;
 }
 
+static void fillTermSet( std::set<TermCollection::Term>& termset, int& nofDocs, strus::StatisticsProcessorInterface* statsproc, const strus::StatisticsMessage& msg)
+{
+	strus::local_ptr<strus::StatisticsViewerInterface> viewer( statsproc->createViewer( msg.ptr(), msg.size()));
+	if (!viewer.get())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	nofDocs += viewer->nofDocumentsInsertedChange();
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+	int blockcnt = 0;
+	std::cerr << "fetch message " << ++blockcnt << " " << msg.size() << std::endl;
+#endif
+	strus::TermStatisticsChange rec;
+	while (viewer->nextDfChange( rec))
+	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "result df change " << rec.type() << " " << rec.value() << " " << rec.increment() << std::endl;
+#endif
+		termset.insert( TermCollection::Term( rec.type(), rec.value(), rec.increment()));
+	}
+}
+
 int main( int argc, const char* argv[])
 {
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
@@ -232,7 +255,12 @@ int main( int argc, const char* argv[])
 		strus::local_ptr<strus::StatisticsIteratorInterface> iterator;
 		if (storagePath.empty())
 		{
-			iterator.reset( builder->createIteratorAndRollback());
+			std::vector<strus::StatisticsMessage> msglist = builder->getMessages();
+			for (auto& msg : msglist)
+			{
+				fillTermSet( termset, nofDocsInserted, statsproc.get(), msg);
+				blobsize += msg.size();
+			}
 		}
 		else
 		{
@@ -248,29 +276,12 @@ int main( int argc, const char* argv[])
 			}
 			strus::TimeStamp timeStamp10MinutesBeforeNow = strus::getCurrentTimeStamp() - (600 * 1000);
 			statsproc->releaseStatistics( storagePath, timeStamp10MinutesBeforeNow);
-		}
-		strus::StatisticsMessage msg = iterator->getNext();
-		for (; !msg.empty(); msg = iterator->getNext())
-		{
-			strus::local_ptr<strus::StatisticsViewerInterface> viewer( statsproc->createViewer( msg.ptr(), msg.size()));
-			if (!viewer.get())
-			{
-				throw std::runtime_error( g_errorhnd->fetchError());
-			}
-			nofDocsInserted += viewer->nofDocumentsInsertedChange();
-			blobsize += msg.size();
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-			int blockcnt = 0;
-			std::cerr << "fetch message " << ++blockcnt << " " << msg.size() << std::endl;
-#endif
-			strus::TermStatisticsChange rec;
-			while (viewer->nextDfChange( rec))
+			strus::StatisticsMessage msg = iterator->getNext();
+			for (; !msg.empty(); msg = iterator->getNext())
 			{
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "result df change " << rec.type() << " " << rec.value() << " " << rec.increment() << std::endl;
-#endif
-				termset.insert( Term( rec.type(), rec.value(), rec.increment()));
+				fillTermSet( termset, nofDocsInserted, statsproc.get(), msg);
+				blobsize += msg.size();
 			}
 		}
 		if (g_errorhnd->hasError())

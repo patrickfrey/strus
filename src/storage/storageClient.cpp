@@ -30,7 +30,6 @@
 #include "private/databaseClientUndefinedStub.hpp"
 #include "databaseKey.hpp"
 #include "byteOrderMark.hpp"
-#include "statisticsInitIterator.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "extractKeyValueData.hpp"
@@ -513,7 +512,7 @@ DocumentTermIteratorInterface*
 class InvertedAclIterator
 	:public InvAclIteratorInterface
 	,public IndexSetIterator
-	
+
 {
 public:
 	InvertedAclIterator( const DatabaseClientInterface* database_, strus::Index userno_, ErrorBufferInterface* errorhnd_)
@@ -582,7 +581,7 @@ StorageTransactionInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
 
-StorageDocumentInterface* 
+StorageDocumentInterface*
 	StorageClient::createDocumentChecker(
 		const std::string& docid,
 		const std::string& logfilename) const
@@ -952,11 +951,11 @@ Index StorageClient::documentStatistics(
 		Index rt = 0;
 		Index typeno = getTermType( type);
 		if (typeno == 0) return 0;
-	
+
 		DatabaseAdapter_InverseTerm::Reader dbadapter_inv( m_database.get());
 		InvTermBlock invblk;
 		typedef InvTermBlock::Element InvTerm;
-	
+
 		if (dbadapter_inv.load( docno, invblk))
 		{
 			char const* ei = invblk.begin();
@@ -1089,7 +1088,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator() const
+std::vector<StatisticsMessage> StorageClient::loadAllStatisticsMessages() const
 {
 	try
 	{
@@ -1097,9 +1096,70 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator() const
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
-		return createStatisticsInitIterator( this, m_database.get(), m_errorhnd);
+		if (!m_statisticsProc)
+		{
+			throw strus::runtime_error(_TXT("error no statistics processor defined"));
+		}
+		strus::Reference<StatisticsBuilderInterface> builder( m_statisticsProc->createBuilder( ""/*path*/));
+		if (!builder.get())
+		{
+			throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), m_errorhnd->fetchError());
+		}
+		int nofdocs = nofDocumentsInserted();
+		builder->addNofDocumentsInsertedChange( nofdocs);
+
+		std::map<Index,std::size_t> typenomap;
+		std::map<Index,std::size_t> termnomap;
+		std::string strings;
+
+		// Fill a map with the strings of all types in the collection:
+		{
+			DatabaseAdapter_TermType::Cursor typecursor( m_database.get());
+			Index typeno;
+			std::string typestr;
+			for (bool more=typecursor.loadFirst( typestr, typeno); more; more=typecursor.loadNext( typestr, typeno))
+			{
+				typenomap[ typeno] = strings.size();
+				strings.append( typestr);
+				strings.push_back( '\0');
+			}
+		}
+		// Fill a map with the strings of all terms in the collection:
+		{
+			DatabaseAdapter_TermValue::Cursor termcursor( m_database.get());
+			Index termno;
+			std::string termstr;
+			for (bool more=termcursor.loadFirst( termstr, termno); more; more=termcursor.loadNext( termstr, termno))
+			{
+				termnomap[ termno] = strings.size();
+				strings.append( termstr);
+				strings.push_back( '\0');
+			}
+		}
+		// Feed all df changes to the statistics message builder:
+		{
+			DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database.get());
+			Index typeno;
+			Index termno;
+			Index df;
+
+			for (bool more=dfcursor.loadFirst( typeno, termno, df); more; more=dfcursor.loadNext( typeno, termno, df))
+			{
+				std::map<Index,std::size_t>::const_iterator ti;
+				ti = typenomap.find( typeno);
+				if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type (no %d) when populating df's"), (int)typeno);
+				const char* typenam = strings.c_str() + ti->second;
+
+				ti = termnomap.find( termno);
+				if (ti == termnomap.end()) throw strus::runtime_error( "%s",  _TXT( "encountered undefined term when populating df's"));
+				const char* termnam = strings.c_str() + ti->second;
+
+				builder->addDfChange( typenam, termnam, df);
+			}
+		}
+		return builder->getMessages();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error loading all statistics messages: %s"), *m_errorhnd, std::vector<StatisticsMessage>());
 }
 
 StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( const TimeStamp& timestamp) const
@@ -1370,7 +1430,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		if (!cursor.get()) return false;
 
 		strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
-	
+
 		for (; key.defined(); key = cursor->seekNext())
 		{
 			if (key.size() == 0)
@@ -1389,16 +1449,15 @@ void StorageClient::close()
 {
 	try
 	{
-		storeVariables();
+		if (!m_close_called)
+		{
+			storeVariables();
+			m_database->compactDatabase();
+			m_database->close();
+			m_close_called = true;
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage: %s"), *m_errorhnd);
-
-	if (!m_close_called)
-	{
-		m_database->compactDatabase();
-		m_database->close();
-		m_close_called = true;
-	}
 }
 
 void StorageClient::compaction()

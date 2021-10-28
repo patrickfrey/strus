@@ -38,7 +38,6 @@ set( source_files
 	metaDataRestriction.cpp
 	nullPostingIterator.cpp
 	browsePostingIterator.cpp
-	statisticsInitIterator.cpp
 	docIndexNode.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp

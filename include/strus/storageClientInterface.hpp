@@ -240,11 +240,6 @@ public:
 	/// \note this function is thread safe, multiple concurrent transactions are allowed
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates an iterator on all storage term occurrence statistics
-	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
-	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createAllStatisticsIterator() const=0;
-
 	/// \brief Creates an iterator on the incremental changes of the storage statistics starting from a given date/time
 	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
 	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
@@ -263,6 +258,10 @@ public:
 	/// \param[in] timestamp timestamp associated with the statistics change message
 	/// \return the statistics change message structure
 	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const=0;
+
+	/// \brief Load all statistics
+	/// \return the list of all statistics
+	virtual std::vector<StatisticsMessage> loadAllStatisticsMessages() const=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface

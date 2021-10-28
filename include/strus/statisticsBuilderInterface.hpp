@@ -13,6 +13,7 @@
 #include "strus/storage/statisticsMessage.hpp"
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -37,10 +38,9 @@ public:
 	/// \return true on success, false in case of an error (memory allocation error)
 	virtual void addDfChange( const char* termtype, const char* termvalue, int increment)=0;
 
-	/// \brief Create an iterator on the elements of the elements of this before a commit or rollback
-	/// \return the iterator or NULL if the operation failed
-	/// \note the elements are moved with ownership to the created iterator, commit has no effect after this call and the iterator can be created only once
-	virtual StatisticsIteratorInterface* createIteratorAndRollback()=0;
+	/// \brief Get the list of statistic messages for the current state
+	/// \return the list
+	virtual std::vector<StatisticsMessage> getMessages()  const=0;
 
 	/// \brief Transaction commit
 	virtual bool commit()=0;

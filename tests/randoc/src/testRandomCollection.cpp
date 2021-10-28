@@ -66,7 +66,7 @@ static const char* randomType()
 {
 	enum {NofTypes=5};
 	static const char* ar[ NofTypes] = {"WORD","STEM","NUM","LOC","ORIG"};
-	return ar[ g_random.get( 0, (unsigned int)NofTypes-1)];
+	return ar[ g_random.get( 0, (unsigned int)NofTypes)];
 }
 
 #ifdef STRUS_GENERATE_READABLE_NAMES
@@ -152,7 +152,7 @@ struct TermCollection
 			rt << " " << type << " '" << value << "'";
 			return rt.str();
 		}
-		
+
 	};
 
 	std::vector<Term> termar;
@@ -225,7 +225,7 @@ static float tfIdf( unsigned int collSize, unsigned int nofMatchingDocs, unsigne
 
 	float IDF = strus::Math::log10( collSize / (nofMatchingDocs + 1.0));
 	float tf = ((float)nofMatchesInDoc * (k1 + 1.0))
-		/ ((float)nofMatchesInDoc 
+		/ ((float)nofMatchesInDoc
 			+ (k1 * (1.0 - b + ((b * (float)docLen) / avgDocLen)))
 		);
 	return (float)(tf * IDF);
@@ -254,7 +254,7 @@ struct RandomCollection
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
 		std::vector<unsigned int> termCollectionFrequencyMap( termCollection.termar.size(), 0);
 		float avgDocLen = 0.0;
-		
+
 		for (unsigned int di=0; di < docar.size(); ++di)
 		{
 			RandomDoc& doc = docar[di];
@@ -857,7 +857,7 @@ struct RandomQuery
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		strus::PostingIteratorInterface* res = 
+		strus::PostingIteratorInterface* res =
 			joinop->createResultIterator( itrar, range, cardinality);
 		if (!res)
 		{
@@ -1092,7 +1092,7 @@ int main( int argc, const char* argv[])
 			strus::Index totTermStringSize = 0;
 			int insertIntervallSize = 1000;
 			int insertIntervallCnt = 0;
-	
+
 			typedef strus::local_ptr<strus::StorageTransactionInterface> StorageTransaction;
 			StorageTransaction transaction( storage->createTransaction());
 			if (!transaction.get())
@@ -1103,7 +1103,7 @@ int main( int argc, const char* argv[])
 			for (; di != de; ++di,++totNofDocuments)
 			{
 				typedef strus::local_ptr<strus::StorageDocumentInterface> StorageDocumentRef;
-	
+
 				StorageDocumentRef doc( transaction->createDocument( di->docid));
 				if (!doc.get())
 				{
@@ -1142,7 +1142,7 @@ int main( int argc, const char* argv[])
 			transaction->commit();
 
 			// Calculate the map that assigns document ids from the random collection to document numbers:
-			std::vector<strus::Index> docnomap = getDocnoMap( storage.get(), collection.docar); 
+			std::vector<strus::Index> docnomap = getDocnoMap( storage.get(), collection.docar);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "docid to docno map:";
 			std::vector<strus::Index>::const_iterator ni=docnomap.begin(), ne=docnomap.end();
@@ -1153,7 +1153,7 @@ int main( int argc, const char* argv[])
 			std::cout << std::endl;
 #endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
-			strus::local_ptr<strus::QueryProcessorInterface> 
+			strus::local_ptr<strus::QueryProcessorInterface>
 				queryproc( strus::createQueryProcessor( g_fileLocator, g_errorhnd));
 			if (!queryproc.get())
 			{

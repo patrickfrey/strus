@@ -18,10 +18,13 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/statisticsStorageInterface.hpp"
 #include "strus/statisticsStorageClientInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/pseudoRandom.hpp"
 #include "strus/base/math.hpp"
 #include "strus/base/stdint.h"
+#include "strus/base/configParser.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -60,7 +63,14 @@ static std::string randomType()
 {
 	enum {NofTypes=5};
 	static const char* ar[ NofTypes] = {"WORD","STEM","NUM","LOC","ORIG"};
-	return ar[ g_random.get( 0, (unsigned int)NofTypes-1)];
+	return ar[ g_random.get( 0, (unsigned int)NofTypes)];
+}
+
+static std::string randomStorage()
+{
+	enum {NofStorages=5};
+	static const char* ar[ NofStorages] = {"S1","S2","S3","S4","S5"};
+	return ar[ g_random.get( 0, (unsigned int)NofStorages)];
 }
 
 static std::string randomTerm()
@@ -87,7 +97,7 @@ class RandomStatisticsBlock
 {
 public:
 	RandomStatisticsBlock( const RandomStatisticsBlock& o)
-		:m_termar(o.m_termar),m_timestamp(o.m_timestamp){}
+		:m_termstats(o.m_termstats),m_timestamp(o.m_timestamp),m_storageid(o.m_storageid),m_nofDocs(o.m_nofDocs){}
 	RandomStatisticsBlock( size_t maxNofTerms)
 	{
 		if (maxNofTerms < 1)
@@ -103,21 +113,23 @@ public:
 			int dfchange = g_random.get( 0, g_random.get( 1, 100));
 			if (termSet.insert( type + " " + value).second == true)
 			{
-				m_termar.emplace_back( type, value, dfchange);
+				m_termstats.emplace_back( type, value, dfchange);
 			}
 		}
 		m_timestamp = ++g_timestamp;
+		m_storageid = randomStorage();
+		m_nofDocs = g_random.get( 1, 1000);
 	}
 
-	struct Element
+	struct TermStat
 	{
 		std::string type;
 		std::string value;
 		int dfchange;
 
-		Element( const Element& o)
+		TermStat( const TermStat& o)
 			:type(o.type),value(o.value),dfchange(o.dfchange){}
-		Element( const std::string& t, const std::string& v, int d)
+		TermStat( const std::string& t, const std::string& v, int d)
 			:type(t),value(v),dfchange(d){}
 
 		std::string tostring() const
@@ -126,11 +138,26 @@ public:
 			rt << " " << type << " '" << value << "'";
 			return rt.str();
 		}
-
 	};
+
+	const std::string& storageid() const noexcept
+	{
+		return m_storageid;
+	}
+	const std::vector<TermStat>& termstats() const noexcept
+	{
+		return m_termstats;
+	}
+	int nofDocs() const noexcept
+	{
+		return m_nofDocs;
+	}
+
 private:
-	std::vector<Element> m_termar;
+	std::vector<TermStat> m_termstats;
 	strus::TimeStamp m_timestamp;
+	std::string m_storageid;
+	int m_nofDocs;
 };
 
 static unsigned int getUintValue( const char* arg)
@@ -188,9 +215,16 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
-		const char* config = argv[1];
+		std::string config = argv[1];
 		unsigned int nofBlocks = getUintValue( argv[2]);
 		unsigned int maxBlockSize = getUintValue( argv[3]);
+
+		std::string configCopy = config;
+		std::string path;
+		if (!strus::extractStringFromConfigString( path, configCopy, "path", g_errorhnd))
+		{
+			throw std::runtime_error("bad configuration passed to test");
+		}
 		{
 			strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 			if (!dbi.get())
@@ -217,6 +251,16 @@ int main( int argc, const char* argv[])
 			for (int ii=0; ii<nofBlocks; ++ii)
 			{
 				blockar.push_back( RandomStatisticsBlock( maxBlockSize));
+			}
+			strus::local_ptr<strus::StatisticsBuilderInterface> statbuilder( statisticsMessageProc->createBuilder( path));
+			for (int ii=0; ii<nofBlocks; ++ii)
+			{
+				for (auto& ts : blockar[ii].termstats())
+				{
+					statbuilder->addDfChange( ts.type.c_str(), ts.value.c_str(), ts.dfchange);
+				}
+				statbuilder->addNofDocumentsInsertedChange( blockar[ii].nofDocs());
+				statbuilder->commit();
 			}
 		}
 		if (g_fileLocator) delete g_fileLocator;

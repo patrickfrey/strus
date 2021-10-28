@@ -33,35 +33,6 @@
 
 using namespace strus;
 
-namespace {
-class InPlaceStatisticsIterator
-	:public StatisticsIteratorInterface
-{
-public:
-	explicit InPlaceStatisticsIterator( std::vector<std::string>& ar_, const TimeStamp timestamp = -1)
-	{
-		while (!ar_.empty())
-		{
-			m_ar.push_back( StatisticsMessage( ar_.back().c_str(), ar_.back().size(), timestamp));
-			ar_.pop_back();
-		}
-		std::reverse( m_ar.begin(), m_ar.end());
-		m_itr = m_ar.begin();
-	}
-
-	virtual StatisticsMessage getNext()
-	{
-		if (m_itr == m_ar.end()) return StatisticsMessage( NULL, 0, -1);
-		return *m_itr++;
-	}
-
-private:
-	std::vector<StatisticsMessage> m_ar;
-	std::vector<StatisticsMessage>::const_iterator m_itr;
-};
-}
-
-
 StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_)
 	:m_timestamp(-1)
 	,m_dfChangeMap()
@@ -149,11 +120,12 @@ void StatisticsBuilder::addDfChange(
 	CATCH_ERROR_MAP( _TXT("error statistics message builder add df change: %s"), *m_errorhnd);
 }
 
-std::vector<std::string> StatisticsBuilder::getDfChangeMapBlocks()
+std::vector<std::string> StatisticsBuilder::getDfChangeMapBlocks() const
 {
 	std::vector<std::string> rt;
 	std::string emptystring;
 	const std::string* lastkey = &emptystring;
+	int nofDocs = m_nofDocumentsInsertedChange;
 
 	std::map<std::string,int>::const_iterator mi = m_dfChangeMap.begin(), me = m_dfChangeMap.end();
 	for (; mi != me; lastkey=&mi->first,++mi)
@@ -163,7 +135,8 @@ std::vector<std::string> StatisticsBuilder::getDfChangeMapBlocks()
 
 		if (rt.empty() || rt.back().size() > m_maxchunksize)
 		{
-			rt.push_back( newContent());
+			rt.push_back( newContent( nofDocs));
+			nofDocs = 0;
 			lastkey = &emptystring;
 		}
 		std::string& content = rt.back();
@@ -217,13 +190,12 @@ void StatisticsBuilder::clear()
 	m_nofDocumentsInsertedChange = 0;
 }
 
-std::string StatisticsBuilder::newContent()
+std::string StatisticsBuilder::newContent( int nofDocs) const
 {
 	StatisticsHeader hdr;
 	std::string rt;
 	rt.reserve( m_maxchunksize);
-	hdr.nofDocumentsInsertedChange = ByteOrder<int32_t>::hton( m_nofDocumentsInsertedChange);
-	m_nofDocumentsInsertedChange = 0;
+	hdr.nofDocumentsInsertedChange = ByteOrder<int32_t>::hton( nofDocs);
 	rt.append( (char*)&hdr, sizeof(hdr));
 	return rt;
 }
@@ -245,21 +217,19 @@ void StatisticsBuilder::rollback()
 	clear();
 }
 
-StatisticsIteratorInterface* StatisticsBuilder::createIteratorAndRollback()
+std::vector<StatisticsMessage> StatisticsBuilder::getMessages() const
 {
 	try
 	{
-		std::vector<std::string> blocks = getDfChangeMapBlocks();
-		TimeStamp currentTimestamp = getCurrentTimeStamp();
-
-		StatisticsIteratorInterface* rt = new InPlaceStatisticsIterator( blocks, currentTimestamp);
-		clear();
+		std::vector<std::string> msglist = getDfChangeMapBlocks();
+		std::vector<StatisticsMessage> rt;
+		for (auto& msg : msglist)
+		{
+			rt.emplace_back( msg, m_timestamp);
+		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message builder create iterator: %s"), *m_errorhnd, NULL);
+	CATCH_ERROR_MAP_RETURN( _TXT("error statistics builder get messages: %s"), *m_errorhnd, std::vector<StatisticsMessage>());
 }
-
-
-
 
 
