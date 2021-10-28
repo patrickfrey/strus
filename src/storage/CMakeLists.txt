@@ -56,6 +56,8 @@ set( source_files
 	storageDocumentUpdate.cpp
 	storageTransaction.cpp
 	storageDump.cpp
+	statisticsStorage.cpp
+	statisticsStorageClient.cpp
 	userAclMap.cpp
 	extractKeyValueData.cpp
 )
@@ -108,7 +110,7 @@ target_link_libraries( strus_storage_static strus_private_utils strus_base strus
 set_property( TARGET strus_storage_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_strus_static strus_base )
+target_link_libraries( strus_storage strus_storage_static ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_base )
 set_target_properties(
     strus_storage
     PROPERTIES
@@ -117,8 +119,18 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
+add_library( strus_statsstorage SHARED libstrus_statsstorage.cpp )
+target_link_libraries( strus_statsstorage strus_storage_static ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_base )
+set_target_properties(
+    strus_statsstorage
+    PROPERTIES
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
+
 add_library( strus_storage_objbuild SHARED libstrus_storage_objbuild.cpp )
-target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc  compactnodetrie_strus_static strus_base )
+target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_base )
 set_target_properties(
     strus_storage_objbuild
     PROPERTIES
@@ -128,7 +140,7 @@ set_target_properties(
 )
 
 add_executable( strusResizeBlocks strusResizeBlocks.cpp )
-target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_base strus_filelocator strus_storage_static compactnodetrie_strus_static ${Intl_LIBRARIES})
+target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_base strus_filelocator strus_storage_static ${Intl_LIBRARIES})
 
 # ------------------------------
 # INSTALLATION
@@ -142,6 +154,10 @@ install( TARGETS strus_structs
 	   RUNTIME DESTINATION bin )
 
 install( TARGETS strus_storage
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
+	   RUNTIME DESTINATION bin )
+
+install( TARGETS strus_statsstorage
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
 	   RUNTIME DESTINATION bin )
 

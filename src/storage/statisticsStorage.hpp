@@ -32,7 +32,7 @@ public:
 	StatisticsStorage( const FileLocatorInterface* filelocator_, ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_),m_filelocator(filelocator_){}
 
-	virtual StorageClientInterface* createClient(
+	virtual StatisticsStorageClientInterface* createClient(
 			const std::string& configsource,
 			const DatabaseInterface* database,
 			const StatisticsProcessorInterface* statisticsProc) const;
@@ -41,6 +41,7 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const;
 
+	virtual const char* getConfigDescription() const;
 	virtual const char** getConfigParameters() const;
 
 private:

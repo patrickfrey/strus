@@ -5,11 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "storage.hpp"
-#include "storageClient.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/storageClientInterface.hpp"
-#include "strus/storageDumpInterface.hpp"
+#include "statisticsStorage.hpp"
+#include "statisticsStorageClient.hpp"
+#include "strus/statisticsStorageInterface.hpp"
+#include "strus/statisticsStorageClientInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
@@ -36,7 +35,7 @@
 
 using namespace strus;
 
-StorageClientInterface* Storage::createClient(
+StatisticsStorageClientInterface* StatisticsStorage::createClient(
 		const std::string& configsource,
 		const DatabaseInterface* database,
 		const StatisticsProcessorInterface* statisticsProc) const
@@ -44,23 +43,21 @@ StorageClientInterface* Storage::createClient(
 	try
 	{
 		if (m_errorhnd->hasError()) return 0;
-		Reference<StorageClient> client( new StorageClient( database, statisticsProc, configsource, m_errorhnd));
+		Reference<StatisticsStorageClient> client( new StatisticsStorageClient( database, statisticsProc, configsource, m_errorhnd));
 		return client.release();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics storage client: %s"), *m_errorhnd, 0);
 }
 
-bool Storage::createStorage(
+bool StatisticsStorage::createStorage(
 		const std::string& configsource,
 		const DatabaseInterface* dbi) const
 {
 	try
 	{
-		bool useAcl = false;
 		ByteOrderMark byteOrderMark;
 
 		std::string src = configsource;
-		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		removeKeyFromConfigString( src, "statsproc", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
@@ -72,28 +69,26 @@ bool Storage::createStorage(
 		strus::local_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
-		DatabaseAdapter_Variable<GlobalCounter>::Writer stor( database.get());
+		DatabaseAdapter_Variable<GlobalCounter>::Writer varstor_64( database.get());
+		DatabaseAdapter_Variable<Index>::Writer varstor_32( database.get());
 
-		stor.store( transaction.get(), "TermNo", 1);
-		stor.store( transaction.get(), "TypeNo", 1);
-		stor.store( transaction.get(), "StructNo", 1);
-		stor.store( transaction.get(), "DocNo", 1);
-		stor.store( transaction.get(), "AttribNo", 1);
-		stor.store( transaction.get(), "NofDocs", 0);
-		stor.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
-		stor.store( transaction.get(), "Version", (STRUS_STORAGE_VERSION_MAJOR * 1000) + STRUS_STORAGE_VERSION_MINOR);
-		if (useAcl)
-		{
-			stor.store( transaction.get(), "UserNo", 1);
-		}
+		varstor_32.store( transaction.get(), "TypeNo", 1);
+		varstor_64.store( transaction.get(), "NofDocs", 0);
+		varstor_32.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
+		varstor_32.store( transaction.get(), "Version", (STRUS_STORAGE_VERSION_MAJOR * 1000) + STRUS_STORAGE_VERSION_MINOR);
 		return transaction->commit();
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
 }
 
-const char** StatisticsStorage::getConfigParameters( const ConfigType& type) const
+const char* StatisticsStorage::getConfigDescription() const
 {
-	static const char ar[] = {NULL};
-	return 0;
+	return "";
+}
+
+const char** StatisticsStorage::getConfigParameters() const
+{
+	static const char* ar[] = {NULL};
+	return ar;
 }
 

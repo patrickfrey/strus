@@ -11,6 +11,7 @@
 #define _STRUS_STATISTICS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/storage/index.hpp"
 #include "strus/timeStamp.hpp"
+#include "strus/storage/statisticsMessage.hpp"
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ public:
 
 	/// \brief Get a list of configuration parameters that can be used in reload (e.g. same as for createClient)
 	/// \return NULL terminated array of config parameters
-	virtual const char** getConfigParameters() const;
+	virtual const char** getConfigParameters() const=0;
 
 	/// \brief Get the interpreted configuration this storage client was created with
 	/// \return the configuration as string
@@ -65,7 +66,7 @@ public:
 	/// \param[in] msg statistics message
 	/// \param[in] storageid id of the storage, these statistics came from. Stores the timestamp of the message associated with the storage name if it is higher than the previous.
 	/// \return true on success, false on failure (error buffer is initialized with error)
-	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid) const=0;
+	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid)=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface

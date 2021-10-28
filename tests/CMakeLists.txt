@@ -22,4 +22,4 @@ add_subdirectory( varSizeNodeTree )
 add_subdirectory( statsproc )
 add_subdirectory( weightingTitle )
 add_subdirectory( weighting )
-
+add_subdirectory( statisticsStorage )

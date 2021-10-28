@@ -49,7 +49,6 @@ public:
 			const DatabaseInterface* database) const=0;
 
 	/// \brief Gets a configuration description (source string as used by the functions here)
-	///	createStorage(const std::string&) and createClient(const std::string&)
 	///	for the usage printed by programs using this storage implementation.
 	virtual const char* getConfigDescription() const=0;
 

@@ -89,7 +89,7 @@ bool Storage::createStorage(
 		if (!transaction.get()) return false;
 
 		DatabaseAdapter_Variable<Index>::Writer stor( database.get());
-	
+
 		stor.store( transaction.get(), "TermNo", 1);
 		stor.store( transaction.get(), "TypeNo", 1);
 		stor.store( transaction.get(), "StructNo", 1);
@@ -109,7 +109,7 @@ bool Storage::createStorage(
 
 const char* Storage::getConfigDescription() const
 {
-	return "cachedterms=<file with list of terms to cache (only for client)>; acl=<yes/no, yes if users with different access rights exist (only on creating the storage)>";
+	return _TXT("cachedterms=<file with list of terms to cache (only for client)>; acl=<yes/no, yes if users with different access rights exist (only on creating the storage)>");
 }
 
 const char** Storage::getConfigParameters() const

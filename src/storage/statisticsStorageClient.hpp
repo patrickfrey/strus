@@ -24,7 +24,11 @@ class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseInterface;
 /// \brief Forward declaration
+class DatabaseClientInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 /// \brief Implementation of the StatisticsStorageClientInterface
 class StatisticsStorageClient
@@ -42,6 +46,8 @@ public:
 
 	virtual long diskUsage() const;
 
+	virtual const char** getConfigParameters() const;
+
 	virtual std::string config() const;
 
 	virtual GlobalCounter nofDocuments() const;
@@ -52,7 +58,7 @@ public:
 
 	virtual TimeStamp storageTimeStamp( const std::string& storageid) const;
 
-	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid) const;
+	virtual bool putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid);
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 

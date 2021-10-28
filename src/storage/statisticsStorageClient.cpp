@@ -10,6 +10,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
+#include "strus/statisticsViewerInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/reference.hpp"
@@ -40,7 +41,7 @@ using namespace strus;
 
 static char const** getConfigParamList( const DatabaseInterface* db);
 
-StaticticsStorageClient::StaticticsStorageClient(
+StatisticsStorageClient::StatisticsStorageClient(
 		const DatabaseInterface* database_,
 		const StatisticsProcessorInterface* statisticsProc_,
 		const std::string& databaseConfig,
@@ -57,7 +58,7 @@ StaticticsStorageClient::StaticticsStorageClient(
 	init( databaseConfig);
 }
 
-StaticticsStorageClient::~StaticticsStorageClient()
+StatisticsStorageClient::~StatisticsStorageClient()
 {
 	if (!m_close_called) try
 	{
@@ -71,7 +72,7 @@ static char const** getConfigParamList( const DatabaseInterface* db)
 {
 	char const** rt;
 	std::vector<const char*> cfgar;
-	char const** cfg = db->getConfigParameters( DatabaseInterface::CmdCreateClient);
+	char const** cfg = db->getConfigParameters();
 	for (int ci = 0; cfg[ci]; ++ci) cfgar.push_back( cfg[ci]);
 	cfgar.push_back( "database");
 	rt = (char const**)std::malloc( (cfgar.size()+1) * sizeof(rt[0]));
@@ -81,7 +82,12 @@ static char const** getConfigParamList( const DatabaseInterface* db)
 	return rt;
 }
 
-void StaticticsStorageClient::init( const std::string& databaseConfig)
+const char** StatisticsStorageClient::getConfigParameters() const
+{
+	return m_cfgparam;
+}
+
+void StatisticsStorageClient::init( const std::string& databaseConfig)
 {
 	std::string databaseConfigCopy( databaseConfig);
 
@@ -93,7 +99,7 @@ void StaticticsStorageClient::init( const std::string& databaseConfig)
 	loadVariables( m_database.get());
 }
 
-bool StaticticsStorageClient::reload( const std::string& databaseConfig)
+bool StatisticsStorageClient::reload( const std::string& databaseConfig)
 {
 	try
 	{
@@ -110,7 +116,6 @@ bool StaticticsStorageClient::reload( const std::string& databaseConfig)
 
 		m_database.reset( new DatabaseClientUndefinedStub( m_errorhnd));
 		//... the assignment of DatabaseClientUndefinedStub guarantees that m_database is initialized, event if 'init' throws
-		m_statisticsPath.clear();
 
 		init( databaseConfig);
 		return true;
@@ -118,12 +123,12 @@ bool StaticticsStorageClient::reload( const std::string& databaseConfig)
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' reloading configuration: %s"), MODULENAME, *m_errorhnd, false);
 }
 
-long StaticticsStorageClient::diskUsage() const
+long StatisticsStorageClient::diskUsage() const
 {
 	return m_database->diskUsage();
 }
 
-std::string StaticticsStorageClient::config() const
+std::string StatisticsStorageClient::config() const
 {
 	try
 	{
@@ -138,7 +143,7 @@ static Index versionNo( Index major, Index minor)
 	return (major * 1000) + minor;
 }
 
-void StaticticsStorageClient::loadVariables( DatabaseClientInterface* database_)
+void StatisticsStorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
 	Index bom;
@@ -147,7 +152,7 @@ void StaticticsStorageClient::loadVariables( DatabaseClientInterface* database_)
 	GlobalCounter nof_documents_;
 	Index version_;
 
-	DatabaseAdapter_Variable<Index>::Reader varstor_64( database_);
+	DatabaseAdapter_Variable<GlobalCounter>::Reader varstor_64( database_);
 	DatabaseAdapter_Variable<Index>::Reader varstor_32( database_);
 	if (!varstor_32.load( "TypeNo", next_typeno_))
 	{
@@ -179,7 +184,7 @@ void StaticticsStorageClient::loadVariables( DatabaseClientInterface* database_)
 	m_nof_documents.set( nof_documents_);
 }
 
-void StaticticsStorageClient::storeVariables()
+void StatisticsStorageClient::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 	if (!transaction.get()) throw std::runtime_error( _TXT("error storing variables"));
@@ -187,16 +192,17 @@ void StaticticsStorageClient::storeVariables()
 	transaction->commit();
 }
 
-void StaticticsStorageClient::getVariablesWriteBatch(
+void StatisticsStorageClient::getVariablesWriteBatch(
 		DatabaseTransactionInterface* transaction,
 		int nof_documents_incr)
 {
-	DatabaseAdapter_Variable<GlobalCounter>::Writer varstor( m_database.get());
-	varstor.store( transaction, "TypeNo", m_next_typeno.value());
-	varstor.store( transaction, "NofDocs", m_nof_documents.value() + nof_documents_incr);
+	DatabaseAdapter_Variable<GlobalCounter>::Writer varstor_64( m_database.get());
+	DatabaseAdapter_Variable<Index>::Writer varstor_32( m_database.get());
+	varstor_32.store( transaction, "TypeNo", m_next_typeno.value());
+	varstor_64.store( transaction, "NofDocs", m_nof_documents.value() + nof_documents_incr);
 }
 
-Index StaticticsStorageClient::getTermType( const std::string& name) const
+Index StatisticsStorageClient::getTermType( const std::string& name) const
 {
 	try
 	{
@@ -205,7 +211,7 @@ Index StaticticsStorageClient::getTermType( const std::string& name) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term type: %s"), *m_errorhnd, 0);
 }
 
-Index StaticticsStorageClient::allocTypenoImm( const std::string& name)
+Index StatisticsStorageClient::allocTypenoImm( const std::string& name)
 {
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
@@ -218,12 +224,12 @@ Index StaticticsStorageClient::allocTypenoImm( const std::string& name)
 	return rt;
 }
 
-Index StaticticsStorageClient::nofDocuments() const
+GlobalCounter StatisticsStorageClient::nofDocuments() const
 {
 	return m_nof_documents.value();
 }
 
-Index StaticticsStorageClient::documentFrequency( const std::string& type, const std::string& term) const
+GlobalCounter StatisticsStorageClient::documentFrequency( const std::string& type, const std::string& term) const
 {
 	try
 	{
@@ -240,7 +246,7 @@ Index StaticticsStorageClient::documentFrequency( const std::string& type, const
 	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
 
-TimeStamp StaticticsStorageClient::storageTimeStamp( const std::string& storageid) const
+TimeStamp StatisticsStorageClient::storageTimeStamp( const std::string& storageid) const
 {
 	try {
 		DatabaseAdapter_StorageTimestamp::Reader reader( m_database.get());
@@ -249,7 +255,7 @@ TimeStamp StaticticsStorageClient::storageTimeStamp( const std::string& storagei
 	CATCH_ERROR_MAP_RETURN( _TXT("error getting a storage timestamp: %s"), *m_errorhnd, 0);
 }
 
-bool StaticticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid) const
+bool StatisticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg, const std::string& storageid)
 {
 	try {
 		strus::Reference<StatisticsViewerInterface> viewer( m_statisticsProc->createViewer( msg.ptr(), msg.size()));
@@ -263,7 +269,7 @@ bool StaticticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg
 		if (!transaction.get()) return false;
 
 		// Update list of term df changes:
-		while (nextDfChange( rec))
+		while (viewer->nextDfChange( rec))
 		{
 			std::string typestr( strus::string_conv::tolower( rec.type()));
 			auto ti = typenoCache.find( typestr);
@@ -277,14 +283,14 @@ bool StaticticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg
 			{
 				typeno = ti->second;
 			}
-			std::string term( rec->value());
+			std::string term( rec.value());
 			GlobalCounter df = DatabaseAdapter_DocFrequencyStatistics::get( m_database.get(), typeno, term);
 			df += rec.increment();
 
 			DatabaseAdapter_DocFrequencyStatistics::store( transaction.get(), typeno, term, df);
 		}
 		// Update TimeStamp:
-		DatabaseAdapter_StorageTimestamp::ReaderWriter timestamp_db( m_database.get());
+		DatabaseAdapter_StorageTimestamp::ReadWriter timestamp_db( m_database.get());
 		TimeStamp oldTimeStamp = timestamp_db.get( storageid, -1);
 		TimeStamp newTimeStamp = msg.timestamp();
 		if (newTimeStamp > oldTimeStamp)
@@ -306,12 +312,12 @@ bool StaticticsStorageClient::putStatisticsMessage( const StatisticsMessage& msg
 	CATCH_ERROR_MAP_RETURN( _TXT("error in put statistics message: %s"), *m_errorhnd, 0);
 }
 
-const StatisticsProcessorInterface* StaticticsStorageClient::getStatisticsProcessor() const
+const StatisticsProcessorInterface* StatisticsStorageClient::getStatisticsProcessor() const
 {
 	return m_statisticsProc;
 }
 
-void StaticticsStorageClient::close()
+void StatisticsStorageClient::close()
 {
 	try
 	{
@@ -327,7 +333,7 @@ void StaticticsStorageClient::close()
 	}
 }
 
-void StaticticsStorageClient::compaction()
+void StatisticsStorageClient::compaction()
 {
 	try
 	{

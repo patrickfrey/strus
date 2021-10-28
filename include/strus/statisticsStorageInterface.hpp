@@ -17,6 +17,8 @@ namespace strus {
 class DatabaseInterface;
 /// \brief Forward declaration
 class StatisticsStorageClientInterface;
+/// \brief Forward declaration
+class StatisticsProcessorInterface;
 
 /// \brief Interface to the create and alter a storage of term and document occurrence statistics
 class StatisticsStorageInterface
@@ -42,6 +44,10 @@ public:
 	virtual bool createStorage(
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
+
+	/// \brief Gets a configuration description (source string as used by the functions here)
+	///	for the usage printed by programs using this storage implementation.
+	virtual const char* getConfigDescription() const=0;
 
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this storage implementation.

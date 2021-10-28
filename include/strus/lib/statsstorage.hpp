@@ -5,10 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Exported functions of the retrieval storage library
-/// \file storage.hpp
-#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_LIB_HPP_INCLUDED
+/// \brief Exported functions of the statistics storage library
+/// \file statsstorage.hpp
+#ifndef _STRUS_STATISTICS_STORAGE_LIB_HPP_INCLUDED
+#define _STRUS_STATISTICS_STORAGE_LIB_HPP_INCLUDED
 #include <string>
 
 /// \brief strus toplevel namespace
@@ -19,13 +19,12 @@ class FileLocatorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class StatisticsStorageInterface;
 
-/// \brief Create an interface for a retrieval storage, standard implementation
+/// \brief Create an interface for a statistics storage, standard implementation
 /// \param[in] filelocator interface to locate files to read or the working directory where to write files to
 /// \param[in] errorhnd reference to error buffer (ownership hold by caller)
-StorageInterface* createStorageType_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
+StatisticsStorageInterface* createStatisticsStorageType_std( const FileLocatorInterface* filelocator, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
-
