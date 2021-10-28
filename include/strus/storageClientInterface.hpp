@@ -42,8 +42,6 @@ class StorageDumpInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
-class StatisticsIteratorInterface;
-/// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class MetaDataRestrictionInterface;
@@ -240,18 +238,12 @@ public:
 	/// \note this function is thread safe, multiple concurrent transactions are allowed
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates an iterator on the incremental changes of the storage statistics starting from a given date/time
-	/// \note Returns NULL with error if no statistics processor instance defined for this storage client
+	/// \brief Get the next change statistics timestamp that is bigger than the one specified as argument
+	/// \note Returns -1 with error if no statistics processor instance defined for this storage client
 	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
 	/// \param[in] timestamp time of last change statistics fetched
-	/// \return the iterator on the incremental changes of the statistics from a certain snapshot defined by the timestamp passed as argument
-	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp) const=0;
-
-	/// \brief Get the list of all timestamps identifying when a change of statistics occurred
-	/// \note Returns an empty list with error if no statistics processor instance defined for this storage client
-	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
-	/// \return the list of timestamps
-	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const=0;
+	/// \return the next timestamp
+	virtual TimeStamp getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const=0;
 
 	/// \brief Load the one incremental statistics change message associated with a timestamp
 	/// \note Returns an empty message with error if no statistics processor instance defined for this storage client

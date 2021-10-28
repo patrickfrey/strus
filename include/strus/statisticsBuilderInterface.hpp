@@ -17,8 +17,6 @@
 
 namespace strus
 {
-///\brief Forward declaration
-class StatisticsIteratorInterface;
 
 /// \brief Interface for a builder for a statistics message (distributed index)
 class StatisticsBuilderInterface

@@ -23,8 +23,6 @@ class StatisticsViewerInterface;
 class StatisticsBuilderInterface;
 /// \brief Forward declaration
 class StatisticsMapInterface;
-/// \brief Forward declaration
-class StatisticsIteratorInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation
 /// \note this interface is used for distributing a search index
@@ -40,23 +38,18 @@ public:
 	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const=0;
 
-	/// \brief Get an iterator on the stored statistics messages after a timestamp from the storage (after commit)
+	/// \brief Get the smallest existing timestamp that is bigger or equal to the specified timestamp
 	/// \param[in] path file path used for storing files with the statistics
-	/// \param[in] timestamp minimum data iterated statistics message should have
-	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
-	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const=0;
-
-	/// \brief Get the list of timestamps of all stored and still available statistics messages
-	/// \param[in] path file path used for storing files with the statistics
-	/// \return the message or an empty blob indicating the end of messages or an error to check with the error buffer interface
-	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const=0;
+	/// \param[in] timestamp smallest possible timestamp
+	/// \return the smallest timestamp that is bigger or equal to timestamp
+	virtual TimeStamp getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const=0;
 
 	/// \brief Load the one incremental statistics change message associated with a timestamp
 	/// \param[in] path file path used for storing files with the statistics
 	/// \param[in] timestamp timestamp associated with the statistics change message
 	/// \return the statistics change message structure
 	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const=0;
-	
+
 	/// \brief Creates a builder for statistics messages
 	/// \param[in] path file path to use for storing files with the statistics
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error

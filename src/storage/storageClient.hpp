@@ -123,9 +123,7 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createChangeStatisticsIterator( const TimeStamp& timestamp) const;
-
-	virtual std::vector<TimeStamp> getChangeStatisticTimeStamps() const;
+	virtual TimeStamp getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const;
 
 	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const;
 
@@ -258,11 +256,8 @@ public:/*StorageDocumentChecker,AclIterator*/
 	IndexSetIterator getAclIterator( strus::Index docno) const;
 	IndexSetIterator getUserAclIterator( strus::Index userno) const;
 
-public:/*StatisticsIterator*/
-	///\brief Get the document frequency cache
-	DocumentFrequencyCache* getDocumentFrequencyCache();
-
 public:/*strusResizeBlocks,StorageDocumentChecker,StorageTransaction*/
+	DocumentFrequencyCache* getDocumentFrequencyCache();
 	Index maxTermTypeNo() const;
 	Index maxStructTypeNo() const;
 	DatabaseClientInterface* databaseClient()

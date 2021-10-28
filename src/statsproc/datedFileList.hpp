@@ -21,56 +21,6 @@ namespace strus
 class DatedFileList
 {
 public:
-	class Iterator
-	{
-	public:
-		Iterator();
-		Iterator( const std::string& directory_, std::size_t prefixsize_, const std::vector<std::string>& filelist_);
-		Iterator( const Iterator& o);
-
-		TimeStamp timestamp() const
-			{return m_timestamp;}
-		bool defined() const
-			{return m_timestamp >= 0;}
-
-		const void* blob() const
-			{return m_blob.c_str();}
-		std::size_t blobsize() const
-			{return m_blob.size();}
-
-		bool next();
-
-	private:
-		void loadBlob();
-
-	private:
-		TimeStamp m_timestamp;
-		std::string m_blob;
-		std::string m_directory;
-		std::size_t m_prefixsize;
-		std::vector<std::string> m_filelist;
-		std::vector<std::string>::const_iterator m_fileiter;
-	};
-
-	class TimeStampIterator
-	{
-	public:
-		TimeStampIterator();
-		TimeStampIterator( std::size_t prefixsize_, const std::vector<std::string>& filelist_);
-		TimeStampIterator( const TimeStampIterator& o);
-
-		TimeStamp timestamp() const
-			{return m_timestamp;}
-
-		TimeStamp next();
-
-	private:
-		TimeStamp m_timestamp;
-		std::vector<TimeStamp> m_ar;
-		std::vector<TimeStamp>::const_iterator m_itr;
-	};
-
-public:
 	/// \brief Constructor
 	/// \param[in] directory_ where to store the files
 	/// \param[in] prefix_ filename prefix to use for files stored
@@ -86,8 +36,8 @@ public:
 	/// \note Transaction completed by file renames, a failed store may lead to files with this extension laying around.
 	void store( const std::vector<std::string>& blobs, const char* tmpfileext);
 
-	Iterator getIterator( const TimeStamp timestamp) const;
-	TimeStampIterator getTimeStampIterator( const TimeStamp timestamp) const;
+	/// \brief Get the smallest existing timestamp that is bigger or equal to the specified timestamp
+	TimeStamp getUpperBoundTimeStamp( const TimeStamp timestamp) const;
 
 	/// \brief Load the blob associated with the timestamp specified
 	std::string loadBlob( const TimeStamp timestamp) const;
@@ -99,7 +49,7 @@ public:
 private:
 	std::string newFileName();
 	void createWorkingDirectoryIfNotExist();
-	std::vector<std::string> getFileNames( const TimeStamp timestamp) const;
+	std::string getUpperBoundFile( const TimeStamp timestamp) const;
 
 private:
 	std::string m_directory;

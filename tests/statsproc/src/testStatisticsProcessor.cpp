@@ -11,7 +11,6 @@
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
-#include "strus/statisticsIteratorInterface.hpp"
 #include "strus/storage/statisticsMessage.hpp"
 #include "strus/storage/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -252,7 +251,6 @@ int main( int argc, const char* argv[])
 		int nofDocsInserted = 0;
 		std::set<Term> termset;
 
-		strus::local_ptr<strus::StatisticsIteratorInterface> iterator;
 		if (storagePath.empty())
 		{
 			std::vector<strus::StatisticsMessage> msglist = builder->getMessages();
@@ -264,25 +262,22 @@ int main( int argc, const char* argv[])
 		}
 		else
 		{
-			strus::TimeStamp timeStampBeforeNow = strus::getCurrentTimeStamp() -1;
+			strus::TimeStamp timeStampCommit = strus::getCurrentTimeStamp();
 			if (!builder->commit())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
-			iterator.reset( statsproc->createIterator( storagePath, timeStampBeforeNow));
-			if (!iterator.get())
+			strus::TimeStamp timestamp = statsproc->getUpperBoundTimeStamp( storagePath, timeStampCommit);
+			if (timestamp < 0)
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
 			strus::TimeStamp timeStamp10MinutesBeforeNow = strus::getCurrentTimeStamp() - (600 * 1000);
 			statsproc->releaseStatistics( storagePath, timeStamp10MinutesBeforeNow);
 
-			strus::StatisticsMessage msg = iterator->getNext();
-			for (; !msg.empty(); msg = iterator->getNext())
-			{
-				fillTermSet( termset, nofDocsInserted, statsproc.get(), msg);
-				blobsize += msg.size();
-			}
+			strus::StatisticsMessage msg = statsproc->loadChangeMessage( storagePath, timestamp);
+			fillTermSet( termset, nofDocsInserted, statsproc.get(), msg);
+			blobsize += msg.size();
 		}
 		if (g_errorhnd->hasError())
 		{

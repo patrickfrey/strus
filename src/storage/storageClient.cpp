@@ -1162,7 +1162,7 @@ std::vector<StatisticsMessage> StorageClient::loadAllStatisticsMessages() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading all statistics messages: %s"), *m_errorhnd, std::vector<StatisticsMessage>());
 }
 
-StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( const TimeStamp& timestamp) const
+TimeStamp StorageClient::getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const
 {
 	try
 	{
@@ -1170,22 +1170,9 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator( cons
 		{
 			throw std::runtime_error( _TXT( "no statistics message processor defined"));
 		}
-		return m_statisticsProc->createIterator( m_statisticsPath, timestamp);
+		return m_statisticsProc->getUpperBoundTimeStamp( m_statisticsPath, timestamp+1);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
-}
-
-std::vector<TimeStamp> StorageClient::getChangeStatisticTimeStamps() const
-{
-	try
-	{
-		if (!m_statisticsProc)
-		{
-			throw std::runtime_error( _TXT( "no statistics message processor defined"));
-		}
-		return m_statisticsProc->getChangeTimeStamps( m_statisticsPath);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating list of statistics message timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching the next statistics message timestamp: %s"), *m_errorhnd, -1);
 }
 
 StatisticsMessage StorageClient::loadChangeStatisticsMessage( const TimeStamp& timestamp) const
@@ -1201,7 +1188,7 @@ StatisticsMessage StorageClient::loadChangeStatisticsMessage( const TimeStamp& t
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading a change statistics message: %s"), *m_errorhnd, StatisticsMessage());
 }
 
-const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
+const StatisticsProcessorInterface* StorageClient::getStatisticsProcessor() const
 {
 	return m_statisticsProc;
 }

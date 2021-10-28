@@ -34,9 +34,7 @@ public:
 
 	virtual StatisticsViewerInterface* createViewer( const void* msgptr, std::size_t msgsize) const;
 
-	virtual StatisticsIteratorInterface* createIterator( const std::string& path, const TimeStamp& timestamp) const;
-
-	virtual std::vector<TimeStamp> getChangeTimeStamps( const std::string& path) const;
+	virtual TimeStamp getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const;
 
 	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const;
 

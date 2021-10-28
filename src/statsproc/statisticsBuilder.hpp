@@ -21,8 +21,6 @@ namespace strus
 {
 ///\brief Forward declaration
 class ErrorBufferInterface;
-///\brief Forward declaration
-class StatisticsIteratorInterface;
 
 class StatisticsBuilder
 	:public StatisticsBuilderInterface

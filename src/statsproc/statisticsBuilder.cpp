@@ -13,7 +13,6 @@
 #include "statisticsProcessor.hpp"
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/statisticsIteratorInterface.hpp"
 #include "strus/timeStamp.hpp"
 #include "strus/errorCodes.hpp"
 #include "private/internationalization.hpp"

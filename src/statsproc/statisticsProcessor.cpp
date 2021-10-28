@@ -12,7 +12,6 @@
 #include "statisticsViewer.hpp"
 #include "statisticsMap.hpp"
 #include "datedFileList.hpp"
-#include "strus/statisticsIteratorInterface.hpp"
 #include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/constants.hpp"
@@ -80,58 +79,15 @@ StatisticsMapInterface* StatisticsProcessor::createMap( const std::string& confi
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics map: %s"), *m_errorhnd, 0);
 }
 
-namespace {
-class StoredStatisticsIterator
-	:public StatisticsIteratorInterface
-{
-public:
-	StoredStatisticsIterator( DatedFileList& filelist, const TimeStamp& timestamp_)
-		:m_itr(filelist.getIterator( timestamp_)){}
-
-	virtual StatisticsMessage getNext()
-	{
-		if (m_itr.defined())
-		{
-			StatisticsMessage rt( m_itr.blob(), m_itr.blobsize(), m_itr.timestamp());
-			(void)m_itr.next();
-			return rt;
-		}
-		else
-		{
-			return StatisticsMessage();
-		}
-	}
-
-private:
-	DatedFileList::Iterator m_itr;
-};
-}
-StatisticsIteratorInterface* StatisticsProcessor::createIterator( const std::string& path, const TimeStamp& timestamp) const
+TimeStamp StatisticsProcessor::getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const
 {
 	try
 	{
 		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
-		return new StoredStatisticsIterator( filelist, timestamp);
+		return filelist.getUpperBoundTimeStamp( timestamp);
 
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error release statistics: %s"), *m_errorhnd, NULL);
-}
-
-std::vector<TimeStamp> StatisticsProcessor::getChangeTimeStamps( const std::string& path) const
-{
-	try
-	{
-		std::vector<TimeStamp> rt;
-		DatedFileList filelist( getFullPath( path), Constants::defaultStatisticsFilePrefix(), Constants::defaultStatisticsFileExtension());
-		DatedFileList::TimeStampIterator itr = filelist.getTimeStampIterator( TimeStamp(-1));
-		TimeStamp tp = itr.timestamp();
-		for (; tp >= 0; tp = itr.next())
-		{
-			rt.push_back( tp);
-		}
-		return rt;
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error getting incremental statistic changes timestamps: %s"), *m_errorhnd, std::vector<TimeStamp>());
+	CATCH_ERROR_MAP_RETURN( _TXT("error getting upperbound timestamp: %s"), *m_errorhnd, NULL);
 }
 
 StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const
