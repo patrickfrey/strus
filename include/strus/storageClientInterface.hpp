@@ -243,13 +243,13 @@ public:
 	/// \note Depending on the higher level configuration of the system, older files with statistic changes are deleted and not accessible anymore
 	/// \param[in] timestamp time of last change statistics fetched
 	/// \return the next timestamp
-	virtual TimeStamp getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const=0;
+	virtual TimeStamp getNextChangeStatisticsTimeStamp( TimeStamp timestamp) const=0;
 
 	/// \brief Load the one incremental statistics change message associated with a timestamp
 	/// \note Returns an empty message with error if no statistics processor instance defined for this storage client
 	/// \param[in] timestamp timestamp associated with the statistics change message
 	/// \return the statistics change message structure
-	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const=0;
+	virtual StatisticsMessage loadChangeStatisticsMessage( TimeStamp timestamp) const=0;
 
 	/// \brief Load all statistics, build them from the storage
 	/// \return the list of the statistics for the initialization of a statistics server

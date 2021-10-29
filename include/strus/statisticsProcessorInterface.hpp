@@ -42,13 +42,13 @@ public:
 	/// \param[in] path file path used for storing files with the statistics
 	/// \param[in] timestamp smallest possible timestamp
 	/// \return the smallest timestamp that is bigger or equal to timestamp
-	virtual TimeStamp getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const=0;
+	virtual TimeStamp getUpperBoundTimeStamp( const std::string& path, TimeStamp timestamp) const=0;
 
 	/// \brief Load the one incremental statistics change message associated with a timestamp
 	/// \param[in] path file path used for storing files with the statistics
 	/// \param[in] timestamp timestamp associated with the statistics change message
 	/// \return the statistics change message structure
-	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const=0;
+	virtual StatisticsMessage loadChangeMessage( const std::string& path, TimeStamp timestamp) const=0;
 
 	/// \brief Creates a builder for statistics messages
 	/// \param[in] path file path to use for storing files with the statistics
@@ -64,7 +64,7 @@ public:
 	/// \brief Release statistics that are older than the specified timestamp
 	/// \param[in] path file path where the the statistic blobs are stored
 	/// \param[in] timestamp minimum data a surviving (not deleted) statistics message should have
-	virtual void releaseStatistics( const std::string& path, const TimeStamp& timestamp) const=0;
+	virtual void releaseStatistics( const std::string& path, TimeStamp timestamp) const=0;
 };
 
 }//namespace

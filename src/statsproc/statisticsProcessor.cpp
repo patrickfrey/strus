@@ -90,7 +90,7 @@ TimeStamp StatisticsProcessor::getUpperBoundTimeStamp( const std::string& path, 
 	CATCH_ERROR_MAP_RETURN( _TXT("error getting upperbound timestamp: %s"), *m_errorhnd, NULL);
 }
 
-StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const
+StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& path, TimeStamp timestamp) const
 {
 	try
 	{
@@ -101,7 +101,7 @@ StatisticsMessage StatisticsProcessor::loadChangeMessage( const std::string& pat
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading a change message blob: %s"), *m_errorhnd, StatisticsMessage());
 }
 
-void StatisticsProcessor::releaseStatistics( const std::string& path, const TimeStamp& timestamp) const
+void StatisticsProcessor::releaseStatistics( const std::string& path, TimeStamp timestamp) const
 {
 	try
 	{

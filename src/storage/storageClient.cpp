@@ -1164,7 +1164,7 @@ std::vector<StatisticsMessage> StorageClient::loadInitStatisticsMessages() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error loading all statistics messages: %s"), *m_errorhnd, std::vector<StatisticsMessage>());
 }
 
-TimeStamp StorageClient::getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const
+TimeStamp StorageClient::getNextChangeStatisticsTimeStamp( TimeStamp timestamp) const
 {
 	try
 	{
@@ -1177,7 +1177,7 @@ TimeStamp StorageClient::getNextChangeStatisticsTimeStamp( const TimeStamp& time
 	CATCH_ERROR_MAP_RETURN( _TXT("error fetching the next statistics message timestamp: %s"), *m_errorhnd, -1);
 }
 
-StatisticsMessage StorageClient::loadChangeStatisticsMessage( const TimeStamp& timestamp) const
+StatisticsMessage StorageClient::loadChangeStatisticsMessage( TimeStamp timestamp) const
 {
 	try
 	{

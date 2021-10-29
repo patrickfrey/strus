@@ -36,9 +36,9 @@ public:
 	/// \brief Constructor
 	StatisticsMessage()
 		:m_timestamp(),m_blob(){}
-	StatisticsMessage( const void* blob_, std::size_t blobsize_, const TimeStamp& timestamp_)
+	StatisticsMessage( const void* blob_, std::size_t blobsize_, TimeStamp timestamp_)
 		:m_timestamp(timestamp_),m_blob( (const char*)blob_,blobsize_){}
-	StatisticsMessage( const std::string& blob_, const TimeStamp& timestamp_)
+	StatisticsMessage( const std::string& blob_, TimeStamp timestamp_)
 		:m_timestamp(timestamp_),m_blob( blob_){}
 #if __cplusplus >= 201103L
 	StatisticsMessage( std::string&& blob_, TimeStamp&& timestamp_)

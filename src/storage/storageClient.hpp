@@ -123,9 +123,9 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual TimeStamp getNextChangeStatisticsTimeStamp( const TimeStamp& timestamp) const;
+	virtual TimeStamp getNextChangeStatisticsTimeStamp( TimeStamp timestamp) const;
 
-	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const;
+	virtual StatisticsMessage loadChangeStatisticsMessage( TimeStamp timestamp) const;
 
 	virtual std::vector<StatisticsMessage> loadInitStatisticsMessages() const;
 

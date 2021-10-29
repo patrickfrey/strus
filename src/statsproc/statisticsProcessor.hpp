@@ -36,13 +36,13 @@ public:
 
 	virtual TimeStamp getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const;
 
-	virtual StatisticsMessage loadChangeMessage( const std::string& path, const TimeStamp& timestamp) const;
+	virtual StatisticsMessage loadChangeMessage( const std::string& path, TimeStamp timestamp) const;
 
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
 	virtual StatisticsMapInterface* createMap( const std::string& config) const;
 
-	virtual void releaseStatistics( const std::string& path, const TimeStamp& timestamp) const;
+	virtual void releaseStatistics( const std::string& path, TimeStamp timestamp) const;
 
 private:
 	std::string getFullPath( const std::string& path) const;
