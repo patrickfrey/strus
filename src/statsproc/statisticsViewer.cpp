@@ -82,9 +82,10 @@ bool StatisticsViewer::nextDfChange( TermStatisticsChange& rec)
 		m_msg.append( msg_itr, flags_itr - msg_itr);
 		m_strings.push_back( m_msg);
 
-		const char* type = m_strings.back();
-		std::size_t typesize = std::strlen( type);
-		const char* value = type + typesize + 1;
+		const char* typestr = m_strings.back();
+		const char* typeend = std::strchr( typestr, ' ');
+		std::size_t typesize = typeend - typestr;
+		const char* value = typeend + 1;
 
 		unsigned char flags = (unsigned char)*flags_itr;
 		if (flags >= 0x2)
@@ -97,7 +98,7 @@ bool StatisticsViewer::nextDfChange( TermStatisticsChange& rec)
 		{
 			increment = -increment;
 		}
-		rec = TermStatisticsChange( type, value, increment);
+		rec = TermStatisticsChange( std::string(typestr,typesize), value, increment);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message viewer fetching next df change: %s"), *m_errorhnd, false);

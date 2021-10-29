@@ -38,9 +38,9 @@ public:
 	}
 };
 
-static std::string termKey( const char* termtype, const char* termvalue)
+static std::string termKey( const std::string& termtype, const std::string& termvalue)
 {
-	return strus::string_format( "%s\1%s", termtype, termvalue);
+	return strus::string_format( "%s\1%s", termtype.c_str(), termvalue.c_str());
 }
 
 void StatisticsMap::addDfChange( const char* termtype, const char* termvalue, int increment)

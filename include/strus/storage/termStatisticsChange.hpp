@@ -9,6 +9,7 @@
 /// \file "termStatisticsChange.hpp"
 #ifndef _STRUS_TERM_STATISTICS_CHANGE_HPP_INCLUDED
 #define _STRUS_TERM_STATISTICS_CHANGE_HPP_INCLUDED
+#include <string>
 
 namespace strus {
 
@@ -18,19 +19,19 @@ class TermStatisticsChange
 {
 public:
 	TermStatisticsChange()
-		:m_type(0),m_value(0),m_increment(0){}
+		:m_type(),m_value(),m_increment(0){}
 	TermStatisticsChange( const TermStatisticsChange& o)
 		:m_type(o.m_type),m_value(o.m_value),m_increment(o.m_increment){}
-	TermStatisticsChange( const char* type_, const char* value_, int increment_)
+	TermStatisticsChange( const std::string& type_, const std::string& value_, int increment_)
 		:m_type(type_),m_value(value_),m_increment(increment_){}
 
-	const char* type() const	{return m_type;}
-	const char* value() const	{return m_value;}
-	int increment() const		{return m_increment;}
+	const std::string& type() const		{return m_type;}
+	const std::string& value() const	{return m_value;}
+	int increment() const			{return m_increment;}
 
 private:
-	const char* m_type;	///< type of the term
-	const char* m_value;	///< value of the term
+	std::string m_type;	///< type of the term
+	std::string m_value;	///< value of the term
 	int m_increment;	///< document frequency increment/decrement
 };
 

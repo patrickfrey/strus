@@ -199,6 +199,7 @@ bool Database::destroyDatabase( const std::string& configsource) const
 			m_errorhnd->report( leveldbErrorCode(status), _TXT( "failed to remove key value store database: %s"), err.c_str());
 			return false;
 		}
+		(void)strus::removeDirRecursive( path);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error destroying database: %s"), *m_errorhnd, false);

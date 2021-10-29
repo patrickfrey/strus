@@ -58,12 +58,12 @@ struct IndexSerializer<strus::Index>
 template <>
 struct IndexSerializer<strus::GlobalCounter>
 {
-	static void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+	static void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const strus::GlobalCounter& idx)
 	{strus::packGlobalCounter( buf, size, maxsize, idx);}
-	static void packIndex( std::string& buf, const Index& idx)
+	static void packIndex( std::string& buf, const strus::GlobalCounter& idx)
 	{strus::packGlobalCounter( buf, idx);}
-	static Index unpackIndex( const char*& ptr, const char* end)
-	{return strus::unpackIndex( ptr, end);}
+	static strus::GlobalCounter unpackIndex( const char*& ptr, const char* end)
+	{return strus::unpackGlobalCounter( ptr, end);}
 };
 
 template <typename IndexType>

@@ -39,6 +39,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <memory>
+#include <inttypes.h>
 
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_GENERATE_READABLE_NAMES
@@ -46,7 +47,7 @@
 static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::FileLocatorInterface* g_fileLocator = 0;
-static strus::TimeStamp g_timestamp = 0;
+static bool g_verbose = false;
 
 class StlRandomGen
 {
@@ -97,7 +98,7 @@ class RandomStatisticsBlock
 {
 public:
 	RandomStatisticsBlock( const RandomStatisticsBlock& o)
-		:m_termstats(o.m_termstats),m_timestamp(o.m_timestamp),m_storageid(o.m_storageid),m_nofDocs(o.m_nofDocs){}
+		:m_termstats(o.m_termstats),m_storageid(o.m_storageid),m_nofdocs(o.m_nofdocs){}
 	RandomStatisticsBlock( size_t maxNofTerms)
 	{
 		if (maxNofTerms < 1)
@@ -116,9 +117,8 @@ public:
 				m_termstats.emplace_back( type, value, dfchange);
 			}
 		}
-		m_timestamp = ++g_timestamp;
 		m_storageid = randomStorage();
-		m_nofDocs = g_random.get( 1, 1000);
+		m_nofdocs = g_random.get( 1, 1000);
 	}
 
 	struct TermStat
@@ -127,17 +127,12 @@ public:
 		std::string value;
 		int dfchange;
 
+		TermStat()
+			:type(),value(),dfchange(0){}
 		TermStat( const TermStat& o)
 			:type(o.type),value(o.value),dfchange(o.dfchange){}
 		TermStat( const std::string& t, const std::string& v, int d)
 			:type(t),value(v),dfchange(d){}
-
-		std::string tostring() const
-		{
-			std::ostringstream rt;
-			rt << " " << type << " '" << value << "'";
-			return rt.str();
-		}
 	};
 
 	const std::string& storageid() const noexcept
@@ -148,16 +143,15 @@ public:
 	{
 		return m_termstats;
 	}
-	int nofDocs() const noexcept
+	int nofdocs() const noexcept
 	{
-		return m_nofDocs;
+		return m_nofdocs;
 	}
 
 private:
 	std::vector<TermStat> m_termstats;
-	strus::TimeStamp m_timestamp;
 	std::string m_storageid;
-	int m_nofDocs;
+	int m_nofdocs;
 };
 
 static unsigned int getUintValue( const char* arg)
@@ -175,7 +169,7 @@ static unsigned int getUintValue( const char* arg)
 
 static void printUsage( int argc, const char* argv[])
 {
-	std::cerr << "usage: " << argv[0] << " <config> <nofblocks> <maxblocksize>" << std::endl;
+	std::cerr << "usage: " << argv[0] << " [-V][-h] <config> <nofblocks> <maxblocksize>" << std::endl;
 	std::cerr << "<config>       = statistics storage description" << std::endl;
 	std::cerr << "<nofblocks>    = number of blocks to insert" << std::endl;
 	std::cerr << "<maxblocksize> = maximum block size" << std::endl;
@@ -195,29 +189,44 @@ int main( int argc, const char* argv[])
 		std::cerr << "construction of file locator failed" << std::endl;
 		return -1;
 	}
-
-	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
+	int argi = 1;
+	for (; argi < argc; ++argi)
 	{
-		printUsage( argc, argv);
-		return 0;
+		if (std::strcmp( argv[ argi], "-V") == 0)
+		{
+			g_verbose = true;
+		}
+		else if (std::strcmp( argv[ argi], "-h") == 0)
+		{
+			printUsage( argc, argv);
+			return 0;
+		}
+		else if (argv[ argi][0] == '-')
+		{
+			throw std::runtime_error( std::string("unknown option ") + argv[ argi]);
+		}
+		else
+		{
+			break;
+		}
 	}
-	else if (argc < 4)
+	if (argc - argi < 3)
 	{
-		std::cerr << "ERROR too few arguments" << std::endl;
+		std::cerr << "ERROR too few arguments " << (argc - argi) << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
-	else if (argc > 4)
+	else if (argc - argi > 3)
 	{
-		std::cerr << "ERROR too many arguments" << std::endl;
+		std::cerr << "ERROR too many arguments " << (argc - argi) << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
 	try
 	{
-		std::string config = argv[1];
-		unsigned int nofBlocks = getUintValue( argv[2]);
-		unsigned int maxBlockSize = getUintValue( argv[3]);
+		std::string config = argv[ argi];
+		unsigned int nofBlocks = getUintValue( argv[ argi+1]);
+		unsigned int maxBlockSize = getUintValue( argv[ argi+2]);
 
 		std::string configCopy = config;
 		std::string path;
@@ -226,6 +235,7 @@ int main( int argc, const char* argv[])
 			throw std::runtime_error("bad configuration passed to test");
 		}
 		{
+			// [1] Create statistics storage:
 			strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_fileLocator, g_errorhnd));
 			if (!dbi.get())
 			{
@@ -247,11 +257,14 @@ int main( int argc, const char* argv[])
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
+			// [2] Build test data (random statistics messages):
 			std::vector<RandomStatisticsBlock> blockar;
 			for (int ii=0; ii<nofBlocks; ++ii)
 			{
 				blockar.push_back( RandomStatisticsBlock( maxBlockSize));
 			}
+			// [3] Process test data (random statistics messages):
+			std::map<std::string,strus::TimeStamp> timestampmap;
 			strus::local_ptr<strus::StatisticsBuilderInterface> statbuilder( statisticsMessageProc->createBuilder( path));
 			for (int ii=0; ii<nofBlocks; ++ii)
 			{
@@ -259,12 +272,80 @@ int main( int argc, const char* argv[])
 				{
 					statbuilder->addDfChange( ts.type.c_str(), ts.value.c_str(), ts.dfchange);
 				}
-				statbuilder->addNofDocumentsInsertedChange( blockar[ii].nofDocs());
+				statbuilder->addNofDocumentsInsertedChange( blockar[ii].nofdocs());
+
+				std::vector<strus::StatisticsMessage> stats = statbuilder->getMessages();
+				for (auto& msg : stats)
+				{
+					storage->putStatisticsMessage( msg, blockar[ii].storageid());
+					auto ins = timestampmap.insert( {blockar[ii].storageid(), msg.timestamp()});
+					if (ins.second == false && ins.first->second < msg.timestamp())
+					{
+						ins.first->second = msg.timestamp();
+					}
+				}
 				statbuilder->commit();
+			}
+			// [4] Build compare data:
+			std::map<std::pair<std::string,std::string>, strus::GlobalCounter> dfmap;
+			strus::GlobalCounter nofdocs = 0;
+			for (int ii=0; ii<nofBlocks; ++ii)
+			{
+				for (auto& ts : blockar[ii].termstats())
+				{
+					dfmap[ {ts.type, ts.value} ] += ts.dfchange;
+				}
+				nofdocs += blockar[ii].nofdocs();
+			}
+			// [5] Compare results with expected:
+			for (auto& expect : dfmap)
+			{
+				strus::GlobalCounter df = storage->documentFrequency( expect.first.first, expect.first.second);
+				if (g_verbose)
+				{
+					std::cerr << "Check type " << expect.first.first << ", value '" << expect.first.second << ", df " << df << std::endl;
+				}
+				if (df != expect.second)
+				{
+					storage->close();
+					char buf[ 1024];
+					std::snprintf( buf, sizeof(buf), "df of %s '%s' not as expected: %" PRId64 " != %" PRId64 "",
+							expect.first.first.c_str(), expect.first.second.c_str(), expect.second, df);
+					throw std::runtime_error( buf);
+				}
+			}
+			if (g_verbose)
+			{
+				std::cerr << "Check number of documents " << storage->nofDocuments() << std::endl;
+			}
+			if (nofdocs != storage->nofDocuments())
+			{
+				storage->close();
+				char buf[ 1024];
+				std::snprintf( buf, sizeof(buf), "total number of documents not as expected: %" PRId64 " != %" PRId64 "",
+						storage->nofDocuments(), nofdocs);
+				throw std::runtime_error( buf);
+			}
+			for (auto& expect : timestampmap)
+			{
+				strus::TimeStamp tm = storage->storageTimeStamp( expect.first);
+				if (g_verbose)
+				{
+					std::cerr << "Check storage timestamp " << expect.first << " = " << tm << std::endl;
+				}
+				if (tm != expect.second)
+				{
+					storage->close();
+					char buf[ 1024];
+					std::snprintf( buf, sizeof(buf), "timestamp of storage '%s' not as expected: %" PRId64 " != %" PRId64 "",
+							expect.first.c_str(), tm, expect.second);
+					throw std::runtime_error( buf);
+				}
 			}
 		}
 		if (g_fileLocator) delete g_fileLocator;
 		if (g_errorhnd) delete g_errorhnd;
+		std::cerr << "OK" << std::endl;
 		return 0;
 	}
 	catch (const std::runtime_error& e)

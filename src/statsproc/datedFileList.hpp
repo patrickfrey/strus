@@ -30,6 +30,9 @@ public:
 	/// \brief Copy constructor
 	DatedFileList( const DatedFileList& o);
 
+	/// \brief Ensure that the current time stamp returned is unique
+	TimeStamp allocTimeStamp() const;
+
 	/// \brief Stores a blobs to files in the context of a transaction (operation either fails entirely or succeeds completely)
 	/// \param[in] blobs data to store
 	/// \param[in] tmpfileext extension to use for temporary files
@@ -46,8 +49,11 @@ public:
 	/// \note Used for cleanup
 	void deleteFilesBefore( const TimeStamp timestamp);
 
+	/// \brief Deletes all files
+	void cleanup();
+
 private:
-	std::string newFileName();
+	std::string getBlobFilePath( const TimeStamp timestamp) const;
 	void createWorkingDirectoryIfNotExist();
 	std::string getUpperBoundFile( const TimeStamp timestamp) const;
 

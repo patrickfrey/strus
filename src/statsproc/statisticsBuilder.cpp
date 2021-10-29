@@ -33,15 +33,13 @@
 using namespace strus;
 
 StatisticsBuilder::StatisticsBuilder( const std::string& path_, std::size_t maxchunksize_, ErrorBufferInterface* errorhnd_)
-	:m_timestamp(-1)
-	,m_dfChangeMap()
+	:m_dfChangeMap()
 	,m_nofDocumentsInsertedChange(0)
 	,m_maxchunksize(maxchunksize_)
 	,m_datedFileList( path_/*directory*/, STATISTICS_FILE_PREFIX, STATISTICS_FILE_EXTENSION)
 	,m_errorhnd(errorhnd_)
 {
 	if (m_maxchunksize <= sizeof(StatisticsHeader)) throw std::runtime_error(_TXT("Maximum block size for statistics builder too small"));
-	m_timestamp = getCurrentTimeStamp();
 }
 
 StatisticsBuilder::~StatisticsBuilder()
@@ -92,7 +90,7 @@ static inline std::string getDfChangeKey( const char* termtype, const char* term
 {
 	std::string rt;
 	rt.append( termtype);
-	rt.push_back( '\0');
+	rt.push_back( ' ');
 	rt.append( termvalue);
 	return rt;
 }
@@ -222,9 +220,10 @@ std::vector<StatisticsMessage> StatisticsBuilder::getMessages() const
 	{
 		std::vector<std::string> msglist = getDfChangeMapBlocks();
 		std::vector<StatisticsMessage> rt;
+		TimeStamp timestamp = m_datedFileList.allocTimeStamp();
 		for (auto& msg : msglist)
 		{
-			rt.emplace_back( msg, m_timestamp);
+			rt.emplace_back( msg, timestamp);
 		}
 		return rt;
 	}

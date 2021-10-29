@@ -1088,7 +1088,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-std::vector<StatisticsMessage> StorageClient::loadAllStatisticsMessages() const
+std::vector<StatisticsMessage> StorageClient::loadInitStatisticsMessages() const
 {
 	try
 	{
@@ -1100,11 +1100,13 @@ std::vector<StatisticsMessage> StorageClient::loadAllStatisticsMessages() const
 		{
 			throw strus::runtime_error(_TXT("error no statistics processor defined"));
 		}
-		strus::Reference<StatisticsBuilderInterface> builder( m_statisticsProc->createBuilder( ""/*path*/));
+		strus::Reference<StatisticsBuilderInterface> builder( m_statisticsProc->createBuilder( m_statisticsPath));
 		if (!builder.get())
 		{
 			throw strus::runtime_error(_TXT("failed to create statistics builder: %s"), m_errorhnd->fetchError());
 		}
+		TransactionLock lock( this);
+
 		int nofdocs = nofDocumentsInserted();
 		builder->addNofDocumentsInsertedChange( nofdocs);
 

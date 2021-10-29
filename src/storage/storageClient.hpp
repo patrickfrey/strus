@@ -127,7 +127,7 @@ public:
 
 	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const;
 
-	virtual std::vector<StatisticsMessage> loadAllStatisticsMessages() const;
+	virtual std::vector<StatisticsMessage> loadInitStatisticsMessages() const;
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
@@ -228,7 +228,8 @@ public:/*StorageTransaction,StorageMetaDataTransaction*/
 	class TransactionLock
 	{
 	public:
-		TransactionLock( StorageClient* storage_)
+		TransactionLock( const TransactionLock&) = delete;
+		TransactionLock( const StorageClient* storage_)
 			:m_mutex(&storage_->m_transaction_mutex)
 		{
 			m_mutex->lock();
@@ -289,7 +290,7 @@ private:
 	strus::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
 	strus::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
 
-	strus::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	mutable strus::mutex m_transaction_mutex;		///< mutual exclusion in the critical part of a transaction
 	strus::mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno
 	strus::mutex m_immalloc_structno_mutex;			///< mutual exclusion in the critical part of immediate allocation of structno
 	strus::mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno

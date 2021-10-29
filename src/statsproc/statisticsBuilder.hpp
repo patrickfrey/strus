@@ -49,7 +49,6 @@ private:
 	std::vector<std::string> getDfChangeMapBlocks() const;
 
 private:
-	TimeStamp m_timestamp;
 	std::map<std::string,int> m_dfChangeMap;
 	int32_t m_nofDocumentsInsertedChange;
 	std::size_t m_maxchunksize;

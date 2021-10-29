@@ -15,6 +15,7 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/string_conv.hpp"
 #include "strus/timeStamp.hpp"
+#include "strus/base/sleep.hpp"
 #include "private/internationalization.hpp"
 #include <string>
 #include <cstring>
@@ -41,11 +42,9 @@ DatedFileList::DatedFileList( const DatedFileList& o)
 	:m_directory(o.m_directory),m_prefix(o.m_prefix),m_extension(o.m_extension)
 {}
 
-std::string DatedFileList::newFileName()
+std::string DatedFileList::getBlobFilePath( const TimeStamp timestamp) const
 {
-	TimeStamp newTimeStamp = getCurrentTimeStamp();
-
-	std::string filename = fileNameFromTimeStamp( m_prefix, newTimeStamp, m_extension);
+	std::string filename = fileNameFromTimeStamp( m_prefix, timestamp, m_extension);
 	std::string rt = strus::joinFilePath( m_directory, filename);
 	if (rt.empty()) throw std::bad_alloc();
 	return rt;
@@ -72,13 +71,16 @@ static void deleteFileList( const std::vector<std::string>& files)
 
 static bool moveFileList( const std::vector<std::string>& files, const char* tmpext)
 {
+	std::string tmpfilename;
+	tmpfilename.reserve( 2048);
 	std::vector<std::string>::const_iterator fi = files.begin(), fe = files.end();
 	for (; fi != fe; ++fi)
 	{
 		int ec;
 		try
 		{
-			std::string tmpfilename( *fi + tmpext);
+			tmpfilename.clear();
+			tmpfilename.append( *fi + tmpext);
 			ec = strus::renameFile( tmpfilename, *fi);
 		}
 		catch (...)
@@ -93,20 +95,35 @@ static bool moveFileList( const std::vector<std::string>& files, const char* tmp
 	return true;
 }
 
+TimeStamp DatedFileList::allocTimeStamp() const
+{
+	TimeStamp timestamp;
+	for (;;)
+	{
+		timestamp = strus::getCurrentTimeStamp();
+		std::string filename = getBlobFilePath( timestamp);
+		if (strus::pathExists( filename))
+		{
+			strus::usleep(1);
+			continue;
+		}
+		break;
+	}
+	return timestamp;
+}
+
 void DatedFileList::store( const std::vector<std::string>& blobs, const char* tmpext)
 {
-	if (m_directory.empty())
-	{
-		throw std::runtime_error( _TXT("failed to store files because no directory defined"));
-	}
 	std::vector<std::string> written_files;
 	std::string tmpfilename;
+	TimeStamp timestamp = allocTimeStamp();
+
 	std::vector<std::string>::const_iterator bi = blobs.begin(), be = blobs.end();
-	for (; bi != be; ++bi)
+	for (; bi != be; ++bi,++timestamp)
 	{
 		try
 		{
-			std::string filename = DatedFileList::newFileName();
+			std::string filename = DatedFileList::getBlobFilePath( timestamp);
 			tmpfilename = filename + tmpext;
 			written_files.push_back( filename);
 		}
@@ -132,12 +149,8 @@ void DatedFileList::store( const std::vector<std::string>& blobs, const char* tm
 std::string DatedFileList::getUpperBoundFile( const TimeStamp timestamp) const
 {
 	std::string rt;
-	if (m_directory.empty())
-	{
-		return rt;
-	}
 	std::vector<std::string> files;
-	TimeStamp timestamp_current = getCurrentTimeStamp();
+	TimeStamp timestamp_current = strus::getCurrentTimeStamp();
 
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
@@ -166,10 +179,6 @@ TimeStamp DatedFileList::getUpperBoundTimeStamp( const TimeStamp timestamp) cons
 
 void DatedFileList::deleteFilesBefore( const TimeStamp timestamp)
 {
-	if (m_directory.empty())
-	{
-		return;
-	}
 	std::vector<std::string> files;
 	int ec = strus::readDirFiles( m_directory, m_extension, files);
 	if (ec != 0) throw std::runtime_error(::strerror(ec));
@@ -185,6 +194,11 @@ void DatedFileList::deleteFilesBefore( const TimeStamp timestamp)
 			(void)strus::removeFile( filepath);
 		}
 	}
+}
+
+void DatedFileList::cleanup()
+{
+	deleteFilesBefore( strus::getCurrentTimeStamp()+1000);
 }
 
 std::string DatedFileList::loadBlob( const TimeStamp timestamp) const

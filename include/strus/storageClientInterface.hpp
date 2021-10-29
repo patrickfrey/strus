@@ -251,9 +251,9 @@ public:
 	/// \return the statistics change message structure
 	virtual StatisticsMessage loadChangeStatisticsMessage( const TimeStamp& timestamp) const=0;
 
-	/// \brief Load all statistics
-	/// \return the list of all statistics
-	virtual std::vector<StatisticsMessage> loadAllStatisticsMessages() const=0;
+	/// \brief Load all statistics, build them from the storage
+	/// \return the list of the statistics for the initialization of a statistics server
+	virtual std::vector<StatisticsMessage> loadInitStatisticsMessages() const=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface
