@@ -129,7 +129,7 @@ bool Storage::destroyStorage( const std::string& configsource, const DatabaseInt
 
 const char* Storage::getConfigDescription() const
 {
-	return _TXT("cachedterms=<file with list of terms to cache (only for client)>; acl=<yes/no, yes if users with different access rights exist (only on creating the storage)>");
+	return _TXT("cachedterms=<file with list of terms to cache (only for client)>\nacl=<yes/no, yes if users with different access rights exist (only on creating the storage)>");
 }
 
 const char** Storage::getConfigParameters() const
