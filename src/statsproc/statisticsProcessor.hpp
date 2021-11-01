@@ -40,8 +40,6 @@ public:
 
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const;
 
-	virtual StatisticsMapInterface* createMap( const std::string& config) const;
-
 	virtual void releaseStatistics( const std::string& path, TimeStamp timestamp) const;
 
 private:

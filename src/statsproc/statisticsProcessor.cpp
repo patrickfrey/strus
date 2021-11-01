@@ -10,7 +10,6 @@
 #include "statisticsProcessor.hpp"
 #include "statisticsBuilder.hpp"
 #include "statisticsViewer.hpp"
-#include "statisticsMap.hpp"
 #include "datedFileList.hpp"
 #include "strus/fileLocatorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -61,22 +60,6 @@ StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const std::strin
 		return new StatisticsBuilder( getFullPath( path), msgChunkSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
-}
-
-
-StatisticsMapInterface* StatisticsProcessor::createMap( const std::string& config) const
-{
-	try
-	{
-		std::string configstr = config;
-		unsigned int nofBlocks = Constants::defaultStatisticsNofBlocks();
-		if (!strus::extractUIntFromConfigString( nofBlocks, configstr, "blocks", m_errorhnd))
-		{
-			if (m_errorhnd->hasError()) throw std::runtime_error( m_errorhnd->fetchError());
-		}
-		return new StatisticsMap( nofBlocks, this, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics map: %s"), *m_errorhnd, 0);
 }
 
 TimeStamp StatisticsProcessor::getUpperBoundTimeStamp( const std::string& path, const TimeStamp timestamp) const

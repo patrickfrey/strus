@@ -21,8 +21,6 @@ namespace strus
 class StatisticsViewerInterface;
 /// \brief Forward declaration
 class StatisticsBuilderInterface;
-/// \brief Forward declaration
-class StatisticsMapInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation
 /// \note this interface is used for distributing a search index
@@ -54,12 +52,6 @@ public:
 	/// \param[in] path file path to use for storing files with the statistics
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsBuilderInterface* createBuilder( const std::string& path) const=0;
-
-	/// \brief Creates a map for global statistics
-	/// \note You can implement the map in your own way, this is just an example implementation provided by the statistics processor
-	/// \param[in] config configuration string of the map instance created
-	/// \return the map object (with ownership returned) or NULL in case of a memory allocation error
-	virtual StatisticsMapInterface* createMap( const std::string& config) const=0;
 
 	/// \brief Release statistics that are older than the specified timestamp
 	/// \param[in] path file path where the the statistic blobs are stored
