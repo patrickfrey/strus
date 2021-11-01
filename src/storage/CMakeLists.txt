@@ -129,7 +129,7 @@ set_target_properties(
 )
 
 add_library( strus_storage_objbuild SHARED libstrus_storage_objbuild.cpp )
-target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_base )
+target_link_libraries( strus_storage_objbuild strus_storage strus_statsstorage strus_queryeval strus_queryproc ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc strus_base )
 set_target_properties(
     strus_storage_objbuild
     PROPERTIES
