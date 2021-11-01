@@ -19,6 +19,8 @@ class StorageObjectBuilderInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
+class StatisticsStorageClientInterface;
+/// \brief Forward declaration
 class VectorStorageClientInterface;
 /// \brief Forward declaration
 class VectorStorageBuilderInterface;
@@ -41,6 +43,16 @@ StorageObjectBuilderInterface*
 ///\param[in] config object configuration (source, not a filename)
 StorageClientInterface*
 	createStorageClient(
+		const StorageObjectBuilderInterface* objbuilder,
+		ErrorBufferInterface* errorhnd,
+		const std::string& config);
+
+///\brief Create a statistics storage client interface with the object builder passed
+///\param[in] objbuilder object builder
+///\param[in] errorhnd error buffer interface
+///\param[in] config object configuration (source, not a filename)
+StatisticsStorageClientInterface*
+	createStatisticsStorageClient(
 		const StorageObjectBuilderInterface* objbuilder,
 		ErrorBufferInterface* errorhnd,
 		const std::string& config);

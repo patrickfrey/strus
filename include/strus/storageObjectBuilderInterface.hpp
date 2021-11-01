@@ -21,6 +21,8 @@ class StorageClientInterface;
 /// \brief Forward declaration
 class StorageInterface;
 /// \brief Forward declaration
+class StatisticsStorageInterface;
+/// \brief Forward declaration
 class QueryEvalInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
@@ -44,6 +46,10 @@ public:
 	/// \param[in] name name of the database interface
 	/// \return the database interface reference
 	virtual const DatabaseInterface* getDatabase( const std::string& name) const=0;
+
+	/// \brief Get the statistics storage interface
+	/// \return the storage interface reference
+	virtual const StatisticsStorageInterface* getStatisticsStorage() const=0;
 
 	/// \brief Get the query processor interface
 	/// \return the query processor interface reference
