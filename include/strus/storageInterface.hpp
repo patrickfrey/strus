@@ -48,12 +48,6 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 
-	/// \brief Deletes all contents of a storage described with configsource using a defined key value store database
-	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
-	/// \param[in] database key value store database type used by this storage
-	/// \return true on success, false on error
-	virtual bool destroyStorage( const std::string& configsource, const DatabaseInterface* database) const=0;
-
 	/// \brief Gets a configuration description (source string as used by the functions here)
 	///	for the usage printed by programs using this storage implementation.
 	virtual const char* getConfigDescription() const=0;

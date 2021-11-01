@@ -42,8 +42,6 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const;
 
-	virtual bool destroyStorage( const std::string& configsource, const DatabaseInterface* database) const;
-
 	virtual const char* getConfigDescription() const;
 
 	virtual const char** getConfigParameters() const;

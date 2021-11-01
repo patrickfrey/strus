@@ -107,26 +107,6 @@ bool Storage::createStorage(
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
 }
 
-bool Storage::destroyStorage( const std::string& configsource, const DatabaseInterface* database) const
-{
-	try
-	{
-		std::string src = configsource;
-		std::string path;
-		if (!strus::extractStringFromConfigString( path, src, "path", m_errorhnd))
-		{
-			throw std::runtime_error(_TXT("no path specified"));
-		}
-		if (!database->destroyDatabase( configsource))
-		{
-			return false;
-		}
-		(void)strus::removeDirRecursive( path);
-		return true;
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error destroying storage: %s"), *m_errorhnd, false);
-}
-
 const char* Storage::getConfigDescription() const
 {
 	return _TXT("cachedterms=<file with list of terms to cache (only for client)>\nacl=<yes/no, yes if users with different access rights exist (only on creating the storage)>");
