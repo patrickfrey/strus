@@ -1074,6 +1074,7 @@ public:
 	static void remove( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr);
 	static void storeImm( DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, const GlobalCounter& df);
 private:
+	static std::string getKey( const Index& typeno, const std::string& termstr);
 	enum {KeyPrefix=DatabaseKey::GlobalDocFrequencyPrefix};
 };
 

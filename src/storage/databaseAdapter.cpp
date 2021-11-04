@@ -340,13 +340,21 @@ GlobalCounter DatabaseAdapter_DocFrequencyStatistics::get( const DatabaseClientI
 	return rt;
 }
 
+std::string DatabaseAdapter_DocFrequencyStatistics::getKey( const Index& typeno, const std::string& termstr)
+{
+	std::string rt;
+	rt.push_back( KeyPrefix);
+	packIndex( rt, typeno);
+	rt.append( termstr);
+	return rt;
+}
+
 bool DatabaseAdapter_DocFrequencyStatistics::load( const DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, GlobalCounter& df)
 {
-	DatabaseKey dbkey( KeyPrefix, typeno);
-	dbkey.addElem( termstr);
+	std::string dbkey = getKey( typeno, termstr);
 	std::string dfstr;
 	df = 0;
-	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, DatabaseOptions().useCache())) return false;
+	if (!database->readValue( dbkey.c_str(), dbkey.size(), dfstr, DatabaseOptions().useCache())) return false;
 
 	char const* cc = dfstr.c_str();
 	df = unpackGlobalCounter( cc, cc + dfstr.size());
@@ -355,27 +363,24 @@ bool DatabaseAdapter_DocFrequencyStatistics::load( const DatabaseClientInterface
 
 void DatabaseAdapter_DocFrequencyStatistics::store( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr, const GlobalCounter& df)
 {
-	DatabaseKey dbkey( KeyPrefix, typeno);
-	dbkey.addElem( termstr);
+	std::string dbkey = getKey( typeno, termstr);
 	std::string dfstr;
 	packGlobalCounter( dfstr, df);
-	transaction->write( dbkey.ptr(), dbkey.size(), dfstr.c_str(), dfstr.size());
+	transaction->write( dbkey.c_str(), dbkey.size(), dfstr.c_str(), dfstr.size());
 }
 
 void DatabaseAdapter_DocFrequencyStatistics::remove( DatabaseTransactionInterface* transaction, const Index& typeno, const std::string& termstr)
 {
-	DatabaseKey dbkey( KeyPrefix, typeno);
-	dbkey.addElem( termstr);
-	transaction->remove( dbkey.ptr(), dbkey.size());
+	std::string dbkey = getKey( typeno, termstr);
+	transaction->remove( dbkey.c_str(), dbkey.size());
 }
 
 void DatabaseAdapter_DocFrequencyStatistics::storeImm( DatabaseClientInterface* database, const Index& typeno, const std::string& termstr, const GlobalCounter& df)
 {
-	DatabaseKey dbkey( KeyPrefix, typeno);
-	dbkey.addElem( termstr);
+	std::string dbkey = getKey( typeno, termstr);
 	std::string dfstr;
 	packGlobalCounter( dfstr, df);
-	database->writeImm( dbkey.ptr(), dbkey.size(), dfstr.c_str(), dfstr.size());
+	database->writeImm( dbkey.c_str(), dbkey.size(), dfstr.c_str(), dfstr.size());
 }
 
 bool DatabaseAdapter_MetaDataDescr::load( const DatabaseClientInterface* database, std::string& descr)
